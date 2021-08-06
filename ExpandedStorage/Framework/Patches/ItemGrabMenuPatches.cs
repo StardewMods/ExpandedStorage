@@ -88,7 +88,7 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
                     new CodeInstruction(OpCodes.Isinst, typeof(Chest)),
                     new CodeInstruction(OpCodes.Callvirt, AccessTools.Method(typeof(Chest), nameof(Chest.GetActualCapacity))),
                     new CodeInstruction(OpCodes.Ldc_I4_S),
-                    new CodeInstruction(OpCodes.Beq)
+                    new CodeInstruction(OpCodes.Beq_S)
                 )
                 .Log("Changing jump condition from Beq 36 to Bge 10.")
                 .Patch(delegate(LinkedList<CodeInstruction> list)
@@ -96,8 +96,8 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
                     var jumpCode = list.Last.Value;
                     list.RemoveLast();
                     list.RemoveLast();
-                    list.AddLast(new CodeInstruction(OpCodes.Ldc_I4_S, (byte) 10));
-                    list.AddLast(new CodeInstruction(OpCodes.Bge, jumpCode.operand));
+                    list.AddLast(new CodeInstruction(OpCodes.Ldc_I4_S, (sbyte) 10));
+                    list.AddLast(new CodeInstruction(OpCodes.Bge_S, jumpCode.operand));
                 });
 
             var inventoryMenuConstructor = AccessTools.Constructor(typeof(InventoryMenu), new[]
@@ -128,9 +128,9 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
                 {
                     list.RemoveLast();
                     list.RemoveLast();
-                    list.AddLast(new CodeInstruction(OpCodes.Ldarg_S, (byte) 16));
+                    list.AddLast(new CodeInstruction(OpCodes.Ldarg_S, (sbyte) 16));
                     list.AddLast(new CodeInstruction(OpCodes.Call, MenuCapacity));
-                    list.AddLast(new CodeInstruction(OpCodes.Ldarg_S, (byte) 16));
+                    list.AddLast(new CodeInstruction(OpCodes.Ldarg_S, (sbyte) 16));
                     list.AddLast(new CodeInstruction(OpCodes.Call, MenuRows));
                 });
 
