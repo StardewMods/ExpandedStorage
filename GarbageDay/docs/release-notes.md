@@ -2,6 +2,7 @@
 
 ## 2.0.1
 - Allow adding Garbage Cans using "Garbage": "ID" tile property
+- Update to SMAPI 3.12
 
 ## 2.0.0
 - Preliminary 64-bit support

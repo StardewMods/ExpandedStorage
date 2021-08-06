@@ -1,5 +1,8 @@
 ﻿# Release Notes
 
+## 1.6.10
+- Update to SMAPI 3.12
+
 ## 1.6.9
 - Fixed chest opening on host from farmhands in same location
 - Removed configurable controls for carry/access carried chests

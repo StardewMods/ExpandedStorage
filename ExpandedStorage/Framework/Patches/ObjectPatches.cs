@@ -47,7 +47,7 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
             );
 
             harmony.Patch(
-                AccessTools.Method(typeof(Chest), nameof(Chest.maximumStackSize)),
+                AccessTools.Method(typeof(Object), nameof(Object.maximumStackSize)),
                 postfix: new HarmonyMethod(GetType(), nameof(MaximumStackSizePostfix))
             );
 
