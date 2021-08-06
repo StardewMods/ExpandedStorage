@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using ImJustMatt.UtilityChest.Framework.Extensions;
 using Microsoft.Xna.Framework;
@@ -16,7 +16,7 @@ namespace ImJustMatt.UtilityChest.Framework.Patches
     {
         private static PerScreen<Chest> CurrentChest;
 
-        public ChestPatches(IMod mod, HarmonyInstance harmony) : base(mod, harmony)
+        public ChestPatches(IMod mod, Harmony harmony) : base(mod, harmony)
         {
             CurrentChest = Mod.CurrentChest;
 

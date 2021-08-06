@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Emit;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
@@ -12,7 +12,7 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
     [SuppressMessage("ReSharper", "ArrangeTypeMemberModifiers")]
     internal class MenuWithInventoryPatches : MenuPatches
     {
-        public MenuWithInventoryPatches(IMod mod, HarmonyInstance harmony) : base(mod, harmony)
+        public MenuWithInventoryPatches(IMod mod, Harmony harmony) : base(mod, harmony)
         {
             var drawMethod = AccessTools.Method(typeof(MenuWithInventory), nameof(MenuWithInventory.draw),
                 new[]

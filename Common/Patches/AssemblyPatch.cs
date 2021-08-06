@@ -2,7 +2,7 @@
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Reflection;
-using Harmony;
+using HarmonyLib;
 
 namespace ImJustMatt.Common.Patches
 {

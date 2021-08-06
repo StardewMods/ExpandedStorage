@@ -7,7 +7,6 @@ using ImJustMatt.GarbageDay.Framework.Models;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Characters;
 using StardewValley.Menus;
@@ -116,27 +115,27 @@ namespace ImJustMatt.GarbageDay.Framework.Controllers
             return true;
         }
 
-        internal void Add(string key)
+        internal void AddToLocation()
         {
             if (Chest == null && Location.Objects.ContainsKey(Tile)) return;
             var chest = new Chest(true, Tile, GarbageDay.ObjectId);
             chest.playerChoiceColor.Value = Color.DarkGray;
-            chest.modData.Add("furyx639.GarbageDay", key);
-            chest.modData.Add("Pathoschild.ChestsAnywhere/IsIgnored", "true");
+            chest.modData.Add("furyx639.GarbageDay", WhichCan);
+            if (_mod.Config.HideFromChestsAnywhere) chest.modData.Add("Pathoschild.ChestsAnywhere/IsIgnored", "true");
             if (Chest != null)
             {
                 chest.items.CopyFrom(Chest.items);
-                Remove();
+                RemoveFromLocation();
             }
             Location.Objects.Add(Tile, chest);
         }
 
-        internal void Remove()
+        internal void RemoveFromLocation()
         {
             if (Chest != null) Location.Objects.Remove(Tile);
         }
 
-        internal void DayStart(float luck = 0)
+        internal void DayStart(float extraLuck = 0)
         {
             if (Chest == null) return;
 
@@ -145,21 +144,20 @@ namespace ImJustMatt.GarbageDay.Framework.Controllers
             _dropQiBeans = false;
             Chest.playerChoiceColor.Value = Color.DarkGray;
             if (_mod.Config.HideFromChestsAnywhere) Chest.modData["Pathoschild.ChestsAnywhere/IsIgnored"] = "true";
-            if (!Chest.modData.TryGetValue("furyx639.GarbageDay", out var whichCan)) whichCan = "0";
             if (Game1.dayOfMonth % 7 == _mod.Config.GarbageDay) Chest.items.Clear();
 
             // Seed Random
-            if (!int.TryParse(whichCan, out var vanillaCanNumber)) vanillaCanNumber = 0;
+            if (!int.TryParse(WhichCan, out var vanillaCanNumber)) vanillaCanNumber = 0;
             var garbageRandom = SeedRandom(vanillaCanNumber);
 
             // Mega/Double-Mega
             _mega = Game1.stats.getStat("trashCansChecked") > 20 && garbageRandom.NextDouble() < 0.01;
             _doubleMega = Game1.stats.getStat("trashCansChecked") > 20 && garbageRandom.NextDouble() < 0.002;
-            if (_doubleMega || !_mega && !(garbageRandom.NextDouble() < 0.2 + Game1.player.DailyLuck + luck))
+            if (_doubleMega || !_mega && !(garbageRandom.NextDouble() < 0.2 + Game1.player.DailyLuck + extraLuck))
                 return;
 
             // Qi Beans
-            if (Game1.random.NextDouble() <= 0.25 * luck && Game1.player.team.SpecialOrderRuleActive("DROP_QI_BEANS"))
+            if (Game1.random.NextDouble() <= 0.25 + extraLuck && Game1.player.team.SpecialOrderRuleActive("DROP_QI_BEANS"))
             {
                 _dropQiBeans = true;
                 return;
@@ -168,7 +166,7 @@ namespace ImJustMatt.GarbageDay.Framework.Controllers
             // Vanilla Local Loot
             if (vanillaCanNumber >= 3 && vanillaCanNumber <= 7)
             {
-                var localLoot = GetVanillaLocalLoot(garbageRandom, vanillaCanNumber, luck);
+                var localLoot = GetVanillaLocalLoot(garbageRandom, vanillaCanNumber, extraLuck);
                 if (localLoot != -1)
                 {
                     Chest.addItem(new Object(localLoot, 1));
@@ -178,9 +176,9 @@ namespace ImJustMatt.GarbageDay.Framework.Controllers
             }
 
             // Custom Local Loot
-            if (garbageRandom.NextDouble() < 0.2 + Game1.player.DailyLuck + luck)
+            if (garbageRandom.NextDouble() < 0.2 + Game1.player.DailyLuck + extraLuck)
             {
-                var localItem = RandomLoot(garbageRandom, whichCan);
+                var localItem = RandomLoot(garbageRandom);
                 if (localItem != null)
                 {
                     Chest.addItem(localItem.CreateItem());
@@ -201,7 +199,7 @@ namespace ImJustMatt.GarbageDay.Framework.Controllers
                 }
             }
 
-            var globalItem = RandomLoot(garbageRandom, "Global");
+            var globalItem = RandomLoot(garbageRandom);
             if (globalItem != null)
             {
                 Chest.addItem(globalItem.CreateItem());
@@ -230,8 +228,6 @@ namespace ImJustMatt.GarbageDay.Framework.Controllers
                 if (item.MatchesTagExt("color_purple", true)
                     || item.MatchesTagExt("color_dark_purple", true)) return Color.Purple;
                 if (item.MatchesTagExt("color_cyan", true)) return Color.DarkCyan;
-                if (item.MatchesTagExt("color_white", true)
-                    || item.MatchesTagExt("color_gray", true)) return Color.Gray;
                 if (item.MatchesTagExt("color_pink", true)) return Color.Pink;
                 if (item.MatchesTagExt("color_orange", true)) return Color.DarkOrange;
             }
@@ -239,12 +235,18 @@ namespace ImJustMatt.GarbageDay.Framework.Controllers
             return Color.Gray;
         }
 
-        private SearchableItem RandomLoot(Random randomizer, string key)
+        private SearchableItem RandomLoot(Random randomizer)
         {
-            var path = PathUtilities.NormalizePath($"Mods/GarbageDay/Loot/{key}");
-            var lootTable = Game1.content.Load<Dictionary<string, double>>(path);
+            var lootTable = Game1.content.Load<Dictionary<string, double>>($"Mods/GarbageDay/Loot/{WhichCan}");
+            if (!string.IsNullOrWhiteSpace(MapLoot))
+            {
+                lootTable = lootTable.Concat(Game1.content.Load<Dictionary<string, double>>($"Mods/GarbageDay/Loot/{MapLoot}"))
+                    .ToDictionary(loot => loot.Key, loot => loot.Value);
+            }
+
             if (!lootTable.Any())
                 return null;
+
             var totalWeight = lootTable.Values.Sum();
             var targetIndex = randomizer.NextDouble() * totalWeight;
             double currentIndex = 0;
@@ -275,12 +277,12 @@ namespace ImJustMatt.GarbageDay.Framework.Controllers
                     return Game1.dishOfTheDay.ParentSheetIndex != 217 ? Game1.dishOfTheDay.ParentSheetIndex : 216;
                 case 6 when garbageRandom.NextDouble() < 0.2 + Game1.player.DailyLuck + luck:
                     return 223;
-                case 7 when garbageRandom.NextDouble() < 0.2 * luck:
+                case 7 when garbageRandom.NextDouble() < 0.2 + luck:
                     if (!Utility.HasAnyPlayerSeenEvent(191393)) item = 167;
                     if (Utility.doesMasterPlayerHaveMailReceivedButNotMailForTomorrow("ccMovieTheater")
                         && !Utility.doesMasterPlayerHaveMailReceivedButNotMailForTomorrow("ccMovieTheaterJoja"))
                     {
-                        item = !(garbageRandom.NextDouble() < 0.25 * luck) ? 270 : 809;
+                        item = !(garbageRandom.NextDouble() < 0.25 + luck) ? 270 : 809;
                     }
 
                     break;

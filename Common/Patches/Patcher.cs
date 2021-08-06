@@ -1,5 +1,5 @@
 ﻿using System;
-using Harmony;
+using HarmonyLib;
 using StardewModdingAPI;
 
 namespace ImJustMatt.Common.Patches
@@ -17,7 +17,7 @@ namespace ImJustMatt.Common.Patches
 
         internal void ApplyAll(params Type[] patchTypes)
         {
-            var harmony = HarmonyInstance.Create(_uniqueId);
+            var harmony = new Harmony(_uniqueId);
             foreach (var patchType in patchTypes)
             {
                 Activator.CreateInstance(patchType, _mod, harmony);

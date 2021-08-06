@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection;
 using System.Reflection.Emit;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using ImJustMatt.ExpandedStorage.Framework.Controllers;
 using ImJustMatt.ExpandedStorage.Framework.Models;
@@ -39,7 +39,7 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
         private protected static readonly FieldInfo IClickableMenuYPositionOnScreen =
             AccessTools.Field(typeof(IClickableMenu), nameof(IClickableMenu.yPositionOnScreen));
 
-        protected MenuPatches(IMod mod, HarmonyInstance harmony) : base(mod, harmony)
+        protected MenuPatches(IMod mod, Harmony harmony) : base(mod, harmony)
         {
         }
 

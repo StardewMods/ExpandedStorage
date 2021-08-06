@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using StardewModdingAPI;
 
 namespace ImJustMatt.Common.Patches
@@ -7,7 +7,7 @@ namespace ImJustMatt.Common.Patches
     {
         private protected static T Mod;
 
-        internal BasePatch(IMod mod, HarmonyInstance harmony)
+        internal BasePatch(IMod mod, Harmony harmony)
         {
             Mod = (T) mod;
         }

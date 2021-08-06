@@ -1,4 +1,4 @@
-﻿using Harmony;
+﻿using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using StardewModdingAPI;
 using StardewValley;
@@ -9,7 +9,7 @@ namespace ImJustMatt.UtilityChest.Framework.Patches
     {
         private static IInputHelper InputHelper;
 
-        public Game1Patches(IMod mod, HarmonyInstance harmony) : base(mod, harmony)
+        public Game1Patches(IMod mod, Harmony harmony) : base(mod, harmony)
         {
             InputHelper = Mod.Helper.Input;
 

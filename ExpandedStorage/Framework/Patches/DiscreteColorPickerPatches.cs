@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using ImJustMatt.ExpandedStorage.Framework.Views;
 using Microsoft.Xna.Framework;
@@ -12,7 +12,7 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal class DiscreteColorPickerPatches : BasePatch<ExpandedStorage>
     {
-        public DiscreteColorPickerPatches(IMod mod, HarmonyInstance harmony) : base(mod, harmony)
+        public DiscreteColorPickerPatches(IMod mod, Harmony harmony) : base(mod, harmony)
         {
             harmony.Patch(
                 AccessTools.Constructor(typeof(DiscreteColorPicker), new[] {typeof(int), typeof(int), typeof(int), typeof(Item)}),

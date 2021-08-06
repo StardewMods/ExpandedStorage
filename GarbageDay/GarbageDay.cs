@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Integrations.GenericModConfigMenu;
 using ImJustMatt.Common.Integrations.JsonAssets;
 using ImJustMatt.Common.Patches;
@@ -103,7 +103,7 @@ namespace ImJustMatt.GarbageDay
                     garbageCan.Value.Location = location;
                 }
             });
-            GarbageCans.Do(garbageCan => garbageCan.Value.Add(garbageCan.Key));
+            GarbageCans.Do(garbageCan => garbageCan.Value.AddToLocation());
 
             Monitor.Log(string.Join("\n",
                 "Garbage Can Report",
@@ -135,7 +135,7 @@ namespace ImJustMatt.GarbageDay
         /// <param name="e">The event arguments.</param>
         private static void OnDayStarted(object sender, DayStartedEventArgs e)
         {
-            GarbageCans.Values.Do(garbageCan => garbageCan.DayStart());
+            GarbageCans.Do(garbageCan => garbageCan.Value.DayStart());
         }
     }
 }

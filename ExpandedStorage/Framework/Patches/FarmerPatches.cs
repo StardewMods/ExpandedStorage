@@ -1,5 +1,5 @@
 ﻿using System.Collections.Generic;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using ImJustMatt.ExpandedStorage.Framework.Controllers;
 using ImJustMatt.ExpandedStorage.Framework.Extensions;
@@ -12,7 +12,7 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
 {
     internal class FarmerPatches : BasePatch<ExpandedStorage>
     {
-        public FarmerPatches(IMod mod, HarmonyInstance harmony) : base(mod, harmony)
+        public FarmerPatches(IMod mod, Harmony harmony) : base(mod, harmony)
         {
             harmony.Patch(
                 AccessTools.Method(typeof(Farmer), nameof(Farmer.addItemToInventory), new[] {typeof(Item), typeof(List<Item>)}),

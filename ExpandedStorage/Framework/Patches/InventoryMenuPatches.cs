@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Reflection.Emit;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using ImJustMatt.ExpandedStorage.Framework.Models;
 using Microsoft.Xna.Framework.Graphics;
@@ -11,7 +11,7 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
 {
     internal class InventoryMenuPatches : MenuPatches
     {
-        public InventoryMenuPatches(IMod mod, HarmonyInstance harmony) : base(mod, harmony)
+        public InventoryMenuPatches(IMod mod, Harmony harmony) : base(mod, harmony)
         {
             harmony.Patch(
                 AccessTools.Method(typeof(InventoryMenu), nameof(InventoryMenu.draw), new[] {typeof(SpriteBatch), typeof(int), typeof(int), typeof(int)}),

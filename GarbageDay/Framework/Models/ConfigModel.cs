@@ -4,7 +4,7 @@ namespace ImJustMatt.GarbageDay.Framework.Models
 {
     internal class ConfigModel
     {
-        /// <summary>Global change that a random item from season is collected</summary>
+        /// <summary>Global chance that a random item from season is collected</summary>
         public double GetRandomItemFromSeason { get; set; } = 0.1;
 
         /// <summary>Day of week that trash is emptied out</summary>
@@ -20,7 +20,7 @@ namespace ImJustMatt.GarbageDay.Framework.Models
         public string LogLevel { get; set; } = "Trace";
 
         /// <summary>Loot available to all garbage cans</summary>
-        public Dictionary<string, double> GlobalLoot { get; set; } = new Dictionary<string, double>
+        public Dictionary<string, double> GlobalLoot { get; set; } = new()
         {
             {"item_trash", 1},
             {"item_joja_cola", 1},

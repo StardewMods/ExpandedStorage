@@ -31,7 +31,7 @@ namespace ImJustMatt.GarbageDay.Framework.Controllers
         public void Edit<T>(IAssetData asset)
         {
             var map = asset.AsMap().Data;
-            if (!asset.AssetNameEquals(@"Maps\Town") && !map.Properties.ContainsKey("GarbageDay"))
+            if (!asset.AssetNameEquals(@"Maps\Town") || !map.Properties.TryGetValue("GarbageDay", out var mapLoot))
             {
                 _excludedAssets.Add(asset.AssetName);
                 return;
@@ -47,12 +47,12 @@ namespace ImJustMatt.GarbageDay.Framework.Controllers
                     string whichCan = "";
                     var tile = layer.PickTile(new Location(x, y) * Game1.tileSize, Game1.viewport.Size);
 
-                    // Look for Garbage: WhichCan
+                    // Look for Garbage: [WhichCan]
                     tile?.Properties.TryGetValue("Garbage", out property);
                     whichCan = property?.ToString();
                     if (string.IsNullOrWhiteSpace(whichCan))
                     {
-                        // Look for Action: Garbage
+                        // Look for Action: Garbage [WhichCan]
                         tile?.Properties.TryGetValue("Action", out property);
                         var parts = property?.ToString().Split(' ');
                         if (parts?.ElementAtOrDefault(0) == "Garbage")
@@ -73,8 +73,10 @@ namespace ImJustMatt.GarbageDay.Framework.Controllers
                         {
                             edits++;
                         }
-
+                        
                         garbageCan.MapName = PathUtilities.NormalizePath(asset.AssetName);
+                        garbageCan.MapLoot = mapLoot.ToString();
+                        garbageCan.WhichCan = whichCan;
                         garbageCan.Tile = new Vector2(x, y);
                         map.GetLayer("Back").PickTile(new Location(x, y) * Game1.tileSize, Game1.viewport.Size)?.Properties.Add("NoPath", "");
                     }

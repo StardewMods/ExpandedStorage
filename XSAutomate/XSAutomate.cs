@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using ImJustMatt.ExpandedStorage.API;
 using Pathoschild.Stardew.Automate;
@@ -23,7 +23,7 @@ namespace ImJustMatt.XSAutomate
             helper.Events.GameLoop.GameLaunched += OnGameLaunched;
 
             Monitor.LogOnce("Patching Automate for Restricted Storage");
-            var harmony = HarmonyInstance.Create(ModManifest.UniqueID);
+            var harmony = new Harmony(ModManifest.UniqueID);
             harmony.Patch(
                 new AssemblyPatch("Automate").Method(ChestContainerType, "Store"),
                 new HarmonyMethod(GetType(), nameof(StorePrefix))

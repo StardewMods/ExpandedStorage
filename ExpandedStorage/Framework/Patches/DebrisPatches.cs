@@ -1,6 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using ImJustMatt.ExpandedStorage.Framework.Extensions;
 using Microsoft.Xna.Framework;
@@ -13,7 +13,7 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal class DebrisPatches : BasePatch<ExpandedStorage>
     {
-        public DebrisPatches(IMod mod, HarmonyInstance harmony) : base(mod, harmony)
+        public DebrisPatches(IMod mod, Harmony harmony) : base(mod, harmony)
         {
             harmony.Patch(
                 AccessTools.Method(typeof(Debris), nameof(Debris.collect)),

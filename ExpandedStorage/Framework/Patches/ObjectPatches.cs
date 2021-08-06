@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using ImJustMatt.ExpandedStorage.Framework.Controllers;
 using ImJustMatt.ExpandedStorage.Framework.Extensions;
@@ -19,7 +19,7 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
     {
         private static readonly HashSet<string> ExcludeModDataKeys = new();
 
-        public ObjectPatches(IMod mod, HarmonyInstance harmony) : base(mod, harmony)
+        public ObjectPatches(IMod mod, Harmony harmony) : base(mod, harmony)
         {
             harmony.Patch(
                 AccessTools.Method(typeof(Object), nameof(Object.checkForAction)),

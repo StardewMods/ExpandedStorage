@@ -1,5 +1,5 @@
 ﻿using System.Diagnostics.CodeAnalysis;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using ImJustMatt.SlimeFramework.Framework.Extensions;
 using Microsoft.Xna.Framework;
@@ -11,7 +11,7 @@ namespace ImJustMatt.SlimeFramework.Framework.Patches
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal class GreenSlimePatches : BasePatch<SlimeFramework>
     {
-        public GreenSlimePatches(IMod mod, HarmonyInstance harmony) : base(mod, harmony)
+        public GreenSlimePatches(IMod mod, Harmony harmony) : base(mod, harmony)
         {
             harmony.Patch(
                 AccessTools.Constructor(typeof(GreenSlime), new []{typeof(Vector2)}),

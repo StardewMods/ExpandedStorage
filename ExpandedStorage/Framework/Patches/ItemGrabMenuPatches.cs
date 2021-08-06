@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
 using System.Reflection.Emit;
-using Harmony;
+using HarmonyLib;
 using ImJustMatt.Common.Patches;
 using ImJustMatt.ExpandedStorage.Framework.Controllers;
 using ImJustMatt.ExpandedStorage.Framework.Extensions;
@@ -19,7 +19,7 @@ namespace ImJustMatt.ExpandedStorage.Framework.Patches
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal class ItemGrabMenuPatches : MenuPatches
     {
-        public ItemGrabMenuPatches(IMod mod, HarmonyInstance harmony) : base(mod, harmony)
+        public ItemGrabMenuPatches(IMod mod, Harmony harmony) : base(mod, harmony)
         {
             var constructor = AccessTools.Constructor(typeof(ItemGrabMenu),
                 new[]
