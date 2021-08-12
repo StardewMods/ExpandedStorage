@@ -56,7 +56,7 @@ and their weighted probability that they get added to the Trash every day.
 
 ### SpriteSheets
 
-The SpriteSheet can be patched in the [Expanded Storage](https://github.com/ImJustMatt/StardewMods/blob/master/ExpandedStorage/docs/content-patcher.md)
+The SpriteSheet can be patched in the [eXpanded Storage](https://github.com/ImJustMatt/StardewMods/blob/master/ExpandedStorage/docs/content-patcher.md)
 supported format.
 
 Target Path:

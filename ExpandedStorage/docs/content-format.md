@@ -1,16 +1,16 @@
-﻿## Expanded Storage Content Format
+﻿## eXpanded Storage Content Format
 
 ### Contents
 
 * [Overview](#overview)
-* [Expanded Storage](#expanded-storage)
+* [eXpanded Storage](#expanded-storage)
 * [Storage Tabs](#storage-tabs)
 * [Sprite Sheet](#sprite-sheets)
 * [Context Tags](#context-tags)
 
 ### Overview
 
-An Expanded Storage content pack must contain the following files:
+An eXpanded Storage content pack must contain the following files:
 
 - `manifest.json`
 - `expanded-storage.json`
@@ -22,9 +22,9 @@ Each Storage must be added to the `BigCraftables' folder in the
 - `BigCraftables\Storage Name\big-craftable.json`
 - `BigCraftables\Storage Name\big-craftable.png`
 
-#### Manifest.json
+#### manifest.json
 
-`manifest.json` must specify this is a content pack for Expanded Storage:
+`manifest.json` must specify this is a content pack for eXpanded Storage:
 
 ```json
 "ContentPackFor": {
@@ -35,9 +35,9 @@ Each Storage must be added to the `BigCraftables' folder in the
 For full details of `manifest.json` refer to
 [Modding:Modder Guide/APIs/Manifest](https://stardewcommunitywiki.com/Modding:Modder_Guide/APIs/Manifest).
 
-#### Expanded-Storage.json
+#### expanded-Storage.json
 
-`expanded-storage.json` is used to enable/disable Expanded Storage features for Storages:
+`expanded-storage.json` is used to enable/disable eXpanded Storage features for Storages:
 
 ```json
 {
@@ -48,7 +48,7 @@ For full details of `manifest.json` refer to
 }
 ```
 
-For full details of `expanded-storage.json` see [Expanded Storages](#expanded-storage).
+For full details of `expanded-storage.json` see [eXpanded Storages](#expanded-storage).
 
 #### Storage-Tabs.json
 
@@ -68,11 +68,11 @@ For full details of `expanded-storage.json` see [Expanded Storages](#expanded-st
 
 For full details of `storage-tabs.json` see [Storage Tabs](#storage-tabs).
 
-### Expanded Storage
+### eXpanded Storage
 
-Expanded Storages are loaded into the game using
+eXpanded Storages are loaded into the game using
 [Json Assets](https://www.nexusmods.com/stardewvalley/mods/1720).  
-It's also possible to load storage or enable features using the [Expanded Storage API]().
+It's also possible to load storage or enable features using the [eXpanded Storage API](../API/IExpandedStorageAPI.cs).
 
 ```json
 "StorageName": {

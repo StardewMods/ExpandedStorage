@@ -4,7 +4,7 @@ using System.Linq;
 using Helpers.ConfigData;
 using ImJustMatt.Common.Extensions;
 using ImJustMatt.ExpandedStorage.API;
-using ImJustMatt.ExpandedStorage.Common.Helpers;
+using ImJustMatt.Common.Helpers;
 using ImJustMatt.ExpandedStorage.Framework.Models;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;

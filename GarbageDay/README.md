@@ -7,7 +7,7 @@ cleared out.
 
 * [Json Assets](https://www.nexusmods.com/stardewvalley/mods/1720) is used to
   add the trash object to the game
-* [Expanded Storage](https://www.nexusmods.com/stardewvalley/mods/7431) turns
+* [eXpanded Storage](https://www.nexusmods.com/stardewvalley/mods/7431) turns
   these objects into custom storages
 
 Please report any issues to GitHub Issues

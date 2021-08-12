@@ -104,7 +104,7 @@ namespace ImJustMatt.ExpandedStorage.Framework.Controllers
                     });
                 }
             }
-
+            
             _mod.Helper.Events.World.ObjectListChanged += OnObjectListChanged;
         }
 

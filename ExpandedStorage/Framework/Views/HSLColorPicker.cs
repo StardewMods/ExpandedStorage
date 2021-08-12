@@ -1,5 +1,5 @@
 ﻿using System;
-using ImJustMatt.ExpandedStorage.Common.Helpers;
+using ImJustMatt.Common.Helpers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;

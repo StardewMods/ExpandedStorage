@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using ImJustMatt.Common.Extensions;
-using ImJustMatt.ExpandedStorage.Common.Helpers.ItemData;
+using ImJustMatt.Common.Helpers.ItemData;
 using ImJustMatt.GarbageDay.Framework.Models;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;

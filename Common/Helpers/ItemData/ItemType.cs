@@ -1,4 +1,4 @@
-﻿namespace ImJustMatt.ExpandedStorage.Common.Helpers.ItemData
+﻿namespace ImJustMatt.Common.Helpers.ItemData
 {
     /// <summary>An item type that can be searched and added to the player through the console.</summary>
     internal enum ItemType

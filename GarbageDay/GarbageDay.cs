@@ -4,14 +4,12 @@ using HarmonyLib;
 using ImJustMatt.Common.Integrations.GenericModConfigMenu;
 using ImJustMatt.Common.Integrations.JsonAssets;
 using ImJustMatt.Common.Patches;
-using ImJustMatt.ExpandedStorage.API;
 using ImJustMatt.GarbageDay.Framework.Controllers;
 using ImJustMatt.GarbageDay.Framework.Patches;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewValley;
-using StardewValley.Objects;
 
 // ReSharper disable ClassNeverInstantiated.Global
 

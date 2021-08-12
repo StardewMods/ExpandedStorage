@@ -2,7 +2,7 @@
 using StardewValley;
 
 // ReSharper disable All
-namespace ImJustMatt.ExpandedStorage.Common.Helpers.ItemData
+namespace ImJustMatt.Common.Helpers.ItemData
 {
     /// <summary>A game item with metadata.</summary>
     /// <remarks>This is copied from the SMAPI source code and should be kept in sync with it.</remarks>

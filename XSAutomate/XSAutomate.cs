@@ -1,7 +1,6 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using HarmonyLib;
 using ImJustMatt.Common.Patches;
-using ImJustMatt.ExpandedStorage.API;
 using Pathoschild.Stardew.Automate;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
