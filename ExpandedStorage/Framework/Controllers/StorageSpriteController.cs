@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 
-namespace ImJustMatt.ExpandedStorage.Framework.Controllers
+namespace ExpandedStorage.Framework.Controllers
 {
     internal class StorageSpriteController
     {

@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using ImJustMatt.ExpandedStorage.Framework.Controllers;
+using ExpandedStorage.Framework.Controllers;
 
-namespace ImJustMatt.ExpandedStorage.Framework.Models
+namespace ExpandedStorage.Framework.Models
 {
     internal class ConfigModel
     {

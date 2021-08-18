@@ -4,7 +4,7 @@ using System.Linq;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 
-namespace ImJustMatt.Common.Extensions
+namespace XSAutomate.Common.Extensions
 {
     internal static class CommonExtensions
     {

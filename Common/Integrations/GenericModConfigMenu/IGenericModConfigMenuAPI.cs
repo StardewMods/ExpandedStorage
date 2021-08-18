@@ -2,7 +2,7 @@
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 
-namespace ImJustMatt.Common.Integrations.GenericModConfigMenu
+namespace Common.Integrations.GenericModConfigMenu
 {
     public interface IGenericModConfigMenuAPI
     {

@@ -4,7 +4,7 @@ using HarmonyLib;
 
 // ReSharper disable UnusedMember.Global
 
-namespace ImJustMatt.Common.Patches
+namespace XSAutomate.Common.Patches
 {
     internal class PatternPatch
     {

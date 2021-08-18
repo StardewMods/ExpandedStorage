@@ -1,14 +1,14 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
-using ImJustMatt.Common.Patches;
-using ImJustMatt.ExpandedStorage.Framework.Extensions;
+using XSAutomate.Common.Patches;
+using ExpandedStorage.Framework.Extensions;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Tools;
 
-namespace ImJustMatt.ExpandedStorage.Framework.Patches
+namespace ExpandedStorage.Framework.Patches
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal class DebrisPatches : BasePatch<ExpandedStorage>

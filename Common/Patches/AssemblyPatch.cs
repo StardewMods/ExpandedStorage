@@ -4,7 +4,7 @@ using System.Linq;
 using System.Reflection;
 using HarmonyLib;
 
-namespace ImJustMatt.Common.Patches
+namespace XSAutomate.Common.Patches
 {
     [SuppressMessage("ReSharper", "MemberCanBePrivate.Global")]
     internal class AssemblyPatch

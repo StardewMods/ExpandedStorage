@@ -2,7 +2,7 @@
 using HarmonyLib;
 using StardewModdingAPI;
 
-namespace ImJustMatt.Common.Patches
+namespace XSAutomate.Common.Patches
 {
     internal class Patcher
     {

@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.Xna.Framework;
 
-namespace ImJustMatt.Common.Helpers
+namespace Common.Helpers
 {
     internal struct HSLColor
     {

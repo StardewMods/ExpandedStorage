@@ -1,11 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using GarbageDay.Framework.Models;
 using Helpers.ConfigData;
-using ImJustMatt.Common.Integrations.GenericModConfigMenu;
-using ImJustMatt.GarbageDay.Framework.Models;
+using Common.Integrations.GenericModConfigMenu;
 using StardewModdingAPI;
 
-namespace ImJustMatt.GarbageDay.Framework.Controllers
+namespace GarbageDay.Framework.Controllers
 {
     internal class ConfigController : ConfigModel
     {

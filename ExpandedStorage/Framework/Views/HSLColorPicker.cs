@@ -1,5 +1,5 @@
 ﻿using System;
-using ImJustMatt.Common.Helpers;
+using Common.Helpers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
@@ -10,7 +10,7 @@ using StardewValley.Objects;
 
 // ReSharper disable InconsistentNaming
 
-namespace ImJustMatt.ExpandedStorage.Framework.Views
+namespace ExpandedStorage.Framework.Views
 {
     internal class HSLColorPicker : DiscreteColorPicker, IDisposable
     {

@@ -1,9 +1,9 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using ExpandedStorage.Framework.Controllers;
 using HarmonyLib;
-using ImJustMatt.Common.Patches;
-using ImJustMatt.ExpandedStorage.Framework.Controllers;
-using ImJustMatt.ExpandedStorage.Framework.Extensions;
+using XSAutomate.Common.Patches;
+using ExpandedStorage.Framework.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
@@ -13,7 +13,7 @@ using StardewValley.Objects;
 
 // ReSharper disable InconsistentNaming
 
-namespace ImJustMatt.ExpandedStorage.Framework.Patches
+namespace ExpandedStorage.Framework.Patches
 {
     internal class ObjectPatches : BasePatch<ExpandedStorage>
     {

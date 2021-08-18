@@ -1,12 +1,12 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using ExpandedStorage.Framework.Controllers;
 using HarmonyLib;
-using ImJustMatt.Common.Patches;
-using ImJustMatt.ExpandedStorage.Framework.Controllers;
+using XSAutomate.Common.Patches;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Objects;
 
-namespace ImJustMatt.ExpandedStorage.Framework.Patches
+namespace ExpandedStorage.Framework.Patches
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal class ItemPatches : BasePatch<ExpandedStorage>

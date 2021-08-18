@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Diagnostics.CodeAnalysis;
 using System.Linq;
-using ImJustMatt.Common.Extensions;
-using ImJustMatt.ExpandedStorage.Framework.Models;
-using ImJustMatt.ExpandedStorage.Framework.Views;
+using ExpandedStorage.Framework.Models;
+using ExpandedStorage.Framework.Views;
+using XSAutomate.Common.Extensions;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
@@ -13,7 +13,7 @@ using StardewValley;
 using StardewValley.Menus;
 using StardewValley.Objects;
 
-namespace ImJustMatt.ExpandedStorage.Framework.Controllers
+namespace ExpandedStorage.Framework.Controllers
 {
     [SuppressMessage("ReSharper", "IdentifierTypo")]
     internal class MenuController : IDisposable

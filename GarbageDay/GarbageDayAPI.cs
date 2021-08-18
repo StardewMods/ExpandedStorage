@@ -1,7 +1,7 @@
 ﻿using System.Collections.Generic;
-using ImJustMatt.GarbageDay.API;
+using GarbageDay.API;
 
-namespace ImJustMatt.GarbageDay
+namespace GarbageDay
 {
     public class GarbageDayAPI : IGarbageDayAPI
     {

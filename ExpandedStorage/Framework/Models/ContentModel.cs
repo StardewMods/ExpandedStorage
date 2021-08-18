@@ -1,4 +1,4 @@
-﻿namespace ImJustMatt.ExpandedStorage.Framework.Models
+﻿namespace ExpandedStorage.Framework.Models
 {
     internal class ContentModel
     {

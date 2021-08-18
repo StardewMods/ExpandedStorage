@@ -5,7 +5,7 @@ using StardewValley.Locations;
 using StardewValley.Objects;
 using Object = StardewValley.Object;
 
-namespace ImJustMatt.Common.Extensions
+namespace XSAutomate.Common.Extensions
 {
     internal static class ItemExtensions
     {

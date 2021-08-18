@@ -1,9 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ImJustMatt.Common.Extensions;
-using ImJustMatt.Common.Helpers.ItemData;
-using ImJustMatt.GarbageDay.Framework.Models;
+using GarbageDay.Framework.Models;
+using XSAutomate.Common.Extensions;
+using Common.Helpers.ItemData;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewModdingAPI.Events;
@@ -13,7 +13,7 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 using Object = StardewValley.Object;
 
-namespace ImJustMatt.GarbageDay.Framework.Controllers
+namespace GarbageDay.Framework.Controllers
 {
     internal class GarbageCanController : GarbageCanModel
     {

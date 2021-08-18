@@ -1,6 +1,6 @@
 ﻿using StardewModdingAPI;
 
-namespace ImJustMatt.Common.Integrations
+namespace Common.Integrations
 {
     internal abstract class ModIntegration<T> where T : class
     {

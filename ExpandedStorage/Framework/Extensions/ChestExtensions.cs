@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ImJustMatt.ExpandedStorage.Framework.Controllers;
+using ExpandedStorage.Framework.Controllers;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley;
@@ -11,7 +11,7 @@ using Object = StardewValley.Object;
 
 // ReSharper disable InconsistentNaming
 
-namespace ImJustMatt.ExpandedStorage.Framework.Extensions
+namespace ExpandedStorage.Framework.Extensions
 {
     internal static class ChestExtensions
     {

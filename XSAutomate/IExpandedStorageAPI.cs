@@ -1,7 +1,7 @@
 ﻿using StardewValley;
 using StardewValley.Objects;
 
-namespace ImJustMatt.XSAutomate
+namespace XSAutomate
 {
     public interface IExpandedStorageAPI
     {

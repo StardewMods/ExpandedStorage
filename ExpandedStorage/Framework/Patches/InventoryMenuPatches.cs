@@ -1,13 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Reflection.Emit;
+using ExpandedStorage.Framework.Models;
 using HarmonyLib;
-using ImJustMatt.Common.Patches;
-using ImJustMatt.ExpandedStorage.Framework.Models;
+using XSAutomate.Common.Patches;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewValley.Menus;
 
-namespace ImJustMatt.ExpandedStorage.Framework.Patches
+namespace ExpandedStorage.Framework.Patches
 {
     internal class InventoryMenuPatches : MenuPatches
     {

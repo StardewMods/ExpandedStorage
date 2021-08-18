@@ -1,14 +1,14 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using ImJustMatt.Common.Extensions;
-using ImJustMatt.ExpandedStorage.API;
-using ImJustMatt.ExpandedStorage.Framework.Models;
+using ExpandedStorage.API;
+using ExpandedStorage.Framework.Models;
+using XSAutomate.Common.Extensions;
 using Microsoft.Xna.Framework.Graphics;
 using Newtonsoft.Json;
 using StardewValley;
 
-namespace ImJustMatt.ExpandedStorage.Framework.Controllers
+namespace ExpandedStorage.Framework.Controllers
 {
     public class TabController : TabModel
     {

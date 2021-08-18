@@ -1,16 +1,16 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using ImJustMatt.ExpandedStorage.API;
-using ImJustMatt.ExpandedStorage.Framework.Controllers;
-using ImJustMatt.ExpandedStorage.Framework.Models;
-using ImJustMatt.ExpandedStorage.Framework.Patches;
+using ExpandedStorage.API;
+using ExpandedStorage.Framework.Controllers;
+using ExpandedStorage.Framework.Models;
+using ExpandedStorage.Framework.Patches;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI;
 using StardewModdingAPI.Utilities;
 using StardewValley;
 using StardewValley.Objects;
 
-namespace ImJustMatt.ExpandedStorage
+namespace ExpandedStorage
 {
     public class ExpandedStorageAPI : IExpandedStorageAPI
     {

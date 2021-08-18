@@ -1,7 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using StardewValley;
 
-namespace ImJustMatt.GarbageDay.Framework.Models
+namespace GarbageDay.Framework.Models
 {
     internal class GarbageCanModel
     {

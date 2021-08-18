@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace ImJustMatt.Common.Integrations.JsonAssets
+namespace Common.Integrations.JsonAssets
 {
     public interface IJsonAssetsAPI
     {

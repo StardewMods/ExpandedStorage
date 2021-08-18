@@ -1,13 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
+using ExpandedStorage.API;
+using ExpandedStorage.Framework.Models;
 using Helpers.ConfigData;
-using ImJustMatt.Common.Integrations.GenericModConfigMenu;
-using ImJustMatt.ExpandedStorage.API;
-using ImJustMatt.ExpandedStorage.Framework.Models;
+using Common.Integrations.GenericModConfigMenu;
 using Newtonsoft.Json;
 using StardewModdingAPI;
 
-namespace ImJustMatt.ExpandedStorage.Framework.Controllers
+namespace ExpandedStorage.Framework.Controllers
 {
     public class StorageConfigController : StorageConfigModel
     {

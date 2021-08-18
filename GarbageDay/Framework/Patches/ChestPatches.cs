@@ -1,11 +1,11 @@
 ﻿using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using HarmonyLib;
-using ImJustMatt.Common.Patches;
+using XSAutomate.Common.Patches;
 using StardewModdingAPI;
 using StardewValley.Objects;
 
-namespace ImJustMatt.GarbageDay.Framework.Patches
+namespace GarbageDay.Framework.Patches
 {
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
     [SuppressMessage("ReSharper", "InconsistentNaming")]

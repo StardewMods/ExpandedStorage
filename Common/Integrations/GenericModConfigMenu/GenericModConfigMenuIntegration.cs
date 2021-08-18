@@ -2,7 +2,7 @@
 using Helpers.ConfigData;
 using StardewModdingAPI;
 
-namespace ImJustMatt.Common.Integrations.GenericModConfigMenu
+namespace Common.Integrations.GenericModConfigMenu
 {
     internal class GenericModConfigMenuIntegration : ModIntegration<IGenericModConfigMenuAPI>
     {

@@ -1,8 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics.CodeAnalysis;
-using ImJustMatt.Common.Extensions;
-using ImJustMatt.ExpandedStorage.Framework.Controllers;
+using ExpandedStorage.Framework.Controllers;
+using XSAutomate.Common.Extensions;
 using Netcode;
 using StardewModdingAPI.Utilities;
 using StardewValley;
@@ -11,7 +11,7 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 using Object = StardewValley.Object;
 
-namespace ImJustMatt.ExpandedStorage.Framework.Models
+namespace ExpandedStorage.Framework.Models
 {
     [SuppressMessage("ReSharper", "UnusedMember.Global")]
     public class MenuModel : IDisposable

@@ -1,4 +1,4 @@
-﻿namespace ImJustMatt.GarbageDay
+﻿namespace GarbageDay
 {
     public interface IExpandedStorageAPI
     {

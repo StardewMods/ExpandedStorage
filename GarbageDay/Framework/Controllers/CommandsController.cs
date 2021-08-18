@@ -5,7 +5,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework;
 using StardewValley.Objects;
 
-namespace ImJustMatt.GarbageDay.Framework.Controllers
+namespace GarbageDay.Framework.Controllers
 {
     internal static class CommandsController
     {

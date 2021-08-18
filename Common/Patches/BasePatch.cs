@@ -1,7 +1,7 @@
 ﻿using HarmonyLib;
 using StardewModdingAPI;
 
-namespace ImJustMatt.Common.Patches
+namespace XSAutomate.Common.Patches
 {
     internal abstract class BasePatch<T> where T : IMod
     {

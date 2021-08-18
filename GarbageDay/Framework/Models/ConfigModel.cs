@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace ImJustMatt.GarbageDay.Framework.Models
+namespace GarbageDay.Framework.Models
 {
     internal class ConfigModel
     {

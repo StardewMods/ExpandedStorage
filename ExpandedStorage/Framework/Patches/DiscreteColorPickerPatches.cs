@@ -1,13 +1,13 @@
 ﻿using System.Diagnostics.CodeAnalysis;
+using ExpandedStorage.Framework.Views;
 using HarmonyLib;
-using ImJustMatt.Common.Patches;
-using ImJustMatt.ExpandedStorage.Framework.Views;
+using XSAutomate.Common.Patches;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Menus;
 
-namespace ImJustMatt.ExpandedStorage.Framework.Patches
+namespace ExpandedStorage.Framework.Patches
 {
     [SuppressMessage("ReSharper", "InconsistentNaming")]
     internal class DiscreteColorPickerPatches : BasePatch<ExpandedStorage>

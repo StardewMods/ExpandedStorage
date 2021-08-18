@@ -3,7 +3,7 @@ using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Objects;
 
-namespace ImJustMatt.ExpandedStorage.API
+namespace ExpandedStorage.API
 {
     public interface IExpandedStorageAPI
     {

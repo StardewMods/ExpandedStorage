@@ -1,8 +1,8 @@
 ﻿using HarmonyLib;
-using ImJustMatt.Common.Patches;
+using XSAutomate.Common.Patches;
 using StardewModdingAPI;
 
-namespace ImJustMatt.ExpandedStorage.Framework.Patches
+namespace ExpandedStorage.Framework.Patches
 {
     internal class ChestsAnywherePatches : BasePatch<ExpandedStorage>
     {
