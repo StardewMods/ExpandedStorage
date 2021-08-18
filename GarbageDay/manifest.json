@@ -1,17 +1,17 @@
 ﻿{
   "Name": "Garbage Day",
   "Author": "furyx639",
-  "Version": "2.0.1",
+  "Version": "2.1.0-alpha.1",
   "Description": "This turns trash cans into storages.",
   "UniqueID": "furyx639.GarbageDay",
   "EntryDll": "GarbageDay.dll",
-  "MinimumApiVersion": "3.12.2",
+  "MinimumApiVersion": "3.13.0-beta.20210818",
   "UpdateKeys": [ "Nexus:8204" ],
   "Dependencies": [
     {
       "UniqueID": "furyx639.ExpandedStorage",
       "IsRequired": true,
-      "MinimumVersion": "1.6.10"
+      "MinimumVersion": "1.7.0-alpha.1"
     },
     {
       "UniqueID": "spacechase0.JsonAssets",

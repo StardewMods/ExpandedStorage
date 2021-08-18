@@ -10,10 +10,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CustomBundles", "CustomBund
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSAutomate", "XSAutomate\XSAutomate.csproj", "{67B80E88-412A-4901-BD9D-E1BADFA193EF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UtilityChest", "UtilityChest\UtilityChest.csproj", "{235F8EF8-938D-4293-B6EF-729E4B8B12E6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimeFramework", "SlimeFramework\SlimeFramework.csproj", "{BE7C1D47-0C19-4D85-81BD-9B1C6542F8E8}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSLite", "XSLite\XSLite.csproj", "{E76BDD4A-6864-48A2-BF4A-2CAE9623F20C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSAlternativeTextures", "XSAlternativeTextures\XSAlternativeTextures.csproj", "{FC5F69D0-06F0-45F9-965B-CE4472DBEF37}"
@@ -44,12 +40,6 @@ Global
 		{67B80E88-412A-4901-BD9D-E1BADFA193EF}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{67B80E88-412A-4901-BD9D-E1BADFA193EF}.Release|Any CPU.Build.0 = Release|Any CPU
 		{67B80E88-412A-4901-BD9D-E1BADFA193EF}.Debug|Any CPU.Deploy.0 = Debug|Any CPU
-		{235F8EF8-938D-4293-B6EF-729E4B8B12E6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{235F8EF8-938D-4293-B6EF-729E4B8B12E6}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{235F8EF8-938D-4293-B6EF-729E4B8B12E6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{BE7C1D47-0C19-4D85-81BD-9B1C6542F8E8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{BE7C1D47-0C19-4D85-81BD-9B1C6542F8E8}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{BE7C1D47-0C19-4D85-81BD-9B1C6542F8E8}.Release|Any CPU.Build.0 = Release|Any CPU
 		{E76BDD4A-6864-48A2-BF4A-2CAE9623F20C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{E76BDD4A-6864-48A2-BF4A-2CAE9623F20C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E76BDD4A-6864-48A2-BF4A-2CAE9623F20C}.Release|Any CPU.ActiveCfg = Release|Any CPU
