@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SlimeFramework", "SlimeFram
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSLite", "XSLite\XSLite.csproj", "{E76BDD4A-6864-48A2-BF4A-2CAE9623F20C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "XSAlternativeTextures", "XSAlternativeTextures\XSAlternativeTextures.csproj", "{FC5F69D0-06F0-45F9-965B-CE4472DBEF37}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -52,5 +54,9 @@ Global
 		{E76BDD4A-6864-48A2-BF4A-2CAE9623F20C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E76BDD4A-6864-48A2-BF4A-2CAE9623F20C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E76BDD4A-6864-48A2-BF4A-2CAE9623F20C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FC5F69D0-06F0-45F9-965B-CE4472DBEF37}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FC5F69D0-06F0-45F9-965B-CE4472DBEF37}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FC5F69D0-06F0-45F9-965B-CE4472DBEF37}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FC5F69D0-06F0-45F9-965B-CE4472DBEF37}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal
