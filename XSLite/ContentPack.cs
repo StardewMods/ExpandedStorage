@@ -1,4 +1,4 @@
-﻿namespace ImJustMatt.XSLite
+﻿namespace XSLite
 {
     internal class ContentPack
     {

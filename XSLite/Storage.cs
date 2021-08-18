@@ -9,7 +9,7 @@ using StardewValley;
 using StardewValley.Objects;
 using SObject = StardewValley.Object;
 
-namespace ImJustMatt.XSLite
+namespace XSLite
 {
     internal class Storage
     {
@@ -53,7 +53,7 @@ namespace ImJustMatt.XSLite
         
         internal void InvalidateCache(IContentHelper contentHelper)
         {
-            _texture = Texture != null ? contentHelper.Load<Texture2D>(_path, ContentSource.GameContent) : null;
+            _texture = contentHelper.Load<Texture2D>(_path, ContentSource.GameContent);
             if (_texture == null)
                 return;
             
@@ -144,10 +144,10 @@ namespace ImJustMatt.XSLite
                     chest.modData.CopyFrom(modData);
                 
                 // Copy modData from config
-                foreach (var modData in ModData)
+                foreach (var (key, value) in ModData)
                 {
-                    if (!chest.modData.ContainsKey(modData.Key))
-                        chest.modData.Add(modData.Key, modData.Value);
+                    if (!chest.modData.ContainsKey(key))
+                        chest.modData.Add(key, value);
                 }
                 
                 // Replace object with chest
@@ -170,16 +170,16 @@ namespace ImJustMatt.XSLite
                 if (innerPos.Equals(pos) || location.Objects.ContainsKey(innerPos))
                     return;
                 
-                var addObj = new SObject(Vector2.Zero, Id)
+                var extraObj = new SObject(Vector2.Zero, Id)
                 {
                     name = Name
                 };
                 
                 // Copy modData from original item
                 foreach (var modData in chest.modData)
-                    addObj.modData.CopyFrom(modData);
+                    extraObj.modData.CopyFrom(modData);
                 
-                location.Objects.Add(innerPos, addObj);
+                location.Objects.Add(innerPos, extraObj);
             });
         }
         

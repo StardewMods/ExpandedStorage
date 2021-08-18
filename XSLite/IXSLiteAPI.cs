@@ -2,7 +2,7 @@
 using StardewValley;
 using StardewValley.Objects;
 
-namespace ImJustMatt.XSLite
+namespace XSLite
 {
     public interface IXSLiteAPI
     {

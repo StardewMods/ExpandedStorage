@@ -8,7 +8,7 @@ using StardewValley;
 using StardewValley.Objects;
 using SObject = StardewValley.Object;
 
-namespace ImJustMatt.XSLite
+namespace XSLite
 {
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Naming convention defined by Harmony")]
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter")]
@@ -73,10 +73,9 @@ namespace ImJustMatt.XSLite
         #region ChestPatches
         private static bool Chest_draw_prefix(Chest __instance, ref int ___currentLidFrame, SpriteBatch spriteBatch, int x, int y, float alpha)
         {
-            if (!__instance.modData.TryGetValue("furyx639.ExpandedStorage/Storage", out var storageName)
+            if (!_mod.TryGetStorage(__instance, out var storage)
                 || !__instance.modData.TryGetValue("furyx639.ExpandedStorage/X", out var xStr)
                 || !__instance.modData.TryGetValue("furyx639.ExpandedStorage/Y", out var yStr)
-                || !_mod.Storages.TryGetValue(storageName, out var storage)
                 || !int.TryParse(xStr, out var xPos)
                 || !int.TryParse(yStr, out var yPos))
                 return true;
@@ -110,9 +109,7 @@ namespace ImJustMatt.XSLite
         /// <summary>Draw chest with playerChoiceColor and animation when held.</summary>
         private static bool Chest_drawLocal_prefix(Chest __instance, ref int ___currentLidFrame, SpriteBatch spriteBatch, int x, int y, float alpha, bool local)
         {
-            if (!__instance.modData.TryGetValue("furyx639.ExpandedStorage/Storage", out var storageName) 
-                || !_mod.Storages.TryGetValue(storageName, out var storage)
-                || storage.Texture == null)
+            if (!_mod.TryGetStorage(__instance, out var storage) || storage.Texture == null)
                 return true;
             
             storage.Draw(
@@ -129,8 +126,7 @@ namespace ImJustMatt.XSLite
         /// <summary>Draw chest with playerChoiceColor and animation in menu.</summary>
         private static bool Chest_drawInMenu_prefix(Chest __instance, ref int ___currentLidFrame, SpriteBatch spriteBatch, Vector2 location, float scaleSize, float transparency, float layerDepth, StackDrawType drawStackNumber, Color color, bool drawShadow)
         {
-            if (!__instance.modData.TryGetValue("furyx639.ExpandedStorage/Storage", out var storageName) 
-                || !_mod.Storages.TryGetValue(storageName, out var storage))
+            if (!_mod.TryGetStorage(__instance, out var storage))
                 return true;
             
             var origin = new Vector2(storage.Width / 2f, storage.Height / 2f);
@@ -171,7 +167,8 @@ namespace ImJustMatt.XSLite
                 || !int.TryParse(xStr, out var xPos)
                 || !int.TryParse(yStr, out var yPos)
                 || !Game1.currentLocation.Objects.TryGetValue(new Vector2(xPos, yPos), out var obj)
-                || obj is not Chest chest) return true;
+                || obj is not Chest chest)
+                return true;
             __result = chest.checkForAction(who);
             return false;
         }
@@ -189,20 +186,17 @@ namespace ImJustMatt.XSLite
         
         private static bool Object_drawWhenHeld_prefix(SObject __instance, SpriteBatch spriteBatch, Vector2 objectPosition, Farmer f)
         {
-            if (!__instance.modData.TryGetValue("furyx639.ExpandedStorage/Storage", out var storageName) 
-                || !_mod.Storages.TryGetValue(storageName, out var storage))
+            if (!_mod.TryGetStorage(__instance, out var storage))
                 return true;
-            
             objectPosition.X -= storage.Width * 2f - 32;
             objectPosition.Y -= storage.Height * 2f - 64;
-            
             return !storage.Draw(__instance, 0, spriteBatch, objectPosition, Vector2.Zero);
         }
         
         private static bool Object_drawPlacementBounds_prefix(SObject __instance, SpriteBatch spriteBatch, GameLocation location)
         {
             
-            if (!_mod.Storages.TryGetValue(__instance.Name, out var storage))
+            if (!_mod.TryGetStorage(__instance, out var storage))
                 return true;
             
             var tile = 64 * Game1.GetPlacementGrabTile();
@@ -242,7 +236,7 @@ namespace ImJustMatt.XSLite
         
         private static bool Object_performToolAction_prefix(SObject __instance, Tool t, GameLocation location)
         {
-            if (!__instance.modData.TryGetValue("furyx639.ExpandedStorage/Storage", out var storageName)
+            if (!__instance.modData.ContainsKey("furyx639.ExpandedStorage/Storage")
                 || !__instance.modData.TryGetValue("furyx639.ExpandedStorage/X", out var xStr)
                 || !__instance.modData.TryGetValue("furyx639.ExpandedStorage/Y", out var yStr)
                 || !int.TryParse(xStr, out var xPos)
@@ -258,7 +252,8 @@ namespace ImJustMatt.XSLite
         #region UtilityPatches
         private static void Utility_playerCanPlaceItemHere_postfix(ref bool __result, GameLocation location, Item item, int x, int y, Farmer f)
         {
-            if (!_mod.Storages.TryGetValue(item.Name, out var storage))
+            if (!_mod.Storages.TryGetValue(item.Name, out var storage)
+                || storage.TileWidth == 1 && storage.TileHeight == 1)
                 return;
             
             x = 64 * (x / 64);

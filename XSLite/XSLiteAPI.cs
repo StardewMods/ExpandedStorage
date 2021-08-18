@@ -4,7 +4,7 @@ using StardewModdingAPI;
 using StardewValley;
 using StardewValley.Objects;
 
-namespace ImJustMatt.XSLite
+namespace XSLite
 {
     public class XSLiteAPI : IXSLiteAPI
     {
@@ -71,15 +71,17 @@ namespace ImJustMatt.XSLite
                     continue;
                 }
                 
-                // Skip loading storages using JA texture only
-                if (string.IsNullOrWhiteSpace(storage.Value.Image) || !contentPack.HasFile($"assets/{storage.Value.Image}"))
-                {
-                    _mod.Monitor.LogOnce("XSLite cannot load JA texture format.", LogLevel.Warn);
-                    continue;
-                }
-                
                 storage.Value.Name = storage.Key;
-                storage.Value.Texture = contentPack.LoadAsset<Texture2D>($"assets/{storage.Value.Image}");
+                
+                if (!string.IsNullOrWhiteSpace(storage.Value.Image) && contentPack.HasFile($"assets/{storage.Value.Image}"))
+                {
+                    storage.Value.Texture = contentPack.LoadAsset<Texture2D>($"assets/{storage.Value.Image}");
+                }
+                else
+                {
+                    // Load placeholder texture
+                    storage.Value.Texture = _mod.Helper.Content.Load<Texture2D>("assets/texture.png");
+                }
                 
                 _mod.Storages.Add(storage.Key, storage.Value);
             }
