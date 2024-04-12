@@ -1,9 +1,11 @@
 ﻿namespace StardewMods.ExpandedStorage.Framework.Services;
 
+using System.Reflection;
 using System.Reflection.Emit;
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewModdingAPI.Events;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
@@ -23,147 +25,59 @@ internal sealed class ModPatches : BaseService
     private const string MiniShippingBinOpenSound = "shwip";
 
     private static ModPatches instance = null!;
+    private readonly AssetHandler assetHandler;
 
-    private readonly IEventPublisher eventPublisher;
-    private readonly StorageManager storageManager;
+    private readonly IEventManager eventManager;
+    private readonly IPatchManager patchManager;
 
     /// <summary>Initializes a new instance of the <see cref="ModPatches" /> class.</summary>
-    /// <param name="eventPublisher">Dependency used for publishing events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
-    /// <param name="storageManager">Dependency used to handle the objects which should be managed by Expanded Storages.</param>
+    /// <param name="assetHandler">Dependency used to handle the objects which should be managed by Expanded Storages.</param>
     public ModPatches(
-        IEventPublisher eventPublisher,
+        IEventManager eventManager,
         ILog log,
         IManifest manifest,
         IPatchManager patchManager,
-        StorageManager storageManager)
+        AssetHandler assetHandler)
         : base(log, manifest)
     {
         // Init
         ModPatches.instance = this;
-        this.eventPublisher = eventPublisher;
-        this.storageManager = storageManager;
+        this.eventManager = eventManager;
+        this.patchManager = patchManager;
+        this.assetHandler = assetHandler;
 
-        // Patches
-        patchManager.Add(
-            this.ModId,
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.checkForAction)),
-                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_checkForAction_transpiler)),
-                PatchType.Transpiler),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(
-                    typeof(Chest),
-                    nameof(Chest.draw),
-                    [typeof(SpriteBatch), typeof(int), typeof(int), typeof(float)]),
-                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_draw_prefix)),
-                PatchType.Prefix),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(
-                    typeof(Chest),
-                    nameof(Chest.draw),
-                    [typeof(SpriteBatch), typeof(int), typeof(int), typeof(float), typeof(bool)]),
-                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_drawLocal_prefix)),
-                PatchType.Prefix),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.getLastLidFrame)),
-                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_getLastLidFrame_postfix)),
-                PatchType.Postfix),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.OpenMiniShippingMenu)),
-                AccessTools.DeclaredMethod(
-                    typeof(ModPatches),
-                    nameof(ModPatches.Chest_OpenMiniShippingMenu_transpiler)),
-                PatchType.Transpiler),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.ShowMenu)),
-                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_SpecialChestType_transpiler)),
-                PatchType.Transpiler),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.UpdateFarmerNearby)),
-                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_UpdateFarmerNearby_transpiler)),
-                PatchType.Transpiler),
-            new SavedPatch(
-                AccessTools
-                    .GetDeclaredConstructors(typeof(ItemGrabMenu))
-                    .First(ctor => ctor.GetParameters().Length >= 10),
-                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.ItemGrabMenu_constructor_postfix)),
-                PatchType.Postfix),
-            new SavedPatch(
-                AccessTools
-                    .GetDeclaredConstructors(typeof(ItemGrabMenu))
-                    .First(ctor => ctor.GetParameters().Length >= 10),
-                AccessTools.DeclaredMethod(
-                    typeof(ModPatches),
-                    nameof(ModPatches.ItemGrabMenu_SpecialChestType_transpiler)),
-                PatchType.Transpiler),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.draw)),
-                AccessTools.DeclaredMethod(
-                    typeof(ModPatches),
-                    nameof(ModPatches.ItemGrabMenu_SpecialChestType_transpiler)),
-                PatchType.Transpiler),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.gameWindowSizeChanged)),
-                AccessTools.DeclaredMethod(
-                    typeof(ModPatches),
-                    nameof(ModPatches.ItemGrabMenu_gameWindowSizeChanged_postfix)),
-                PatchType.Postfix),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.gameWindowSizeChanged)),
-                AccessTools.DeclaredMethod(
-                    typeof(ModPatches),
-                    nameof(ModPatches.ItemGrabMenu_SpecialChestType_transpiler)),
-                PatchType.Transpiler),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.setSourceItem)),
-                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.ItemGrabMenu_setSourceItem_postfix)),
-                PatchType.Postfix),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.setSourceItem)),
-                AccessTools.DeclaredMethod(
-                    typeof(ModPatches),
-                    nameof(ModPatches.ItemGrabMenu_SpecialChestType_transpiler)),
-                PatchType.Transpiler),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.snapToDefaultClickableComponent)),
-                AccessTools.DeclaredMethod(
-                    typeof(ModPatches),
-                    nameof(ModPatches.ItemGrabMenu_SpecialChestType_transpiler)),
-                PatchType.Transpiler),
-            new SavedPatch(
-                AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.placementAction)),
-                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Object_placementAction_postfix)),
-                PatchType.Postfix));
-
-        patchManager.Patch(this.ModId);
+        // Events
+        this.eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
     }
 
-    private static IEnumerable<CodeInstruction> Chest_checkForAction_transpiler(
-        IEnumerable<CodeInstruction> instructions)
-    {
-        foreach (var instruction in instructions)
-        {
-            if (instruction.LoadsConstant(ModPatches.ChestOpenSound))
-            {
-                yield return new CodeInstruction(OpCodes.Ldarg_0);
-                yield return instruction;
-                yield return CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound));
-            }
-            else if (instruction.LoadsConstant(ModPatches.LidOpenSound))
-            {
-                yield return new CodeInstruction(OpCodes.Ldarg_0);
-                yield return instruction;
-                yield return CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound));
-            }
-            else
-            {
-                yield return instruction;
-            }
-        }
-    }
+    private static IEnumerable<CodeInstruction>
+        Chest_checkForAction_transpiler(IEnumerable<CodeInstruction> instructions) =>
+        new CodeMatcher(instructions)
+            .MatchEndForward(new CodeMatch(instruction => instruction.LoadsConstant(ModPatches.ChestOpenSound)))
+            .Advance(1)
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0),
+                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound)))
+            .InstructionEnumeration();
+
+    private static IEnumerable<CodeInstruction>
+        Chest_checkForAction_delegate_transpiler(IEnumerable<CodeInstruction> instructions) =>
+        new CodeMatcher(instructions)
+            .MatchEndForward(new CodeMatch(instruction => instruction.LoadsConstant(ModPatches.ChestOpenSound)))
+            .Advance(1)
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0),
+                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound)))
+            .MatchEndForward(new CodeMatch(instruction => instruction.LoadsConstant(ModPatches.LidOpenSound)))
+            .Advance(1)
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0),
+                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound)))
+            .InstructionEnumeration();
 
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
@@ -175,8 +89,7 @@ internal sealed class ModPatches : BaseService
         int y,
         float alpha)
     {
-        if (!__instance.playerChest.Value
-            || !ModPatches.instance.storageManager.TryGetData(__instance, out var storage))
+        if (!__instance.playerChest.Value || !ModPatches.instance.assetHandler.TryGetData(__instance, out var storage))
         {
             return true;
         }
@@ -263,8 +176,7 @@ internal sealed class ModPatches : BaseService
         float alpha,
         bool local)
     {
-        if (!__instance.playerChest.Value
-            || !ModPatches.instance.storageManager.TryGetData(__instance, out var storage))
+        if (!__instance.playerChest.Value || !ModPatches.instance.assetHandler.TryGetData(__instance, out var storage))
         {
             return true;
         }
@@ -318,8 +230,7 @@ internal sealed class ModPatches : BaseService
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static void Chest_getLastLidFrame_postfix(Chest __instance, ref int __result)
     {
-        if (!__instance.playerChest.Value
-            || !ModPatches.instance.storageManager.TryGetData(__instance, out var storage))
+        if (!__instance.playerChest.Value || !ModPatches.instance.assetHandler.TryGetData(__instance, out var storage))
         {
             return;
         }
@@ -327,54 +238,38 @@ internal sealed class ModPatches : BaseService
         __result = __instance.startingLidFrame.Value + storage.Frames - 1;
     }
 
-    private static IEnumerable<CodeInstruction> Chest_OpenMiniShippingMenu_transpiler(
-        IEnumerable<CodeInstruction> instructions)
-    {
-        foreach (var instruction in instructions)
-        {
-            if (instruction.LoadsConstant(ModPatches.MiniShippingBinOpenSound))
-            {
-                yield return new CodeInstruction(OpCodes.Ldarg_0);
-                yield return instruction;
-                yield return CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound));
-            }
-            else
-            {
-                yield return instruction;
-            }
-        }
-    }
+    private static IEnumerable<CodeInstruction>
+        Chest_OpenMiniShippingMenu_transpiler(IEnumerable<CodeInstruction> instructions) =>
+        new CodeMatcher(instructions)
+            .MatchEndForward(
+                new CodeMatch(instruction => instruction.LoadsConstant(ModPatches.MiniShippingBinOpenSound)))
+            .Advance(1)
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0),
+                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound)))
+            .InstructionEnumeration();
 
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
-    private static IEnumerable<CodeInstruction> Chest_UpdateFarmerNearby_transpiler(
-        IEnumerable<CodeInstruction> instructions)
-    {
-        foreach (var instruction in instructions)
-        {
-            if (instruction.LoadsConstant(ModPatches.LidOpenSound))
-            {
-                yield return new CodeInstruction(OpCodes.Ldarg_0);
-                yield return instruction;
-                yield return CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound));
-            }
-            else if (instruction.LoadsConstant(ModPatches.LidCloseSound))
-            {
-                yield return new CodeInstruction(OpCodes.Ldarg_0);
-                yield return instruction;
-                yield return CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound));
-            }
-            else
-            {
-                yield return instruction;
-            }
-        }
-    }
+    private static IEnumerable<CodeInstruction>
+        Chest_UpdateFarmerNearby_transpiler(IEnumerable<CodeInstruction> instructions) =>
+        new CodeMatcher(instructions)
+            .MatchEndForward(new CodeMatch(instruction => instruction.LoadsConstant(ModPatches.LidOpenSound)))
+            .Advance(1)
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0),
+                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound)))
+            .MatchEndForward(new CodeMatch(instruction => instruction.LoadsConstant(ModPatches.LidCloseSound)))
+            .Advance(1)
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0),
+                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound)))
+            .InstructionEnumeration();
 
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
-    private static string GetSound(Chest chest, string sound)
+    private static string GetSound(string sound, Chest chest)
     {
-        if (!ModPatches.instance.storageManager.TryGetData(chest, out var storage))
+        if (!ModPatches.instance.assetHandler.TryGetData(chest, out var storage))
         {
             return sound;
         }
@@ -393,48 +288,38 @@ internal sealed class ModPatches : BaseService
     private static void ItemGrabMenu_constructor_postfix(ItemGrabMenu __instance, ref Item ___sourceItem) =>
         ModPatches.UpdateColorPicker(__instance, ___sourceItem);
 
-    private static IEnumerable<CodeInstruction> ItemGrabMenu_SpecialChestType_transpiler(
-        IEnumerable<CodeInstruction> instructions)
-    {
-        foreach (var instruction in instructions)
-        {
-            if (instruction.Calls(AccessTools.PropertyGetter(typeof(Chest), nameof(Chest.SpecialChestType))))
-            {
-                yield return instruction;
-                yield return new CodeInstruction(OpCodes.Ldarg_0);
-                yield return CodeInstruction.LoadField(typeof(ItemGrabMenu), nameof(ItemGrabMenu.sourceItem));
-                yield return CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSpecialChestType));
-            }
-            else
-            {
-                yield return instruction;
-            }
-        }
-    }
+    private static IEnumerable<CodeInstruction>
+        ItemGrabMenu_SpecialChestType_transpiler(IEnumerable<CodeInstruction> instructions) =>
+        new CodeMatcher(instructions)
+            .MatchEndForward(
+                new CodeMatch(
+                    instruction =>
+                        instruction.Calls(AccessTools.PropertyGetter(typeof(Chest), nameof(Chest.SpecialChestType)))))
+            .Advance(1)
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0),
+                CodeInstruction.LoadField(typeof(ItemGrabMenu), nameof(ItemGrabMenu.sourceItem)),
+                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSpecialChestType)))
+            .InstructionEnumeration();
 
-    private static IEnumerable<CodeInstruction> Chest_SpecialChestType_transpiler(
-        IEnumerable<CodeInstruction> instructions)
-    {
-        foreach (var instruction in instructions)
-        {
-            if (instruction.Calls(AccessTools.PropertyGetter(typeof(Chest), nameof(Chest.SpecialChestType))))
-            {
-                yield return instruction;
-                yield return new CodeInstruction(OpCodes.Ldarg_0);
-                yield return CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSpecialChestType));
-            }
-            else
-            {
-                yield return instruction;
-            }
-        }
-    }
+    private static IEnumerable<CodeInstruction>
+        Chest_SpecialChestType_transpiler(IEnumerable<CodeInstruction> instructions) =>
+        new CodeMatcher(instructions)
+            .MatchEndForward(
+                new CodeMatch(
+                    instruction =>
+                        instruction.Calls(AccessTools.PropertyGetter(typeof(Chest), nameof(Chest.SpecialChestType)))))
+            .Advance(1)
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0),
+                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSpecialChestType)))
+            .InstructionEnumeration();
 
     private static Chest.SpecialChestTypes GetSpecialChestType(
         Chest.SpecialChestTypes specialChestType,
         Item sourceItem)
     {
-        if (!ModPatches.instance.storageManager.TryGetData(sourceItem, out var storage) || !storage.OpenNearby)
+        if (!ModPatches.instance.assetHandler.TryGetData(sourceItem, out var storage) || !storage.OpenNearby)
         {
             return specialChestType;
         }
@@ -463,7 +348,7 @@ internal sealed class ModPatches : BaseService
         int x,
         int y)
     {
-        if (!__result || !ModPatches.instance.storageManager.TryGetData(__instance, out var storage))
+        if (!__result || !ModPatches.instance.assetHandler.TryGetData(__instance, out var storage))
         {
             return;
         }
@@ -487,12 +372,12 @@ internal sealed class ModPatches : BaseService
         location.Objects[tile] = chest;
         location.playSound(storage.PlaceSound);
         __result = true;
-        ModPatches.instance.eventPublisher.Publish(new ChestCreatedEventArgs(chest, location, tile, storage));
+        ModPatches.instance.eventManager.Publish(new ChestCreatedEventArgs(chest, location, tile, storage));
     }
 
     private static void UpdateColorPicker(ItemGrabMenu itemGrabMenu, Item sourceItem)
     {
-        if (sourceItem is not Chest chest || !ModPatches.instance.storageManager.TryGetData(chest, out var storage))
+        if (sourceItem is not Chest chest || !ModPatches.instance.assetHandler.TryGetData(chest, out var storage))
         {
             return;
         }
@@ -506,5 +391,112 @@ internal sealed class ModPatches : BaseService
         itemGrabMenu.colorPickerToggleButton = null;
         itemGrabMenu.discreteColorPickerCC = null;
         itemGrabMenu.RepositionSideButtons();
+    }
+
+    private void OnGameLaunched(GameLaunchedEventArgs e)
+    {
+        var checkForActionDelegate = typeof(Chest)
+            .GetMethods(BindingFlags.Instance | BindingFlags.NonPublic | BindingFlags.Public)
+            .First(method => method.Name.Contains("<checkForAction>", StringComparison.Ordinal));
+
+        // Patches
+        this.patchManager.Add(
+            this.ModId,
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.checkForAction)),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_checkForAction_transpiler)),
+                PatchType.Transpiler),
+            new SavedPatch(
+                checkForActionDelegate,
+                AccessTools.DeclaredMethod(
+                    typeof(ModPatches),
+                    nameof(ModPatches.Chest_checkForAction_delegate_transpiler)),
+                PatchType.Transpiler),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(
+                    typeof(Chest),
+                    nameof(Chest.draw),
+                    [typeof(SpriteBatch), typeof(int), typeof(int), typeof(float)]),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_draw_prefix)),
+                PatchType.Prefix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(
+                    typeof(Chest),
+                    nameof(Chest.draw),
+                    [typeof(SpriteBatch), typeof(int), typeof(int), typeof(float), typeof(bool)]),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_drawLocal_prefix)),
+                PatchType.Prefix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.getLastLidFrame)),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_getLastLidFrame_postfix)),
+                PatchType.Postfix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.OpenMiniShippingMenu)),
+                AccessTools.DeclaredMethod(
+                    typeof(ModPatches),
+                    nameof(ModPatches.Chest_OpenMiniShippingMenu_transpiler)),
+                PatchType.Transpiler),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.ShowMenu)),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_SpecialChestType_transpiler)),
+                PatchType.Transpiler),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.UpdateFarmerNearby)),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_UpdateFarmerNearby_transpiler)),
+                PatchType.Transpiler),
+            new SavedPatch(
+                AccessTools
+                    .GetDeclaredConstructors(typeof(ItemGrabMenu))
+                    .First(ctor => ctor.GetParameters().Length >= 10),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.ItemGrabMenu_constructor_postfix)),
+                PatchType.Postfix),
+            new SavedPatch(
+                AccessTools
+                    .GetDeclaredConstructors(typeof(ItemGrabMenu))
+                    .First(ctor => ctor.GetParameters().Length >= 10),
+                AccessTools.DeclaredMethod(
+                    typeof(ModPatches),
+                    nameof(ModPatches.ItemGrabMenu_SpecialChestType_transpiler)),
+                PatchType.Transpiler),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.draw)),
+                AccessTools.DeclaredMethod(
+                    typeof(ModPatches),
+                    nameof(ModPatches.ItemGrabMenu_SpecialChestType_transpiler)),
+                PatchType.Transpiler),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.gameWindowSizeChanged)),
+                AccessTools.DeclaredMethod(
+                    typeof(ModPatches),
+                    nameof(ModPatches.ItemGrabMenu_gameWindowSizeChanged_postfix)),
+                PatchType.Postfix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.gameWindowSizeChanged)),
+                AccessTools.DeclaredMethod(
+                    typeof(ModPatches),
+                    nameof(ModPatches.ItemGrabMenu_SpecialChestType_transpiler)),
+                PatchType.Transpiler),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.setSourceItem)),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.ItemGrabMenu_setSourceItem_postfix)),
+                PatchType.Postfix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.setSourceItem)),
+                AccessTools.DeclaredMethod(
+                    typeof(ModPatches),
+                    nameof(ModPatches.ItemGrabMenu_SpecialChestType_transpiler)),
+                PatchType.Transpiler),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(ItemGrabMenu), nameof(ItemGrabMenu.snapToDefaultClickableComponent)),
+                AccessTools.DeclaredMethod(
+                    typeof(ModPatches),
+                    nameof(ModPatches.ItemGrabMenu_SpecialChestType_transpiler)),
+                PatchType.Transpiler),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.placementAction)),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Object_placementAction_postfix)),
+                PatchType.Postfix));
+
+        this.patchManager.Patch(this.ModId);
     }
 }

@@ -1,5 +1,18 @@
 # FauxCore Change Log
 
+### 1.1.1 (April 12, 2024)
+
+### Changed
+
+* Initialize FauxCore DI container on Entry.
+
+## 1.1.0 (April 9, 2024)
+
+### Changed
+
+* Updated Api for Theme Helper.
+* Collect multiple samples for palette swaps.
+
 ## 1.0.2 (April 2, 2024)
 
 ### Changed

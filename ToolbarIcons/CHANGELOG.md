@@ -1,5 +1,28 @@
 # Toolbar Icons Change Log
 
+## 2.7.2 (April 12, 2024)
+
+### Changed
+
+* Initialize ToolbarIcons DI container on Entry.
+
+## 2.7.1 (April 9, 2024)
+
+### Changed
+
+* Updated for FauxCore api changes.
+
+## 2.7.0 (April 6, 2024)
+
+### Added
+
+* New default icon to toggle player collision.
+* Improved GMCM integration.
+
+### Fixed
+
+* Toolbar icons should work correctly for all zoom levels.
+
 ## 2.6.2 (March 25, 2024)
 
 ### Fixed
@@ -28,7 +51,8 @@
 
 ### Changed
 
-* New icons created by [Tai](https://www.nexusmods.com/stardewvalley/users/92060238):
+* New icons created
+  by [Tai](https://www.nexusmods.com/stardewvalley/users/92060238):
     * Always Scroll Map
     * To-Dew
     * Daily Quests

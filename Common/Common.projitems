@@ -29,6 +29,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\CustomBush\CustomBushIntegration.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\CustomBush\ICustomBush.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\CustomBush\ICustomBushApi.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\CustomBush\ICustomBushDrop.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\IManagedTexture.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FindAnything\ISearchResult.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FindAnything\ISearchSubmitted.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\ILog.cs"/>
@@ -42,7 +44,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\GenericModConfigMenu\IComplexOption.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\BaseService.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\ConfigManager.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\Enums\CapacityOption.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\Enums\ChestMenuOption.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\Enums\GroupBy.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\Enums\FeatureOption.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\Enums\RangeOption.cs"/>

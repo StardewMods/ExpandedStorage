@@ -205,14 +205,14 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>, IItemFilter
             if (this.newIndex.Value != -1)
             {
                 this.cachedTabs.Value[this.newIndex.Value].Select();
-                this.Log.Trace(
+                this.Log.Info(
                     "{0}: Set tab to {1}",
                     this.Id,
                     this.cachedTabs.Value[this.newIndex.Value].Component.hoverText);
             }
             else
             {
-                this.Log.Trace("{0}: Set tab to All", this.Id);
+                this.Log.Info("{0}: Set tab to All Items", this.Id);
             }
 
             this.currentIndex.Value = this.newIndex.Value;

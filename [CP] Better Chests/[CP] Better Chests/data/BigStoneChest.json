@@ -1,0 +1,32 @@
+{
+  "Changes": [
+    {
+      "LogName": "Big Craftable - Big Stone Chest",
+      "Action": "EditData",
+      "Target": "Data/BigCraftables",
+      "TargetField": ["BigStoneChest", "CustomFields"],
+      "Entries": {
+        "furyx639.BetterChests/AutoOrganize": "Default",
+        "furyx639.BetterChests/CarryChest": "Default",
+        "furyx639.BetterChests/CategorizeChest": "Default",
+        "furyx639.BetterChests/CategorizeChestAutomatically": "Default",
+        "furyx639.BetterChests/CategorizeChestMethod": "Default",
+        "furyx639.BetterChests/ChestFinder": "Default",
+        "furyx639.BetterChests/ChestInfo": "Default",
+        "furyx639.BetterChests/CollectItems": "Default",
+        "furyx639.BetterChests/ConfigureChest": "Default",
+        "furyx639.BetterChests/CraftFromChest": "Location",
+        "furyx639.BetterChests/CraftFromChestDistance": "-1",
+        "furyx639.BetterChests/HslColorPicker": "Default",
+        "furyx639.BetterChests/InventoryTabs": "Default",
+        "furyx639.BetterChests/OpenHeldChest": "Default",
+        "furyx639.BetterChests/ResizeChest": "Large",
+        "furyx639.BetterChests/ResizeChestCapacity": "-1",
+        "furyx639.BetterChests/SearchItems": "Default",
+        "furyx639.BetterChests/ShopFromChest": "Default",
+        "furyx639.BetterChests/StashToChest": "Location",
+        "furyx639.BetterChests/StashToChestDistance": "-1"
+      }
+    }
+  ]
+}

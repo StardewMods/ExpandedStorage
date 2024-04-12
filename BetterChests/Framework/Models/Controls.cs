@@ -1,5 +1,7 @@
 ﻿namespace StardewMods.BetterChests.Framework.Models;
 
+using System.Globalization;
+using System.Text;
 using StardewModdingAPI.Utilities;
 
 /// <summary>Controls config data.</summary>
@@ -59,4 +61,26 @@ internal sealed class Controls
     public KeybindList ToggleSearch { get; set; } = new(
         new Keybind(SButton.LeftControl, SButton.F),
         new Keybind(SButton.RightControl, SButton.F));
+
+    /// <inheritdoc />
+    public override string ToString()
+    {
+        StringBuilder sb = new();
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.CloseChestFinder)}: {this.CloseChestFinder}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.ConfigureChest)}: {this.ConfigureChest}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.FindChest)}: {this.FindChest}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.LockSlot)}: {this.LockSlot}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.NextTab)}: {this.NextTab}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.OpenCrafting)}: {this.OpenCrafting}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.OpenFoundChest)}: {this.OpenFoundChest}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.PreviousTab)}: {this.PreviousTab}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.ScrollDown)}: {this.ScrollDown}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.ScrollPage)}: {this.ScrollPage}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.ScrollUp)}: {this.ScrollUp}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.StashItems)}: {this.StashItems}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.ToggleCollectItems)}: {this.ToggleCollectItems}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.ToggleInfo)}: {this.ToggleInfo}");
+        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.ToggleSearch)}: {this.ToggleSearch}");
+        return sb.ToString();
+    }
 }

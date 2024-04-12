@@ -6,18 +6,25 @@ using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 internal sealed class ItemTransferringEventArgs(IStorageContainer into, Item item, bool force) : EventArgs,
     IItemTransferring
 {
-    /// <summary>Gets a value indicating whether the transfer is being forced.</summary>
+    private bool isAllowed;
+
+    private bool isPrevented;
+
+    /// <inheritdoc />
     public bool IsForced { get; } = force;
 
-    /// <summary>Gets the destination container to which the item was sent.</summary>
+    /// <inheritdoc />
     public IStorageContainer Into { get; } = into;
 
-    /// <summary>Gets the item that was transferred.</summary>
+    /// <inheritdoc />
     public Item Item { get; } = item;
 
-    /// <summary>Gets a value indicating whether the the transfer is prevented.</summary>
-    public bool IsAllowed { get; private set; } = true;
+    /// <inheritdoc />
+    public bool IsAllowed => this.isAllowed && !this.isPrevented;
 
-    /// <summary>Prevent the transfer.</summary>
-    public void PreventTransfer() => this.IsAllowed = false;
+    /// <inheritdoc />
+    public void AllowTransfer() => this.isAllowed = true;
+
+    /// <inheritdoc />
+    public void PreventTransfer() => this.isPrevented = true;
 }

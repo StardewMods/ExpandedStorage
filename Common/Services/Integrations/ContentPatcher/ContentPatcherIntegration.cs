@@ -20,12 +20,14 @@ internal sealed class ContentPatcherIntegration : ModIntegration<IContentPatcher
         : base(modRegistry, ContentPatcherIntegration.ModUniqueId, ContentPatcherIntegration.ModVersion)
     {
         this.eventManager = eventManager;
-
         if (this.IsLoaded)
         {
-            this.eventManager.Subscribe<UpdateTickedEventArgs>(this.OnUpdateTicked);
+            this.eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
         }
     }
+
+    private void OnGameLaunched(GameLaunchedEventArgs e) =>
+        this.eventManager.Subscribe<UpdateTickedEventArgs>(this.OnUpdateTicked);
 
     private void OnUpdateTicked(UpdateTickedEventArgs e)
     {

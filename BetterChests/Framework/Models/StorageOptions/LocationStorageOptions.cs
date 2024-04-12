@@ -7,10 +7,10 @@ using StardewValley.GameData.Locations;
 internal sealed class LocationStorageOptions : ChildStorageOptions
 {
     /// <summary>Initializes a new instance of the <see cref="LocationStorageOptions" /> class.</summary>
-    /// <param name="default">The default storage options.</param>
+    /// <param name="getDefault">Get the default storage options.</param>
     /// <param name="data">The location data.</param>
-    public LocationStorageOptions(IStorageOptions @default, LocationData? data)
-        : base(@default, new CustomFieldsStorageOptions(data?.CustomFields)) =>
+    public LocationStorageOptions(Func<IStorageOptions> getDefault, LocationData? data)
+        : base(getDefault, new CustomFieldsStorageOptions(data?.CustomFields)) =>
         this.Data = data;
 
     /// <summary>Gets the location data.</summary>

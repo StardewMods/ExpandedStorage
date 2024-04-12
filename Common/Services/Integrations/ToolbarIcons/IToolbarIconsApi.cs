@@ -6,7 +6,8 @@ using StardewValley.Menus;
 /// <summary>Public api to add icons above or below the toolbar.</summary>
 public interface IToolbarIconsApi
 {
-    /// <summary>(Deprecated) Event triggered when a toolbar icon is pressed.</summary>
+    /// <summary>Event triggered when any toolbar icon is pressed.</summary>
+    [Obsolete("Use Subscribe(Action<IIconPressedEventArgs>) and Unsubscribe(Action<IIconPressedEventArgs>) instead.")]
     public event EventHandler<string> ToolbarIconPressed;
 
     /// <summary>Adds an icon next to the <see cref="Toolbar" />.</summary>

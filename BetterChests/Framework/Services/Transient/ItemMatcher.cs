@@ -137,6 +137,9 @@ internal sealed class ItemMatcher : IItemFilter
 
             // Exactly matches context tag
             true when item.HasContextTag(term.Value) => true,
+
+            // Exactly matches mod data
+            true when item.modData.Values.Any(modData => modData == term.Value) => true,
             _ => false,
         };
 
@@ -168,7 +171,8 @@ internal sealed class ItemMatcher : IItemFilter
             }
         }
 
-        return false;
+        // Partially matches mod data values
+        return item.modData.Values.Any(modData => modData.Contains(term.Value, StringComparison.OrdinalIgnoreCase));
     }
 
     private readonly struct ParsedTerm(string value, bool notMatch, bool tagMatch)

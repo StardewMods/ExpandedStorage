@@ -6,7 +6,9 @@ using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services.Factory;
+using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Locations;
@@ -18,39 +20,46 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
     private static CarryChest instance = null!;
 
     private readonly ContainerFactory containerFactory;
-    private readonly Harmony harmony;
     private readonly IInputHelper inputHelper;
+    private readonly IPatchManager patchManager;
     private readonly ProxyChestFactory proxyChestFactory;
     private readonly StatusEffectManager statusEffectManager;
 
     /// <summary>Initializes a new instance of the <see cref="CarryChest" /> class.</summary>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="harmony">Dependency used to patch external code.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="proxyChestFactory">Dependency used for creating virtualized chests.</param>
     /// <param name="statusEffectManager">Dependency used for adding and removing custom buffs.</param>
     public CarryChest(
         ContainerFactory containerFactory,
         IEventManager eventManager,
-        Harmony harmony,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
+        IPatchManager patchManager,
         ProxyChestFactory proxyChestFactory,
         StatusEffectManager statusEffectManager)
         : base(eventManager, log, manifest, modConfig)
     {
         CarryChest.instance = this;
         this.containerFactory = containerFactory;
-        this.harmony = harmony;
         this.inputHelper = inputHelper;
+        this.patchManager = patchManager;
         this.proxyChestFactory = proxyChestFactory;
         this.statusEffectManager = statusEffectManager;
+
+        this.patchManager.Add(
+            this.UniqueId,
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.placementAction)),
+                AccessTools.DeclaredMethod(typeof(CarryChest), nameof(CarryChest.Object_placementAction_postfix)),
+                PatchType.Postfix));
     }
 
     /// <inheritdoc />
@@ -64,9 +73,7 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
         this.Events.Subscribe<OneSecondUpdateTickedEventArgs>(this.OnOneSecondUpdateTicked);
 
         // Patches
-        this.harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.placementAction)),
-            postfix: new HarmonyMethod(typeof(CarryChest), nameof(CarryChest.Object_placementAction_postfix)));
+        this.patchManager.Patch(this.UniqueId);
     }
 
     /// <inheritdoc />
@@ -77,9 +84,7 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
         this.Events.Unsubscribe<OneSecondUpdateTickedEventArgs>(this.OnOneSecondUpdateTicked);
 
         // Patches
-        this.harmony.Unpatch(
-            AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.placementAction)),
-            AccessTools.DeclaredMethod(typeof(CarryChest), nameof(CarryChest.Object_placementAction_postfix)));
+        this.patchManager.Unpatch(this.UniqueId);
     }
 
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
@@ -145,9 +150,21 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
             return;
         }
 
-        if (!Game1.currentLocation.Objects.TryGetValue(e.Cursor.GrabTile, out var obj)
-            || obj is not Chest chest
-            || !this.containerFactory.TryGetOneFromLocation(Game1.currentLocation, e.Cursor.GrabTile, out var container)
+        if (!Game1.currentLocation.Objects.TryGetValue(e.Cursor.GrabTile, out var obj) || obj is not Chest chest)
+        {
+            return;
+        }
+
+        // Allow swap behavior
+        if (Game1.player.CurrentItem?.HasContextTag("swappable_chest") == true
+            && chest.HasContextTag("swappable_chest")
+            && Game1.player.CurrentItem.Name.Contains("Chest")
+            && (Game1.player.CurrentItem.Name.Contains("Big") || !chest.ItemId.Contains("Big")))
+        {
+            return;
+        }
+
+        if (!this.containerFactory.TryGetOneFromLocation(Game1.currentLocation, e.Cursor.GrabTile, out var container)
             || container.Options.CarryChest != FeatureOption.Enabled)
         {
             return;
@@ -176,7 +193,7 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
         }
 
         // Remove chest from world
-        this.Log.Trace(
+        this.Log.Info(
             "{0}: Grabbed chest from {1} at ({2}, {3})",
             this.Id,
             Game1.player.currentLocation.Name,

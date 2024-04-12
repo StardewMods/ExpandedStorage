@@ -1,10 +1,15 @@
 namespace StardewMods.Common.Services.Integrations.FauxCore;
 
 /// <inheritdoc />
-internal sealed class Themer(FauxCoreIntegration fauxCore) : IThemeHelper
+internal sealed class Themer : IThemeHelper
 {
-    private readonly IThemeHelper themeHelper = fauxCore.Api!.CreateThemeService();
+    private readonly Lazy<IThemeHelper> themeHelper;
+
+    /// <summary>Initializes a new instance of the <see cref="Themer"/> class.</summary>
+    /// <param name="fauxCoreIntegration">Dependency used for FauxCore integration.</param>
+    public Themer(FauxCoreIntegration fauxCoreIntegration) =>
+        this.themeHelper = new Lazy<IThemeHelper>(() => fauxCoreIntegration.Api!.CreateThemeService());
 
     /// <inheritdoc />
-    public void AddAssets(string[] assetNames) => this.themeHelper.AddAssets(assetNames);
+    public IManagedTexture AddAsset(string path, IRawTextureData data) => this.themeHelper.Value.AddAsset(path, data);
 }

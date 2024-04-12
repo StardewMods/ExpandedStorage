@@ -8,10 +8,10 @@ using StardewValley.TokenizableStrings;
 internal sealed class BuildingStorageOptions : ChildStorageOptions
 {
     /// <summary>Initializes a new instance of the <see cref="BuildingStorageOptions" /> class.</summary>
-    /// <param name="default">The default storage options.</param>
+    /// <param name="getDefault">Get the default storage options.</param>
     /// <param name="data">The building data.</param>
-    public BuildingStorageOptions(IStorageOptions @default, BuildingData data)
-        : base(@default, new CustomFieldsStorageOptions(data.CustomFields)) =>
+    public BuildingStorageOptions(Func<IStorageOptions> getDefault, BuildingData data)
+        : base(getDefault, new CustomFieldsStorageOptions(data.CustomFields)) =>
         this.Data = data;
 
     /// <summary>Gets the building data.</summary>

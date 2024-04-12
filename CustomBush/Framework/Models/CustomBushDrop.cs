@@ -1,13 +1,14 @@
 namespace StardewMods.CustomBush.Framework.Models;
 
+using StardewMods.Common.Services.Integrations.CustomBush;
 using StardewValley.GameData;
 
-/// <summary>Model used for drops from custom bushes.</summary>
-internal sealed class CustomBushDrop : GenericSpawnItemDataWithCondition
+/// <inheritdoc cref="StardewMods.Common.Services.Integrations.CustomBush.ICustomBushDrop" />
+public sealed class CustomBushDrop : GenericSpawnItemDataWithCondition, ICustomBushDrop
 {
-    /// <summary>Gets or sets the specific season when the item can be produced.</summary>
+    /// <inheritdoc />
     public Season? Season { get; set; }
 
-    /// <summary>Gets or sets the probability that the item will be produced.</summary>
+    /// <inheritdoc />
     public float Chance { get; set; } = 1f;
 }

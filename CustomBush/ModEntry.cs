@@ -2,12 +2,11 @@
 
 using HarmonyLib;
 using SimpleInjector;
-using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.CustomBush.Framework;
-using StardewMods.CustomBush.Framework.Models;
 using StardewMods.CustomBush.Framework.Services;
 
 /// <inheritdoc />
@@ -16,13 +15,7 @@ public sealed class ModEntry : Mod
     private Container container = null!;
 
     /// <inheritdoc />
-    public override void Entry(IModHelper helper) => this.Helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
-
-    /// <inheritdoc />
-    public override object GetApi(IModInfo mod) =>
-        new CustomBushApi(this.container.GetInstance<BushManager>(), mod, this.container.GetInstance<ILog>());
-
-    private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
+    public override void Entry(IModHelper helper)
     {
         // Init
         this.container = new Container();
@@ -40,23 +33,25 @@ public sealed class ModEntry : Mod
         this.container.RegisterInstance(this.Helper.ModRegistry);
         this.container.RegisterInstance(this.Helper.Reflection);
         this.container.RegisterInstance(this.Helper.Translation);
-        this.container.RegisterInstance<Func<Dictionary<string, CustomBush>>>(this.GetData);
         this.container.RegisterSingleton<AssetHandler>();
-        this.container.RegisterSingleton<BushManager>();
+        this.container.RegisterSingleton<ContentPatcherIntegration>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
         this.container.RegisterSingleton<IEventPublisher, EventManager>();
         this.container.RegisterSingleton<IEventSubscriber, EventManager>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<ILog, Logger>();
+        this.container.RegisterSingleton<ModPatches>();
+        this.container.RegisterSingleton<IPatchManager, Patcher>();
 
         // Verify
         this.container.Verify();
     }
 
-    private Dictionary<string, CustomBush> GetData()
-    {
-        var assetHandler = this.container.GetInstance<AssetHandler>();
-        var gameContentHelper = this.container.GetInstance<IGameContentHelper>();
-        return gameContentHelper.Load<Dictionary<string, CustomBush>>(assetHandler.DataPath);
-    }
+    /// <inheritdoc />
+    public override object GetApi(IModInfo mod) =>
+        new CustomBushApi(
+            this.container.GetInstance<AssetHandler>(),
+            this.container.GetInstance<ModPatches>(),
+            mod,
+            this.container.GetInstance<ILog>());
 }

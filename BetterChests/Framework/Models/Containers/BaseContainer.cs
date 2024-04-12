@@ -36,7 +36,7 @@ internal abstract class BaseContainer : IStorageContainer
     {
         this.baseOptions = baseOptions;
         this.storageOptions = new Lazy<IStorageOptions>(
-            () => new ChildStorageOptions(baseOptions, new ModDataStorageOptions(this.ModData)));
+            () => new ChildStorageOptions(() => baseOptions, new ModDataStorageOptions(this.ModData)));
     }
 
     /// <inheritdoc />

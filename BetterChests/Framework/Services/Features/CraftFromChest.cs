@@ -109,7 +109,7 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
         {
             this.toolbarIconsIntegration.Api.AddToolbarIcon(
                 this.Id,
-                this.assetHandler.IconTexturePath,
+                this.assetHandler.Icons.Name.BaseName,
                 new Rectangle(32, 0, 16, 16),
                 I18n.Button_CraftFromChest_Name());
 
@@ -224,7 +224,7 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
         var position = e.Menu.Position ?? Game1.player.Tile;
 
         Func<IStorageContainer, bool> predicate =
-            location.Objects.TryGetValue(position, out var obj) && obj is not Workbench
+            location.Objects.TryGetValue(position, out var obj) && obj is Workbench
                 ? CraftFromChest.WorkbenchPredicate
                 : CraftFromChest.DefaultPredicate;
 

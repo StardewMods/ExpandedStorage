@@ -31,6 +31,15 @@ internal interface IModConfig
     /// <summary>Gets a value indicating the distance in tiles that the workbench can be remotely crafted from.</summary>
     public int CraftFromWorkbenchDistance { get; }
 
+    /// <summary>Gets a value for the number of steps in the hue color picker.</summary>
+    public int HslColorPickerHueSteps { get; }
+
+    /// <summary>Gets a value for the number of steps in the hue color picker.</summary>
+    public int HslColorPickerSaturationSteps { get; }
+
+    /// <summary>Gets a value for the number of steps in the hue color picker.</summary>
+    public int HslColorPickerLightnessSteps { get; }
+
     /// <summary>Gets a value indicating how tab items will be displayed.</summary>
     public FilterMethod InventoryTabMethod { get; }
 

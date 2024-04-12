@@ -53,8 +53,11 @@ public interface IStorageOptions
     /// <summary>Gets or sets a value indicating if the chest can be opened while it's being carried in the players inventory.</summary>
     public FeatureOption OpenHeldChest { get; set; }
 
-    /// <summary>Gets or sets a value the chest's carrying capacity.</summary>
-    public CapacityOption ResizeChest { get; set; }
+    /// <summary>Gets or sets the menu for the chest.</summary>
+    public ChestMenuOption ResizeChest { get; set; }
+
+    /// <summary>Gets or sets the chest's carrying capacity.</summary>
+    public int ResizeChestCapacity { get; set; }
 
     /// <summary>Gets or sets a value indicating if a search bar will be added to the chest menu.</summary>
     public FeatureOption SearchItems { get; set; }

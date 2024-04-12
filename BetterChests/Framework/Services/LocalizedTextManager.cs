@@ -30,13 +30,12 @@ internal sealed class LocalizedTextManager : BaseService
     /// <param name="value">The value for capacity to format.</param>
     /// <returns>Localized text for the capacity.</returns>
     public string Capacity(string value) =>
-        (CapacityOptionExtensions.TryParse(value, out var capacity) ? capacity : CapacityOption.Default) switch
+        (ChestMenuOptionExtensions.TryParse(value, out var capacity) ? capacity : ChestMenuOption.Default) switch
         {
-            CapacityOption.Disabled => I18n.Option_Disabled_Name(),
-            CapacityOption.Small => I18n.Capacity_Small_Name(),
-            CapacityOption.Medium => I18n.Capacity_Medium_Name(),
-            CapacityOption.Large => I18n.Capacity_Large_Name(),
-            >= CapacityOption.Unlimited => I18n.Capacity_Unlimited_Name(),
+            ChestMenuOption.Disabled => I18n.Option_Disabled_Name(),
+            ChestMenuOption.Small => I18n.ChestMenu_Small_Name(),
+            ChestMenuOption.Medium => I18n.ChestMenu_Medium_Name(),
+            ChestMenuOption.Large => I18n.ChestMenu_Large_Name(),
             _ => I18n.Option_Default_Name(),
         };
 

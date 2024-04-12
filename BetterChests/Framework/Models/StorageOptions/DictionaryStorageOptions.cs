@@ -130,13 +130,20 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
-    public CapacityOption ResizeChest
+    public ChestMenuOption ResizeChest
     {
         get =>
-            CapacityOptionExtensions.TryParse(this.Get(StringKey.ResizeChest), out var capacityOption)
+            ChestMenuOptionExtensions.TryParse(this.Get(StringKey.ResizeChest), out var capacityOption)
                 ? capacityOption
-                : CapacityOption.Default;
+                : ChestMenuOption.Default;
         set => this.Set(StringKey.ResizeChest, value.ToStringFast());
+    }
+
+    /// <inheritdoc />
+    public int ResizeChestCapacity
+    {
+        get => this.Get(IntegerKey.ResizeChestCapacity);
+        set => this.Set(IntegerKey.ResizeChestCapacity, value);
     }
 
     /// <inheritdoc />
@@ -369,6 +376,7 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
     internal enum IntegerKey
     {
         CraftFromChestDistance,
+        ResizeChestCapacity,
         StashToChestDistance,
         StashToChestPriority,
     }

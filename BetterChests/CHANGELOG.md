@@ -1,6 +1,67 @@
 ﻿# Better Chests Change Log
 
-## 2.9.4 (April 4, 2024)
+## 2.13.0 (April 12, 2024)
+
+## Added
+
+* Allow chest menu to be resized independently of capacity.
+* Added ShopFromChest options to generic mod config menu.
+* Added ResizeChestCapacity options to generic mod config menu.
+
+### Changed
+
+* Initialize BetterChests DI container on Entry.
+* Update transpilers to use CodeMatchers.
+
+### Fixed
+
+* Fixed carried Junimo Chests losing their inventory.
+
+## 2.12.0 (April 10, 2024)
+
+### Added
+
+* Added controller support for the HSL Color Picker.
+
+### Changed
+
+### Fixed
+
+* Fixed color picker forgetting colors.
+* Fixed shipping bin not showing last item.
+
+## 2.11.0 (April 9, 2024)
+
+### Added
+
+* Added support for Shipping Bins.
+
+### Changed
+
+* Added more logging of configuration changes.
+* When configuring chests, it will show the chest being configured.
+* Updated for FauxCore api changes.
+
+### Fixed
+
+* Config options will now be reflected without restarting the game.
+* Disabled config options will show on the main menu.
+* Workbenches were not using the Workbench range.
+* Prevent swapping chest with carried chests.
+* Fixed Satchels not opening after exiting from menu.
+
+## 2.10.1 (April 6, 2024)
+
+### Changed
+
+* If categorize is disabled, stash to existing stacks only.
+
+### Fixed
+
+* Categorize menu should work correctly for all zoom levels.
+* Updated to support Better Crafting 2.2.0 Api changes.
+
+## 2.10.0 (April 4, 2024)
 
 ### Added
 

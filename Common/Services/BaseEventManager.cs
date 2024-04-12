@@ -52,7 +52,7 @@ internal class BaseEventManager : BaseService, IEventManager
                 }
                 catch (Exception ex)
                 {
-                    this.Log.Warn(ex.Message);
+                    this.Log.Trace("Exception occured: {0}\n{1}", ex.Message, ex.StackTrace);
                 }
             }
         }
@@ -90,7 +90,7 @@ internal class BaseEventManager : BaseService, IEventManager
                 }
                 catch (Exception ex)
                 {
-                    this.Log.Warn(ex.Message);
+                    this.Log.Trace("Exception occured: {0}\n{1}", ex.Message, ex.StackTrace);
                 }
             }
         }

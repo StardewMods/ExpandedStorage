@@ -1,5 +1,11 @@
 # Crystalline Junimo Chest Change Log
 
+## 1.0.3 (April 7, 2024)
+
+### Fixed
+
+* Ensure only Junmo Chests are affected by the mod.
+
 ## 1.0.2 (April 4, 2024)
 
 ### Added

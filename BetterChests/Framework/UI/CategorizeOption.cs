@@ -3,11 +3,10 @@ namespace StardewMods.BetterChests.Framework.UI;
 using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Models;
+using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.BetterChests.Framework.Services.Transient;
-using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewValley.Menus;
 
@@ -32,7 +31,6 @@ internal sealed class CategorizeOption : BaseComplexOption
 
     private readonly List<ClickableComponent> allComponents = [];
     private readonly ClickableTextureComponent downArrow;
-    private readonly IEventSubscriber eventSubscriber;
     private readonly IGameContentHelper gameContentHelper;
     private readonly IInputHelper inputHelper;
     private readonly Dictionary<string, InventoryTabData> inventoryTabData;
@@ -52,24 +50,21 @@ internal sealed class CategorizeOption : BaseComplexOption
     private HashSet<string> tags = [];
 
     /// <summary>Initializes a new instance of the <see cref="CategorizeOption" /> class.</summary>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
-    /// <param name="getInventoryTabData">Function which returns inventory tab data.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="itemMatcherFactory">Dependency used for getting an ItemMatcher.</param>
     /// <param name="translationHelper">Dependency used for accessing translations.</param>
     public CategorizeOption(
-        IEventSubscriber eventSubscriber,
+        AssetHandler assetHandler,
         IGameContentHelper gameContentHelper,
-        Func<Dictionary<string, InventoryTabData>> getInventoryTabData,
         IInputHelper inputHelper,
         ItemMatcherFactory itemMatcherFactory,
         ITranslationHelper translationHelper)
     {
-        this.eventSubscriber = eventSubscriber;
         this.gameContentHelper = gameContentHelper;
         this.inputHelper = inputHelper;
-        this.inventoryTabData = getInventoryTabData();
+        this.inventoryTabData = assetHandler.TabData;
         this.itemMatcherForFiltering = itemMatcherFactory.GetDefault();
         this.itemMatcherForSorting = itemMatcherFactory.GetDefault();
         this.translationHelper = translationHelper;
@@ -121,6 +116,9 @@ internal sealed class CategorizeOption : BaseComplexOption
         }
 
         var (mouseX, mouseY) = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        var mouseLeft = this.inputHelper.GetState(SButton.MouseLeft) == SButtonState.Pressed;
+        var mouseRight = this.inputHelper.GetState(SButton.MouseRight) == SButtonState.Pressed;
+        this.hoverText = null;
 
         for (var index = 0; index < this.allComponents.Count; ++index)
         {
@@ -128,6 +126,63 @@ internal sealed class CategorizeOption : BaseComplexOption
             var item = this.items.ElementAtOrDefault(index);
             var color = Color.White;
             var transparency = 0.25f;
+
+            if (component.containsPoint(mouseX, mouseY))
+            {
+                var textureComponent = component as ClickableTextureComponent;
+                this.hoverText ??= textureComponent?.hoverText
+                    ?? (int.TryParse(component.name, out var itemIndex)
+                        ? this.items[itemIndex].DisplayName
+                        : component.label);
+
+                if (mouseLeft || mouseRight)
+                {
+                    if (component == this.upArrow)
+                    {
+                        this.offset--;
+                        this.RefreshItems();
+                        return;
+                    }
+
+                    if (component == this.downArrow)
+                    {
+                        this.offset++;
+                        this.RefreshItems();
+                        return;
+                    }
+
+                    var tag = component.label;
+                    var tagToAdd = mouseLeft ? tag : "!" + tag;
+
+                    if (textureComponent is not null)
+                    {
+                        if (!this.inventoryTabData.TryGetValue(textureComponent.hoverText, out var data))
+                        {
+                            return;
+                        }
+
+                        tag = string.Join(' ', data.Rules);
+                        tagToAdd = tag;
+                    }
+
+                    if (this.tags.Contains(tag))
+                    {
+                        this.tags.Remove(tag);
+                        this.RefreshItems();
+                        return;
+                    }
+
+                    if (this.tags.Contains("!" + tag))
+                    {
+                        this.tags.Remove("!" + tag);
+                        this.RefreshItems();
+                        return;
+                    }
+
+                    this.tags.Add(tagToAdd);
+                    this.RefreshItems();
+                }
+            }
 
             // Draw items
             if (index < this.indexItems)
@@ -246,20 +301,6 @@ internal sealed class CategorizeOption : BaseComplexOption
         }
 
         IClickableMenu.drawHoverText(spriteBatch, this.hoverText, Game1.smallFont);
-    }
-
-    /// <inheritdoc />
-    public override void BeforeMenuOpened()
-    {
-        this.eventSubscriber.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
-        this.eventSubscriber.Subscribe<CursorMovedEventArgs>(this.OnCursorMoved);
-    }
-
-    /// <inheritdoc />
-    public override void BeforeMenuClosed()
-    {
-        this.eventSubscriber.Unsubscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
-        this.eventSubscriber.Unsubscribe<CursorMovedEventArgs>(this.OnCursorMoved);
     }
 
     private static void DrawQuality(
@@ -440,96 +481,5 @@ internal sealed class CategorizeOption : BaseComplexOption
 
         this.lastPos = pos;
         this.RefreshItems();
-    }
-
-    private void OnButtonPressed(ButtonPressedEventArgs e)
-    {
-        if (e.Button is not (SButton.MouseLeft or SButton.MouseRight))
-        {
-            return;
-        }
-
-        var (mouseX, mouseY) = e.Cursor.GetScaledScreenPixels().ToPoint();
-        var component =
-            this.allComponents.FirstOrDefault(
-                component => component.visible && component.containsPoint(mouseX, mouseY));
-
-        if (component is null)
-        {
-            return;
-        }
-
-        if (component == this.upArrow)
-        {
-            this.offset--;
-            this.RefreshItems();
-            return;
-        }
-
-        if (component == this.downArrow)
-        {
-            this.offset++;
-            this.RefreshItems();
-            return;
-        }
-
-        var tag = component.label;
-        var tagToAdd = e.Button == SButton.MouseLeft ? tag : "!" + tag;
-
-        if (component is ClickableTextureComponent textureComponent)
-        {
-            if (!this.inventoryTabData.TryGetValue(textureComponent.hoverText, out var data))
-            {
-                return;
-            }
-
-            tag = string.Join(' ', data.Rules);
-            tagToAdd = tag;
-        }
-
-        if (this.tags.Contains(tag))
-        {
-            this.tags.Remove(tag);
-            this.RefreshItems();
-            return;
-        }
-
-        if (this.tags.Contains("!" + tag))
-        {
-            this.tags.Remove("!" + tag);
-            this.RefreshItems();
-            return;
-        }
-
-        this.tags.Add(tagToAdd);
-        this.RefreshItems();
-    }
-
-    private void OnCursorMoved(CursorMovedEventArgs e)
-    {
-        var (mouseX, mouseY) = e.NewPosition.GetScaledScreenPixels().ToPoint();
-        var component =
-            this.allComponents.FirstOrDefault(
-                component => component.visible && component.containsPoint(mouseX, mouseY));
-
-        if (component is null)
-        {
-            this.hoverText = null;
-            return;
-        }
-
-        if (component is ClickableTextureComponent textureComponent)
-        {
-            this.hoverText = textureComponent.hoverText;
-            return;
-        }
-
-        if (int.TryParse(component.name, out var index))
-        {
-            this.hoverText = this.items[index].DisplayName;
-            return;
-        }
-
-        this.hoverText = component.label;
     }
 }

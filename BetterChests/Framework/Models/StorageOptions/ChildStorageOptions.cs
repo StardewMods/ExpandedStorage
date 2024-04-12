@@ -7,14 +7,14 @@ using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 internal class ChildStorageOptions : IStorageOptions
 {
     private readonly IStorageOptions child;
-    private readonly IStorageOptions parent;
+    private readonly Func<IStorageOptions> getParent;
 
     /// <summary>Initializes a new instance of the <see cref="ChildStorageOptions" /> class.</summary>
-    /// <param name="parent">The parent storage options.</param>
+    /// <param name="getParent">Get the parent storage options.</param>
     /// <param name="child">The child storage options.</param>
-    public ChildStorageOptions(IStorageOptions parent, IStorageOptions child)
+    public ChildStorageOptions(Func<IStorageOptions> getParent, IStorageOptions child)
     {
-        this.parent = parent;
+        this.getParent = getParent;
         this.child = child;
     }
 
@@ -72,7 +72,7 @@ internal class ChildStorageOptions : IStorageOptions
     {
         get =>
             this.child.CraftFromChestDistance == 0
-                ? this.parent.CraftFromChestDistance
+                ? this.getParent().CraftFromChestDistance
                 : this.child.CraftFromChestDistance;
         set => this.child.CraftFromChestDistance = value;
     }
@@ -108,7 +108,7 @@ internal class ChildStorageOptions : IStorageOptions
     /// <inheritdoc />
     public HashSet<string> CategorizeChestTags
     {
-        get => this.child.CategorizeChestTags.Union(this.parent.CategorizeChestTags).ToHashSet();
+        get => this.child.CategorizeChestTags.Union(this.getParent().CategorizeChestTags).ToHashSet();
         set => this.child.CategorizeChestTags = value;
     }
 
@@ -122,7 +122,7 @@ internal class ChildStorageOptions : IStorageOptions
     /// <inheritdoc />
     public HashSet<string> InventoryTabList
     {
-        get => this.child.InventoryTabList.Union(this.parent.InventoryTabList).ToHashSet();
+        get => this.child.InventoryTabList.Union(this.getParent().InventoryTabList).ToHashSet();
         set => this.child.InventoryTabList = value;
     }
 
@@ -134,10 +134,17 @@ internal class ChildStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
-    public CapacityOption ResizeChest
+    public ChestMenuOption ResizeChest
     {
         get => this.Get(storage => storage.ResizeChest);
         set => this.child.ResizeChest = value;
+    }
+
+    /// <inheritdoc />
+    public int ResizeChestCapacity
+    {
+        get => this.child.ResizeChestCapacity;
+        set => this.child.ResizeChestCapacity = value;
     }
 
     /// <inheritdoc />
@@ -165,7 +172,9 @@ internal class ChildStorageOptions : IStorageOptions
     public int StashToChestDistance
     {
         get =>
-            this.child.StashToChestDistance == 0 ? this.parent.StashToChestDistance : this.child.StashToChestDistance;
+            this.child.StashToChestDistance == 0
+                ? this.getParent().StashToChestDistance
+                : this.child.StashToChestDistance;
         set => this.child.StashToChestDistance = value;
     }
 
@@ -173,24 +182,26 @@ internal class ChildStorageOptions : IStorageOptions
     public int StashToChestPriority
     {
         get =>
-            this.child.StashToChestPriority == 0 ? this.parent.StashToChestPriority : this.child.StashToChestPriority;
+            this.child.StashToChestPriority == 0
+                ? this.getParent().StashToChestPriority
+                : this.child.StashToChestPriority;
         set => this.child.StashToChestPriority = value;
     }
 
     /// <inheritdoc />
-    public virtual string GetDescription() => this.parent.GetDescription();
+    public virtual string GetDescription() => this.getParent().GetDescription();
 
     /// <inheritdoc />
-    public virtual string GetDisplayName() => this.parent.GetDisplayName();
+    public virtual string GetDisplayName() => this.getParent().GetDisplayName();
 
-    private CapacityOption Get(Func<IStorageOptions, CapacityOption> selector)
+    private ChestMenuOption Get(Func<IStorageOptions, ChestMenuOption> selector)
     {
         var childValue = selector(this.child);
-        var parentValue = selector(this.parent);
+        var parentValue = selector(this.getParent());
         return childValue switch
         {
-            _ when parentValue == CapacityOption.Disabled => CapacityOption.Disabled,
-            CapacityOption.Default => parentValue,
+            _ when parentValue == ChestMenuOption.Disabled => ChestMenuOption.Disabled,
+            ChestMenuOption.Default => parentValue,
             _ => childValue,
         };
     }
@@ -198,7 +209,7 @@ internal class ChildStorageOptions : IStorageOptions
     private FeatureOption Get(Func<IStorageOptions, FeatureOption> selector)
     {
         var childValue = selector(this.child);
-        var parentValue = selector(this.parent);
+        var parentValue = selector(this.getParent());
         return childValue switch
         {
             _ when parentValue == FeatureOption.Disabled => FeatureOption.Disabled,
@@ -210,7 +221,7 @@ internal class ChildStorageOptions : IStorageOptions
     private RangeOption Get(Func<IStorageOptions, RangeOption> selector)
     {
         var childValue = selector(this.child);
-        var parentValue = selector(this.parent);
+        var parentValue = selector(this.getParent());
         return childValue switch
         {
             _ when parentValue == RangeOption.Disabled => RangeOption.Disabled,

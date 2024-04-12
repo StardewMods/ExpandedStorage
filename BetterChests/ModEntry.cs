@@ -4,7 +4,6 @@ using HarmonyLib;
 using SimpleInjector;
 using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Interfaces;
-using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.BetterChests.Framework.Services.Features;
@@ -25,13 +24,8 @@ public sealed class ModEntry : Mod
     /// <inheritdoc />
     public override void Entry(IModHelper helper)
     {
-        I18n.Init(this.Helper.Translation);
-        this.Helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
-    }
-
-    private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
-    {
         // Init
+        I18n.Init(this.Helper.Translation);
         this.container = new Container();
 
         // Configuration
@@ -48,9 +42,6 @@ public sealed class ModEntry : Mod
         this.container.RegisterInstance(this.Helper.Reflection);
         this.container.RegisterInstance(this.Helper.Translation);
 
-        this.container.RegisterInstance<Func<CategorizeOption>>(this.GetCategorizeOption);
-        this.container.RegisterInstance<Func<Dictionary<string, InventoryTabData>>>(this.GetInventoryTabData);
-        this.container.RegisterInstance<Func<IModConfig>>(this.GetConfig);
         this.container.RegisterSingleton<AssetHandler>();
         this.container.RegisterSingleton<AutomateIntegration>();
         this.container.RegisterSingleton<BetterCraftingIntegration>();
@@ -69,10 +60,14 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<ItemMatcherFactory>();
         this.container.RegisterSingleton<LocalizedTextManager>();
         this.container.RegisterSingleton<ILog, Logger>();
-        this.container.RegisterSingleton<IThemeHelper, Themer>();
+        this.container.RegisterSingleton<IPatchManager, Patcher>();
         this.container.RegisterSingleton<ProxyChestFactory>();
         this.container.RegisterSingleton<StatusEffectManager>();
+        this.container.RegisterSingleton<IThemeHelper, Themer>();
         this.container.RegisterSingleton<ToolbarIconsIntegration>();
+
+        this.container.RegisterInstance<Func<CategorizeOption>>(this.container.GetInstance<CategorizeOption>);
+        this.container.RegisterInstance<Func<IModConfig>>(this.container.GetInstance<IModConfig>);
 
         this.container.Register<CategorizeOption>();
 
@@ -101,18 +96,13 @@ public sealed class ModEntry : Mod
         // Verify
         this.container.Verify();
 
+        // Events
+        this.Helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+    }
+
+    private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
+    {
         var configManager = this.container.GetInstance<ConfigManager>();
         configManager.Init();
     }
-
-    private IModConfig GetConfig() => this.container.GetInstance<IModConfig>();
-
-    private Dictionary<string, InventoryTabData> GetInventoryTabData()
-    {
-        var assetHandler = this.container.GetInstance<AssetHandler>();
-        var gameContentHelper = this.container.GetInstance<IGameContentHelper>();
-        return gameContentHelper.Load<Dictionary<string, InventoryTabData>>(assetHandler.TabDataPath);
-    }
-
-    private CategorizeOption GetCategorizeOption() => this.container.GetInstance<CategorizeOption>();
 }

@@ -4,7 +4,9 @@ using HarmonyLib;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Services.Factory;
+using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -18,91 +20,68 @@ internal sealed class ShopFromChest : BaseFeature<ShopFromChest>
     private static ShopFromChest instance = null!;
 
     private readonly ContainerFactory containerFactory;
-    private readonly Harmony harmony;
+    private readonly IPatchManager patchManager;
 
     /// <summary>Initializes a new instance of the <see cref="ShopFromChest" /> class.</summary>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="harmony">Dependency used to patch external code.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="patchManager">Dependency used for managing patches.</param>
     public ShopFromChest(
         ContainerFactory containerFactory,
         IEventManager eventManager,
-        Harmony harmony,
         ILog log,
         IManifest manifest,
-        IModConfig modConfig)
+        IModConfig modConfig,
+        IPatchManager patchManager)
         : base(eventManager, log, manifest, modConfig)
     {
         ShopFromChest.instance = this;
         this.containerFactory = containerFactory;
-        this.harmony = harmony;
+        this.patchManager = patchManager;
+
+        this.patchManager.Add(
+            this.UniqueId,
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(CarpenterMenu), nameof(CarpenterMenu.ConsumeResources)),
+                AccessTools.DeclaredMethod(
+                    typeof(ShopFromChest),
+                    nameof(ShopFromChest.CarpenterMenu_ConsumeResources_prefix)),
+                PatchType.Prefix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(
+                    typeof(CarpenterMenu),
+                    nameof(CarpenterMenu.DoesFarmerHaveEnoughResourcesToBuild)),
+                AccessTools.DeclaredMethod(
+                    typeof(ShopFromChest),
+                    nameof(ShopFromChest.CarpenterMenu_DoesFarmerHaveEnoughResourcesToBuild_postfix)),
+                PatchType.Postfix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(CarpenterMenu), nameof(CarpenterMenu.draw)),
+                AccessTools.DeclaredMethod(typeof(ShopFromChest), nameof(ShopFromChest.CarpenterMenu_draw_transpiler)),
+                PatchType.Transpiler),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(ShopMenu), nameof(ShopMenu.ConsumeTradeItem)),
+                AccessTools.DeclaredMethod(
+                    typeof(ShopFromChest),
+                    nameof(ShopFromChest.ShopMenu_ConsumeTradeItem_prefix)),
+                PatchType.Prefix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(ShopMenu), nameof(ShopMenu.HasTradeItem)),
+                AccessTools.DeclaredMethod(typeof(ShopFromChest), nameof(ShopFromChest.ShopMenu_HasTradeItem_postfix)),
+                PatchType.Postfix));
     }
 
     /// <inheritdoc />
     public override bool ShouldBeActive => this.Config.DefaultOptions.ShopFromChest != FeatureOption.Disabled;
 
     /// <inheritdoc />
-    protected override void Activate()
-    {
-        // Patches
-        this.harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(CarpenterMenu), nameof(CarpenterMenu.ConsumeResources)),
-            new HarmonyMethod(typeof(ShopFromChest), nameof(ShopFromChest.CarpenterMenu_ConsumeResources_prefix)));
-
-        this.harmony.Patch(
-            AccessTools.DeclaredMethod(
-                typeof(CarpenterMenu),
-                nameof(CarpenterMenu.DoesFarmerHaveEnoughResourcesToBuild)),
-            postfix: new HarmonyMethod(
-                typeof(ShopFromChest),
-                nameof(ShopFromChest.CarpenterMenu_DoesFarmerHaveEnoughResourcesToBuild_postfix)));
-
-        this.harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(CarpenterMenu), nameof(CarpenterMenu.draw)),
-            transpiler: new HarmonyMethod(typeof(ShopFromChest), nameof(ShopFromChest.CarpenterMenu_draw_transpiler)));
-
-        this.harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(ShopMenu), nameof(ShopMenu.ConsumeTradeItem)),
-            new HarmonyMethod(typeof(ShopFromChest), nameof(ShopFromChest.ShopMenu_ConsumeTradeItem_prefix)));
-
-        this.harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(ShopMenu), nameof(ShopMenu.HasTradeItem)),
-            postfix: new HarmonyMethod(typeof(ShopFromChest), nameof(ShopFromChest.ShopMenu_HasTradeItem_postfix)));
-    }
+    protected override void Activate() => this.patchManager.Patch(this.UniqueId);
 
     /// <inheritdoc />
-    protected override void Deactivate()
-    {
-        // Patches
-        this.harmony.Unpatch(
-            AccessTools.DeclaredMethod(typeof(CarpenterMenu), nameof(CarpenterMenu.ConsumeResources)),
-            AccessTools.DeclaredMethod(
-                typeof(ShopFromChest),
-                nameof(ShopFromChest.CarpenterMenu_ConsumeResources_prefix)));
-
-        this.harmony.Unpatch(
-            AccessTools.DeclaredMethod(
-                typeof(CarpenterMenu),
-                nameof(CarpenterMenu.DoesFarmerHaveEnoughResourcesToBuild)),
-            AccessTools.DeclaredMethod(
-                typeof(ShopFromChest),
-                nameof(ShopFromChest.CarpenterMenu_DoesFarmerHaveEnoughResourcesToBuild_postfix)));
-
-        this.harmony.Unpatch(
-            AccessTools.DeclaredMethod(typeof(CarpenterMenu), nameof(CarpenterMenu.draw)),
-            AccessTools.DeclaredMethod(typeof(ShopFromChest), nameof(ShopFromChest.CarpenterMenu_draw_transpiler)));
-
-        this.harmony.Unpatch(
-            AccessTools.DeclaredMethod(typeof(ShopMenu), nameof(ShopMenu.ConsumeTradeItem)),
-            AccessTools.DeclaredMethod(typeof(ShopFromChest), nameof(ShopFromChest.ShopMenu_ConsumeTradeItem_prefix)));
-
-        this.harmony.Unpatch(
-            AccessTools.DeclaredMethod(typeof(ShopMenu), nameof(ShopMenu.HasTradeItem)),
-            AccessTools.DeclaredMethod(typeof(ShopFromChest), nameof(ShopFromChest.ShopMenu_HasTradeItem_postfix)));
-    }
+    protected override void Deactivate() => this.patchManager.Unpatch(this.UniqueId);
 
     private static bool ContainsId(Inventory items, string itemId, int minimum)
     {
@@ -204,24 +183,11 @@ internal sealed class ShopFromChest : BaseFeature<ShopFromChest>
         __result = true;
     }
 
-    private static IEnumerable<CodeInstruction> CarpenterMenu_draw_transpiler(IEnumerable<CodeInstruction> instructions)
-    {
-        foreach (var instruction in instructions)
-        {
-            if (instruction.Calls(
-                AccessTools.DeclaredMethod(
-                    typeof(Inventory),
-                    nameof(Inventory.ContainsId),
-                    [typeof(string), typeof(int)])))
-            {
-                yield return CodeInstruction.Call(typeof(ShopFromChest), nameof(ShopFromChest.ContainsId));
-            }
-            else
-            {
-                yield return instruction;
-            }
-        }
-    }
+    private static IEnumerable<CodeInstruction>
+        CarpenterMenu_draw_transpiler(IEnumerable<CodeInstruction> instructions) =>
+        instructions.MethodReplacer(
+            AccessTools.DeclaredMethod(typeof(Inventory), nameof(Inventory.ContainsId), [typeof(string), typeof(int)]),
+            AccessTools.DeclaredMethod(typeof(ShopFromChest), nameof(ShopFromChest.ContainsId)));
 
     private static bool ShopMenu_ConsumeTradeItem_prefix(string itemId, int count)
     {

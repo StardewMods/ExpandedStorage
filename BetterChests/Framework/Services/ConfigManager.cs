@@ -1,5 +1,6 @@
 namespace StardewMods.BetterChests.Framework.Services;
 
+using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Models.StorageOptions;
@@ -40,12 +41,8 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         this.log = log;
         this.manifest = manifest;
 
+        eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
         eventManager.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
-
-        if (this.genericModConfigMenuIntegration.IsLoaded)
-        {
-            this.SetupMainConfig();
-        }
     }
 
     /// <inheritdoc />
@@ -70,6 +67,15 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     public int CraftFromWorkbenchDistance => this.Config.CraftFromWorkbenchDistance;
 
     /// <inheritdoc />
+    public int HslColorPickerHueSteps => this.Config.HslColorPickerHueSteps;
+
+    /// <inheritdoc />
+    public int HslColorPickerSaturationSteps => this.Config.HslColorPickerSaturationSteps;
+
+    /// <inheritdoc />
+    public int HslColorPickerLightnessSteps => this.Config.HslColorPickerLightnessSteps;
+
+    /// <inheritdoc />
     public FilterMethod InventoryTabMethod => this.Config.InventoryTabMethod;
 
     /// <inheritdoc />
@@ -89,9 +95,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
     /// <inheritdoc />
     public HashSet<string> StashToChestDisableLocations => this.Config.StashToChestDisableLocations;
-
-    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) =>
-        this.log.Trace("Config changed: {0}", e.Config);
 
     /// <summary>Setup the main config options.</summary>
     public void SetupMainConfig()
@@ -118,7 +121,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         gmcm.AddParagraph(this.manifest, I18n.Section_Storages_Description);
 
         gmcm.AddPage(this.manifest, "Main", I18n.Section_Main_Name);
-        this.AddMainOption(config.DefaultOptions);
+        this.AddMainOption(config.DefaultOptions, true);
 
         gmcm.AddPage(this.manifest, "Controls", I18n.Section_Controls_Name);
         this.AddControls(config.Controls);
@@ -133,7 +136,8 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
     /// <summary>Adds the main options to the config menu.</summary>
     /// <param name="options">The storage options to add.</param>
-    public void AddMainOption(IStorageOptions options)
+    /// <param name="isDefault">Indicates if these are the default options being set.</param>
+    public void AddMainOption(IStorageOptions options, bool isDefault = false)
     {
         if (!this.genericModConfigMenuIntegration.IsLoaded)
         {
@@ -143,7 +147,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         var gmcm = this.genericModConfigMenuIntegration.Api;
 
         // Auto Organize
-        if (options == this.DefaultOptions || this.DefaultOptions.AutoOrganize != FeatureOption.Disabled)
+        if (isDefault || this.DefaultOptions.AutoOrganize != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
@@ -158,7 +162,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // Carry Chest
-        if (options == this.DefaultOptions || this.DefaultOptions.CarryChest != FeatureOption.Disabled)
+        if (isDefault || this.DefaultOptions.CarryChest != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
@@ -173,7 +177,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // Categorize Chest
-        if (options == this.DefaultOptions || this.DefaultOptions.CategorizeChest != FeatureOption.Disabled)
+        if (isDefault || this.DefaultOptions.CategorizeChest != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
@@ -210,7 +214,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // Chest Finder
-        if (options == this.DefaultOptions || this.DefaultOptions.ChestFinder != FeatureOption.Disabled)
+        if (isDefault || this.DefaultOptions.ChestFinder != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
@@ -225,7 +229,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // Chest Info
-        if (options == this.DefaultOptions || this.DefaultOptions.ChestInfo != FeatureOption.Disabled)
+        if (isDefault || this.DefaultOptions.ChestInfo != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
@@ -240,7 +244,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // Collect Items
-        if (options == this.DefaultOptions || this.DefaultOptions.CollectItems != FeatureOption.Disabled)
+        if (isDefault || this.DefaultOptions.CollectItems != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
@@ -255,7 +259,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // Configure Chest
-        if (options == this.DefaultOptions || this.DefaultOptions.ConfigureChest != FeatureOption.Disabled)
+        if (isDefault || this.DefaultOptions.ConfigureChest != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
@@ -270,7 +274,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // Craft from Chest
-        if (options == this.DefaultOptions || this.DefaultOptions.CraftFromChest != RangeOption.Disabled)
+        if (isDefault || this.DefaultOptions.CraftFromChest != RangeOption.Disabled)
         {
             gmcm.AddNumberOption(
                 this.manifest,
@@ -318,7 +322,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // HSL Color Picker
-        if (options == this.DefaultOptions || this.DefaultOptions.HslColorPicker != FeatureOption.Disabled)
+        if (isDefault || this.DefaultOptions.HslColorPicker != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
@@ -333,7 +337,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // Inventory Tabs
-        if (options == this.DefaultOptions || this.DefaultOptions.InventoryTabs != FeatureOption.Disabled)
+        if (isDefault || this.DefaultOptions.InventoryTabs != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
@@ -348,7 +352,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // Open Held Chest
-        if (options == this.DefaultOptions || this.DefaultOptions.OpenHeldChest != FeatureOption.Disabled)
+        if (isDefault || this.DefaultOptions.OpenHeldChest != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
@@ -363,22 +367,32 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // Resize Chest
-        if (options == this.DefaultOptions || this.DefaultOptions.ResizeChest != CapacityOption.Disabled)
+        gmcm.AddNumberOption(
+            this.manifest,
+            () => options.ResizeChestCapacity,
+            value => options.ResizeChestCapacity = value,
+            I18n.Config_ResizeChest_Name,
+            I18n.Config_ResizeChest_Tooltip,
+            -1,
+            2520);
+
+        // Resize Chest Menu
+        if (isDefault || this.DefaultOptions.ResizeChest != ChestMenuOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
                 () => options.ResizeChest.ToStringFast(),
-                value => options.ResizeChest = CapacityOptionExtensions.TryParse(value, out var capacity)
+                value => options.ResizeChest = ChestMenuOptionExtensions.TryParse(value, out var capacity)
                     ? capacity
-                    : CapacityOption.Default,
-                I18n.Config_ResizeChest_Name,
-                I18n.Config_ResizeChest_Tooltip,
-                CapacityOptionExtensions.GetNames(),
+                    : ChestMenuOption.Default,
+                I18n.Config_ResizeChestMenu_Name,
+                I18n.Config_ResizeChestMenu_Tooltip,
+                ChestMenuOptionExtensions.GetNames(),
                 this.localizedTextManager.Capacity);
         }
 
         // Search Items
-        if (options == this.DefaultOptions || this.DefaultOptions.SearchItems != FeatureOption.Disabled)
+        if (isDefault || this.DefaultOptions.SearchItems != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
                 this.manifest,
@@ -392,8 +406,23 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 this.localizedTextManager.FormatOption);
         }
 
+        // Shop from Chest
+        if (isDefault || this.DefaultOptions.ShopFromChest != FeatureOption.Disabled)
+        {
+            gmcm.AddTextOption(
+                this.manifest,
+                () => options.ShopFromChest.ToStringFast(),
+                value => options.ShopFromChest = FeatureOptionExtensions.TryParse(value, out var option)
+                    ? option
+                    : FeatureOption.Default,
+                I18n.Config_ShopFromChest_Name,
+                I18n.Config_ShopFromChest_Tooltip,
+                FeatureOptionExtensions.GetNames(),
+                this.localizedTextManager.FormatOption);
+        }
+
         // Stash to Chest
-        if (options == this.DefaultOptions || this.DefaultOptions.StashToChest != RangeOption.Disabled)
+        if (isDefault || this.DefaultOptions.StashToChest != RangeOption.Disabled)
         {
             gmcm.AddNumberOption(
                 this.manifest,
@@ -645,6 +674,37 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             1,
             this.localizedTextManager.Distance);
 
+        // Hsl Color Picker Steps
+        gmcm.AddNumberOption(
+            this.manifest,
+            () => config.HslColorPickerHueSteps,
+            value => config.HslColorPickerHueSteps = value,
+            I18n.Config_HslColorPickerHueSteps_Name,
+            I18n.Config_HslColorPickerHueSteps_Tooltip,
+            1,
+            29,
+            1);
+
+        gmcm.AddNumberOption(
+            this.manifest,
+            () => config.HslColorPickerSaturationSteps,
+            value => config.HslColorPickerSaturationSteps = value,
+            I18n.Config_HslColorPickerSaturationSteps_Name,
+            I18n.Config_HslColorPickerSaturationSteps_Tooltip,
+            1,
+            29,
+            1);
+
+        gmcm.AddNumberOption(
+            this.manifest,
+            () => config.HslColorPickerLightnessSteps,
+            value => config.HslColorPickerLightnessSteps = value,
+            I18n.Config_HslColorPickerLightnessSteps_Name,
+            I18n.Config_HslColorPickerSaturationSteps_Tooltip,
+            1,
+            29,
+            1);
+
         // Inventory Tab Method
         gmcm.AddTextOption(
             this.manifest,
@@ -701,5 +761,16 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             value => config.SearchNegationSymbol = string.IsNullOrWhiteSpace(value) ? '#' : value.ToCharArray()[0],
             I18n.Config_SearchNegationSymbol_Name,
             I18n.Config_SearchNegationSymbol_Tooltip);
+    }
+
+    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) =>
+        this.log.Trace("Config changed:\n{0}", e.Config);
+
+    private void OnGameLaunched(GameLaunchedEventArgs e)
+    {
+        if (this.genericModConfigMenuIntegration.IsLoaded)
+        {
+            this.SetupMainConfig();
+        }
     }
 }

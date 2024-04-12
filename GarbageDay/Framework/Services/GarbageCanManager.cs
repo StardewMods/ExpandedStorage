@@ -17,20 +17,18 @@ using StardewValley.Objects;
 /// <summary>Represents a manager for managing garbage cans in a game.</summary>
 internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
 {
+    private readonly AssetHandler assetHandler;
     private readonly PerScreen<NPC?> currentNpc = new();
-    private readonly Definitions definitions;
-    private readonly Dictionary<string, FoundGarbageCan> foundGarbageCans = [];
     private readonly Dictionary<string, GameLocation?> foundLocations = [];
     private readonly PerScreen<GarbageCan?> garbageCanOpened = new();
     private readonly Dictionary<string, GarbageCan> garbageCans = [];
     private readonly IInputHelper inputHelper;
-    private readonly HashSet<string> invalidGarbageCans = [];
     private readonly IModConfig modConfig;
     private readonly IReflectedField<Multiplayer> multiplayer;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="GarbageCanManager" /> class.</summary>
-    /// <param name="definitions">Dependency used for defining common variables.</param>
+    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
@@ -39,7 +37,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
     /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public GarbageCanManager(
-        Definitions definitions,
+        AssetHandler assetHandler,
         IEventSubscriber eventSubscriber,
         IInputHelper inputHelper,
         ILog log,
@@ -50,59 +48,35 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
         : base(log, manifest)
     {
         // Init
-        this.definitions = definitions;
+        this.assetHandler = assetHandler;
         this.inputHelper = inputHelper;
         this.modConfig = modConfig;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
         this.multiplayer = reflectionHelper.GetField<Multiplayer>(typeof(Game1), "multiplayer");
 
         // Events
-        eventSubscriber.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
+        eventSubscriber.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
         eventSubscriber.Subscribe<MenuChangedEventArgs>(this.OnMenuChanged);
         eventSubscriber.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         eventSubscriber.Subscribe<DayEndingEventArgs>(this.OnDayEnding);
         eventSubscriber.Subscribe<DayStartedEventArgs>(this.OnDayStarted);
-        eventSubscriber.Subscribe<SaveLoadedEventArgs>(this.OnSaveLoaded);
     }
 
-    /// <summary>Add a new pending garbage can.</summary>
-    /// <param name="whichCan">The name of the garbage can.</param>
-    /// <param name="assetName">The asset name of the map containing the garbage can.</param>
-    /// <param name="x">The x-coordinate of the garbage can.</param>
-    /// <param name="y">The y-coordinate of the garbage can.</param>
-    /// <returns>true if the garbage can was successfully added; otherwise, false.</returns>
-    public bool TryAddFound(string whichCan, IAssetName assetName, int x, int y)
+    private void OnGameLaunched(GameLaunchedEventArgs e)
     {
-        if (this.foundGarbageCans.ContainsKey(whichCan))
+        // Integrations
+        if (!this.toolbarIconsIntegration.IsLoaded)
         {
-            return true;
+            return;
         }
 
-        if (this.invalidGarbageCans.Contains(whichCan))
-        {
-            return false;
-        }
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(
+            this.Id,
+            this.assetHandler.IconTexturePath,
+            new Rectangle(0, 0, 16, 16),
+            I18n.Button_GarbageFill_Name());
 
-        if (!DataLoader.GarbageCans(Game1.content).GarbageCans.TryGetValue(whichCan, out var garbageCanData))
-        {
-            return false;
-        }
-
-        if (!this.modConfig.OnByDefault && garbageCanData.CustomFields?.GetBool(this.ModId + "/Enabled") != true)
-        {
-            return false;
-        }
-
-        this.foundGarbageCans.Add(whichCan, new FoundGarbageCan(whichCan, assetName, x, y));
-        return true;
-    }
-
-    private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
-    {
-        if (e.Names.Any(assetName => assetName.IsEquivalentTo(Definitions.GarbageCanPath)))
-        {
-            this.foundGarbageCans.Clear();
-        }
+        this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
     }
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
@@ -179,7 +153,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
     private void OnDayStarted(DayStartedEventArgs e)
     {
         // Add garbage cans
-        foreach (var (whichCan, foundGarbageCan) in this.foundGarbageCans)
+        foreach (var (whichCan, foundGarbageCan) in this.assetHandler.FoundGarbageCans)
         {
             if (this.garbageCans.ContainsKey(whichCan))
             {
@@ -188,7 +162,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
 
             if (!this.TryCreateGarbageCan(foundGarbageCan, out var garbageCan))
             {
-                this.invalidGarbageCans.Add(whichCan);
+                this.assetHandler.InvalidateGarbageCan(whichCan);
                 continue;
             }
 
@@ -243,22 +217,6 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
         this.garbageCanOpened.Value = null;
     }
 
-    private void OnSaveLoaded(SaveLoadedEventArgs e)
-    {
-        if (!this.toolbarIconsIntegration.IsLoaded)
-        {
-            return;
-        }
-
-        this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.Id,
-            this.definitions.IconTexturePath,
-            new Rectangle(0, 0, 16, 16),
-            I18n.Button_GarbageFill_Name());
-
-        this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
-    }
-
     private bool TryCreateGarbageCan(FoundGarbageCan foundGarbageCan, [NotNullWhen(true)] out GarbageCan? garbageCan)
     {
         // Find location
@@ -283,7 +241,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
         }
 
         // Attempt to place item
-        var item = (SObject)ItemRegistry.Create(this.definitions.QualifiedItemId);
+        var item = this.assetHandler.GarbageCan;
         this.Log.Trace(
             "Placing Garbage Can {0} at {1} ({2})",
             foundGarbageCan.WhichCan,

@@ -1,0 +1,140 @@
+{
+  "Format": "2.0.0",
+  "ConfigSchema":  {
+    "EnableAutoGrabber": {
+      "AllowValues": "true, false",
+      "Default": "true",
+      "Section": "BigCraftables"
+    },
+    "EnableChest": {
+      "AllowValues": "true, false",
+      "Default": "true",
+      "Section": "BigCraftables"
+    },
+    "EnableStoneChest": {
+      "AllowValues": "true, false",
+      "Default": "true",
+      "Section": "BigCraftables"
+    },
+    "EnableJunimoChest": {
+      "AllowValues": "true, false",
+      "Default": "true",
+      "Section": "BigCraftables"
+    },
+    "EnableBigChest": {
+      "AllowValues": "true, false",
+      "Default": "true",
+      "Section": "BigCraftables"
+    },
+    "EnableBigStoneChest": {
+      "AllowValues": "true, false",
+      "Default": "true",
+      "Section": "BigCraftables"
+    },
+    "EnableJunimoHut": {
+      "AllowValues": "true, false",
+      "Default": "true",
+      "Section": "Buildings"
+    },
+    "EnableMill": {
+      "AllowValues": "true, false",
+      "Default": "true",
+      "Section": "Buildings"
+    },
+    "EnableShippingBin": {
+      "AllowValues": "true, false",
+      "Default": "true",
+      "Section": "Buildings"
+    },
+    "EnableFarmhouseFridge": {
+      "AllowValues": "true, false",
+      "Default": "true",
+      "Section": "Other"
+    },
+    "EnableIslandFridge": {
+      "AllowValues": "true, false",
+      "Default": "true",
+      "Section": "Other"
+    }
+  },
+  "Changes": [
+    {
+      "Action": "Include",
+      "FromFile": "data/AutoGrabber.json",
+      "When": {
+        "EnableAutoGrabber": "true"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/Chest.json",
+      "When": {
+        "EnableChest": "true"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/StoneChest.json",
+      "When": {
+        "EnableStoneChest": "true"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/JunimoChest.json",
+      "When": {
+        "EnableJunimoChest": "true"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/BigChest.json",
+      "When": {
+        "EnableBigChest": "true"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/BigStoneChest.json",
+      "When": {
+        "EnableBigStoneChest": "true"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/JunimoHut.json",
+      "When": {
+        "EnableJunimoHut": "true"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/Mill.json",
+      "When": {
+        "EnableMill": "true"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/ShippingBin.json",
+      "When": {
+        "EnableShippingBin": "true"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/FarmHouseFridge.json",
+      "When": {
+        "EnableFarmHouseFridge": "true"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/IslandFridge.json",
+      "When": {
+        "EnableIslandFridge": "true"
+      }
+    }
+  ],
+  "$schema": "https://smapi.io/schemas/content-patcher.json"
+}

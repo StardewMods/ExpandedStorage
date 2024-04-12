@@ -108,30 +108,14 @@ internal sealed class ContainerFactory : BaseService
         // Search for containers from buildings
         foreach (var building in location.buildings)
         {
-            if (!building.buildingChests.Any())
+            if (!this.TryGetOneFromBuilding(building, out var container))
             {
                 continue;
             }
 
-            if (!this.storageOptions.TryGetValue($"(B){building.buildingType.Value}", out var storageType))
+            if (predicate is null || predicate(container))
             {
-                storageType = new BuildingStorageOptions(this.modConfig.DefaultOptions, building.GetData());
-                this.storageOptions.Add($"(B){building.buildingType.Value}", storageType);
-            }
-
-            foreach (var chest in building.buildingChests)
-            {
-                if (!this.cachedContainers.TryGetValue(chest, out var container))
-                {
-                    container = new BuildingContainer(storageType, building, chest);
-
-                    this.cachedContainers.AddOrUpdate(chest, container);
-                }
-
-                if (predicate is null || predicate(container))
-                {
-                    yield return container;
-                }
+                yield return container;
             }
         }
 
@@ -141,7 +125,7 @@ internal sealed class ContainerFactory : BaseService
         {
             if (!this.storageOptions.TryGetValue($"(L){location.Name}", out var storageType))
             {
-                storageType = new LocationStorageOptions(this.modConfig.DefaultOptions, location.GetData());
+                storageType = new LocationStorageOptions(() => this.modConfig.DefaultOptions, location.GetData());
                 this.storageOptions.Add($"(L){location.Name}", storageType);
             }
 
@@ -195,6 +179,52 @@ internal sealed class ContainerFactory : BaseService
     }
 
     /// <summary>Tries to retrieve a container from the specified game location at the specified position.</summary>
+    /// <param name="building">The building where the container will be retrieved.</param>
+    /// <param name="container">When this method returns, contains the container if found; otherwise, null.</param>
+    /// <returns>true if a container is found; otherwise, false.</returns>
+    public bool TryGetOneFromBuilding(Building building, [NotNullWhen(true)] out IStorageContainer? container)
+    {
+        container = null;
+        if (!building.buildingChests.Any() && building is not ShippingBin)
+        {
+            return false;
+        }
+
+        if (!this.storageOptions.TryGetValue($"(B){building.buildingType.Value}", out var storageType))
+        {
+            storageType = new BuildingStorageOptions(() => this.modConfig.DefaultOptions, building.GetData());
+            this.storageOptions.Add($"(B){building.buildingType.Value}", storageType);
+        }
+
+        if (building is ShippingBin shippingBin)
+        {
+            if (this.cachedContainers.TryGetValue(shippingBin, out container))
+            {
+                return true;
+            }
+
+            container = new BuildingContainer(storageType, shippingBin);
+            this.cachedContainers.AddOrUpdate(shippingBin, container);
+            return true;
+        }
+
+        var chest = building.GetBuildingChest("Output");
+        if (chest is null)
+        {
+            return false;
+        }
+
+        if (this.cachedContainers.TryGetValue(chest, out container))
+        {
+            return true;
+        }
+
+        container = new BuildingContainer(storageType, building, chest);
+        this.cachedContainers.AddOrUpdate(chest, container);
+        return true;
+    }
+
+    /// <summary>Tries to retrieve a container from the specified game location at the specified position.</summary>
     /// <param name="location">The game location where the container will be retrieved.</param>
     /// <param name="pos">The position of the game location where the container will be retrieved.</param>
     /// <param name="container">When this method returns, contains the container if found; otherwise, null.</param>
@@ -204,19 +234,26 @@ internal sealed class ContainerFactory : BaseService
         Vector2 pos,
         [NotNullWhen(true)] out IStorageContainer? container)
     {
-        if (!location.Objects.TryGetValue(pos, out var obj))
+        container = null;
+
+        // Container is a placed object
+        if (location.Objects.TryGetValue(pos, out var obj))
         {
-            container = null;
+            if (this.cachedContainers.TryGetValue(obj, out container) || this.TryGetAny(obj, out container))
+            {
+                return true;
+            }
+        }
+
+        // Container is a fridge
+        if (!pos.Equals(Vector2.Zero)
+            || location.GetFridge() is not
+                { } fridge)
+        {
             return false;
         }
 
-        if (this.cachedContainers.TryGetValue(obj, out container) || this.TryGetAny(obj, out container))
-        {
-            return true;
-        }
-
-        container = null;
-        return false;
+        return this.cachedContainers.TryGetValue(fridge, out container) || this.TryGetAny(fridge, out container);
     }
 
     /// <summary>Tries to retrieve a container from the active menu.</summary>
@@ -224,20 +261,45 @@ internal sealed class ContainerFactory : BaseService
     /// <returns>true if a container is found; otherwise, false.</returns>
     public bool TryGetOneFromMenu([NotNullWhen(true)] out IStorageContainer? container)
     {
-        if ((Game1.activeClickableMenu as ItemGrabMenu)?.context is not Chest chest)
+        if (Game1.activeClickableMenu is not ItemGrabMenu itemGrabMenu)
         {
             container = null;
             return false;
         }
 
-        if (chest.Location is not null && this.TryGetOneFromLocation(chest.Location, chest.TileLocation, out container))
+        switch (itemGrabMenu.context)
         {
-            return true;
-        }
+            case Chest chest:
+                if (chest.Location is not null
+                    && this.TryGetOneFromLocation(chest.Location, chest.TileLocation, out container))
+                {
+                    return true;
+                }
 
-        if (chest == Game1.player.ActiveObject && this.TryGetOneFromPlayer(Game1.player, out container))
-        {
-            return true;
+                if (chest == Game1.player.ActiveObject && this.TryGetOneFromPlayer(Game1.player, out container))
+                {
+                    return true;
+                }
+
+                break;
+
+            case ShippingBin shippingBin:
+                if (this.TryGetOneFromBuilding(shippingBin, out container))
+                {
+                    return true;
+                }
+
+                break;
+
+            // Chests Anywhere
+            case Farm farm:
+                var building = farm.getBuildingByType("Shipping Bin");
+                if (building is not null && this.TryGetOneFromBuilding(building, out container))
+                {
+                    return true;
+                }
+
+                break;
         }
 
         container = null;
@@ -413,7 +475,7 @@ internal sealed class ContainerFactory : BaseService
             var data =
                 ItemRegistry.GetData(item.QualifiedItemId)?.RawData as BigCraftableData ?? new BigCraftableData();
 
-            storageOption = new BigCraftableStorageOptions(this.modConfig.DefaultOptions, data);
+            storageOption = new BigCraftableStorageOptions(() => this.modConfig.DefaultOptions, data);
             this.storageOptions.Add(item.QualifiedItemId, storageOption);
         }
 

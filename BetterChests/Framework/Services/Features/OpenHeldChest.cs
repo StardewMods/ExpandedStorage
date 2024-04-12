@@ -5,7 +5,9 @@ using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Services.Factory;
+using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
@@ -15,38 +17,45 @@ using StardewValley.Objects;
 internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
 {
     private readonly ContainerFactory containerFactory;
-    private readonly Harmony harmony;
     private readonly IInputHelper inputHelper;
     private readonly ItemGrabMenuManager itemGrabMenuManager;
+    private readonly IPatchManager patchManager;
     private readonly ProxyChestFactory proxyChestFactory;
 
     /// <summary>Initializes a new instance of the <see cref="OpenHeldChest" /> class.</summary>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="harmony">Dependency used to patch external code.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="itemGrabMenuManager">Dependency used for managing the item grab menu.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
+    /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="proxyChestFactory">Dependency used for creating virtualized chests.</param>
     public OpenHeldChest(
         ContainerFactory containerFactory,
         IEventManager eventManager,
-        Harmony harmony,
         IInputHelper inputHelper,
         ItemGrabMenuManager itemGrabMenuManager,
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
+        IPatchManager patchManager,
         ProxyChestFactory proxyChestFactory)
         : base(eventManager, log, manifest, modConfig)
     {
         this.containerFactory = containerFactory;
-        this.harmony = harmony;
         this.inputHelper = inputHelper;
         this.itemGrabMenuManager = itemGrabMenuManager;
+        this.patchManager = patchManager;
         this.proxyChestFactory = proxyChestFactory;
+
+        this.patchManager.Add(
+            this.UniqueId,
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.addItem)),
+                AccessTools.DeclaredMethod(typeof(OpenHeldChest), nameof(OpenHeldChest.Chest_addItem_prefix)),
+                PatchType.Prefix));
     }
 
     /// <inheritdoc />
@@ -60,9 +69,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
         this.Events.Subscribe<ItemGrabMenuChangedEventArgs>(this.OnItemGrabMenuChanged);
 
         // Patches
-        this.harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.addItem)),
-            new HarmonyMethod(typeof(OpenHeldChest), nameof(OpenHeldChest.Chest_addItem_prefix)));
+        this.patchManager.Patch(this.UniqueId);
     }
 
     /// <inheritdoc />
@@ -73,9 +80,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
         this.Events.Unsubscribe<ItemGrabMenuChangedEventArgs>(this.OnItemGrabMenuChanged);
 
         // Patches
-        this.harmony.Unpatch(
-            AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.addItem)),
-            AccessTools.Method(typeof(OpenHeldChest), nameof(OpenHeldChest.Chest_addItem_prefix)));
+        this.patchManager.Unpatch(this.UniqueId);
     }
 
     // TODO: Recursive check
@@ -106,6 +111,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
             return;
         }
 
+        this.Log.Info("{0}: Opening held chest {1}", this.Id, container);
         this.inputHelper.Suppress(e.Button);
         container.Mutex?.RequestLock(
             () =>

@@ -33,7 +33,10 @@ public sealed class ModEntry : Mod
         if (!e.Button.IsUseToolButton()
             || Game1.activeClickableMenu is not ItemGrabMenu
             {
-                context: Chest chest,
+                context: Chest
+                {
+                    QualifiedItemId: "(BC)256",
+                } chest,
                 chestColorPicker:
                 { } chestColorPicker,
             })

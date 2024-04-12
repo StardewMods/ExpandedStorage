@@ -1,9 +1,11 @@
 namespace StardewMods.BetterChests.Framework.Services;
 
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Models;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
@@ -12,6 +14,14 @@ internal sealed class AssetHandler : BaseService
 {
     private readonly IDataHelper dataHelper;
     private readonly IGameContentHelper gameContentHelper;
+    private readonly string hslTexturePath;
+    private readonly Lazy<IManagedTexture> icons;
+    private readonly string tabDataPath;
+    private readonly Lazy<IManagedTexture> tabs;
+
+    private HslColor[]? hslColors;
+    private Texture2D? hslTexture;
+    private Color[]? hslTextureData;
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
@@ -19,6 +29,7 @@ internal sealed class AssetHandler : BaseService
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
+    /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public AssetHandler(
         IDataHelper dataHelper,
@@ -26,64 +37,71 @@ internal sealed class AssetHandler : BaseService
         IGameContentHelper gameContentHelper,
         ILog log,
         IManifest manifest,
+        IModContentHelper modContentHelper,
         IThemeHelper themeHelper)
         : base(log, manifest)
     {
         // Init
         this.dataHelper = dataHelper;
         this.gameContentHelper = gameContentHelper;
-        this.HslTexturePath = this.ModId + "/HueBar";
-        this.IconTexturePath = this.ModId + "/Icons";
-        this.TabTexturePath = this.ModId + "/Tabs/Texture";
-        this.TabDataPath = this.ModId + "/Tabs";
-        themeHelper.AddAssets([this.IconTexturePath, this.TabTexturePath]);
+        this.hslTexturePath = this.ModId + "/HueBar";
+        this.tabDataPath = this.ModId + "/Tabs";
+
+        this.icons = new Lazy<IManagedTexture>(
+            () => themeHelper.AddAsset(
+                this.ModId + "/Icons",
+                modContentHelper.Load<IRawTextureData>("assets/icons.png")));
+
+        this.tabs = new Lazy<IManagedTexture>(
+            () => themeHelper.AddAsset(
+                this.ModId + "/Tabs/Texture",
+                modContentHelper.Load<IRawTextureData>("assets/tabs.png")));
 
         // Events
+        eventSubscriber.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
         eventSubscriber.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
     }
 
-    /// <summary>Gets the game path to the hsl texture.</summary>
-    private string HslTexturePath { get; }
+    /// <summary>Gets the hsl colors data.</summary>
+    public HslColor[] HslColors
+    {
+        get
+        {
+            if (this.hslTextureData is not null)
+            {
+                return this.hslColors ??= this.hslTextureData.Select(HslColor.FromColor).Distinct().ToArray();
+            }
 
-    /// <summary>Gets the game path to the icon texture.</summary>
-    public string IconTexturePath { get; }
+            this.hslTextureData = new Color[this.HslTexture.Width * this.HslTexture.Height];
+            this.HslTexture.GetData(this.hslTextureData);
+            return this.hslColors ??= this.hslTextureData.Select(HslColor.FromColor).Distinct().ToArray();
+        }
+    }
 
-    /// <summary>Gets the game path to the tab texture.</summary>
-    private string TabTexturePath { get; }
+    /// <summary>Gets the hsl texture.</summary>
+    public Texture2D HslTexture => this.hslTexture ??= this.gameContentHelper.Load<Texture2D>(this.hslTexturePath);
 
-    /// <summary>Gets the game path to tab data.</summary>
-    public string TabDataPath { get; }
+    /// <summary>Gets the managed icons texture.</summary>
+    public IManagedTexture Icons => this.icons.Value;
 
-    /// <summary>Returns a Texture2D object representing the HSL texture.</summary>
-    /// <returns>A Texture2D object.</returns>
-    public Texture2D GetHslTexture() => this.gameContentHelper.Load<Texture2D>(this.HslTexturePath);
+    /// <summary>Gets the managed tabs texture.</summary>
+    public IManagedTexture Tabs => this.tabs.Value;
 
-    /// <summary>Retrieves inventory tab data.</summary>
-    /// <returns>A dictionary with inventory tab names as keys and corresponding InventoryTabData objects as values.</returns>
-    public Dictionary<string, InventoryTabData> GetInventoryTabData() =>
-        this.gameContentHelper.Load<Dictionary<string, InventoryTabData>>(this.TabDataPath);
+    /// <summary>Gets the tab data.</summary>
+    public Dictionary<string, InventoryTabData> TabData =>
+        this.gameContentHelper.Load<Dictionary<string, InventoryTabData>>(this.tabDataPath);
+
+    private void OnGameLaunched(GameLaunchedEventArgs e) => _ = this.Tabs.Value;
 
     private void OnAssetRequested(AssetRequestedEventArgs e)
     {
-        if (e.Name.IsEquivalentTo(this.HslTexturePath))
+        if (e.Name.IsEquivalentTo(this.hslTexturePath))
         {
             e.LoadFromModFile<Texture2D>("assets/hue.png", AssetLoadPriority.Exclusive);
             return;
         }
 
-        if (e.Name.IsEquivalentTo(this.IconTexturePath))
-        {
-            e.LoadFromModFile<Texture2D>("assets/icons.png", AssetLoadPriority.Exclusive);
-            return;
-        }
-
-        if (e.Name.IsEquivalentTo(this.TabTexturePath))
-        {
-            e.LoadFromModFile<Texture2D>("assets/tabs.png", AssetLoadPriority.Exclusive);
-            return;
-        }
-
-        if (e.Name.IsEquivalentTo(this.TabDataPath))
+        if (e.Name.IsEquivalentTo(this.tabDataPath))
         {
             e.LoadFrom(this.GetTabData, AssetLoadPriority.Exclusive);
         }
@@ -112,7 +130,7 @@ internal sealed class AssetHandler : BaseService
                 "Clothing",
                 new InventoryTabData(
                     "Clothing",
-                    this.TabTexturePath,
+                    this.Tabs.Name.BaseName,
                     2,
                     ["category_clothing", "category_boots", "category_hat"])
             },
@@ -120,7 +138,7 @@ internal sealed class AssetHandler : BaseService
                 "Cooking",
                 new InventoryTabData(
                     "Cooking",
-                    this.TabTexturePath,
+                    this.Tabs.Name.BaseName,
                     3,
                     [
                         "category_syrup",
@@ -138,7 +156,7 @@ internal sealed class AssetHandler : BaseService
                 "Crops",
                 new InventoryTabData(
                     "Crops",
-                    this.TabTexturePath,
+                    this.Tabs.Name.BaseName,
                     4,
                     ["category_greens", "category_flowers", "category_fruits", "category_vegetable"])
             },
@@ -146,7 +164,7 @@ internal sealed class AssetHandler : BaseService
                 "Equipment",
                 new InventoryTabData(
                     "Equipment",
-                    this.TabTexturePath,
+                    this.Tabs.Name.BaseName,
                     5,
                     ["category_equipment", "category_ring", "category_tool", "category_weapon"])
             },
@@ -154,7 +172,7 @@ internal sealed class AssetHandler : BaseService
                 "Fishing",
                 new InventoryTabData(
                     "Fishing",
-                    this.TabTexturePath,
+                    this.Tabs.Name.BaseName,
                     6,
                     ["category_bait", "category_fish", "category_tackle", "category_sell_at_fish_shop"])
             },
@@ -162,7 +180,7 @@ internal sealed class AssetHandler : BaseService
                 "Materials",
                 new InventoryTabData(
                     "Materials",
-                    this.TabTexturePath,
+                    this.Tabs.Name.BaseName,
                     7,
                     [
                         "category_monster_loot",
@@ -177,13 +195,13 @@ internal sealed class AssetHandler : BaseService
                 "Misc",
                 new InventoryTabData(
                     "Misc",
-                    this.TabTexturePath,
+                    this.Tabs.Name.BaseName,
                     8,
                     ["category_big_craftable", "category_furniture", "category_junk"])
             },
             {
                 "Seeds",
-                new InventoryTabData("Seeds", this.TabTexturePath, 9, ["category_seeds", "category_fertilizer"])
+                new InventoryTabData("Seeds", this.Tabs.Name.BaseName, 9, ["category_seeds", "category_fertilizer"])
             },
         };
 

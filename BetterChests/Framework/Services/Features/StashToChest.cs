@@ -68,7 +68,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
 
         this.toolbarIconsIntegration.Api.AddToolbarIcon(
             this.Id,
-            this.assetHandler.IconTexturePath,
+            this.assetHandler.Icons.Name.BaseName,
             new Rectangle(16, 0, 16, 16),
             I18n.Button_StashToChest_Name());
 

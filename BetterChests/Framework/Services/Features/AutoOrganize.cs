@@ -97,7 +97,7 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
                         {
                             if (amount > 0)
                             {
-                                this.Log.Trace(
+                                this.Log.Info(
                                     "{0}: {{ Item: {1}, Quantity: {2}, From: {3}, To: {4} }}",
                                     this.Id,
                                     name,

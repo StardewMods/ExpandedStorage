@@ -8,10 +8,10 @@ using StardewValley.TokenizableStrings;
 internal sealed class BigCraftableStorageOptions : ChildStorageOptions
 {
     /// <summary>Initializes a new instance of the <see cref="BigCraftableStorageOptions" /> class.</summary>
-    /// <param name="default">The default storage options.</param>
+    /// <param name="getDefault">Get the default storage options.</param>
     /// <param name="data">The big craftable data.</param>
-    public BigCraftableStorageOptions(IStorageOptions @default, BigCraftableData data)
-        : base(@default, new CustomFieldsStorageOptions(data.CustomFields)) =>
+    public BigCraftableStorageOptions(Func<IStorageOptions> getDefault, BigCraftableData data)
+        : base(getDefault, new CustomFieldsStorageOptions(data.CustomFields)) =>
         this.Data = data;
 
     /// <summary>Gets the big craftable data.</summary>

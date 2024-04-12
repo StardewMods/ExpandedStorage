@@ -1,5 +1,30 @@
 # Custom Bush Change Log
 
+## 1.1.1 (April 12, 2024)
+
+### Changed
+
+* Initialize CustomBush DI container on Entry.
+* Update transpilers to use CodeMatchers.
+
+## 1.1.0 (April 10, 2024)
+
+### Added
+
+* Added support for Junimo Harvester.
+
+## 1.0.5 (April 9, 2024)
+
+### Changed
+
+* Updated for FauxCore api changes.
+
+## 1.0.4 (April 6, 2024)
+
+### Changed
+
+* Updated api to return ICustomBushDrop with ICustomBush.
+
 ## 1.0.3 (April 2, 2024)
 
 ### Added

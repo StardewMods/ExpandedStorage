@@ -91,7 +91,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
 
         this.toolbarIconsIntegration.Api.AddToolbarIcon(
             this.Id,
-            this.assetHandler.IconTexturePath,
+            this.assetHandler.Icons.Name.BaseName,
             new Rectangle(48, 0, 16, 16),
             I18n.Button_FindChest_Name());
 
@@ -291,7 +291,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
             }
         }
 
-        this.Log.Trace("{0}: Found {1} chests", this.Id, this.pointers.Value.Count);
+        this.Log.Info("{0}: Found {1} chests", this.Id, this.pointers.Value.Count);
         this.currentIndex.Value = 0;
     }
 }

@@ -1,5 +1,23 @@
 # Garbage Day Change Log
 
+## 3.1.7 (April 12, 2024)
+
+### Changed
+
+* Initialize GarbageDay DI container on Entry.
+
+## 3.1.6 (April 9, 2024)
+
+### Changed
+
+* Updated for FauxCore api changes.
+
+## 3.1.5 (April 6, 2024)
+
+### Fixed
+
+* Add toolbar icon integration on game launched.
+
 ## 3.1.4 (April 4, 2024)
 
 ### Fixed

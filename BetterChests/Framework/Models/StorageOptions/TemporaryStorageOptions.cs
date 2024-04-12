@@ -32,7 +32,9 @@ internal sealed class TemporaryStorageOptions : DefaultStorageOptions
         this.InventoryTabList = [..storageOptions.InventoryTabList];
         this.OpenHeldChest = storageOptions.OpenHeldChest;
         this.ResizeChest = storageOptions.ResizeChest;
+        this.ResizeChestCapacity = storageOptions.ResizeChestCapacity;
         this.SearchItems = storageOptions.SearchItems;
+        this.ShopFromChest = this.storageOptions.ShopFromChest;
         this.StashToChest = storageOptions.StashToChest;
         this.StashToChestDistance = storageOptions.StashToChestDistance;
         this.StashToChestPriority = storageOptions.StashToChestPriority;
@@ -64,7 +66,9 @@ internal sealed class TemporaryStorageOptions : DefaultStorageOptions
         this.InventoryTabList = [..this.defaultOptions.InventoryTabList];
         this.OpenHeldChest = this.defaultOptions.OpenHeldChest;
         this.ResizeChest = this.defaultOptions.ResizeChest;
+        this.ResizeChestCapacity = this.defaultOptions.ResizeChestCapacity;
         this.SearchItems = this.defaultOptions.SearchItems;
+        this.ShopFromChest = this.defaultOptions.ShopFromChest;
         this.StashToChest = this.defaultOptions.StashToChest;
         this.StashToChestDistance = this.defaultOptions.StashToChestDistance;
         this.StashToChestPriority = this.defaultOptions.StashToChestPriority;
@@ -90,7 +94,9 @@ internal sealed class TemporaryStorageOptions : DefaultStorageOptions
         this.storageOptions.InventoryTabList = [..this.InventoryTabList];
         this.storageOptions.OpenHeldChest = this.OpenHeldChest;
         this.storageOptions.ResizeChest = this.ResizeChest;
+        this.storageOptions.ResizeChestCapacity = this.ResizeChestCapacity;
         this.storageOptions.SearchItems = this.SearchItems;
+        this.storageOptions.ShopFromChest = this.ShopFromChest;
         this.storageOptions.StashToChest = this.StashToChest;
         this.storageOptions.StashToChestDistance = this.StashToChestDistance;
         this.storageOptions.StashToChestPriority = this.StashToChestPriority;

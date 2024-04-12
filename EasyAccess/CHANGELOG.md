@@ -1,6 +1,22 @@
 # Easy Access Change Log
 
-### 2.1.2 (March 25, 2024)
+## 2.1.4 (April 12, 2024)
+
+### Changed
+
+* Initialize EasyAccess DI container on Entry.
+
+### Fixed
+
+* Fixed machines taking an extra item when dispensing.
+
+## 2.1.3 (April 9, 2024)
+
+### Changed
+
+* Updated for FauxCore api changes.
+
+## 2.1.2 (March 25, 2024)
 
 ### Fixed
 

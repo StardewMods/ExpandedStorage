@@ -12,8 +12,10 @@ using StardewMods.EasyAccess.Framework.Interfaces;
 /// <summary>Handles collecting items.</summary>
 internal sealed class CollectService : BaseService<CollectService>
 {
+    private readonly AssetHandler assetHandler;
     private readonly IInputHelper inputHelper;
     private readonly IModConfig modConfig;
+    private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="CollectService" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
@@ -34,24 +36,30 @@ internal sealed class CollectService : BaseService<CollectService>
         : base(log, manifest)
     {
         // Init
+        this.assetHandler = assetHandler;
         this.inputHelper = inputHelper;
         this.modConfig = modConfig;
+        this.toolbarIconsIntegration = toolbarIconsIntegration;
 
         // Events
+        eventSubscriber.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
         eventSubscriber.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
+    }
 
-        if (!toolbarIconsIntegration.IsLoaded)
+    private void OnGameLaunched(GameLaunchedEventArgs obj)
+    {
+        if (!this.toolbarIconsIntegration.IsLoaded)
         {
             return;
         }
 
-        toolbarIconsIntegration.Api.AddToolbarIcon(
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(
             this.UniqueId,
-            assetHandler.IconTexturePath,
+            this.assetHandler.IconTexture.Name.BaseName,
             new Rectangle(0, 0, 16, 16),
             I18n.Button_CollectOutputs_Name());
 
-        toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
+        this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
     }
 
     private void CollectItems()

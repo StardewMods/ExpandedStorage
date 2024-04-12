@@ -2,10 +2,11 @@
 <project version="4">
   <component name="UserContentModel">
     <attachedFolders>
-      <Path>GarbageDayCP</Path>
-      <Path>HelpfulSpousesCP</Path>
-      <Path>SpritePatcherCP</Path>
-      <Path>ToolbarIconsCP</Path>
+      <Path>[CP] Better Chests</Path>
+      <Path>[CP] Garbage Day</Path>
+      <Path>[CP] Helpful Spouses</Path>
+      <Path>[CP] Sprite Patcher</Path>
+      <Path>[CP] Toolbar Icons</Path>
       <Path>build</Path>
     </attachedFolders>
     <explicitIncludes />

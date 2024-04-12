@@ -1,7 +1,6 @@
 namespace StardewMods.EasyAccess;
 
 using SimpleInjector;
-using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -20,14 +19,6 @@ public sealed class ModEntry : Mod
     {
         // Init
         I18n.Init(this.Helper.Translation);
-
-        // Events
-        this.Helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
-    }
-
-    private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
-    {
-        // Init
         this.container = new Container();
 
         // Configuration

@@ -1,16 +1,15 @@
-﻿namespace StardewMods.ToolbarIcons.Framework.Services;
+namespace StardewMods.ToolbarIcons.Framework.Services;
 
 using System.Reflection;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Interfaces;
-using StardewMods.ToolbarIcons.Framework.Models;
 using StardewMods.ToolbarIcons.Framework.Models.Events;
 using StardewValley.Menus;
 
@@ -63,7 +62,7 @@ internal sealed class IntegrationManager : BaseService
             ?? throw new MethodAccessException("Unable to access OverrideButton");
 
         // Events
-        eventManager.Subscribe<SaveLoadedEventArgs>(this.OnSaveLoaded);
+        eventManager.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
         eventManager.Subscribe<IIconPressedEventArgs>(this.OnIconPressed);
     }
 
@@ -72,7 +71,7 @@ internal sealed class IntegrationManager : BaseService
     /// <param name="hoverText">The text to display.</param>
     /// <param name="action">Function which returns the action to perform.</param>
     private void AddCustomAction(int index, string hoverText, Action action) =>
-        this.AddIcon(string.Empty, index, hoverText, action, this.assetHandler.IconPath);
+        this.AddIcon(string.Empty, index, hoverText, action, () => this.assetHandler.Icons.Value);
 
     /// <summary>Adds a complex mod integration.</summary>
     /// <param name="modId">The id of the mod.</param>
@@ -92,7 +91,7 @@ internal sealed class IntegrationManager : BaseService
             return;
         }
 
-        this.AddIcon(modId, index, hoverText, () => action.Invoke(), this.assetHandler.IconPath);
+        this.AddIcon(modId, index, hoverText, () => action.Invoke(), () => this.assetHandler.Icons.Value);
     }
 
     /// <summary>Adds a toolbar icon for an integrated mod.</summary>
@@ -100,14 +99,13 @@ internal sealed class IntegrationManager : BaseService
     /// <param name="index">The index of the mod icon.</param>
     /// <param name="hoverText">The text to display.</param>
     /// <param name="action">The action to perform for this icon.</param>
-    /// <param name="texturePath">The texture path of the icon.</param>
-    private void AddIcon(string modId, int index, string hoverText, Action action, string texturePath)
+    /// <param name="getTexture">Get method for the texture.</param>
+    private void AddIcon(string modId, int index, string hoverText, Action action, Func<Texture2D> getTexture)
     {
-        var texture = this.gameContentHelper.Load<Texture2D>(texturePath);
-        var cols = texture.Width / 16;
+        const int cols = AssetHandler.IconTextureWidth / 16;
         this.toolbarManager.AddToolbarIcon(
             $"{modId}.{hoverText}",
-            texturePath,
+            getTexture,
             new Rectangle(16 * (index % cols), 16 * (index / cols), 16, 16),
             hoverText);
 
@@ -119,8 +117,8 @@ internal sealed class IntegrationManager : BaseService
     /// <param name="index">The index of the mod icon.</param>
     /// <param name="hoverText">The text to display.</param>
     /// <param name="keybinds">The method to run.</param>
-    /// <param name="texturePath">The texture path of the icon.</param>
-    private void AddKeybind(string modId, int index, string hoverText, string keybinds, string texturePath)
+    /// <param name="getTexture">Get method for the texture.</param>
+    private void AddKeybind(string modId, int index, string hoverText, string keybinds, Func<Texture2D> getTexture)
     {
         if (!this.modRegistry.IsLoaded(modId))
         {
@@ -148,7 +146,7 @@ internal sealed class IntegrationManager : BaseService
                     this.OverrideButton(button, true);
                 }
             },
-            texturePath);
+            getTexture);
     }
 
     /// <summary>Adds a simple mod integration for a parameterless menu.</summary>
@@ -156,8 +154,8 @@ internal sealed class IntegrationManager : BaseService
     /// <param name="index">The index of the mod icon.</param>
     /// <param name="hoverText">The text to display.</param>
     /// <param name="fullName">The full name to the menu class.</param>
-    /// <param name="texturePath">The texture path of the icon.</param>
-    private void AddMenu(string modId, int index, string hoverText, string fullName, string texturePath)
+    /// <param name="getTexture">Get method for the texture.</param>
+    private void AddMenu(string modId, int index, string hoverText, string fullName, Func<Texture2D> getTexture)
     {
         if (!this.TryGetMod(modId, out var mod))
         {
@@ -179,7 +177,7 @@ internal sealed class IntegrationManager : BaseService
                 var menu = action.Invoke(Array.Empty<object>());
                 Game1.activeClickableMenu = (IClickableMenu)menu;
             },
-            texturePath);
+            getTexture);
     }
 
     /// <summary>Adds a simple mod integration for a parameterless method.</summary>
@@ -187,8 +185,8 @@ internal sealed class IntegrationManager : BaseService
     /// <param name="index">The index of the mod icon.</param>
     /// <param name="hoverText">The text to display.</param>
     /// <param name="method">The method to run.</param>
-    /// <param name="texturePath">The texture path of the icon.</param>
-    private void AddMethod(string modId, int index, string hoverText, string method, string texturePath)
+    /// <param name="getTexture">Get method for the texture.</param>
+    private void AddMethod(string modId, int index, string hoverText, string method, Func<Texture2D> getTexture)
     {
         if (!this.TryGetMod(modId, out var mod))
         {
@@ -201,7 +199,7 @@ internal sealed class IntegrationManager : BaseService
             return;
         }
 
-        this.AddIcon(modId, index, hoverText, () => action.Invoke(), texturePath);
+        this.AddIcon(modId, index, hoverText, () => action.Invoke(), getTexture);
     }
 
     /// <summary>Adds a simple mod integration for a method with parameters.</summary>
@@ -223,10 +221,10 @@ internal sealed class IntegrationManager : BaseService
             return;
         }
 
-        this.AddIcon(modId, index, hoverText, () => action.Invoke(arguments), this.assetHandler.IconPath);
+        this.AddIcon(modId, index, hoverText, () => action.Invoke(arguments), () => this.assetHandler.Icons.Value);
     }
 
-    private void OnSaveLoaded(SaveLoadedEventArgs e)
+    private void OnConditionsApiReady(ConditionsApiReadyEventArgs e)
     {
         if (this.isLoaded)
         {
@@ -266,19 +264,36 @@ internal sealed class IntegrationManager : BaseService
         }
 
         // Load Data Integrations
-        foreach (var (_, data) in this.gameContentHelper.Load<Dictionary<string, ToolbarIconData>>(
-            this.assetHandler.DataPath))
+        foreach (var (_, data) in this.assetHandler.Data)
         {
             switch (data.Type)
             {
                 case IntegrationType.Menu:
-                    this.AddMenu(data.ModId, data.Index, data.HoverText, data.ExtraData, data.Texture);
+                    this.AddMenu(
+                        data.ModId,
+                        data.Index,
+                        data.HoverText,
+                        data.ExtraData,
+                        () => this.gameContentHelper.Load<Texture2D>(data.Texture));
+
                     break;
                 case IntegrationType.Method:
-                    this.AddMethod(data.ModId, data.Index, data.HoverText, data.ExtraData, data.Texture);
+                    this.AddMethod(
+                        data.ModId,
+                        data.Index,
+                        data.HoverText,
+                        data.ExtraData,
+                        () => this.gameContentHelper.Load<Texture2D>(data.Texture));
+
                     break;
                 case IntegrationType.Keybind:
-                    this.AddKeybind(data.ModId, data.Index, data.HoverText, data.ExtraData, data.Texture);
+                    this.AddKeybind(
+                        data.ModId,
+                        data.Index,
+                        data.HoverText,
+                        data.ExtraData,
+                        () => this.gameContentHelper.Load<Texture2D>(data.Texture));
+
                     break;
             }
         }

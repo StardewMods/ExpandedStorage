@@ -12,17 +12,17 @@ using StardewMods.ExpandedStorage.Framework.Models;
 using StardewValley.GameData.BigCraftables;
 
 /// <summary>Responsible for managing expanded storage objects.</summary>
-internal sealed class StorageManager : BaseService
+internal sealed class AssetHandler : BaseService
 {
     private const string AssetPath = "Data/BigCraftables";
 
     private readonly Dictionary<string, IStorageData> data = new();
 
-    /// <summary>Initializes a new instance of the <see cref="StorageManager" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public StorageManager(IEventSubscriber eventSubscriber, ILog log, IManifest manifest)
+    public AssetHandler(IEventSubscriber eventSubscriber, ILog log, IManifest manifest)
         : base(log, manifest)
     {
         eventSubscriber.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
@@ -104,7 +104,7 @@ internal sealed class StorageManager : BaseService
 
     private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
     {
-        if (e.Names.Any(assetName => assetName.IsEquivalentTo(StorageManager.AssetPath)))
+        if (e.Names.Any(assetName => assetName.IsEquivalentTo(AssetHandler.AssetPath)))
         {
             this.data.Clear();
         }

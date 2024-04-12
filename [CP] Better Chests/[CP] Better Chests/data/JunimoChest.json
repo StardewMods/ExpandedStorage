@@ -1,0 +1,32 @@
+{
+  "Changes": [
+    {
+      "LogName": "Big Craftable - Junimo Chest",
+      "Action": "EditData",
+      "Target": "Data/BigCraftables",
+      "TargetField": ["256", "CustomFields"],
+      "Entries": {
+        "furyx639.BetterChests/AutoOrganize": "Default",
+        "furyx639.BetterChests/CarryChest": "Default",
+        "furyx639.BetterChests/CategorizeChest": "Default",
+        "furyx639.BetterChests/CategorizeChestAutomatically": "Default",
+        "furyx639.BetterChests/CategorizeChestMethod": "Default",
+        "furyx639.BetterChests/ChestFinder": "Default",
+        "furyx639.BetterChests/ChestInfo": "Default",
+        "furyx639.BetterChests/CollectItems": "Default",
+        "furyx639.BetterChests/ConfigureChest": "Default",
+        "furyx639.BetterChests/CraftFromChest": "World",
+        "furyx639.BetterChests/CraftFromChestDistance": "0",
+        "furyx639.BetterChests/HslColorPicker": "Default",
+        "furyx639.BetterChests/InventoryTabs": "Default",
+        "furyx639.BetterChests/OpenHeldChest": "Default",
+        "furyx639.BetterChests/ResizeChest": "Medium",
+        "furyx639.BetterChests/ResizeChestCapacity": "36",
+        "furyx639.BetterChests/SearchItems": "Default",
+        "furyx639.BetterChests/ShopFromChest": "Enabled",
+        "furyx639.BetterChests/StashToChest": "World",
+        "furyx639.BetterChests/StashToChestDistance": "0"
+      }
+    }
+  ]
+}

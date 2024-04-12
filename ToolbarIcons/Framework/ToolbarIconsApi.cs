@@ -1,6 +1,7 @@
 namespace StardewMods.ToolbarIcons.Framework;
 
 using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -12,6 +13,7 @@ using StardewMods.ToolbarIcons.Framework.Services;
 public sealed class ToolbarIconsApi : IToolbarIconsApi
 {
     private readonly BaseEventManager eventManager;
+    private readonly IGameContentHelper gameContentHelper;
     private readonly ILog log;
     private readonly IModInfo modInfo;
     private readonly string prefix;
@@ -22,16 +24,19 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
     /// <summary>Initializes a new instance of the <see cref="ToolbarIconsApi" /> class.</summary>
     /// <param name="modInfo">Mod info from the calling mod.</param>
     /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="log">Dependency used for monitoring and logging.</param>
     /// <param name="toolbarManager">Dependency for managing the toolbar icons.</param>
     internal ToolbarIconsApi(
         IModInfo modInfo,
         IEventSubscriber eventSubscriber,
+        IGameContentHelper gameContentHelper,
         ILog log,
         ToolbarManager toolbarManager)
     {
         // Init
         this.modInfo = modInfo;
+        this.gameContentHelper = gameContentHelper;
         this.log = log;
         this.toolbarManager = toolbarManager;
         this.prefix = this.modInfo.Manifest.UniqueID + "/";
@@ -59,7 +64,11 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
 
     /// <inheritdoc />
     public void AddToolbarIcon(string id, string texturePath, Rectangle? sourceRect, string? hoverText) =>
-        this.toolbarManager.AddToolbarIcon($"{this.prefix}{id}", texturePath, sourceRect, hoverText);
+        this.toolbarManager.AddToolbarIcon(
+            $"{this.prefix}{id}",
+            () => this.gameContentHelper.Load<Texture2D>(texturePath),
+            sourceRect,
+            hoverText);
 
     /// <inheritdoc />
     public void RemoveToolbarIcon(string id) => this.toolbarManager.RemoveToolbarIcon($"{this.prefix}{id}");

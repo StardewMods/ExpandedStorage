@@ -4,7 +4,9 @@ using System.Reflection;
 using HarmonyLib;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Services.Factory;
+using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.Automate;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
@@ -13,7 +15,7 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Objects;
 
 /// <summary>Responsible for handling containers.</summary>
-internal sealed class ContainerHandler : BaseService
+internal sealed class ContainerHandler : BaseService<ContainerHandler>
 {
     private static ContainerHandler instance = null!;
 
@@ -25,19 +27,19 @@ internal sealed class ContainerHandler : BaseService
     /// <param name="automateIntegration">Dependency for integration with Automate.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventPublisher">Dependency used for publishing events.</param>
-    /// <param name="harmony">Dependency used to patch external code.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modRegistry">Dependency used for fetching metadata about loaded mods.</param>
+    /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
     public ContainerHandler(
         AutomateIntegration automateIntegration,
         ContainerFactory containerFactory,
         IEventPublisher eventPublisher,
-        Harmony harmony,
         ILog log,
         IManifest manifest,
         IModRegistry modRegistry,
+        IPatchManager patchManager,
         IReflectionHelper reflectionHelper)
         : base(log, manifest)
     {
@@ -46,12 +48,17 @@ internal sealed class ContainerHandler : BaseService
         this.eventPublisher = eventPublisher;
         this.reflectionHelper = reflectionHelper;
 
-        harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.addItem)),
-            new HarmonyMethod(typeof(ContainerHandler), nameof(ContainerHandler.Chest_addItem_prefix)));
+        // Patches
+        patchManager.Add(
+            this.UniqueId,
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.addItem)),
+                AccessTools.DeclaredMethod(typeof(ContainerHandler), nameof(ContainerHandler.Chest_addItem_prefix)),
+                PatchType.Prefix));
 
         if (!automateIntegration.IsLoaded)
         {
+            patchManager.Patch(this.ModId);
             return;
         }
 
@@ -63,10 +70,17 @@ internal sealed class ContainerHandler : BaseService
 
         if (storeMethod is not null)
         {
-            harmony.Patch(
-                storeMethod,
-                new HarmonyMethod(typeof(ContainerHandler), nameof(ContainerHandler.Automate_Store_prefix)));
+            patchManager.Add(
+                this.UniqueId,
+                new SavedPatch(
+                    storeMethod,
+                    AccessTools.DeclaredMethod(
+                        typeof(ContainerHandler),
+                        nameof(ContainerHandler.Automate_Store_prefix)),
+                    PatchType.Prefix));
         }
+
+        patchManager.Patch(this.UniqueId);
     }
 
     /// <summary>Checks if an item is allowed to be added to a container.</summary>
@@ -83,9 +97,14 @@ internal sealed class ContainerHandler : BaseService
         }
 
         var itemTransferringEventArgs = new ItemTransferringEventArgs(to, item, force);
-        if (!force
-            && !(to.Options.CategorizeChestAutomatically == FeatureOption.Enabled
-                && to.Items.ContainsId(item.QualifiedItemId)))
+        if (force || to.Items.ContainsId(item.QualifiedItemId))
+        {
+            itemTransferringEventArgs.AllowTransfer();
+        }
+
+        ContainerHandler.AddTagIfNeeded(to, item, force);
+
+        if (!force)
         {
             this.eventPublisher.Publish(itemTransferringEventArgs);
         }
@@ -116,9 +135,14 @@ internal sealed class ContainerHandler : BaseService
                 }
 
                 var itemTransferringEventArgs = new ItemTransferringEventArgs(to, item, force);
-                if (!force
-                    && !(to.Options.CategorizeChestAutomatically == FeatureOption.Enabled
-                        && to.Items.ContainsId(item.QualifiedItemId)))
+                if (to.Items.ContainsId(item.QualifiedItemId))
+                {
+                    itemTransferringEventArgs.AllowTransfer();
+                }
+
+                ContainerHandler.AddTagIfNeeded(to, item, force);
+
+                if (!force)
                 {
                     this.eventPublisher.Publish(itemTransferringEventArgs);
                 }
@@ -129,14 +153,14 @@ internal sealed class ContainerHandler : BaseService
                 }
 
                 var stack = item.Stack;
-                items.TryAdd(item.Name, 0);
+                items.TryAdd(item.QualifiedItemId, 0);
                 if (!to.TryAdd(item, out var remaining) || !from.TryRemove(item))
                 {
                     return true;
                 }
 
                 var amount = stack - (remaining?.Stack ?? 0);
-                items[item.Name] += amount;
+                items[item.QualifiedItemId] += amount;
                 return true;
             });
 
@@ -174,5 +198,31 @@ internal sealed class ContainerHandler : BaseService
 
         __result = item;
         return false;
+    }
+
+    private static void AddTagIfNeeded(IStorageContainer container, Item item, bool force)
+    {
+        if (!force
+            || !(container.Options.CategorizeChestAutomatically == FeatureOption.Enabled
+                && container.Items.ContainsId(item.QualifiedItemId)))
+        {
+            return;
+        }
+
+        var tags = new HashSet<string>(container.Options.CategorizeChestTags);
+        var tag = item
+            .GetContextTags()
+            .Where(tag => tag.StartsWith("id_", StringComparison.OrdinalIgnoreCase))
+            .MinBy(tag => tag.Contains('('));
+
+        if (tag is not null)
+        {
+            tags.Add(tag);
+        }
+
+        if (!tags.SetEquals(container.Options.CategorizeChestTags))
+        {
+            container.Options.CategorizeChestTags = [..tags];
+        }
     }
 }
