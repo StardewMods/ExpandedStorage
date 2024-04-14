@@ -93,6 +93,11 @@ internal abstract class BaseContainer : IStorageContainer
     public abstract bool TryRemove(Item item);
 
     /// <inheritdoc />
-    public override string ToString() =>
-        $"{this.DisplayName} at {this.Location?.DisplayName ?? "Unknown"} ({this.TileLocation.X:n0}, {this.TileLocation.Y:n0})";
+    public override string ToString()
+    {
+        string name = this.ModData.TryGetValue("Pathoschild.ChestsAnywhere/Name", out var modName) ? modName : this.DisplayName;
+        string location = this.ModData.TryGetValue("Pathoschild.ChestsAnywhere/Category", out var modLocation) ? modName : this.Location?.DisplayName ?? "Unknown";
+
+        return $"{name} at {location} ({this.TileLocation.X:n0}, {this.TileLocation.Y:n0})";
+    }
 }
