@@ -3,28 +3,25 @@ namespace StardewMods.BetterChests.Framework.Models.StorageOptions;
 /// <inheritdoc />
 internal sealed class CustomFieldsStorageOptions : DictionaryStorageOptions
 {
-    private static readonly Dictionary<string, string> EmptyDictionary = new();
-
-    private readonly Dictionary<string, string> customFields;
+    private readonly Func<bool, Dictionary<string, string>> getData;
 
     /// <summary>Initializes a new instance of the <see cref="CustomFieldsStorageOptions" /> class.</summary>
-    /// <param name="customFields">The custom fields.</param>
-    public CustomFieldsStorageOptions(Dictionary<string, string>? customFields) =>
-        this.customFields = customFields ?? CustomFieldsStorageOptions.EmptyDictionary;
+    /// <param name="getData">Get the custom field data.</param>
+    public CustomFieldsStorageOptions(Func<bool, Dictionary<string, string>> getData) => this.getData = getData;
 
     /// <inheritdoc />
     protected override bool TryGetValue(string key, [NotNullWhen(true)] out string? value) =>
-        this.customFields.TryGetValue(key, out value);
+        this.getData(false).TryGetValue(key, out value);
 
     /// <inheritdoc />
     protected override void SetValue(string key, string value)
     {
         if (string.IsNullOrWhiteSpace(value))
         {
-            this.customFields.Remove(key);
+            this.getData(false).Remove(key);
             return;
         }
 
-        this.customFields[key] = value;
+        this.getData(true)[key] = value;
     }
 }

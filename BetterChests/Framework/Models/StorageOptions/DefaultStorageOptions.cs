@@ -63,7 +63,7 @@ internal class DefaultStorageOptions : IStorageOptions
     public ChestMenuOption ResizeChest { get; set; } = ChestMenuOption.Large;
 
     /// <inheritdoc />
-    public int ResizeChestCapacity { get; set; }
+    public int ResizeChestCapacity { get; set; } = 70;
 
     /// <inheritdoc />
     public FeatureOption SearchItems { get; set; } = FeatureOption.Enabled;

@@ -1,8 +1,30 @@
 ﻿# Better Chests Change Log
 
+## 2.14.0 (April 12, 2024)
+
+### Added
+
+* Added support for configuring chest types in the config menu.
+
+### Changed
+
+* Ensure the minimum capacity is at least the same as the menu size.
+* Display capacity in GMCM as increments of menu size.
+* Play lid animation when hovering a chest in the color picker.
+
+### Fixed
+
+* Chests can now inherit capacity from parent options.
+
+## 2.13.1 (April 12, 2024)
+
+### Fixed
+
+* Fixed crash when generating a new tab.json file.
+
 ## 2.13.0 (April 12, 2024)
 
-## Added
+### Added
 
 * Allow chest menu to be resized independently of capacity.
 * Added ShopFromChest options to generic mod config menu.

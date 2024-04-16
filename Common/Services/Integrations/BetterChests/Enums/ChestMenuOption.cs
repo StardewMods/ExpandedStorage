@@ -13,11 +13,11 @@ public enum ChestMenuOption
     Disabled = 1,
 
     /// <summary>Resize to 9 item slots.</summary>
-    Small = 2,
+    Small = 9,
 
     /// <summary>Resize to 36 item slots.</summary>
-    Medium = 3,
+    Medium = 36,
 
     /// <summary>Resize to 70 item slots.</summary>
-    Large = 4,
+    Large = 70,
 }

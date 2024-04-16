@@ -170,6 +170,7 @@ internal sealed class ModPatches : BaseService
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static bool Chest_drawLocal_prefix(
         Chest __instance,
+        ref int ___currentLidFrame,
         SpriteBatch spriteBatch,
         int x,
         int y,
@@ -190,7 +191,14 @@ internal sealed class ModPatches : BaseService
             ? new Vector2(x, y - 64)
             : Game1.GlobalToLocal(Game1.viewport, new Vector2(x, y - 1) * Game1.tileSize);
 
-        var frame = new Rectangle(0, colored ? 32 : 0, 16, 32);
+        var startingLidFrame = __instance.startingLidFrame.Value;
+        var lastLidFrame = __instance.getLastLidFrame();
+        var frame = new Rectangle(
+            Math.Min(lastLidFrame - startingLidFrame + 1, Math.Max(0, ___currentLidFrame - startingLidFrame)) * 16,
+            colored ? 32 : 0,
+            16,
+            32);
+
         var baseSortOrder = local ? 0.89f : ((y * 64) + 4) / 10000f;
 
         // Draw Base Layer

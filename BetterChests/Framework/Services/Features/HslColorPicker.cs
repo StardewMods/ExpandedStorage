@@ -28,6 +28,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
     private readonly IInputHelper inputHelper;
     private readonly ItemGrabMenuManager itemGrabMenuManager;
     private readonly IPatchManager patchManager;
+    private readonly IReflectionHelper reflectionHelper;
 
     /// <summary>Initializes a new instance of the <see cref="HslColorPicker" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
@@ -38,6 +39,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
     public HslColorPicker(
         AssetHandler assetHandler,
         IEventManager eventManager,
@@ -46,7 +48,8 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
-        IPatchManager patchManager)
+        IPatchManager patchManager,
+        IReflectionHelper reflectionHelper)
         : base(eventManager, log, manifest, modConfig)
     {
         HslColorPicker.instance = this;
@@ -54,6 +57,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
         this.inputHelper = inputHelper;
         this.itemGrabMenuManager = itemGrabMenuManager;
         this.patchManager = patchManager;
+        this.reflectionHelper = reflectionHelper;
 
         this.patchManager.Add(
             this.UniqueId,
@@ -209,7 +213,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
     {
         if (this.itemGrabMenuManager.CurrentMenu?.chestColorPicker is not
             {
-                itemToDrawColored: Chest,
+                itemToDrawColored: Chest chest,
             } chestColorPicker
             || this.itemGrabMenuManager.Top.Container is not ChestContainer container
             || container.Options.HslColorPicker != FeatureOption.Enabled)
@@ -218,11 +222,17 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
             return;
         }
 
+        foreach (var (key, value) in container.Chest.modData.Pairs)
+        {
+            chest.modData[key] = value;
+        }
+
         this.colorPicker.Value = new HslComponent(
             this.assetHandler,
             chestColorPicker,
             this.inputHelper,
             this.itemGrabMenuManager,
+            this.reflectionHelper,
             this.Config,
             () => container.Chest.playerChoiceColor.Value,
             c => container.Chest.playerChoiceColor.Value = c,

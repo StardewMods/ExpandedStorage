@@ -1,5 +1,11 @@
 # Expanded Storage Change Log
 
+## 3.0.5 (April 12, 2024)
+
+### Changed
+
+* Draw based on current lid frame in local.
+
 ## 3.0.4 (April 12, 2024)
 
 ### Changed

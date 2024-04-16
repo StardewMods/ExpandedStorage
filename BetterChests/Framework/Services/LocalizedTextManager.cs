@@ -29,14 +29,12 @@ internal sealed class LocalizedTextManager : BaseService
     /// <summary>Formats capacity option using localized text when available.</summary>
     /// <param name="value">The value for capacity to format.</param>
     /// <returns>Localized text for the capacity.</returns>
-    public string Capacity(string value) =>
+    public string ChestMenuSize(string value) =>
         (ChestMenuOptionExtensions.TryParse(value, out var capacity) ? capacity : ChestMenuOption.Default) switch
         {
             ChestMenuOption.Disabled => I18n.Option_Disabled_Name(),
-            ChestMenuOption.Small => I18n.ChestMenu_Small_Name(),
-            ChestMenuOption.Medium => I18n.ChestMenu_Medium_Name(),
-            ChestMenuOption.Large => I18n.ChestMenu_Large_Name(),
-            _ => I18n.Option_Default_Name(),
+            ChestMenuOption.Default => I18n.Option_Default_Name(),
+            _ => I18n.Capacity_Other_Name((int)capacity),
         };
 
     /// <summary>Formats range distance using localized text when available.</summary>
@@ -53,6 +51,22 @@ internal sealed class LocalizedTextManager : BaseService
             >= (int)RangeOption.Location => I18n.Range_Distance_Many(
                 Math.Pow(2, 1 + value - (int)RangeOption.Location).ToString(CultureInfo.InvariantCulture)),
             _ => I18n.Option_Default_Name(),
+        };
+
+    /// <summary>Formats a capacity value using localized text when available.</summary>
+    /// <param name="value">The capacity value to format.</param>
+    /// <param name="size">The current menu size.</param>
+    /// <returns>Localized text for the method value.</returns>
+    public string FormatCapacity(int value, int size) =>
+        value switch
+        {
+            9 => I18n.Capacity_Unlimited_Name(),
+            0 => I18n.Option_Default_Name(),
+            _ when size > 1 => I18n.Capacity_Other_Name(value * size),
+            1 => I18n.Capacity_Other_Name(9),
+            2 => I18n.Capacity_Other_Name(36),
+            3 => I18n.Capacity_Other_Name(70),
+            _ => I18n.Capacity_Other_Name(70 * value),
         };
 
     /// <summary>Formats a method value using localized text when available.</summary>

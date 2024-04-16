@@ -8,6 +8,8 @@
   "storage.Default.tooltip": "Config options that apply to every storage.",
   "storage.Fridge.name": "Fridge",
   "storage.Fridge.tooltip": "Storage in the farmhouse for cooking ingredients.",
+  "storage.Island-Fridge.name": "Island Fridge",
+  "storage.Island-Fridge.tooltip": "Storage in the island farmhouse for cooking ingredients.",
   "storage.SaddleBag.name": "SaddleBag",
   "storage.SaddleBag.tooltip": "Storage from the Horse Overhaul mod.",
   "storage.Object.name": "Object",
@@ -160,9 +162,8 @@
   "option.location.name": "Location",
   "option.world.name": "World",
   // Capacity Options
-  "chest-menu.small.name": "9 slots",
-  "chest-menu.medium.name": "36 slots",
-  "chest-menu.large.name": "70 slots",
+  "capacity.other.name": "{{slots}} slots",
+  "capacity.unlimited.name": "Unlimited slots",
   // Method Options
   "method.sorted.name": "Sorted",
   "method.grayed-out.name": "Grayed Out",

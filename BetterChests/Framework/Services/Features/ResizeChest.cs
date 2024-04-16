@@ -60,19 +60,25 @@ internal sealed class ResizeChest : BaseFeature<ResizeChest>
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static void Chest_GetActualCapacity_postfix(Chest __instance, ref int __result)
     {
-        if (!ResizeChest.instance.containerFactory.TryGetOne(__instance, out var container)
-            || container.Options.ResizeChest == ChestMenuOption.Disabled)
+        if (!ResizeChest.instance.containerFactory.TryGetOne(__instance, out var container))
         {
             return;
         }
 
         __result = Math.Max(
-            container.Items.Count,
-            container.Options.ResizeChestCapacity switch
-            {
-                < 0 => Math.Max(container.Items.Count + 1, 70),
-                0 => __result,
-                _ => container.Options.ResizeChestCapacity,
-            });
+            container.Items.Count, // Guarantee space for existing items
+            Math.Max(
+                (int)container.Options.ResizeChest, // Guarantee space for menu size
+                container.Options.ResizeChestCapacity switch
+                {
+                    // Always allocate +1 space for unlimited storage
+                    < 0 => container.Items.Count + 1,
+
+                    // Allocate assigned space
+                    > 0 => container.Options.ResizeChestCapacity,
+
+                    // Allocate vanilla space
+                    _ => __result,
+                }));
     }
 }

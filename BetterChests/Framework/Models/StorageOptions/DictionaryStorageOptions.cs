@@ -10,8 +10,8 @@ using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 internal abstract class DictionaryStorageOptions : IStorageOptions
 {
     private const string Prefix = "furyx639.BetterChests/";
-    private readonly Dictionary<string, CachedValue<FilterMethod>> cachedFilterMethod = new();
 
+    private readonly Dictionary<string, CachedValue<FilterMethod>> cachedFilterMethod = new();
     private readonly Dictionary<string, CachedValue<HashSet<string>>> cachedHashSet = new();
     private readonly Dictionary<string, CachedValue<int>> cachedInt = new();
     private readonly Dictionary<string, CachedValue<FeatureOption>> cachedOption = new();

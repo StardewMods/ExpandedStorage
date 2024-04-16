@@ -14,9 +14,12 @@ internal sealed class HslComponent
     private static readonly PerScreen<HslColor> SavedColor = new(() => HslComponent.Transparent);
     private static readonly HslColor Transparent = new(0, 0, 0);
 
+    private readonly Chest chest;
+    private readonly Rectangle chestArea;
     private readonly DiscreteColorPicker colorPicker;
     private readonly Rectangle copyArea;
     private readonly ClickableTextureComponent copyComponent;
+    private readonly IReflectedField<int> currentLidFrame;
     private readonly Rectangle defaultColorArea;
     private readonly ClickableTextureComponent defaultColorComponent;
     private readonly Func<Color> getColor;
@@ -29,12 +32,15 @@ internal sealed class HslComponent
     private readonly int yPosition;
 
     private Slider? holding;
+    private bool hoverChest;
+    private int lidFrameCount;
 
     /// <summary>Initializes a new instance of the <see cref="HslComponent" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="colorPicker">The vanilla color picker component.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="itemGrabMenuManager">Dependency used for managing the item grab menu.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="getColor">Get method for the current color.</param>
     /// <param name="setColor">Set method for the current color.</param>
@@ -45,6 +51,7 @@ internal sealed class HslComponent
         DiscreteColorPicker colorPicker,
         IInputHelper inputHelper,
         ItemGrabMenuManager itemGrabMenuManager,
+        IReflectionHelper reflectionHelper,
         IModConfig modConfig,
         Func<Color> getColor,
         Action<Color> setColor,
@@ -57,6 +64,9 @@ internal sealed class HslComponent
         this.setColor = setColor;
         this.xPosition = xPosition;
         this.yPosition = yPosition;
+        this.chest = (Chest)colorPicker.itemToDrawColored!;
+        this.currentLidFrame = reflectionHelper.GetField<int>(this.chest, "currentLidFrame");
+        this.currentLidFrame.SetValue(this.chest.startingLidFrame.Value);
 
         var playerChoiceColor = getColor();
         this.CurrentColor = HslComponent.Transparent;
@@ -66,11 +76,14 @@ internal sealed class HslComponent
             colorPicker.colorSelection =
                 (playerChoiceColor.R << 0) | (playerChoiceColor.G << 8) | (playerChoiceColor.B << 16);
 
-            if (colorPicker.itemToDrawColored is Chest chest)
-            {
-                chest.playerChoiceColor.Value = playerChoiceColor;
-            }
+            this.chest.playerChoiceColor.Value = playerChoiceColor;
         }
+
+        this.chestArea = new Rectangle(
+            xPosition,
+            yPosition - Game1.tileSize - (IClickableMenu.borderWidth / 2),
+            Game1.tileSize,
+            Game1.tileSize);
 
         this.copyArea = new Rectangle(xPosition + 30, yPosition - 4, 36, 36);
         this.copyComponent = new ClickableTextureComponent(
@@ -345,11 +358,30 @@ internal sealed class HslComponent
         }
 
         // Chest
-        (this.colorPicker.itemToDrawColored as Chest)?.draw(
-            spriteBatch,
-            this.xPosition,
-            this.yPosition - Game1.tileSize - (IClickableMenu.borderWidth / 2),
-            local: true);
+        var hovering = this.chestArea.Contains(mouseX, mouseY);
+        if (hovering != this.hoverChest)
+        {
+            this.lidFrameCount = 0;
+            this.hoverChest = hovering;
+        }
+        else if (++this.lidFrameCount < 5)
+        {
+            // Do nothing
+        }
+        else if (this.hoverChest)
+        {
+            this.lidFrameCount = 0;
+            var nextFrame = Math.Min(this.chest.getLastLidFrame(), this.currentLidFrame.GetValue() + 1);
+            this.currentLidFrame.SetValue(nextFrame);
+        }
+        else
+        {
+            this.lidFrameCount = 0;
+            var nextFrame = Math.Max(this.chest.startingLidFrame.Value, this.currentLidFrame.GetValue() - 1);
+            this.currentLidFrame.SetValue(nextFrame);
+        }
+
+        this.chest.draw(spriteBatch, this.chestArea.X, this.chestArea.Y, local: true);
 
         var isDown = this.inputHelper.IsDown(SButton.MouseLeft) || this.inputHelper.IsSuppressed(SButton.MouseLeft);
         if (!isDown)

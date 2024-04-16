@@ -7,8 +7,11 @@ using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 /// <summary>Mod config data for Better Chests.</summary>
 internal interface IModConfig
 {
-    /// <summary>Gets a value containing the default storage options.</summary>
+    /// <summary>Gets the default storage options.</summary>
     public DefaultStorageOptions DefaultOptions { get; }
+
+    /// <summary>Gets the default options for different storage types.</summary>
+    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions { get; }
 
     /// <summary>Gets a value indicating how many chests can be carried at once.</summary>
     public int CarryChestLimit { get; }

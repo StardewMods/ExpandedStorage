@@ -11,6 +11,7 @@ using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
+using StardewValley.TokenizableStrings;
 
 /// <inheritdoc cref="StardewMods.BetterChests.Framework.Interfaces.IModConfig" />
 internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
@@ -47,6 +48,9 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
     /// <inheritdoc />
     public DefaultStorageOptions DefaultOptions => this.Config.DefaultOptions;
+
+    /// <inheritdoc />
+    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions => this.Config.StorageOptions;
 
     /// <inheritdoc />
     public int CarryChestLimit => this.Config.CarryChestLimit;
@@ -106,6 +110,8 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         var gmcm = this.genericModConfigMenuIntegration.Api;
         var config = this.GetNew();
+        this.InitializeStorageTypes(config);
+
         this.genericModConfigMenuIntegration.Register(this.Reset, () => this.Save(config));
 
         gmcm.AddPageLink(this.manifest, "Main", I18n.Section_Main_Name);
@@ -117,8 +123,41 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         gmcm.AddPageLink(this.manifest, "Tweaks", I18n.Section_Tweaks_Name);
         gmcm.AddParagraph(this.manifest, I18n.Section_Tweaks_Description);
 
-        gmcm.AddPageLink(this.manifest, "Storages", I18n.Section_Storages_Name);
+        gmcm.AddSectionTitle(this.manifest, I18n.Section_Storages_Name);
         gmcm.AddParagraph(this.manifest, I18n.Section_Storages_Description);
+        var pages = new List<(string Id, string Title, IStorageOptions Options)>();
+        foreach (var (dataType, storageTypes) in config.StorageOptions)
+        {
+            foreach (var (storageId, storageOptions) in storageTypes)
+            {
+                string name;
+                string description;
+
+                switch (dataType)
+                {
+                    case "BigCraftables" when Game1.bigCraftableData.TryGetValue(storageId, out var bigCraftableData):
+                        name = TokenParser.ParseText(bigCraftableData.DisplayName);
+                        description = TokenParser.ParseText(bigCraftableData.Description);
+                        break;
+                    case "Buildings" when Game1.buildingData.TryGetValue(storageId, out var buildingData):
+                        name = TokenParser.ParseText(buildingData.Name);
+                        description = TokenParser.ParseText(buildingData.Description);
+                        break;
+                    case "Locations" when storageId == "FarmHouse":
+                        name = I18n.Storage_Fridge_Name();
+                        description = I18n.Storage_Fridge_Tooltip();
+                        break;
+                    case "Locations" when storageId == "IslandFarmHouse":
+                        name = I18n.Storage_IslandFridge_Name();
+                        description = I18n.Storage_IslandFridge_Tooltip();
+                        break;
+                    default: continue;
+                }
+
+                pages.Add(($"{dataType}_{storageId}", name, storageOptions));
+                gmcm.AddPageLink(this.manifest, $"{dataType}_{storageId}", () => name, () => description);
+            }
+        }
 
         gmcm.AddPage(this.manifest, "Main", I18n.Section_Main_Name);
         this.AddMainOption(config.DefaultOptions, true);
@@ -129,9 +168,11 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         gmcm.AddPage(this.manifest, "Tweaks", I18n.Section_Tweaks_Name);
         this.AddTweaks(config);
 
-        gmcm.AddPage(this.manifest, "Storages", I18n.Section_Storages_Name);
-        gmcm.AddSectionTitle(this.manifest, I18n.Storage_Default_Name);
-        gmcm.AddParagraph(this.manifest, I18n.Storage_Default_Tooltip);
+        foreach (var (id, title, options) in pages)
+        {
+            gmcm.AddPage(this.manifest, id, () => title);
+            this.AddMainOption(options, true);
+        }
     }
 
     /// <summary>Adds the main options to the config menu.</summary>
@@ -367,14 +408,41 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         // Resize Chest
+        var size = (int)options.ResizeChest;
+        gmcm.OnFieldChanged(
+            this.manifest,
+            (fieldId, fieldValue) =>
+            {
+                if (fieldId == nameof(options.ResizeChest)
+                    && fieldValue is string value
+                    && ChestMenuOptionExtensions.TryParse(value, out var option))
+                {
+                    size = (int)option;
+                }
+            });
+
         gmcm.AddNumberOption(
             this.manifest,
-            () => options.ResizeChestCapacity,
-            value => options.ResizeChestCapacity = value,
+            () => options.ResizeChestCapacity switch
+            {
+                -1 => 9,
+                _ when size > 1 => Math.Min(9, (int)Math.Ceiling((float)options.ResizeChestCapacity / size)),
+                0 => 0,
+                9 => 1,
+                36 => 2,
+                70 => 3,
+                _ => Math.Min(9, (int)Math.Ceiling(options.ResizeChestCapacity / 70f)),
+            },
+            value => options.ResizeChestCapacity = value switch
+            {
+                9 => -1, 0 => 0, _ when size > 1 => value * size, 1 => 9, 2 => 36, 3 => 70, _ => 70 * value,
+            },
             I18n.Config_ResizeChest_Name,
             I18n.Config_ResizeChest_Tooltip,
-            -1,
-            2520);
+            0,
+            9,
+            1,
+            value => this.localizedTextManager.FormatCapacity(value, size));
 
         // Resize Chest Menu
         if (isDefault || this.DefaultOptions.ResizeChest != ChestMenuOption.Disabled)
@@ -382,13 +450,14 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             gmcm.AddTextOption(
                 this.manifest,
                 () => options.ResizeChest.ToStringFast(),
-                value => options.ResizeChest = ChestMenuOptionExtensions.TryParse(value, out var capacity)
-                    ? capacity
+                value => options.ResizeChest = ChestMenuOptionExtensions.TryParse(value, out var option)
+                    ? option
                     : ChestMenuOption.Default,
                 I18n.Config_ResizeChestMenu_Name,
                 I18n.Config_ResizeChestMenu_Tooltip,
                 ChestMenuOptionExtensions.GetNames(),
-                this.localizedTextManager.Capacity);
+                this.localizedTextManager.ChestMenuSize,
+                nameof(options.ResizeChest));
         }
 
         // Search Items
@@ -763,8 +832,11 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             I18n.Config_SearchNegationSymbol_Tooltip);
     }
 
-    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) =>
+    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e)
+    {
+        this.InitializeStorageTypes(this.Config);
         this.log.Trace("Config changed:\n{0}", e.Config);
+    }
 
     private void OnGameLaunched(GameLaunchedEventArgs e)
     {
@@ -772,5 +844,237 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         {
             this.SetupMainConfig();
         }
+    }
+
+    private void InitializeStorageTypes(DefaultConfig config)
+    {
+        // Initialize Data Types
+        config.StorageOptions.TryAdd("BigCraftables", []);
+        config.StorageOptions.TryAdd("Buildings", []);
+        config.StorageOptions.TryAdd("Locations", []);
+
+        // Initialize Chest
+        config
+            .StorageOptions["BigCraftables"]
+            .TryAdd(
+                "130",
+                new DefaultStorageOptions
+                {
+                    ResizeChest = ChestMenuOption.Large,
+                    ResizeChestCapacity = 70,
+                });
+
+        // Initialize Stone Chest
+        config
+            .StorageOptions["BigCraftables"]
+            .TryAdd(
+                "232",
+                new DefaultStorageOptions
+                {
+                    ResizeChest = ChestMenuOption.Large,
+                    ResizeChestCapacity = 70,
+                });
+
+        // Initialize Junimo Chest
+        config
+            .StorageOptions["BigCraftables"]
+            .TryAdd(
+                "256",
+                new DefaultStorageOptions
+                {
+                    CraftFromChest = RangeOption.World,
+                    ResizeChest = ChestMenuOption.Medium,
+                    ResizeChestCapacity = 36,
+                    StashToChest = RangeOption.World,
+                });
+
+        // Initialize Mini-Fridge
+        config
+            .StorageOptions["BigCraftables"]
+            .TryAdd(
+                "213",
+                new DefaultStorageOptions
+                {
+                    HslColorPicker = FeatureOption.Disabled,
+                    InventoryTabs = FeatureOption.Disabled,
+                    ResizeChest = ChestMenuOption.Large,
+                    ResizeChestCapacity = -1,
+                    SearchItems = FeatureOption.Disabled,
+                });
+
+        // Initialize Mini-Shipping Bin
+        config
+            .StorageOptions["BigCraftables"]
+            .TryAdd(
+                "248",
+                new DefaultStorageOptions
+                {
+                    AutoOrganize = FeatureOption.Disabled,
+                    CarryChest = FeatureOption.Disabled,
+                    CategorizeChest = FeatureOption.Disabled,
+                    CategorizeChestAutomatically = FeatureOption.Disabled,
+                    ChestFinder = FeatureOption.Disabled,
+                    ChestInfo = FeatureOption.Disabled,
+                    CollectItems = FeatureOption.Disabled,
+                    ConfigureChest = FeatureOption.Disabled,
+                    CraftFromChest = RangeOption.Disabled,
+                    HslColorPicker = FeatureOption.Disabled,
+                    InventoryTabs = FeatureOption.Disabled,
+                    OpenHeldChest = FeatureOption.Disabled,
+                    ResizeChest = ChestMenuOption.Disabled,
+                    SearchItems = FeatureOption.Disabled,
+                    ShopFromChest = FeatureOption.Disabled,
+                    StashToChest = RangeOption.Disabled,
+                });
+
+        // Initialize Big Chest
+        config
+            .StorageOptions["BigCraftables"]
+            .TryAdd(
+                "BigChest",
+                new DefaultStorageOptions
+                {
+                    ResizeChest = ChestMenuOption.Large,
+                    ResizeChestCapacity = -1,
+                });
+
+        // Initialize Big Stone Chest
+        config
+            .StorageOptions["BigCraftables"]
+            .TryAdd(
+                "BigStoneChest",
+                new DefaultStorageOptions
+                {
+                    ResizeChest = ChestMenuOption.Large,
+                    ResizeChestCapacity = -1,
+                });
+
+        // Initialize Auto-Grabber
+        config
+            .StorageOptions["BigCraftables"]
+            .TryAdd(
+                "165",
+                new DefaultStorageOptions
+                {
+                    AutoOrganize = FeatureOption.Disabled,
+                    CarryChest = FeatureOption.Disabled,
+                    CategorizeChest = FeatureOption.Disabled,
+                    CategorizeChestAutomatically = FeatureOption.Disabled,
+                    ChestFinder = FeatureOption.Disabled,
+                    ChestInfo = FeatureOption.Disabled,
+                    CollectItems = FeatureOption.Disabled,
+                    ConfigureChest = FeatureOption.Disabled,
+                    CraftFromChest = RangeOption.Disabled,
+                    HslColorPicker = FeatureOption.Disabled,
+                    InventoryTabs = FeatureOption.Disabled,
+                    OpenHeldChest = FeatureOption.Disabled,
+                    ResizeChest = ChestMenuOption.Disabled,
+                    SearchItems = FeatureOption.Disabled,
+                    ShopFromChest = FeatureOption.Disabled,
+                    StashToChest = RangeOption.Disabled,
+                });
+
+        // Initialize Junimo Hut
+        config
+            .StorageOptions["Buildings"]
+            .TryAdd(
+                "Junimo Hut",
+                new DefaultStorageOptions
+                {
+                    AutoOrganize = FeatureOption.Disabled,
+                    CarryChest = FeatureOption.Disabled,
+                    CategorizeChest = FeatureOption.Disabled,
+                    CategorizeChestAutomatically = FeatureOption.Disabled,
+                    ChestFinder = FeatureOption.Disabled,
+                    ChestInfo = FeatureOption.Disabled,
+                    CollectItems = FeatureOption.Disabled,
+                    ConfigureChest = FeatureOption.Disabled,
+                    CraftFromChest = RangeOption.Disabled,
+                    HslColorPicker = FeatureOption.Disabled,
+                    InventoryTabs = FeatureOption.Disabled,
+                    OpenHeldChest = FeatureOption.Disabled,
+                    ResizeChest = ChestMenuOption.Disabled,
+                    SearchItems = FeatureOption.Disabled,
+                    ShopFromChest = FeatureOption.Disabled,
+                    StashToChest = RangeOption.Disabled,
+                });
+
+        // Initialize Mill
+        config
+            .StorageOptions["Buildings"]
+            .TryAdd(
+                "Mill",
+                new DefaultStorageOptions
+                {
+                    AutoOrganize = FeatureOption.Disabled,
+                    CarryChest = FeatureOption.Disabled,
+                    CategorizeChest = FeatureOption.Disabled,
+                    CategorizeChestAutomatically = FeatureOption.Disabled,
+                    ChestFinder = FeatureOption.Disabled,
+                    ChestInfo = FeatureOption.Disabled,
+                    CollectItems = FeatureOption.Disabled,
+                    ConfigureChest = FeatureOption.Disabled,
+                    CraftFromChest = RangeOption.Disabled,
+                    HslColorPicker = FeatureOption.Disabled,
+                    InventoryTabs = FeatureOption.Disabled,
+                    OpenHeldChest = FeatureOption.Disabled,
+                    ResizeChest = ChestMenuOption.Disabled,
+                    SearchItems = FeatureOption.Disabled,
+                    ShopFromChest = FeatureOption.Disabled,
+                    StashToChest = RangeOption.Disabled,
+                });
+
+        // Initialize Shipping Bin
+        config
+            .StorageOptions["Buildings"]
+            .TryAdd(
+                "Shipping Bin",
+                new DefaultStorageOptions
+                {
+                    AutoOrganize = FeatureOption.Disabled,
+                    CarryChest = FeatureOption.Disabled,
+                    CategorizeChest = FeatureOption.Disabled,
+                    CategorizeChestAutomatically = FeatureOption.Disabled,
+                    ChestFinder = FeatureOption.Disabled,
+                    ChestInfo = FeatureOption.Disabled,
+                    CollectItems = FeatureOption.Disabled,
+                    ConfigureChest = FeatureOption.Disabled,
+                    CraftFromChest = RangeOption.Disabled,
+                    HslColorPicker = FeatureOption.Disabled,
+                    InventoryTabs = FeatureOption.Disabled,
+                    OpenHeldChest = FeatureOption.Disabled,
+                    ResizeChest = ChestMenuOption.Disabled,
+                    SearchItems = FeatureOption.Disabled,
+                    ShopFromChest = FeatureOption.Disabled,
+                    StashToChest = RangeOption.Disabled,
+                });
+
+        // Initialize FarmHouse
+        config
+            .StorageOptions["Locations"]
+            .TryAdd(
+                "FarmHouse",
+                new DefaultStorageOptions
+                {
+                    HslColorPicker = FeatureOption.Disabled,
+                    InventoryTabs = FeatureOption.Disabled,
+                    ResizeChest = ChestMenuOption.Large,
+                    ResizeChestCapacity = -1,
+                    SearchItems = FeatureOption.Disabled,
+                });
+
+        // Initialize IslandFarmHouse
+        config
+            .StorageOptions["Locations"]
+            .TryAdd(
+                "IslandFarmHouse",
+                new DefaultStorageOptions
+                {
+                    HslColorPicker = FeatureOption.Disabled,
+                    InventoryTabs = FeatureOption.Disabled,
+                    ResizeChest = ChestMenuOption.Large,
+                    ResizeChestCapacity = -1,
+                    SearchItems = FeatureOption.Disabled,
+                });
     }
 }

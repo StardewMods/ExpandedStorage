@@ -13,6 +13,9 @@ internal sealed class DefaultConfig : IModConfig
     public DefaultStorageOptions DefaultOptions { get; set; } = new();
 
     /// <inheritdoc />
+    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions { get; set; } = [];
+
+    /// <inheritdoc />
     public int CarryChestLimit { get; set; } = 3;
 
     /// <inheritdoc />

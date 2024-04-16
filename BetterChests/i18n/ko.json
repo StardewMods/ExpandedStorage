@@ -149,10 +149,8 @@
   "option.inventory.name": "인벤토리",
   "option.location.name": "현재 위치",
   "option.world.name": "어디서나",
-  // Capacity Options
-  "capacity.small.name": "9칸",
-  "capacity.medium.name": "36칸",
-  "capacity.large.name": "70칸",
+  // Chest Menu Options
+  "capacity.other.name": "{{slots}}칸",
   "capacity.unlimited.name": "무제한",
   // Method Options
   "method.sorted.name": "정렬됨",
