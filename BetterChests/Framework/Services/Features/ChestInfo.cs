@@ -149,8 +149,7 @@ internal sealed class ChestInfo : BaseFeature<ChestInfo>
     private void RefreshInfo()
     {
         this.cachedInfo.Value.Clear();
-        if (!this.containerFactory.TryGetOneFromMenu(out var container)
-            || container.Options.ChestInfo != FeatureOption.Enabled)
+        if (!this.containerFactory.TryGetOne(out var container) || container.Options.ChestInfo != FeatureOption.Enabled)
         {
             return;
         }
@@ -158,17 +157,12 @@ internal sealed class ChestInfo : BaseFeature<ChestInfo>
         // Add type
         this.cachedInfo.Value.Add(new Info(I18n.ChestInfo_Type(), container.DisplayName));
 
-        if (container.Location is not null)
-        {
-            // Add location
-            this.cachedInfo.Value.Add(new Info(I18n.ChestInfo_Location(), container.Location.Name));
+        // Add location
+        this.cachedInfo.Value.Add(new Info(I18n.ChestInfo_Location(), container.Location.Name));
 
-            // Add position
-            this.cachedInfo.Value.Add(
-                new Info(
-                    I18n.ChestInfo_Position(),
-                    $"{(int)container.TileLocation.X}, {(int)container.TileLocation.Y}"));
-        }
+        // Add position
+        this.cachedInfo.Value.Add(
+            new Info(I18n.ChestInfo_Position(), $"{(int)container.TileLocation.X}, {(int)container.TileLocation.Y}"));
 
         // Add inventory
         if (container is ChildContainer

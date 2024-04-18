@@ -3,6 +3,7 @@ namespace StardewMods.BetterChests.Framework.Models.Containers;
 using Microsoft.Xna.Framework;
 using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewValley.Inventories;
+using StardewValley.Menus;
 using StardewValley.Mods;
 using StardewValley.Network;
 using StardewValley.Objects;
@@ -53,7 +54,23 @@ internal class ChestContainer : BaseContainer<Chest>
             Game1.player.currentLocation.localSound("openChest");
         }
 
-        this.Chest.ShowMenu();
+        Game1.activeClickableMenu = new ItemGrabMenu(
+            this.Items,
+            false,
+            true,
+            InventoryMenu.highlightAllItems,
+            this.GrabItemFromInventory,
+            null,
+            this.GrabItemFromChest,
+            false,
+            true,
+            true,
+            true,
+            true,
+            1,
+            this.Chest,
+            -1,
+            this.Chest);
     }
 
     /// <inheritdoc />

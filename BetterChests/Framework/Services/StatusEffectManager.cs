@@ -1,6 +1,7 @@
 namespace StardewMods.BetterChests.Framework.Services;
 
 using StardewMods.BetterChests.Framework.Enums;
+using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Buffs;
@@ -8,11 +9,15 @@ using StardewValley.Buffs;
 /// <summary>Responsible for adding or removing custom buffs.</summary>
 internal sealed class StatusEffectManager : BaseService<StatusEffectManager>
 {
+    private readonly IModConfig modConfig;
+
     /// <summary>Initializes a new instance of the <see cref="StatusEffectManager" /> class.</summary>
     /// <param name="log">Dependency used for monitoring and logging.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public StatusEffectManager(ILog log, IManifest manifest)
-        : base(log, manifest) { }
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    public StatusEffectManager(ILog log, IManifest manifest, IModConfig modConfig)
+        : base(log, manifest) =>
+        this.modConfig = modConfig;
 
     /// <summary>Adds a custom status effect to the player.</summary>
     /// <param name="statusEffect">The status effect to add.</param>
@@ -30,7 +35,7 @@ internal sealed class StatusEffectManager : BaseService<StatusEffectManager>
 
     /// <summary>Checks if the specified status effect is currently active on the player.</summary>
     /// <param name="statusEffect">The status effect to check.</param>
-    /// <returns>True if the status effect is active on the player, otherwise false.</returns>
+    /// <returns>true if the status effect is active on the player; otherwise, false.</returns>
     public bool HasEffect(StatusEffect statusEffect)
     {
         var id = this.GetId(statusEffect);
@@ -66,7 +71,7 @@ internal sealed class StatusEffectManager : BaseService<StatusEffectManager>
                 duration: 60_000,
                 iconTexture: Game1.buffsIcons,
                 iconSheetIndex: 13,
-                effects: new BuffEffects { Speed = { -1 } }),
+                effects: new BuffEffects { Speed = { this.modConfig.CarryChestSlowAmount } }),
             _ => null,
         };
 }

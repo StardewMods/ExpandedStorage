@@ -1,5 +1,11 @@
 # Custom Bush Change Log
 
+## 1.2.0 (April 15, 2024)
+
+### Added
+
+* Added support for Automate.
+
 ## 1.1.1 (April 12, 2024)
 
 ### Changed

@@ -7,7 +7,6 @@ using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.GarbageDay.Framework.Interfaces;
-using StardewMods.GarbageDay.Framework.Models;
 using StardewMods.GarbageDay.Framework.Services;
 
 /// <inheritdoc />
@@ -48,6 +47,4 @@ public sealed class ModEntry : Mod
         // Verify
         this.container.Verify();
     }
-
-    private static void GarbageHat(string command, string[] args) => GarbageCan.GarbageHat = true;
 }

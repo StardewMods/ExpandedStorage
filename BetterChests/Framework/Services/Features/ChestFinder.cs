@@ -5,8 +5,8 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
+using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Services.Factory;
-using StardewMods.BetterChests.Framework.Services.Transient;
 using StardewMods.BetterChests.Framework.UI;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
@@ -22,10 +22,10 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     private readonly PerScreen<int> currentIndex = new();
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<bool> isActive = new();
-    private readonly PerScreen<ItemMatcher> itemMatcher;
     private readonly PerScreen<List<Pointer>> pointers = new(() => []);
     private readonly PerScreen<bool> resetCache = new(() => true);
     private readonly PerScreen<SearchBar> searchBar;
+    private readonly PerScreen<ISearchExpression?> searchExpression;
     private readonly PerScreen<SearchOverlay> searchOverlay;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
@@ -34,36 +34,54 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="itemMatcherFactory">Dependency used for getting an ItemMatcher.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="searchExpression">Dependency for retrieving a parsed search expression.</param>
+    /// <param name="searchHandler">Dependency used for handling search.</param>
+    /// <param name="searchText">Dependency for retrieving the unified search text.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public ChestFinder(
         AssetHandler assetHandler,
         ContainerFactory containerFactory,
         IEventManager eventManager,
         IInputHelper inputHelper,
-        ItemMatcherFactory itemMatcherFactory,
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
+        PerScreen<ISearchExpression?> searchExpression,
+        SearchHandler searchHandler,
+        PerScreen<string> searchText,
         ToolbarIconsIntegration toolbarIconsIntegration)
         : base(eventManager, log, manifest, modConfig)
     {
         this.assetHandler = assetHandler;
         this.containerFactory = containerFactory;
         this.inputHelper = inputHelper;
+        this.searchExpression = searchExpression;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
-        this.itemMatcher = new PerScreen<ItemMatcher>(itemMatcherFactory.GetOneForSearch);
         this.searchBar = new PerScreen<SearchBar>(
             () => new SearchBar(
-                () => this.itemMatcher.Value.SearchText,
+                () => searchText.Value,
                 value =>
                 {
-                    this.Log.Trace("{0}: Searching for {1}", this.Id, value);
-                    this.itemMatcher.Value.SearchText = value;
+                    if (!string.IsNullOrWhiteSpace(value))
+                    {
+                        this.Log.Trace("{0}: Searching for {1}", this.Id, value);
+                    }
+
+                    if (searchText.Value == value)
+                    {
+                        return;
+                    }
+
+                    searchText.Value = value;
                     this.resetCache.Value = true;
+                    this.searchExpression.Value = searchHandler.TryParseExpression(value, out var expression)
+                        ? expression
+                        : null;
+
+                    this.Events.Publish(new SearchChangedEventArgs(this.searchExpression.Value));
                 }));
 
         this.searchOverlay = new PerScreen<SearchOverlay>(() => new SearchOverlay(this.searchBar.Value));
@@ -81,6 +99,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         this.Events.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         this.Events.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
         this.Events.Subscribe<ChestInventoryChangedEventArgs>(this.OnChestInventoryChanged);
+        this.Events.Subscribe<SearchChangedEventArgs>(this.OnSearchChanged);
         this.Events.Subscribe<WarpedEventArgs>(this.OnWarped);
 
         // Integrations
@@ -107,6 +126,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         this.Events.Unsubscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         this.Events.Unsubscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
         this.Events.Unsubscribe<ChestInventoryChangedEventArgs>(this.OnChestInventoryChanged);
+        this.Events.Subscribe<SearchChangedEventArgs>(this.OnSearchChanged);
         this.Events.Unsubscribe<WarpedEventArgs>(this.OnWarped);
 
         // Integrations
@@ -156,14 +176,19 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
             && this.Config.Controls.FindChest.JustPressed())
         {
             this.OpenSearchBar();
+            this.searchBar.Value.Reset();
             this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.FindChest);
             return;
         }
 
         // Close Search Bar
-        if (this.isActive.Value && this.Config.Controls.CloseChestFinder.JustPressed())
+        if (Context.IsPlayerFree
+            && Game1.displayHUD
+            && Game1.activeClickableMenu is null
+            && this.isActive.Value
+            && this.Config.Controls.CloseChestFinder.JustPressed())
         {
-            this.CloseSearchBar();
+            this.isActive.Value = false;
             this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.CloseChestFinder);
             return;
         }
@@ -229,11 +254,18 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         this.searchBar.Value.Update(mouseX, mouseY);
     }
 
+    private void OnSearchChanged(SearchChangedEventArgs e)
+    {
+        this.resetCache.Value = true;
+        this.searchBar.Value.Reset();
+    }
+
     private void OnWarped(WarpedEventArgs e) => this.resetCache.Value = true;
 
     private void OpenSearchBar()
     {
         this.isActive.Value = true;
+        this.searchBar.Value.Reset();
         this.searchOverlay.Value.Show();
     }
 
@@ -243,13 +275,6 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         {
             this.OpenSearchBar();
         }
-    }
-
-    private void CloseSearchBar()
-    {
-        this.isActive.Value = false;
-        this.pointers.Value.Clear();
-        this.resetCache.Value = true;
     }
 
     private void OpenFoundChest()
@@ -274,18 +299,18 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     private void SearchForStorages()
     {
         this.pointers.Value.Clear();
-        if (this.itemMatcher.Value.IsEmpty)
+        if (this.searchExpression.Value is null)
         {
             return;
         }
 
         foreach (var container in this
-            .containerFactory.GetAllFromLocation(
+            .containerFactory.GetAll(
                 Game1.player.currentLocation,
                 container => container.Options.ChestFinder == FeatureOption.Enabled)
             .Where(container => container is ChestContainer or ObjectContainer))
         {
-            if (container.Items.Any(this.itemMatcher.Value.MatchesFilter))
+            if (container.Items.Any(this.searchExpression.Value.PartialMatch))
             {
                 this.pointers.Value.Add(new Pointer(container));
             }

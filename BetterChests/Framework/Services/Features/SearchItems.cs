@@ -4,8 +4,6 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Events;
-using StardewMods.BetterChests.Framework.Services.Factory;
-using StardewMods.BetterChests.Framework.Services.Transient;
 using StardewMods.BetterChests.Framework.UI;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
@@ -18,33 +16,37 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<bool> isActive = new();
     private readonly ItemGrabMenuManager itemGrabMenuManager;
-    private readonly PerScreen<ItemMatcher> itemMatcher;
     private readonly PerScreen<SearchBar> searchBar;
+    private readonly PerScreen<ISearchExpression?> searchExpression;
 
     /// <summary>Initializes a new instance of the <see cref="SearchItems" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="itemGrabMenuManager">Dependency used for managing the item grab menu.</param>
-    /// <param name="itemMatcherFactory">Dependency used for getting an ItemMatcher.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="searchExpression">Dependency for retrieving a parsed search expression.</param>
+    /// <param name="searchHandler">Dependency used for handling search.</param>
+    /// <param name="searchText">Dependency for retrieving the unified search text.</param>
     public SearchItems(
         IEventManager eventManager,
         IInputHelper inputHelper,
         ItemGrabMenuManager itemGrabMenuManager,
-        ItemMatcherFactory itemMatcherFactory,
         ILog log,
         IManifest manifest,
-        IModConfig modConfig)
+        IModConfig modConfig,
+        PerScreen<ISearchExpression?> searchExpression,
+        SearchHandler searchHandler,
+        PerScreen<string> searchText)
         : base(eventManager, log, manifest, modConfig)
     {
         this.inputHelper = inputHelper;
         this.itemGrabMenuManager = itemGrabMenuManager;
-        this.itemMatcher = new PerScreen<ItemMatcher>(itemMatcherFactory.GetOneForSearch);
+        this.searchExpression = searchExpression;
         this.searchBar = new PerScreen<SearchBar>(
             () => new SearchBar(
-                () => this.itemMatcher.Value.SearchText,
+                () => searchText.Value,
                 value =>
                 {
                     if (!string.IsNullOrWhiteSpace(value))
@@ -52,7 +54,17 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
                         this.Log.Trace("{0}: Searching for {1}", this.Id, value);
                     }
 
-                    this.itemMatcher.Value.SearchText = value;
+                    if (searchText.Value == value)
+                    {
+                        return;
+                    }
+
+                    searchText.Value = value;
+                    this.searchExpression.Value = searchHandler.TryParseExpression(value, out var expression)
+                        ? expression
+                        : null;
+
+                    this.Events.Publish(new SearchChangedEventArgs(this.searchExpression.Value));
                 }));
     }
 
@@ -68,6 +80,9 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         this.Events.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         this.Events.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
         this.Events.Subscribe<ItemGrabMenuChangedEventArgs>(this.OnItemGrabMenuChanged);
+        this.Events.Subscribe<ItemHighlightingEventArgs>(this.OnItemHighlighting);
+        this.Events.Subscribe<ItemsDisplayingEventArgs>(this.OnItemsDisplaying);
+        this.Events.Subscribe<SearchChangedEventArgs>(this.OnSearchChanged);
     }
 
     /// <inheritdoc />
@@ -79,22 +94,16 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         this.Events.Unsubscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         this.Events.Unsubscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
         this.Events.Unsubscribe<ItemGrabMenuChangedEventArgs>(this.OnItemGrabMenuChanged);
+        this.Events.Unsubscribe<ItemHighlightingEventArgs>(this.OnItemHighlighting);
+        this.Events.Unsubscribe<ItemsDisplayingEventArgs>(this.OnItemsDisplaying);
+        this.Events.Unsubscribe<SearchChangedEventArgs>(this.OnSearchChanged);
     }
-
-    private IEnumerable<Item> FilterBySearch(IEnumerable<Item> items) =>
-        this.itemMatcher.Value.IsEmpty
-            ? items
-            : this.Config.SearchItemsMethod switch
-            {
-                FilterMethod.Sorted or FilterMethod.GrayedOut => items.OrderByDescending(
-                    this.itemMatcher.Value.MatchesFilter),
-                FilterMethod.Hidden => items.Where(this.itemMatcher.Value.MatchesFilter),
-                _ => items,
-            };
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
-        if (!this.isActive.Value || this.itemGrabMenuManager.CurrentMenu is null)
+        if (!this.isActive.Value
+            || this.itemGrabMenuManager.CurrentMenu is null
+            || !this.itemGrabMenuManager.CanFocus(this))
         {
             return;
         }
@@ -161,18 +170,55 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             || this.itemGrabMenuManager.Top.Container?.Options.SearchItems != FeatureOption.Enabled)
         {
             this.isActive.Value = false;
-            this.searchBar.Value.Clear();
             return;
         }
 
         var top = this.itemGrabMenuManager.Top;
-        this.isActive.Value = true;
-        this.searchBar.Value.MoveTo(
-            top.Menu.xPositionOnScreen + 512,
-            top.Menu.yPositionOnScreen - (IClickableMenu.borderWidth / 2) - Game1.tileSize - (top.Rows == 3 ? 20 : 4));
+        this.searchBar.Value.Reset();
+        this.searchBar.Value.Width = Math.Min(12 * Game1.tileSize, Game1.uiViewport.Width);
 
-        this.searchBar.Value.SetWidth(top.Columns == 12 ? 284 : 384);
-        this.itemGrabMenuManager.Top.AddHighlightMethod(this.itemMatcher.Value.MatchesFilter);
-        this.itemGrabMenuManager.Top.AddOperation(this.FilterBySearch);
+        this.searchBar.Value.X = top.Columns switch
+        {
+            3 => top.Menu.inventory[1].bounds.Center.X - (this.searchBar.Value.Width / 2),
+            12 => top.Menu.inventory[5].bounds.Right - (this.searchBar.Value.Width / 2),
+            14 => top.Menu.inventory[6].bounds.Right - (this.searchBar.Value.Width / 2),
+        };
+
+        this.searchBar.Value.Y = top.Menu.yPositionOnScreen
+            - (IClickableMenu.borderWidth / 2)
+            - Game1.tileSize
+            - (top.Rows == 3 ? 20 : 4);
+
+        this.isActive.Value = true;
     }
+
+    private void OnItemHighlighting(ItemHighlightingEventArgs e)
+    {
+        if (this.searchExpression.Value?.PartialMatch(e.Item) == false)
+        {
+            e.UnHighlight();
+        }
+    }
+
+    private void OnItemsDisplaying(ItemsDisplayingEventArgs e)
+    {
+        if (this.searchExpression.Value is null
+            || this.Config.SearchItemsMethod is not (FilterMethod.Sorted
+                or FilterMethod.GrayedOut
+                or FilterMethod.Hidden))
+        {
+            return;
+        }
+
+        e.Edit(
+            items => this.Config.SearchItemsMethod switch
+            {
+                FilterMethod.Sorted or FilterMethod.GrayedOut => items.OrderByDescending(
+                    this.searchExpression.Value.PartialMatch),
+                FilterMethod.Hidden => items.Where(this.searchExpression.Value.PartialMatch),
+                _ => items,
+            });
+    }
+
+    private void OnSearchChanged(SearchChangedEventArgs e) => this.searchBar.Value.Reset();
 }

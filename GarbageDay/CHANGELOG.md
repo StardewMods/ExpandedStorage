@@ -1,5 +1,16 @@
 # Garbage Day Change Log
 
+## 3.1.8 (April 15, 2024)
+
+### Changed
+
+* Toolbar icon forces the trash can lid event on the nearby garbage can.
+* Provide default options for Better Chests.
+
+### Fixed
+
+* Fixed garbage cans dropping infinite special items.
+
 ## 3.1.7 (April 12, 2024)
 
 ### Changed

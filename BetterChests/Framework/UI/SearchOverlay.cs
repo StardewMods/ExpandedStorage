@@ -23,10 +23,13 @@ internal sealed class SearchOverlay : IClickableMenu
     /// <inheritdoc />
     public override void receiveKeyPress(Keys key)
     {
-        if (key is Keys.Enter or Keys.Escape)
+        if (key is not (Keys.Enter or Keys.Escape))
         {
-            this.exitThisMenuNoSound();
+            return;
         }
+
+        this.searchBar.Update();
+        this.exitThisMenuNoSound();
     }
 
     /// <inheritdoc />
@@ -61,12 +64,13 @@ internal sealed class SearchOverlay : IClickableMenu
     public void Show()
     {
         Game1.activeClickableMenu = this;
-        this.searchBar.SetWidth(Math.Min(12 * Game1.tileSize, Game1.uiViewport.Width));
+        this.searchBar.Width = Math.Min(12 * Game1.tileSize, Game1.uiViewport.Width);
         var origin = Utility.getTopLeftPositionForCenteringOnScreen(
             this.searchBar.Area.Width,
             this.searchBar.Area.Height);
 
-        this.searchBar.MoveTo((int)origin.X, Game1.tileSize);
+        this.searchBar.X = (int)origin.X;
+        this.searchBar.Y = Game1.tileSize;
         this.searchBar.Selected = true;
     }
 }

@@ -50,7 +50,7 @@ internal sealed class BetterCraftingInventoryProvider : BaseService, IInventoryP
 
     /// <inheritdoc />
     public bool IsItemValid(object obj, GameLocation? location, Farmer? who, Item item) =>
-        obj is IStorageContainer container && this.containerHandler.CanAddItem(container, item);
+        obj is IStorageContainer container && this.containerHandler.CanAddItem(container, item, true);
 
     /// <inheritdoc />
     public void CleanInventory(object obj, GameLocation? location, Farmer? who) =>

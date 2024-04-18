@@ -35,13 +35,13 @@ public sealed class BetterChestsApi : IBetterChestsApi
     public IEnumerable<IStorageContainer> GetAllContainersFromLocation(
         GameLocation location,
         Func<IStorageContainer, bool>? predicate = default) =>
-        this.containerFactory.GetAllFromLocation(location, predicate);
+        this.containerFactory.GetAll(location, predicate);
 
     /// <inheritdoc />
     public IEnumerable<IStorageContainer> GetAllContainersFromPlayer(
         Farmer farmer,
         Func<IStorageContainer, bool>? predicate = default) =>
-        this.containerFactory.GetAllFromPlayer(farmer, predicate);
+        this.containerFactory.GetAll(farmer, predicate);
 
     /// <inheritdoc />
     public IEnumerable<(string ItemId, int Amount, bool Prevented)> Transfer(
@@ -64,18 +64,18 @@ public sealed class BetterChestsApi : IBetterChestsApi
         GameLocation location,
         Vector2 pos,
         [NotNullWhen(true)] out IStorageContainer? container) =>
-        this.containerFactory.TryGetOneFromLocation(location, pos, out container);
+        this.containerFactory.TryGetOne(location, pos, out container);
 
     /// <inheritdoc />
     public bool TryGetContainerFromMenu([NotNullWhen(true)] out IStorageContainer? container) =>
-        this.containerFactory.TryGetOneFromMenu(out container);
+        this.containerFactory.TryGetOne(out container);
 
     /// <inheritdoc />
     public bool TryGetContainerFromPlayer(
         Farmer farmer,
-        [NotNullWhen(true)] out IStorageContainer? container,
-        int index = -1) =>
-        this.containerFactory.TryGetOneFromPlayer(farmer, out container, index);
+        int index,
+        [NotNullWhen(true)] out IStorageContainer? container) =>
+        this.containerFactory.TryGetOne(farmer, index, out container);
 
     /// <inheritdoc />
     public bool TryGetContainerFromBackpack(Farmer farmer, [NotNullWhen(true)] out IStorageContainer? container) =>

@@ -195,7 +195,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
                 && chest.modData.TryGetValue(this.ModId + "/WhichCan", out var whichCan)
                 && this.garbageCans.TryGetValue(whichCan, out var garbageCan))
             {
-                garbageCan.AddLoot(this.Log);
+                garbageCan.AddLoot(this.Log, ItemRegistry.Create("(H)66"));
             }
         }
     }
@@ -266,6 +266,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
         chest.playerChoiceColor.Value = Color.DarkGray;
         chest.modData[this.ModId + "/WhichCan"] = foundGarbageCan.WhichCan;
         chest.modData["Pathoschild.ChestsAnywhere/IsIgnored"] = "true";
+        chest.modData["furyx639.BetterChests/StorageName"] = $"{I18n.GarbageCan_Name()} {foundGarbageCan.WhichCan}";
 
         // Create garbage can
         garbageCan = new GarbageCan(chest);

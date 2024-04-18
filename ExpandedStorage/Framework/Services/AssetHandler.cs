@@ -32,8 +32,8 @@ internal sealed class AssetHandler : BaseService
     /// <summary>Tries to retrieve the storage data associated with the specified item.</summary>
     /// <param name="item">The item for which to retrieve the data.</param>
     /// <param name="storageData">
-    /// When this method returns, contains the data associated with the specified item, if the
-    /// retrieval succeeds; otherwise, null. This parameter is passed uninitialized.
+    /// When this method returns, contains the data associated with the specified item; otherwise,
+    /// null.
     /// </param>
     /// <returns>true if the data was successfully retrieved; otherwise, false.</returns>
     public bool TryGetData(Item item, [NotNullWhen(true)] out IStorageData? storageData)

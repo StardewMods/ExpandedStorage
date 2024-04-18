@@ -69,5 +69,11 @@ internal class ChildContainer : IStorageContainer
     public bool TryRemove(Item item) => this.child.TryRemove(item);
 
     /// <inheritdoc />
+    public void GrabItemFromInventory(Item item, Farmer who) => this.child.GrabItemFromInventory(item, who);
+
+    /// <inheritdoc />
+    public void GrabItemFromChest(Item item, Farmer who) => this.child.GrabItemFromChest(item, who);
+
+    /// <inheritdoc />
     public override string ToString() => $"{this.DisplayName} in {this.Parent}";
 }

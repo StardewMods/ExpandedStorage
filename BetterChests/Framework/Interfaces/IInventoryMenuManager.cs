@@ -20,15 +20,4 @@ internal interface IInventoryMenuManager
 
     /// <summary>Gets the number of rows of the inventory menu.</summary>
     public int Rows { get; }
-
-    /// <summary>Gets or sets the number of rows that the inventory menu will be scrolled by.</summary>
-    public int Scrolled { get; set; }
-
-    /// <summary>Adds a filter method to the inventory menu.</summary>
-    /// <param name="highlightMethod">The filter method to add.</param>
-    public void AddHighlightMethod(InventoryMenu.highlightThisItem highlightMethod);
-
-    /// <summary>Adds the specified operation.</summary>
-    /// <param name="operation">The operation to register.</param>
-    public void AddOperation(Func<IEnumerable<Item>, IEnumerable<Item>> operation);
 }

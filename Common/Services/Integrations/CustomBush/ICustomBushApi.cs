@@ -11,7 +11,7 @@ public interface ICustomBushApi
 
     /// <summary>Determines if the given Bush instance is a custom bush.</summary>
     /// <param name="bush">The bush instance to check.</param>
-    /// <returns>True if the bush is a custom bush, otherwise false.</returns>
+    /// <returns>true if the bush is a custom bush, otherwise false.</returns>
     public bool IsCustomBush(Bush bush);
 
     /// <summary>Tries to get the custom bush model associated with the given bush.</summary>

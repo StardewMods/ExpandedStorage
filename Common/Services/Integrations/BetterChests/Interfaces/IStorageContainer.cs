@@ -53,4 +53,14 @@ public interface IStorageContainer
     /// <param name="remaining">When this method returns, contains the remaining item after addition, if any.</param>
     /// <returns>True if the item was successfully given; otherwise, false.</returns>
     public bool TryAdd(Item item, out Item? remaining);
+
+    /// <summary>Grabs an item from the inventory.</summary>
+    /// <param name="item">The item to grab from the inventory.</param>
+    /// <param name="who">The farmer who is grabbing the item.</param>
+    public void GrabItemFromInventory(Item item, Farmer who);
+
+    /// <summary>Grabs an item from the chest.</summary>
+    /// <param name="item">The item to be grabbed from the chest.</param>
+    /// <param name="who">The farmer who is grabbing the item.</param>
+    public void GrabItemFromChest(Item item, Farmer who);
 }

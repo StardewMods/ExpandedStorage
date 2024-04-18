@@ -18,7 +18,7 @@ internal sealed class Pointer
     /// <param name="spriteBatch">The sprite batch used for drawing.</param>
     public void Draw(SpriteBatch spriteBatch)
     {
-        var position = new Vector2(this.Container.TileLocation.X + 0.5f, this.Container.TileLocation.Y - 0.75f)
+        var position = new Vector2(this.Container.TileLocation.X + 0.5f, this.Container.TileLocation.Y - 1f)
             * Game1.tileSize;
 
         var onScreenPos = default(Vector2);

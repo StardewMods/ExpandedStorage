@@ -50,13 +50,13 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
     {
         var containerGroupsTo = this
             .containerFactory.GetAll(container => container.Options.AutoOrganize == FeatureOption.Enabled)
-            .GroupBy(container => container.Options.StashToChestPriority)
+            .GroupBy(container => (int)container.Options.StashToChestPriority)
             .ToDictionary(containerGroup => containerGroup.Key, group => group.ToList());
 
         var containerGroupsFrom = new Dictionary<int, List<IStorageContainer>>();
         foreach (var (priority, containers) in containerGroupsTo)
         {
-            containerGroupsFrom.Add(priority, new List<IStorageContainer>(containers));
+            containerGroupsFrom.Add(priority, [..containers]);
         }
 
         var topPriority = containerGroupsTo.Keys.Max();
@@ -81,11 +81,6 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
                     var containerTo = containersTo[indexTo];
                     for (var indexFrom = containersFrom.Count - 1; indexFrom >= 0; --indexFrom)
                     {
-                        if (containerTo.Items.Count >= containerTo.Capacity)
-                        {
-                            break;
-                        }
-
                         var containerFrom = containersFrom[indexFrom];
                         if (!this.containerHandler.Transfer(containerFrom, containerTo, out var amounts))
                         {

@@ -1,9 +1,11 @@
 namespace StardewMods.BetterChests.Framework.Models.Containers;
 
 using Microsoft.Xna.Framework;
+using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewValley.Buildings;
 using StardewValley.Inventories;
+using StardewValley.Menus;
 using StardewValley.Mods;
 using StardewValley.Network;
 using StardewValley.Objects;
@@ -67,20 +69,115 @@ internal sealed class BuildingContainer : BaseContainer<Building>
     /// <inheritdoc />
     public override void ShowMenu(bool playSound = false)
     {
-        if (this.chest is not null)
+        switch (this.Building)
         {
-            if (playSound)
-            {
-                Game1.player.currentLocation.localSound("openChest");
-            }
+            case ShippingBin shippingBin:
+                if (playSound)
+                {
+                    Game1.player.currentLocation.localSound("shwip");
+                }
 
-            this.chest.ShowMenu();
-            return;
-        }
+                ItemGrabMenu itemGrabMenu;
 
-        if (Game1.activeClickableMenu.readyToClose())
-        {
-            Game1.activeClickableMenu.exitThisMenuNoSound();
+                if (this.Options.ResizeChest is ChestMenuOption.Default or ChestMenuOption.Disabled)
+                {
+                    itemGrabMenu = new ItemGrabMenu(
+                        null,
+                        true,
+                        false,
+                        Utility.highlightShippableObjects,
+                        this.GrabItemFromInventory,
+                        null,
+                        null,
+                        true,
+                        true,
+                        false,
+                        true,
+                        false,
+                        0,
+                        null,
+                        -1,
+                        shippingBin);
+
+                    itemGrabMenu.initializeUpperRightCloseButton();
+                    itemGrabMenu.setBackgroundTransparency(b: false);
+                    itemGrabMenu.setDestroyItemOnClick(b: true);
+                    itemGrabMenu.initializeShippingBin();
+                }
+                else
+                {
+                    itemGrabMenu = new ItemGrabMenu(
+                        this.Items,
+                        false,
+                        true,
+                        Utility.highlightShippableObjects,
+                        this.GrabItemFromInventory,
+                        null,
+                        this.GrabItemFromChest,
+                        false,
+                        true,
+                        true,
+                        true,
+                        true,
+                        0,
+                        null,
+                        -1,
+                        shippingBin);
+                }
+
+                Game1.activeClickableMenu = itemGrabMenu;
+
+                break;
+
+            case JunimoHut when this.chest is not null:
+                Game1.activeClickableMenu = new ItemGrabMenu(
+                    this.Items,
+                    false,
+                    true,
+                    InventoryMenu.highlightAllItems,
+                    this.GrabItemFromInventory,
+                    null,
+                    this.GrabItemFromChest,
+                    false,
+                    true,
+                    true,
+                    true,
+                    true,
+                    1,
+                    null,
+                    1,
+                    this.Building);
+
+                break;
+
+            default:
+                if (this.chest is not null)
+                {
+                    if (playSound)
+                    {
+                        Game1.player.currentLocation.localSound("openChest");
+                    }
+
+                    Game1.activeClickableMenu = new ItemGrabMenu(
+                        this.Items,
+                        false,
+                        true,
+                        InventoryMenu.highlightAllItems,
+                        this.GrabItemFromInventory,
+                        null,
+                        this.GrabItemFromChest,
+                        false,
+                        true,
+                        true,
+                        true,
+                        true,
+                        1,
+                        null,
+                        -1,
+                        this.Building);
+                }
+
+                break;
         }
     }
 
@@ -95,6 +192,23 @@ internal sealed class BuildingContainer : BaseContainer<Building>
         }
 
         remaining = null;
+        foreach (var slot in this.Items)
+        {
+            if (slot?.canStackWith(item) != true)
+            {
+                continue;
+            }
+
+            item.Stack = slot.addToStack(item);
+            if (item.Stack > 0)
+            {
+                continue;
+            }
+
+            Game1.getFarm().lastItemShipped = slot;
+            return true;
+        }
+
         this.Items.Add(item);
         Game1.getFarm().lastItemShipped = item;
         return true;
@@ -111,5 +225,22 @@ internal sealed class BuildingContainer : BaseContainer<Building>
         this.Items.Remove(item);
         this.Items.RemoveEmptySlots();
         return true;
+    }
+
+    /// <inheritdoc />
+    public override void GrabItemFromChest(Item item, Farmer who)
+    {
+        if (item is null || !who.couldInventoryAcceptThisItem(item))
+        {
+            return;
+        }
+
+        if (this.Building is ShippingBin && item == Game1.getFarm().lastItemShipped)
+        {
+            Game1.getFarm().lastItemShipped = this.Items.LastOrDefault();
+        }
+
+        this.Items.RemoveEmptySlots();
+        this.ShowMenu();
     }
 }

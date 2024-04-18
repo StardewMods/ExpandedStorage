@@ -53,7 +53,13 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions => this.Config.StorageOptions;
 
     /// <inheritdoc />
+    public bool AccessChestsShowArrows => this.Config.AccessChestsShowArrows;
+
+    /// <inheritdoc />
     public int CarryChestLimit => this.Config.CarryChestLimit;
+
+    /// <inheritdoc />
+    public float CarryChestSlowAmount => this.Config.CarryChestSlowAmount;
 
     /// <inheritdoc />
     public int CarryChestSlowLimit => this.Config.CarryChestSlowLimit;
@@ -65,12 +71,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     public HashSet<string> CraftFromChestDisableLocations => this.Config.CraftFromChestDisableLocations;
 
     /// <inheritdoc />
-    public RangeOption CraftFromWorkbench => this.Config.CraftFromWorkbench;
-
-    /// <inheritdoc />
-    public int CraftFromWorkbenchDistance => this.Config.CraftFromWorkbenchDistance;
-
-    /// <inheritdoc />
     public int HslColorPickerHueSteps => this.Config.HslColorPickerHueSteps;
 
     /// <inheritdoc />
@@ -80,9 +80,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     public int HslColorPickerLightnessSteps => this.Config.HslColorPickerLightnessSteps;
 
     /// <inheritdoc />
-    public FilterMethod InventoryTabMethod => this.Config.InventoryTabMethod;
-
-    /// <inheritdoc />
     public FeatureOption LockItem => this.Config.LockItem;
 
     /// <inheritdoc />
@@ -90,12 +87,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
     /// <inheritdoc />
     public FilterMethod SearchItemsMethod => this.Config.SearchItemsMethod;
-
-    /// <inheritdoc />
-    public char SearchTagSymbol => this.Config.SearchTagSymbol;
-
-    /// <inheritdoc />
-    public char SearchNegationSymbol => this.Config.SearchNegationSymbol;
 
     /// <inheritdoc />
     public HashSet<string> StashToChestDisableLocations => this.Config.StashToChestDisableLocations;
@@ -125,7 +116,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         gmcm.AddSectionTitle(this.manifest, I18n.Section_Storages_Name);
         gmcm.AddParagraph(this.manifest, I18n.Section_Storages_Description);
-        var pages = new List<(string Id, string Title, IStorageOptions Options)>();
+        var pages = new List<(string Id, string Title, string Description, IStorageOptions Options)>();
         foreach (var (dataType, storageTypes) in config.StorageOptions)
         {
             foreach (var (storageId, storageOptions) in storageTypes)
@@ -154,13 +145,16 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     default: continue;
                 }
 
-                pages.Add(($"{dataType}_{storageId}", name, storageOptions));
-                gmcm.AddPageLink(this.manifest, $"{dataType}_{storageId}", () => name, () => description);
+                pages.Add(($"{dataType}_{storageId}", name, description, storageOptions));
             }
         }
 
-        gmcm.AddPage(this.manifest, "Main", I18n.Section_Main_Name);
-        this.AddMainOption(config.DefaultOptions, true);
+        foreach (var (id, title, description, _) in pages.OrderBy(page => page.Title))
+        {
+            gmcm.AddPageLink(this.manifest, id, () => title, () => description);
+        }
+
+        this.AddMainOption("Main", I18n.Section_Main_Name, config.DefaultOptions.GetActualOptions(), true);
 
         gmcm.AddPage(this.manifest, "Controls", I18n.Section_Controls_Name);
         this.AddControls(config.Controls);
@@ -168,17 +162,24 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         gmcm.AddPage(this.manifest, "Tweaks", I18n.Section_Tweaks_Name);
         this.AddTweaks(config);
 
-        foreach (var (id, title, options) in pages)
+        foreach (var (id, title, _, options) in pages)
         {
-            gmcm.AddPage(this.manifest, id, () => title);
-            this.AddMainOption(options, true);
+            this.AddMainOption(id, () => title, options.GetActualOptions(), true, config.DefaultOptions);
         }
     }
 
     /// <summary>Adds the main options to the config menu.</summary>
+    /// <param name="id">The page id.</param>
+    /// <param name="getTitle">Gets the title for the page.</param>
     /// <param name="options">The storage options to add.</param>
     /// <param name="isDefault">Indicates if these are the default options being set.</param>
-    public void AddMainOption(IStorageOptions options, bool isDefault = false)
+    /// <param name="parentOptions">The options that this inherits from.</param>
+    public void AddMainOption(
+        string id,
+        Func<string> getTitle,
+        IStorageOptions options,
+        bool isDefault = false,
+        IStorageOptions? parentOptions = null)
     {
         if (!this.genericModConfigMenuIntegration.IsLoaded)
         {
@@ -186,6 +187,29 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         var gmcm = this.genericModConfigMenuIntegration.Api;
+        gmcm.AddPage(this.manifest, id, getTitle);
+
+        if (parentOptions is not null)
+        {
+            gmcm.AddParagraph(
+                this.manifest,
+                () => $"{I18n.Config_DefaultOption_Description(I18n.Config_DefaultOption_Indicator())}");
+        }
+
+        // Access Chest
+        if (isDefault || this.DefaultOptions.AccessChest != RangeOption.Disabled)
+        {
+            gmcm.AddTextOption(
+                this.manifest,
+                () => options.AccessChest.ToStringFast(),
+                value => options.AccessChest = RangeOptionExtensions.TryParse(value, out var range)
+                    ? range
+                    : RangeOption.Default,
+                I18n.Config_AccessChests_Name,
+                I18n.Config_AccessChests_Tooltip,
+                RangeOptionExtensions.GetNames(),
+                this.localizedTextManager.FormatRange(parentOptions?.AccessChest));
+        }
 
         // Auto Organize
         if (isDefault || this.DefaultOptions.AutoOrganize != FeatureOption.Disabled)
@@ -199,7 +223,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_AutoOrganize_Name,
                 I18n.Config_AutoOrganize_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
+                this.localizedTextManager.FormatOption(parentOptions?.AutoOrganize));
         }
 
         // Carry Chest
@@ -214,7 +238,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_CarryChest_Name,
                 I18n.Config_CarryChest_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
+                this.localizedTextManager.FormatOption(parentOptions?.CarryChest));
         }
 
         // Categorize Chest
@@ -229,29 +253,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_CategorizeChest_Name,
                 I18n.Config_CategorizeChest_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
-
-            gmcm.AddTextOption(
-                this.manifest,
-                () => options.CategorizeChestAutomatically.ToStringFast(),
-                value => options.CategorizeChestAutomatically = FeatureOptionExtensions.TryParse(value, out var option)
-                    ? option
-                    : FeatureOption.Default,
-                I18n.Config_CategorizeChestAutomatically_Name,
-                I18n.Config_CategorizeChestAutomatically_Tooltip,
-                FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
-
-            gmcm.AddTextOption(
-                this.manifest,
-                () => options.CategorizeChestMethod.ToStringFast(),
-                value => options.CategorizeChestMethod = FilterMethodExtensions.TryParse(value, out var filterMethod)
-                    ? filterMethod
-                    : FilterMethod.Default,
-                I18n.Config_CategorizeChestMethod_Name,
-                I18n.Config_CategorizeChestMethod_Tooltip,
-                FilterMethodExtensions.GetNames(),
-                this.localizedTextManager.FormatMethod);
+                this.localizedTextManager.FormatOption(parentOptions?.CategorizeChest));
         }
 
         // Chest Finder
@@ -266,7 +268,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_ChestFinder_Name,
                 I18n.Config_ChestFinder_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
+                this.localizedTextManager.FormatOption(parentOptions?.ChestFinder));
         }
 
         // Chest Info
@@ -281,7 +283,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_ChestInfo_Name,
                 I18n.Config_ChestInfo_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
+                this.localizedTextManager.FormatOption(parentOptions?.ChestInfo));
         }
 
         // Collect Items
@@ -296,7 +298,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_CollectItems_Name,
                 I18n.Config_CollectItems_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
+                this.localizedTextManager.FormatOption(parentOptions?.CollectItems));
         }
 
         // Configure Chest
@@ -311,7 +313,22 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_ConfigureChest_Name,
                 I18n.Config_ConfigureChest_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
+                this.localizedTextManager.FormatOption(parentOptions?.ConfigureChest));
+        }
+
+        // Craft from Chest
+        if (isDefault || this.DefaultOptions.CookFromChest != RangeOption.Disabled)
+        {
+            gmcm.AddTextOption(
+                this.manifest,
+                () => options.CookFromChest.ToStringFast(),
+                value => options.CookFromChest = RangeOptionExtensions.TryParse(value, out var range)
+                    ? range
+                    : RangeOption.Default,
+                I18n.Config_CookFromChest_Name,
+                I18n.Config_CookFromChest_Tooltip,
+                RangeOptionExtensions.GetNames(),
+                this.localizedTextManager.FormatRange(parentOptions?.CookFromChest));
         }
 
         // Craft from Chest
@@ -359,7 +376,9 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 (int)RangeOption.Default,
                 (int)RangeOption.World,
                 1,
-                this.localizedTextManager.Distance);
+                this.localizedTextManager.FormatDistance(
+                    parentOptions?.CraftFromChest,
+                    parentOptions?.CraftFromChestDistance ?? 0));
         }
 
         // HSL Color Picker
@@ -374,22 +393,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_HslColorPicker_Name,
                 I18n.Config_HslColorPicker_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
-        }
-
-        // Inventory Tabs
-        if (isDefault || this.DefaultOptions.InventoryTabs != FeatureOption.Disabled)
-        {
-            gmcm.AddTextOption(
-                this.manifest,
-                () => options.InventoryTabs.ToStringFast(),
-                value => options.InventoryTabs = FeatureOptionExtensions.TryParse(value, out var option)
-                    ? option
-                    : FeatureOption.Default,
-                I18n.Config_InventoryTabs_Name,
-                I18n.Config_InventoryTabs_Tooltip,
-                FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
+                this.localizedTextManager.FormatOption(parentOptions?.HslColorPicker));
         }
 
         // Open Held Chest
@@ -404,7 +408,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_OpenHeldChest_Name,
                 I18n.Config_OpenHeldChest_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
+                this.localizedTextManager.FormatOption(parentOptions?.OpenHeldChest));
         }
 
         // Resize Chest
@@ -425,24 +429,24 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             this.manifest,
             () => options.ResizeChestCapacity switch
             {
-                -1 => 9,
-                _ when size > 1 => Math.Min(9, (int)Math.Ceiling((float)options.ResizeChestCapacity / size)),
+                -1 => 5,
+                _ when size > 1 => Math.Min(5, (int)Math.Ceiling((float)options.ResizeChestCapacity / size)),
                 0 => 0,
                 9 => 1,
                 36 => 2,
                 70 => 3,
-                _ => Math.Min(9, (int)Math.Ceiling(options.ResizeChestCapacity / 70f)),
+                _ => Math.Min(5, (int)Math.Ceiling(options.ResizeChestCapacity / 70f)),
             },
             value => options.ResizeChestCapacity = value switch
             {
-                9 => -1, 0 => 0, _ when size > 1 => value * size, 1 => 9, 2 => 36, 3 => 70, _ => 70 * value,
+                5 => -1, 0 => 0, _ when size > 1 => value * size, 1 => 9, 2 => 36, 3 => 70, _ => 70 * value,
             },
-            I18n.Config_ResizeChest_Name,
-            I18n.Config_ResizeChest_Tooltip,
+            I18n.Config_ResizeChestCapacity_Name,
+            I18n.Config_ResizeChestCapacity_Tooltip,
             0,
-            9,
+            5,
             1,
-            value => this.localizedTextManager.FormatCapacity(value, size));
+            this.localizedTextManager.FormatCapacity(parentOptions?.ResizeChestCapacity ?? 0, () => size));
 
         // Resize Chest Menu
         if (isDefault || this.DefaultOptions.ResizeChest != ChestMenuOption.Disabled)
@@ -456,7 +460,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_ResizeChestMenu_Name,
                 I18n.Config_ResizeChestMenu_Tooltip,
                 ChestMenuOptionExtensions.GetNames(),
-                this.localizedTextManager.ChestMenuSize,
+                this.localizedTextManager.FormatMenuSize(parentOptions?.ResizeChest),
                 nameof(options.ResizeChest));
         }
 
@@ -472,7 +476,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_SearchItems_Name,
                 I18n.Config_SearchItems_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
+                this.localizedTextManager.FormatOption(parentOptions?.SearchItems));
         }
 
         // Shop from Chest
@@ -487,7 +491,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_ShopFromChest_Name,
                 I18n.Config_ShopFromChest_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption);
+                this.localizedTextManager.FormatOption(parentOptions?.ShopFromChest));
         }
 
         // Stash to Chest
@@ -535,7 +539,9 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 (int)RangeOption.Default,
                 (int)RangeOption.World,
                 1,
-                this.localizedTextManager.Distance);
+                this.localizedTextManager.FormatDistance(
+                    parentOptions?.StashToChest,
+                    parentOptions?.StashToChestDistance ?? 0));
         }
     }
 
@@ -547,6 +553,30 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         var gmcm = this.genericModConfigMenuIntegration.Api;
+
+        // Access Chests
+        gmcm.AddKeybindList(
+            this.manifest,
+            () => controls.AccessChests,
+            value => controls.AccessChests = value,
+            I18n.Controls_AccessChests_Name,
+            I18n.Controls_AccessChests_Tooltip);
+
+        // Access Previous Chest
+        gmcm.AddKeybindList(
+            this.manifest,
+            () => controls.AccessPreviousChest,
+            value => controls.AccessPreviousChest = value,
+            I18n.Controls_AccessPreviousChest_Name,
+            I18n.Controls_AccessPreviousChest_Tooltip);
+
+        // Access Next Chest
+        gmcm.AddKeybindList(
+            this.manifest,
+            () => controls.AccessNextChest,
+            value => controls.AccessNextChest = value,
+            I18n.Controls_AccessNextChest_Name,
+            I18n.Controls_AccessNextChest_Tooltip);
 
         // Configure Chest
         gmcm.AddKeybindList(
@@ -593,21 +623,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             value => controls.StashItems = value,
             I18n.Controls_StashItems_Name,
             I18n.Controls_StashItems_Tooltip);
-
-        // Inventory Tabs
-        gmcm.AddKeybindList(
-            this.manifest,
-            () => controls.PreviousTab,
-            value => controls.PreviousTab = value,
-            I18n.Controls_PreviousTab_Name,
-            I18n.Controls_PreviousTab_Tooltip);
-
-        gmcm.AddKeybindList(
-            this.manifest,
-            () => controls.NextTab,
-            value => controls.NextTab = value,
-            I18n.Controls_NextTab_Name,
-            I18n.Controls_NextTab_Tooltip);
 
         // Resize Chest
         gmcm.AddKeybindList(
@@ -662,6 +677,21 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             value => controls.ToggleSearch = value,
             I18n.Controls_ToggleSearch_Name,
             I18n.Controls_ToggleSearch_Tooltip);
+
+        // Transfer Items
+        gmcm.AddKeybindList(
+            this.manifest,
+            () => controls.TransferItems,
+            value => controls.TransferItems = value,
+            I18n.Controls_TransferItems_Name,
+            I18n.Controls_TransferItems_Tooltip);
+
+        gmcm.AddKeybindList(
+            this.manifest,
+            () => controls.TransferItemsReverse,
+            value => controls.TransferItemsReverse = value,
+            I18n.Controls_TransferItemsReverse_Name,
+            I18n.Controls_TransferItemsReverse_Tooltip);
     }
 
     private void AddTweaks(DefaultConfig config)
@@ -672,6 +702,14 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         var gmcm = this.genericModConfigMenuIntegration.Api;
+
+        // Access Chest Show Arrows
+        gmcm.AddBoolOption(
+            this.manifest,
+            () => config.AccessChestsShowArrows,
+            value => config.AccessChestsShowArrows = value,
+            I18n.Config_AccessChestsShowArrows_Name,
+            I18n.Config_AccessChestsShowArrows_Tooltip);
 
         // Carry Chest Limit
         gmcm.AddNumberOption(
@@ -685,6 +723,13 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             1,
             this.localizedTextManager.CarryChestLimit);
 
+        gmcm.AddNumberOption(
+            this.manifest,
+            () => config.CarryChestSlowAmount,
+            value => config.CarryChestSlowAmount = value,
+            I18n.Config_CarryChestSlowAmount_Name,
+            I18n.Config_CarryChestSlowAmount_Tooltip);
+
         // Carry Chest Slow Limit
         gmcm.AddNumberOption(
             this.manifest,
@@ -696,52 +741,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             4,
             1,
             this.localizedTextManager.CarryChestLimit);
-
-        // TODO: Move Workbench into an object type config for workbench
-        // Craft From Workbench
-        gmcm.AddNumberOption(
-            this.manifest,
-            () => config.CraftFromWorkbenchDistance switch
-            {
-                _ when config.CraftFromWorkbench is RangeOption.Default => (int)RangeOption.Default,
-                _ when config.CraftFromWorkbench is RangeOption.Disabled => (int)RangeOption.Disabled,
-                _ when config.CraftFromWorkbench is RangeOption.Inventory => (int)RangeOption.Inventory,
-                _ when config.CraftFromWorkbench is RangeOption.World => (int)RangeOption.World,
-                >= 2 when config.CraftFromWorkbench is RangeOption.Location => (int)RangeOption.Location
-                    + (int)Math.Ceiling(Math.Log2(config.CraftFromWorkbenchDistance))
-                    - 1,
-                _ when config.CraftFromWorkbench is RangeOption.Location => (int)RangeOption.World - 1,
-                _ => (int)RangeOption.Default,
-            },
-            value =>
-            {
-                config.CraftFromWorkbenchDistance = value switch
-                {
-                    (int)RangeOption.Default => 0,
-                    (int)RangeOption.Disabled => 0,
-                    (int)RangeOption.Inventory => 0,
-                    (int)RangeOption.World => 0,
-                    (int)RangeOption.World - 1 => -1,
-                    >= (int)RangeOption.Location => (int)Math.Pow(2, 1 + value - (int)RangeOption.Location),
-                    _ => 0,
-                };
-
-                config.CraftFromWorkbench = value switch
-                {
-                    (int)RangeOption.Default => RangeOption.Default,
-                    (int)RangeOption.Disabled => RangeOption.Disabled,
-                    (int)RangeOption.Inventory => RangeOption.Inventory,
-                    (int)RangeOption.World => RangeOption.World,
-                    (int)RangeOption.World - 1 => RangeOption.Location,
-                    _ => RangeOption.Location,
-                };
-            },
-            I18n.Config_CraftFromWorkbench_Name,
-            I18n.Config_CraftFromWorkbench_Tooltip,
-            (int)RangeOption.Default,
-            (int)RangeOption.World,
-            1,
-            this.localizedTextManager.Distance);
 
         // Hsl Color Picker Steps
         gmcm.AddNumberOption(
@@ -774,17 +773,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             29,
             1);
 
-        // Inventory Tab Method
-        gmcm.AddTextOption(
-            this.manifest,
-            () => config.InventoryTabMethod.ToStringFast(),
-            value => config.InventoryTabMethod =
-                FilterMethodExtensions.TryParse(value, out var method) ? method : FilterMethod.Default,
-            I18n.Config_CategorizeChestMethod_Name,
-            I18n.Config_CategorizeChestMethod_Tooltip,
-            FilterMethodExtensions.GetNames(),
-            this.localizedTextManager.FormatMethod);
-
         // Lock Item
         gmcm.AddTextOption(
             this.manifest,
@@ -794,7 +782,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             I18n.Config_LockItem_Name,
             I18n.Config_LockItem_Tooltip,
             FeatureOptionExtensions.GetNames(),
-            this.localizedTextManager.FormatOption);
+            this.localizedTextManager.FormatOption());
 
         // Lock Item Hold
         gmcm.AddBoolOption(
@@ -810,26 +798,10 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             () => config.SearchItemsMethod.ToStringFast(),
             value => config.SearchItemsMethod =
                 FilterMethodExtensions.TryParse(value, out var method) ? method : FilterMethod.Default,
-            I18n.Config_CategorizeChestMethod_Name,
-            I18n.Config_CategorizeChestMethod_Tooltip,
+            I18n.Config_SearchItemsMethod_Name,
+            I18n.Config_SearchItemsMethod_Tooltip,
             FilterMethodExtensions.GetNames(),
-            this.localizedTextManager.FormatMethod);
-
-        // Search Tag Symbol
-        gmcm.AddTextOption(
-            this.manifest,
-            () => config.SearchTagSymbol.ToString(),
-            value => config.SearchTagSymbol = string.IsNullOrWhiteSpace(value) ? '#' : value.ToCharArray()[0],
-            I18n.Config_SearchTagSymbol_Name,
-            I18n.Config_SearchTagSymbol_Tooltip);
-
-        // Search Negation Symbol
-        gmcm.AddTextOption(
-            this.manifest,
-            () => config.SearchNegationSymbol.ToString(),
-            value => config.SearchNegationSymbol = string.IsNullOrWhiteSpace(value) ? '#' : value.ToCharArray()[0],
-            I18n.Config_SearchNegationSymbol_Name,
-            I18n.Config_SearchNegationSymbol_Tooltip);
+            this.localizedTextManager.FormatMethod());
     }
 
     private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e)
@@ -896,7 +868,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 new DefaultStorageOptions
                 {
                     HslColorPicker = FeatureOption.Disabled,
-                    InventoryTabs = FeatureOption.Disabled,
                     ResizeChest = ChestMenuOption.Large,
                     ResizeChestCapacity = -1,
                     SearchItems = FeatureOption.Disabled,
@@ -912,14 +883,12 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     AutoOrganize = FeatureOption.Disabled,
                     CarryChest = FeatureOption.Disabled,
                     CategorizeChest = FeatureOption.Disabled,
-                    CategorizeChestAutomatically = FeatureOption.Disabled,
                     ChestFinder = FeatureOption.Disabled,
                     ChestInfo = FeatureOption.Disabled,
                     CollectItems = FeatureOption.Disabled,
                     ConfigureChest = FeatureOption.Disabled,
                     CraftFromChest = RangeOption.Disabled,
                     HslColorPicker = FeatureOption.Disabled,
-                    InventoryTabs = FeatureOption.Disabled,
                     OpenHeldChest = FeatureOption.Disabled,
                     ResizeChest = ChestMenuOption.Disabled,
                     SearchItems = FeatureOption.Disabled,
@@ -956,22 +925,32 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 "165",
                 new DefaultStorageOptions
                 {
+                    AccessChest = RangeOption.Disabled,
                     AutoOrganize = FeatureOption.Disabled,
                     CarryChest = FeatureOption.Disabled,
                     CategorizeChest = FeatureOption.Disabled,
-                    CategorizeChestAutomatically = FeatureOption.Disabled,
                     ChestFinder = FeatureOption.Disabled,
                     ChestInfo = FeatureOption.Disabled,
                     CollectItems = FeatureOption.Disabled,
                     ConfigureChest = FeatureOption.Disabled,
                     CraftFromChest = RangeOption.Disabled,
                     HslColorPicker = FeatureOption.Disabled,
-                    InventoryTabs = FeatureOption.Disabled,
                     OpenHeldChest = FeatureOption.Disabled,
                     ResizeChest = ChestMenuOption.Disabled,
                     SearchItems = FeatureOption.Disabled,
                     ShopFromChest = FeatureOption.Disabled,
                     StashToChest = RangeOption.Disabled,
+                });
+
+        // Initialize Workbench
+        config
+            .StorageOptions["BigCraftables"]
+            .TryAdd(
+                "208",
+                new DefaultStorageOptions
+                {
+                    CraftFromChest = RangeOption.Location,
+                    CraftFromChestDistance = -1,
                 });
 
         // Initialize Junimo Hut
@@ -981,17 +960,16 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 "Junimo Hut",
                 new DefaultStorageOptions
                 {
+                    AccessChest = RangeOption.Disabled,
                     AutoOrganize = FeatureOption.Disabled,
                     CarryChest = FeatureOption.Disabled,
                     CategorizeChest = FeatureOption.Disabled,
-                    CategorizeChestAutomatically = FeatureOption.Disabled,
                     ChestFinder = FeatureOption.Disabled,
                     ChestInfo = FeatureOption.Disabled,
                     CollectItems = FeatureOption.Disabled,
                     ConfigureChest = FeatureOption.Disabled,
                     CraftFromChest = RangeOption.Disabled,
                     HslColorPicker = FeatureOption.Disabled,
-                    InventoryTabs = FeatureOption.Disabled,
                     OpenHeldChest = FeatureOption.Disabled,
                     ResizeChest = ChestMenuOption.Disabled,
                     SearchItems = FeatureOption.Disabled,
@@ -1006,17 +984,16 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 "Mill",
                 new DefaultStorageOptions
                 {
+                    AccessChest = RangeOption.Disabled,
                     AutoOrganize = FeatureOption.Disabled,
                     CarryChest = FeatureOption.Disabled,
                     CategorizeChest = FeatureOption.Disabled,
-                    CategorizeChestAutomatically = FeatureOption.Disabled,
                     ChestFinder = FeatureOption.Disabled,
                     ChestInfo = FeatureOption.Disabled,
                     CollectItems = FeatureOption.Disabled,
                     ConfigureChest = FeatureOption.Disabled,
                     CraftFromChest = RangeOption.Disabled,
                     HslColorPicker = FeatureOption.Disabled,
-                    InventoryTabs = FeatureOption.Disabled,
                     OpenHeldChest = FeatureOption.Disabled,
                     ResizeChest = ChestMenuOption.Disabled,
                     SearchItems = FeatureOption.Disabled,
@@ -1034,14 +1011,12 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     AutoOrganize = FeatureOption.Disabled,
                     CarryChest = FeatureOption.Disabled,
                     CategorizeChest = FeatureOption.Disabled,
-                    CategorizeChestAutomatically = FeatureOption.Disabled,
                     ChestFinder = FeatureOption.Disabled,
                     ChestInfo = FeatureOption.Disabled,
                     CollectItems = FeatureOption.Disabled,
                     ConfigureChest = FeatureOption.Disabled,
                     CraftFromChest = RangeOption.Disabled,
                     HslColorPicker = FeatureOption.Disabled,
-                    InventoryTabs = FeatureOption.Disabled,
                     OpenHeldChest = FeatureOption.Disabled,
                     ResizeChest = ChestMenuOption.Disabled,
                     SearchItems = FeatureOption.Disabled,
@@ -1056,8 +1031,8 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 "FarmHouse",
                 new DefaultStorageOptions
                 {
+                    CookFromChest = RangeOption.Location,
                     HslColorPicker = FeatureOption.Disabled,
-                    InventoryTabs = FeatureOption.Disabled,
                     ResizeChest = ChestMenuOption.Large,
                     ResizeChestCapacity = -1,
                     SearchItems = FeatureOption.Disabled,
@@ -1070,8 +1045,8 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 "IslandFarmHouse",
                 new DefaultStorageOptions
                 {
+                    CookFromChest = RangeOption.Location,
                     HslColorPicker = FeatureOption.Disabled,
-                    InventoryTabs = FeatureOption.Disabled,
                     ResizeChest = ChestMenuOption.Large,
                     ResizeChestCapacity = -1,
                     SearchItems = FeatureOption.Disabled,

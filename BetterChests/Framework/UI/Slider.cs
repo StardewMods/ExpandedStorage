@@ -58,18 +58,18 @@ internal sealed class Slider
         this.track = new Range<int>(area.Top, area.Bottom);
         this.Bars = new ClickableComponent[steps];
         var height = this.area.Height / steps;
+        var initId = (area.Y * area.Y) + area.X;
         for (var step = 0; step < steps; ++step)
         {
-            this.Bars[step] =
-                new ClickableComponent(
-                    new Rectangle(area.X, area.Y + (step * height), area.Width, height),
-                    string.Empty)
-                {
-                    myID = step + 4343,
-                    upNeighborID = step > 0 ? step + 4343 - 1 : -1,
-                    downNeighborID = step < steps - 1 ? step + 4343 + 1 : -1,
-                };
+            this.Bars[step] = new ClickableComponent(
+                new Rectangle(area.X, area.Y + (step * height), area.Width, height),
+                string.Empty)
+            {
+                myID = step + initId,
+            };
         }
+
+        ClickableComponent.ChainNeighborsUpDown(this.Bars.ToList());
 
         // Initialize selected
         var y = this.getMethod().Remap(Slider.Unit, this.track);
@@ -114,32 +114,11 @@ internal sealed class Slider
     /// <summary>Performs a left click at the specified coordinates on the screen.</summary>
     /// <param name="mouseX">The X-coordinate of the mouse click.</param>
     /// <param name="mouseY">The Y-coordinate of the mouse click.</param>
-    /// <returns>Returns true if the area was clicked; otherwise, false.</returns>
+    /// <returns>true if the area was clicked; otherwise, false.</returns>
     public bool LeftClick(int mouseX, int mouseY)
     {
         this.Holding = this.area.Contains(mouseX, mouseY);
         return this.Holding;
-    }
-
-    /// <summary>Assign the id to components.</summary>
-    /// <param name="startId">The starting id.</param>
-    public void SetId(int startId)
-    {
-        for (var index = 0; index < this.Bars.Length; ++index)
-        {
-            var id = startId + index;
-            this.Bars[index].myID = id;
-
-            if (index > 0)
-            {
-                this.Bars[index].upNeighborID = id - 1;
-            }
-
-            if (index < this.Bars.Length - 1)
-            {
-                this.Bars[index].downNeighborID = id + 1;
-            }
-        }
     }
 
     /// <summary>Updates the slider based on the mouse position.</summary>

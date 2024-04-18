@@ -2,7 +2,11 @@ namespace StardewMods.BetterChests.Framework.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Interfaces;
+using StardewMods.BetterChests.Framework.Models.Events;
+using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -14,18 +18,34 @@ using StardewValley.Menus;
 internal sealed class InventoryMenuManager : BaseService, IInventoryMenuManager
 {
     private readonly ClickableTextureComponent downArrow;
-    private readonly HashSet<InventoryMenu.highlightThisItem> highlightMethods = [];
-    private readonly HashSet<Func<IEnumerable<Item>, IEnumerable<Item>>> operations = [];
+    private readonly IEventManager eventManager;
+    private readonly IInputHelper inputHelper;
+    private readonly IModConfig modConfig;
     private readonly WeakReference<InventoryMenu?> source = new(null);
     private readonly ClickableTextureComponent upArrow;
-    private List<Item>? cachedItems;
+
+    private int maxScroll;
+    private int scrolled;
 
     /// <summary>Initializes a new instance of the <see cref="InventoryMenuManager" /> class.</summary>
+    /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public InventoryMenuManager(ILog log, IManifest manifest)
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    public InventoryMenuManager(
+        IEventManager eventManager,
+        IInputHelper inputHelper,
+        ILog log,
+        IManifest manifest,
+        IModConfig modConfig)
         : base(log, manifest)
     {
+        // Init
+        this.eventManager = eventManager;
+        this.inputHelper = inputHelper;
+        this.modConfig = modConfig;
+
         this.upArrow = new ClickableTextureComponent(
             new Rectangle(0, 0, 11 * Game1.pixelZoom, 12 * Game1.pixelZoom),
             Game1.mouseCursors,
@@ -36,7 +56,13 @@ internal sealed class InventoryMenuManager : BaseService, IInventoryMenuManager
             new Rectangle(0, 0, 11 * Game1.pixelZoom, 12 * Game1.pixelZoom),
             Game1.mouseCursors,
             new Rectangle(421, 472, 11, 12),
-            Game1.pixelZoom) { myID = 5318009 };
+            Game1.pixelZoom) { myID = 5318008 };
+
+        // Events
+        eventManager.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
+        eventManager.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
+        eventManager.Subscribe<MouseWheelScrolledEventArgs>(this.OnMouseWheelScrolled);
+        this.eventManager.Subscribe<ItemsDisplayingEventArgs>(this.OnItemsDisplaying);
     }
 
     /// <summary>Gets or sets the method used to highlight an item in the inventory menu.</summary>
@@ -57,59 +83,12 @@ internal sealed class InventoryMenuManager : BaseService, IInventoryMenuManager
     /// <inheritdoc />
     public IStorageContainer? Container { get; set; }
 
-    /// <inheritdoc />
-    public int Scrolled { get; set; }
-
-    /// <inheritdoc />
-    public void AddHighlightMethod(InventoryMenu.highlightThisItem highlightMethod) =>
-        this.highlightMethods.Add(highlightMethod);
-
-    /// <inheritdoc />
-    public void AddOperation(Func<IEnumerable<Item>, IEnumerable<Item>> operation) => this.operations.Add(operation);
-
-    /// <summary>
-    /// Applies a series of operations to a collection of items and returns a modified subset of items based on
-    /// specified criteria.
-    /// </summary>
-    /// <param name="items">The collection of items to apply the operations to.</param>
-    /// <returns>The modified subset of items based on the applied operations and specified criteria.</returns>
-    public IEnumerable<Item> ApplyOperation(IEnumerable<Item> items)
-    {
-        // Apply added operations
-        this.cachedItems = this.operations.Aggregate(items, (current, operation) => operation(current)).ToList();
-
-        // Validate the scrolled value
-        var totalRows = (int)Math.Ceiling((double)this.cachedItems.Count / this.Columns);
-        var maxScroll = Math.Max(0, totalRows - this.Rows);
-        this.Scrolled = Math.Max(0, Math.Min(this.Scrolled, maxScroll));
-        return this.cachedItems.Skip(this.Scrolled * this.Columns).Take(this.Capacity);
-    }
-
     /// <summary>Draws overlay components to the SpriteBatch.</summary>
     /// <param name="spriteBatch">The SpriteBatch used to draw the game object.</param>
     public void Draw(SpriteBatch spriteBatch)
     {
-        if (this.Scrolled > 0)
-        {
-            this.upArrow.draw(spriteBatch);
-        }
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
 
-        if (this.cachedItems is not null)
-        {
-            var totalRows = (int)Math.Ceiling((double)this.cachedItems.Count / this.Columns);
-            var maxScroll = Math.Max(0, totalRows - this.Rows);
-            if (this.Scrolled < maxScroll)
-            {
-                this.downArrow.draw(spriteBatch);
-            }
-        }
-    }
-
-    /// <summary>Performs a hover action at the specified coordinates on the screen.</summary>
-    /// <param name="mouseX">The X-coordinate of the mouse click.</param>
-    /// <param name="mouseY">The Y-coordinate of the mouse click.</param>
-    public void Hover(int mouseX, int mouseY)
-    {
         this.upArrow.scale = this.upArrow.containsPoint(mouseX, mouseY)
             ? Math.Min(Game1.pixelZoom * 1.1f, this.upArrow.scale + 0.05f)
             : Math.Max(Game1.pixelZoom, this.upArrow.scale - 0.05f);
@@ -117,27 +96,16 @@ internal sealed class InventoryMenuManager : BaseService, IInventoryMenuManager
         this.downArrow.scale = this.downArrow.containsPoint(mouseX, mouseY)
             ? Math.Min(Game1.pixelZoom * 1.1f, this.downArrow.scale + 0.05f)
             : Math.Max(Game1.pixelZoom, this.downArrow.scale - 0.05f);
-    }
 
-    /// <summary>Performs a left click at the specified coordinates on the screen.</summary>
-    /// <param name="mouseX">The X-coordinate of the mouse.</param>
-    /// <param name="mouseY">The Y-coordinate of the mouse.</param>
-    /// <returns>Returns true if an overlay item was clicked; otherwise, false.</returns>
-    public bool LeftClick(int mouseX, int mouseY)
-    {
-        if (this.upArrow.containsPoint(mouseX, mouseY))
+        if (this.scrolled > 0)
         {
-            this.Scrolled--;
-            return true;
+            this.upArrow.draw(spriteBatch);
         }
 
-        if (this.downArrow.containsPoint(mouseX, mouseY))
+        if (this.scrolled < this.maxScroll)
         {
-            this.Scrolled++;
-            return true;
+            this.downArrow.draw(spriteBatch);
         }
-
-        return false;
     }
 
     /// <summary>
@@ -149,13 +117,10 @@ internal sealed class InventoryMenuManager : BaseService, IInventoryMenuManager
     public void Reset(ItemGrabMenu? parent, InventoryMenu? current)
     {
         this.source.SetTarget(current);
-        this.highlightMethods.Clear();
-        this.operations.Clear();
-        this.cachedItems = null;
-
         if (parent is null || current is null)
         {
-            this.Scrolled = 0;
+            this.scrolled = 0;
+            this.maxScroll = 0;
             this.Container = null;
             return;
         }
@@ -183,8 +148,91 @@ internal sealed class InventoryMenuManager : BaseService, IInventoryMenuManager
 
     /// <summary>Highlights an item using the provided highlight methods.</summary>
     /// <param name="item">The item to highlight.</param>
-    /// <returns>Returns true if the item is successfully highlighted, false otherwise.</returns>
-    public bool HighlightMethod(Item item) =>
-        this.OriginalHighlightMethod(item)
-        && (!this.highlightMethods.Any() || this.highlightMethods.All(highlightMethod => highlightMethod(item)));
+    /// <returns>true if the item is successfully highlighted; otherwise, false.</returns>
+    public bool HighlightMethod(Item item)
+    {
+        var original = this.OriginalHighlightMethod(item);
+        if (!original || this.Container is null)
+        {
+            return original;
+        }
+
+        var itemHighlightingEventArgs = new ItemHighlightingEventArgs(this.Container, item);
+        this.eventManager.Publish(itemHighlightingEventArgs);
+        return itemHighlightingEventArgs.IsHighlighted;
+    }
+
+    private void OnButtonPressed(ButtonPressedEventArgs e)
+    {
+        if (e.Button is not SButton.MouseLeft)
+        {
+            return;
+        }
+
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        if (this.scrolled > 0 && this.upArrow.containsPoint(mouseX, mouseY))
+        {
+            this.scrolled--;
+            this.inputHelper.Suppress(e.Button);
+        }
+
+        if (this.scrolled < this.maxScroll && this.downArrow.containsPoint(mouseX, mouseY))
+        {
+            this.scrolled++;
+            this.inputHelper.Suppress(e.Button);
+        }
+    }
+
+    private void OnButtonsChanged(ButtonsChangedEventArgs e)
+    {
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        if (this.Menu?.isWithinBounds(mouseX, mouseY) != true)
+        {
+            return;
+        }
+
+        if (this.modConfig.Controls.ScrollUp.JustPressed())
+        {
+            this.scrolled--;
+            this.inputHelper.SuppressActiveKeybinds(this.modConfig.Controls.ScrollUp);
+        }
+
+        if (this.modConfig.Controls.ScrollDown.JustPressed())
+        {
+            this.scrolled++;
+            this.inputHelper.SuppressActiveKeybinds(this.modConfig.Controls.ScrollDown);
+        }
+    }
+
+    private void OnMouseWheelScrolled(MouseWheelScrolledEventArgs e)
+    {
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        if (this.Menu?.isWithinBounds(mouseX, mouseY) != true)
+        {
+            return;
+        }
+
+        var scroll = this.modConfig.Controls.ScrollPage.IsDown() ? this.Rows : 1;
+        this.scrolled += e.Delta > 0 ? -scroll : scroll;
+    }
+
+    [Priority(int.MinValue)]
+    private void OnItemsDisplaying(ItemsDisplayingEventArgs e)
+    {
+        if (e.Container != this.Container)
+        {
+            return;
+        }
+
+        var totalRows = (int)Math.Ceiling((double)e.Items.Count() / this.Columns);
+        this.maxScroll = Math.Max(0, totalRows - this.Rows);
+        this.scrolled = Math.Max(0, Math.Min(this.scrolled, this.maxScroll));
+
+        if (this.scrolled == 0 && this.maxScroll == 0)
+        {
+            return;
+        }
+
+        e.Edit(items => items.Skip(this.scrolled * this.Columns).Take(this.Capacity));
+    }
 }

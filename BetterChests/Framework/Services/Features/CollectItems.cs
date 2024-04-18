@@ -148,7 +148,7 @@ internal sealed class CollectItems : BaseFeature<CollectItems>
     private void RefreshEligible()
     {
         this.cachedContainers.Value.Clear();
-        foreach (var storage in this.containerFactory.GetAllFromPlayer(
+        foreach (var storage in this.containerFactory.GetAll(
             Game1.player,
             container => container.Options.ChestFinder == FeatureOption.Enabled))
         {

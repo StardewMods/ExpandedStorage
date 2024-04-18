@@ -70,7 +70,6 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
     {
         // Events
         this.Events.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
-        this.Events.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
 
         // Integrations
         if (this.betterCraftingIntegration.IsLoaded)
@@ -119,7 +118,6 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
     {
         // Events
         this.Events.Unsubscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
-        this.Events.Unsubscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
 
         // Integrations
         if (this.betterCraftingIntegration.IsLoaded)
@@ -132,8 +130,6 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
             this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(ObjectContainer));
             this.betterCraftingIntegration.Api.MenuPopulateContainers -= this.OnMenuPopulateContainers;
         }
-
-        this.Log.Trace("Test");
 
         if (this.toolbarIconsIntegration.IsLoaded)
         {
@@ -154,17 +150,14 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
             container.Location,
             container.TileLocation);
 
-    private static bool WorkbenchPredicate(IStorageContainer container) =>
+    private static bool CookingPredicate(IStorageContainer container) =>
         container is not FarmerContainer
-        && container.Options.CraftFromChest is not RangeOption.Disabled
+        && container.Options.CookFromChest is not (RangeOption.Disabled or RangeOption.Default)
         && container.Items.Count > 0
         && !CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains(Game1.player.currentLocation.Name)
         && !(CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains("UndergroundMine")
             && Game1.player.currentLocation is MineShaft)
-        && CraftFromChest.instance.Config.CraftFromWorkbench.WithinRange(
-            CraftFromChest.instance.Config.CraftFromWorkbenchDistance,
-            container.Location,
-            container.TileLocation);
+        && container.Options.CookFromChest.WithinRange(-1, container.Location, container.TileLocation);
 
     private void OnGameLaunched(GameLaunchedEventArgs obj)
     {
@@ -172,25 +165,6 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
         {
             this.Log.Warn("Better Crafting is not loaded. CraftFromChest will not be active.");
         }
-    }
-
-    private void OnButtonPressed(ButtonPressedEventArgs e)
-    {
-        if (this.Config.CraftFromWorkbench is RangeOption.Disabled or RangeOption.Default
-            || !Context.IsPlayerFree
-            || Game1.player.CurrentItem is Tool
-            || !e.Button.IsUseToolButton()
-            || this.inputHelper.IsSuppressed(e.Button))
-        {
-            return;
-        }
-
-        if (!Game1.currentLocation.Objects.TryGetValue(e.Cursor.GrabTile, out var obj) || obj is not Workbench)
-        {
-            return;
-        }
-
-        this.betterCraftingIntegration.Api!.OpenCraftingMenu(false, true, obj.Location, obj.TileLocation, null, false);
     }
 
     private void OnButtonsChanged(ButtonsChangedEventArgs e)
@@ -229,11 +203,26 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
         e.DisableDiscovery = true;
         var location = e.Menu.Location ?? Game1.player.currentLocation;
         var position = e.Menu.Position ?? Game1.player.Tile;
+        var predicate = CraftFromChest.DefaultPredicate;
 
-        Func<IStorageContainer, bool> predicate =
-            location.Objects.TryGetValue(position, out var obj) && obj is Workbench
-                ? CraftFromChest.WorkbenchPredicate
-                : CraftFromChest.DefaultPredicate;
+        if (location.Objects.TryGetValue(position, out var obj) && obj is Workbench)
+        {
+            var storageOptions = this.containerFactory.GetStorageOptions(obj);
+            predicate = container => container is not FarmerContainer
+                && container.Options.CraftFromChest is not (RangeOption.Disabled or RangeOption.Default)
+                && !CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains(
+                    Game1.player.currentLocation.Name)
+                && !(CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains("UndergroundMine")
+                    && Game1.player.currentLocation is MineShaft)
+                && storageOptions.CraftFromChest.WithinRange(
+                    storageOptions.CraftFromChestDistance,
+                    container.Location,
+                    container.TileLocation);
+        }
+        else if (location.GetFridgePosition()?.ToVector2().Equals(position) == true)
+        {
+            predicate = CraftFromChest.CookingPredicate;
+        }
 
         var containers = this.containerFactory.GetAll(predicate).ToList();
         foreach (var container in containers)

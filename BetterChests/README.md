@@ -10,7 +10,6 @@ Adds enhanced chest features to the game.
     * [Carry Chest](#carry-chest)
     * [Chest Finder](#chest-finder)
     * [Chest Info](#chest-info)
-    * [Chest Menu Tabs](#chest-menu-tabs)
     * [Collect Items](#collect-items)
     * [Configurator](#configurator)
     * [Craft From Chest](#craft-from-chest)
@@ -40,7 +39,6 @@ Adds enhanced chest features to the game.
     * [Better Crafting](#better-crafting)
     * [Horse Overhaul](#horse-overhaul)
 * [Customization](#customization)
-    * [Customized Tabs](#customized-tabs)
     * [Other Assets](#other-assets)
 * [Translations](#translations)
 
@@ -115,25 +113,6 @@ Show stats to the left of the currently opened chest.
 
 1. See [Option Values](#option-values).
 2.
-
-See [Button Codes](https://stardewvalleywiki.com/Modding:Player_Guide/Key_Bindings#Button_codes).
-
-### Chest Menu Tabs
-
-Tabs are added to the Chest Menu to allow you to quickly toggle between
-categories of items.<sup>1</sup>
-
-| Config          | Description                                    | Default Value    | Other Value(s)                        |
-|:----------------|:-----------------------------------------------|------------------|:--------------------------------------|
-| ChestMenuTabs   | Enables the Chest Menu Tabs feature.           | `"Enabled"`      | `"Disabled"`, `"Default"`<sup>2</sup> |
-| ChestMenuTabSet | Assigns what tabs to show/hide.                | `[]`<sup>3</sup> | The names of tabs to show.            |
-| NextTab         | Assigns a keybind to move to the next tab.     | `"DPadRight"`    | Any valid button code.<sup>4</sup>    |
-| PreviousTab     | Assigns a keybind to move to the previous tab. | `"DPadLeft"`     | Any valid button code.<sup>4</sup>    |
-
-1. See [Customized Tabs](#customized-tabs).
-2. See [Option Values](#option-values).
-3. An empty string array shows all available tabs.
-4.
 
 See [Button Codes](https://stardewvalleywiki.com/Modding:Player_Guide/Key_Bindings#Button_codes).
 
@@ -522,26 +501,6 @@ chest named `"SaddleBag"` to the
 
 Register your chest using
 the [Better Chests API](../Common/Integrations/BetterChests/IBetterChestsApi.cs).
-
-### Customized Tabs
-
-The default tabs are defined by the `tabs.json` and `tabs.png` files which are
-both found under the `assets` folder.
-
-If `tabs.json` is not found, a default one is automatically generated:
-
-| Key<sup>1</sup> | Display Name | Texture                                | Icon Index | Item Tags<sup>2</sup>                                                                                        |
-|:----------------|:-------------|:---------------------------------------|:-----------|:-------------------------------------------------------------------------------------------------------------|
-| Clothing        | Clothing     | `furyx639.BetterChests\\Tabs\\Texture` | 0          | Boots, Clothing, Hat                                                                                         |
-| Cooking         | Cooking      | `furyx639.BetterChests\\Tabs\\Texture` | 1          | Artisan Goods, Cooking, Egg, Ingredients, Meat, Milk, Sell at Pierre's and Marnie's, Sell at Pierre's, Syrup |
-| Crops           | Crops        | `furyx639.BetterChests\\Tabs\\Texture` | 2          | Flowers, Fruits, Greens, Vegetables                                                                          |
-| Equipment       | Equipment    | `furyx639.BetterChests\\Tabs\\Texture` | 3          | Equipment, Ring, Tool, Weapon                                                                                |
-| Fishing         | Fishing      | `furyx639.BetterChests\\Tabs\\Texture` | 4          | Bait, Fishing, Sell at Fish Shop, Tackle                                                                     | 
-| Materials       | Materials    | `furyx639.BetterChests\\Tabs\\Texture` | 5          | Building Resources, Crafting, Gem, Metal Resources, Minerals, Monster Loot                                   |
-| Misc            | Misc         | `furyx639.BetterChests\\Tabs\\Texture` | 6          | Big Craftable, Furniture, Junk                                                                               | 
-| Seeds           | Seeds        | `furyx639.BetterChests\\Tabs\\Texture` | 7          | Fertilizer, Seeds                                                                                            |
-
-You can edit these files directly for personal usage.
 
 ### Other Assets
 

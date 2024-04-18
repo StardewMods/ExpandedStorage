@@ -10,13 +10,39 @@ using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 internal sealed class DefaultConfig : IModConfig
 {
     /// <inheritdoc />
-    public DefaultStorageOptions DefaultOptions { get; set; } = new();
+    public DefaultStorageOptions DefaultOptions { get; set; } = new()
+    {
+        AccessChest = RangeOption.Location,
+        AutoOrganize = FeatureOption.Enabled,
+        CarryChest = FeatureOption.Enabled,
+        CategorizeChest = FeatureOption.Enabled,
+        CategorizeChestIncludeStacks = FeatureOption.Enabled,
+        ChestFinder = FeatureOption.Enabled,
+        ConfigureChest = FeatureOption.Enabled,
+        CookFromChest = RangeOption.Location,
+        CraftFromChest = RangeOption.Location,
+        CraftFromChestDistance = -1,
+        HslColorPicker = FeatureOption.Enabled,
+        OpenHeldChest = FeatureOption.Enabled,
+        ResizeChest = ChestMenuOption.Large,
+        ResizeChestCapacity = 70,
+        SearchItems = FeatureOption.Enabled,
+        ShopFromChest = FeatureOption.Enabled,
+        StashToChest = RangeOption.Location,
+        StashToChestDistance = 16,
+    };
 
     /// <inheritdoc />
     public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions { get; set; } = [];
 
     /// <inheritdoc />
+    public bool AccessChestsShowArrows { get; set; } = true;
+
+    /// <inheritdoc />
     public int CarryChestLimit { get; set; } = 3;
+
+    /// <inheritdoc />
+    public float CarryChestSlowAmount { get; set; } = -1f;
 
     /// <inheritdoc />
     public int CarryChestSlowLimit { get; set; } = 1;
@@ -28,12 +54,6 @@ internal sealed class DefaultConfig : IModConfig
     public HashSet<string> CraftFromChestDisableLocations { get; set; } = [];
 
     /// <inheritdoc />
-    public RangeOption CraftFromWorkbench { get; set; } = RangeOption.Location;
-
-    /// <inheritdoc />
-    public int CraftFromWorkbenchDistance { get; set; } = -1;
-
-    /// <inheritdoc />
     public int HslColorPickerHueSteps { get; set; } = 29;
 
     /// <inheritdoc />
@@ -41,9 +61,6 @@ internal sealed class DefaultConfig : IModConfig
 
     /// <inheritdoc />
     public int HslColorPickerLightnessSteps { get; set; } = 16;
-
-    /// <inheritdoc />
-    public FilterMethod InventoryTabMethod { get; set; } = FilterMethod.Hidden;
 
     /// <inheritdoc />
     public FeatureOption LockItem { get; set; }
@@ -55,12 +72,6 @@ internal sealed class DefaultConfig : IModConfig
     public FilterMethod SearchItemsMethod { get; set; } = FilterMethod.GrayedOut;
 
     /// <inheritdoc />
-    public char SearchTagSymbol { get; set; } = '#';
-
-    /// <inheritdoc />
-    public char SearchNegationSymbol { get; set; } = '!';
-
-    /// <inheritdoc />
     public HashSet<string> StashToChestDisableLocations { get; set; } = [];
 
     /// <inheritdoc />
@@ -68,16 +79,15 @@ internal sealed class DefaultConfig : IModConfig
     {
         StringBuilder sb = new();
 
+        sb.AppendLine(
+            CultureInfo.InvariantCulture,
+            $"{nameof(this.AccessChestsShowArrows)}: {this.AccessChestsShowArrows}");
+
         sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.CarryChestLimit)}: {this.CarryChestLimit}");
         sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.CarryChestSlowLimit)}: {this.CarryChestSlowLimit}");
         sb.AppendLine(
             CultureInfo.InvariantCulture,
             $"{nameof(this.CraftFromChestDisableLocations)}: {string.Join(", ", this.CraftFromChestDisableLocations)}");
-
-        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.CraftFromWorkbench)}: {this.CraftFromWorkbench}");
-        sb.AppendLine(
-            CultureInfo.InvariantCulture,
-            $"{nameof(this.CraftFromWorkbenchDistance)}: {this.CraftFromWorkbenchDistance}");
 
         sb.AppendLine(
             CultureInfo.InvariantCulture,
@@ -91,14 +101,9 @@ internal sealed class DefaultConfig : IModConfig
             CultureInfo.InvariantCulture,
             $"{nameof(this.HslColorPickerLightnessSteps)}: {this.HslColorPickerLightnessSteps}");
 
-        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.InventoryTabMethod)}: {this.InventoryTabMethod}");
         sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.LockItem)}: {this.LockItem}");
         sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.LockItemHold)}: {this.LockItemHold}");
         sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.SearchItemsMethod)}: {this.SearchItemsMethod}");
-        sb.AppendLine(CultureInfo.InvariantCulture, $"{nameof(this.SearchTagSymbol)}: {this.SearchTagSymbol}");
-        sb.AppendLine(
-            CultureInfo.InvariantCulture,
-            $"{nameof(this.SearchNegationSymbol)}: {this.SearchNegationSymbol}");
 
         sb.AppendLine(
             CultureInfo.InvariantCulture,

@@ -16,8 +16,6 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 using StardewValley.Objects;
 
-// TODO: Draw farmer nearby using cursor distance
-
 /// <summary>Adds a color picker that support hue, saturation, and lightness.</summary>
 internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
 {
@@ -191,6 +189,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
             this.inputHelper.Suppress(e.Button);
             Game1.playSound("drumkit6");
             Game1.player.showChestColorPicker = !Game1.player.showChestColorPicker;
+            this.colorPicker.Value.SetupBorderNeighbors();
             return;
         }
 
@@ -227,6 +226,9 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
             chest.modData[key] = value;
         }
 
+        this.itemGrabMenuManager.CurrentMenu.colorPickerToggleButton.texture = this.assetHandler.Icons.Value;
+        this.itemGrabMenuManager.CurrentMenu.colorPickerToggleButton.sourceRect = new Rectangle(126, 0, 16, 16);
+
         this.colorPicker.Value = new HslComponent(
             this.assetHandler,
             chestColorPicker,
@@ -236,9 +238,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
             this.Config,
             () => container.Chest.playerChoiceColor.Value,
             c => container.Chest.playerChoiceColor.Value = c,
-            this.itemGrabMenuManager.CurrentMenu.xPositionOnScreen
-            - (2 * Game1.tileSize)
-            - (IClickableMenu.borderWidth / 2),
+            this.itemGrabMenuManager.CurrentMenu.colorPickerToggleButton.bounds.Right + Game1.tileSize,
             this.itemGrabMenuManager.CurrentMenu.yPositionOnScreen - 56 + (IClickableMenu.borderWidth / 2));
     }
 

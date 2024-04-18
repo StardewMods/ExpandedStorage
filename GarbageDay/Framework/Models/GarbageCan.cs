@@ -21,9 +21,6 @@ internal sealed class GarbageCan
     /// <param name="chest">A unique name given to the garbage can for its loot table.</param>
     public GarbageCan(Chest chest) => this.chest = chest;
 
-    /// <summary>Gets or sets a value indicating whether the next can will drop a hat.</summary>
-    public static bool GarbageHat { get; set; }
-
     /// <summary>Gets the Location where the garbage can is placed.</summary>
     public GameLocation Location => this.chest.Location;
 
@@ -36,7 +33,8 @@ internal sealed class GarbageCan
 
     /// <summary>Adds an item to the garbage can determined by luck and mirroring vanilla chances.</summary>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
-    public void AddLoot(ILog log)
+    /// <param name="overrideItem">Manually override the item.</param>
+    public void AddLoot(ILog log, Item? overrideItem = null)
     {
         // Reset daily state
         this.checkedToday = false;
@@ -49,6 +47,14 @@ internal sealed class GarbageCan
         }
 
         log.Trace("Adding loot item to garbage can {0}.", whichCan);
+
+        if (overrideItem is not null)
+        {
+            log.Trace("Special loot item selected {0}", overrideItem.Name);
+            this.specialItem = overrideItem;
+            return;
+        }
+
         this.Location.TryGetGarbageItem(
             whichCan,
             Game1.player.DailyLuck,
@@ -114,7 +120,7 @@ internal sealed class GarbageCan
         }
 
         // Give Hat
-        if (this.doubleMega || GarbageCan.GarbageHat)
+        if (this.doubleMega)
         {
             this.doubleMega = false;
             this.Location.playSound("explosion");
@@ -142,11 +148,11 @@ internal sealed class GarbageCan
 
         if (this.specialItem.ItemId == "(H)66")
         {
-            GarbageCan.GarbageHat = false;
             this.chest.playerChoiceColor.Value = Color.Black; // Remove Lid
         }
 
         Game1.player.addItemByMenuIfNecessary(this.specialItem);
+        this.specialItem = null;
     }
 
     /// <summary>Empties the trash of all items.</summary>

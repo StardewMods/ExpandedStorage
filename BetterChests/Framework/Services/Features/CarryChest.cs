@@ -164,7 +164,7 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
             return;
         }
 
-        if (!this.containerFactory.TryGetOneFromLocation(Game1.currentLocation, e.Cursor.GrabTile, out var container)
+        if (!this.containerFactory.TryGetOne(Game1.currentLocation, e.Cursor.GrabTile, out var container)
             || container.Options.CarryChest != FeatureOption.Enabled)
         {
             return;

@@ -7,6 +7,7 @@ using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
@@ -48,7 +49,7 @@ internal sealed class LockItem : BaseFeature<LockItem>
         this.Events.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         this.Events.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
         this.Events.Subscribe<ItemTransferringEventArgs>(this.OnItemTransferring);
-        this.Events.Subscribe<ItemGrabMenuChangedEventArgs>(this.OnItemGrabMenuChanged);
+        this.Events.Subscribe<ItemHighlightingEventArgs>(this.OnItemHighlighting);
     }
 
     /// <inheritdoc />
@@ -59,7 +60,7 @@ internal sealed class LockItem : BaseFeature<LockItem>
         this.Events.Unsubscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         this.Events.Unsubscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
         this.Events.Unsubscribe<ItemTransferringEventArgs>(this.OnItemTransferring);
-        this.Events.Unsubscribe<ItemGrabMenuChangedEventArgs>(this.OnItemGrabMenuChanged);
+        this.Events.Unsubscribe<ItemHighlightingEventArgs>(this.OnItemHighlighting);
     }
 
     private static bool TryGetMenu(int mouseX, int mouseY, [NotNullWhen(true)] out InventoryMenu? inventoryMenu)
@@ -191,12 +192,15 @@ internal sealed class LockItem : BaseFeature<LockItem>
         this.ToggleLock(item);
     }
 
-    private void OnItemGrabMenuChanged(ItemGrabMenuChangedEventArgs e)
+    private void OnItemHighlighting(ItemHighlightingEventArgs e)
     {
-        this.itemGrabMenuManager.Top.AddHighlightMethod(this.IsUnlocked);
-        this.itemGrabMenuManager.Bottom.AddHighlightMethod(this.IsUnlocked);
+        if (!this.IsUnlocked(e.Item))
+        {
+            e.UnHighlight();
+        }
     }
 
+    [Priority(int.MaxValue)]
     private void OnItemTransferring(ItemTransferringEventArgs e)
     {
         if (!this.IsUnlocked(e.Item))

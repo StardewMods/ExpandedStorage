@@ -58,13 +58,13 @@ public interface IBetterChestsApi
 
     /// <summary>Tries to get a container from the specified farmer.</summary>
     /// <param name="farmer">The player whose container will be retrieved.</param>
-    /// <param name="container">When this method returns, contains the container if found; otherwise, null.</param>
     /// <param name="index">The index of the player's inventory. Defaults to the active item.</param>
+    /// <param name="container">When this method returns, contains the container if found; otherwise, null.</param>
     /// <returns>true if a container is found; otherwise, false.</returns>
     public bool TryGetContainerFromPlayer(
         Farmer farmer,
-        [NotNullWhen(true)] out IStorageContainer? container,
-        int index = -1);
+        int index,
+        [NotNullWhen(true)] out IStorageContainer? container);
 
     /// <summary>Tries to retrieve a container from the specified farmer.</summary>
     /// <param name="farmer">The farmer to get a container from.</param>

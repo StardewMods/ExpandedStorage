@@ -3,6 +3,7 @@ namespace StardewMods.BetterChests.Framework.Services.Features;
 using HarmonyLib;
 using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Interfaces;
+using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
@@ -10,7 +11,6 @@ using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
-using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Allows a chest to be opened while in the farmer's inventory.</summary>
@@ -66,7 +66,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
     {
         // Events
         this.Events.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
-        this.Events.Subscribe<ItemGrabMenuChangedEventArgs>(this.OnItemGrabMenuChanged);
+        this.Events.Subscribe<ItemHighlightingEventArgs>(this.OnItemHighlighting);
 
         // Patches
         this.patchManager.Patch(this.UniqueId);
@@ -77,7 +77,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
     {
         // Events
         this.Events.Unsubscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
-        this.Events.Unsubscribe<ItemGrabMenuChangedEventArgs>(this.OnItemGrabMenuChanged);
+        this.Events.Unsubscribe<ItemHighlightingEventArgs>(this.OnItemHighlighting);
 
         // Patches
         this.patchManager.Unpatch(this.UniqueId);
@@ -105,7 +105,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
     {
         if (!Context.IsPlayerFree
             || !e.Button.IsActionButton()
-            || !this.containerFactory.TryGetOneFromPlayer(Game1.player, out var container)
+            || !this.containerFactory.TryGetOne(Game1.player, Game1.player.CurrentToolIndex, out var container)
             || container.Options.OpenHeldChest != FeatureOption.Enabled)
         {
             return;
@@ -120,18 +120,11 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
             });
     }
 
-    private void OnItemGrabMenuChanged(ItemGrabMenuChangedEventArgs e) =>
-        this.itemGrabMenuManager.Bottom.AddHighlightMethod(this.MatchesFilter);
-
-    private bool MatchesFilter(Item item)
+    private void OnItemHighlighting(ItemHighlightingEventArgs e)
     {
-        if (Game1.activeClickableMenu is not ItemGrabMenu itemGrabMenu
-            || !this.proxyChestFactory.TryGetProxy(item, out var chest))
+        if (e.Container is FarmerContainer && this.itemGrabMenuManager.CurrentMenu?.sourceItem == e.Item)
         {
-            return true;
+            e.UnHighlight();
         }
-
-        // Prevent chest from being added into itself
-        return itemGrabMenu.sourceItem != chest;
     }
 }

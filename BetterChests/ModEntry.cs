@@ -3,14 +3,13 @@ namespace StardewMods.BetterChests;
 using HarmonyLib;
 using SimpleInjector;
 using StardewModdingAPI.Events;
+using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.BetterChests.Framework.Services.Features;
-using StardewMods.BetterChests.Framework.UI;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.Automate;
 using StardewMods.Common.Services.Integrations.BetterCrafting;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
@@ -33,6 +32,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterInstance(this.Helper);
         this.container.RegisterInstance(this.ModManifest);
         this.container.RegisterInstance(this.Monitor);
+        this.container.RegisterInstance(this.Helper.ConsoleCommands);
         this.container.RegisterInstance(this.Helper.Data);
         this.container.RegisterInstance(this.Helper.Events);
         this.container.RegisterInstance(this.Helper.GameContent);
@@ -43,9 +43,9 @@ public sealed class ModEntry : Mod
         this.container.RegisterInstance(this.Helper.Translation);
 
         this.container.RegisterSingleton<AssetHandler>();
-        this.container.RegisterSingleton<AutomateIntegration>();
         this.container.RegisterSingleton<BetterCraftingIntegration>();
         this.container.RegisterSingleton<BetterCraftingInventoryProvider>();
+        this.container.RegisterSingleton<CacheManager>();
         this.container.RegisterSingleton<IModConfig, ConfigManager>();
         this.container.RegisterSingleton<ConfigManager, ConfigManager>();
         this.container.RegisterSingleton<ContainerFactory>();
@@ -55,25 +55,24 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<IEventSubscriber, EventManager>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
-        this.container.RegisterSingleton<InventoryTabFactory>();
         this.container.RegisterSingleton<ItemGrabMenuManager>();
-        this.container.RegisterSingleton<ItemMatcherFactory>();
         this.container.RegisterSingleton<LocalizedTextManager>();
         this.container.RegisterSingleton<ILog, Logger>();
         this.container.RegisterSingleton<IPatchManager, Patcher>();
         this.container.RegisterSingleton<ProxyChestFactory>();
+        this.container.RegisterSingleton<SearchHandler>();
         this.container.RegisterSingleton<StatusEffectManager>();
         this.container.RegisterSingleton<IThemeHelper, Themer>();
         this.container.RegisterSingleton<ToolbarIconsIntegration>();
 
-        this.container.RegisterInstance<Func<CategorizeOption>>(this.container.GetInstance<CategorizeOption>);
         this.container.RegisterInstance<Func<IModConfig>>(this.container.GetInstance<IModConfig>);
-
-        this.container.Register<CategorizeOption>();
+        this.container.RegisterInstance(new PerScreen<string>(() => string.Empty));
+        this.container.RegisterInstance(new PerScreen<ISearchExpression?>());
 
         this.container.Collection.Register<IFeature>(
             new[]
             {
+                typeof(AccessChest),
                 typeof(AutoOrganize),
                 typeof(CarryChest),
                 typeof(CategorizeChest),
@@ -83,7 +82,6 @@ public sealed class ModEntry : Mod
                 typeof(ConfigureChest),
                 typeof(CraftFromChest),
                 typeof(HslColorPicker),
-                typeof(InventoryTabs),
                 typeof(LockItem),
                 typeof(OpenHeldChest),
                 typeof(ResizeChest),
