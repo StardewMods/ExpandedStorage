@@ -343,13 +343,24 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
             case ItemGrabMenu itemGrabMenu:
                 if (itemGrabMenu.ItemsToGrabMenu.highlightMethod?.Target != this.Top)
                 {
+                    var targetType = itemGrabMenu.ItemsToGrabMenu.highlightMethod?.Target?.GetType();
+                    if (targetType is not null && targetType.Assembly == this.chestsAnywhereType?.Assembly)
+                    {
+                        return;
+                    }
+
                     this.Top.OriginalHighlightMethod = itemGrabMenu.ItemsToGrabMenu.highlightMethod;
                     itemGrabMenu.ItemsToGrabMenu.highlightMethod = this.Top.HighlightMethod;
                 }
 
-                if (itemGrabMenu.inventory.highlightMethod?.Target != this.Bottom
-                    && itemGrabMenu.inventory.highlightMethod?.Target?.GetType() != this.chestsAnywhereType)
+                if (itemGrabMenu.inventory.highlightMethod?.Target != this.Bottom)
                 {
+                    var targetType = itemGrabMenu.inventory.highlightMethod?.Target?.GetType();
+                    if (targetType is not null && targetType.Assembly == this.chestsAnywhereType?.Assembly)
+                    {
+                        return;
+                    }
+
                     this.Bottom.OriginalHighlightMethod = itemGrabMenu.inventory.highlightMethod;
                     itemGrabMenu.inventory.highlightMethod = this.Bottom.HighlightMethod;
                 }
@@ -428,7 +439,9 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
             if (topContainer is not null && this.CurrentMenu is ItemGrabMenu itemGrabMenu)
             {
                 // Relaunch menu once
-                if (depth == 0 && itemGrabMenu.inventory.highlightMethod?.Target?.GetType() != this.chestsAnywhereType)
+                if (depth == 0
+                    && (itemGrabMenu.inventory.highlightMethod?.Target?.GetType() is null
+                        || itemGrabMenu.inventory.highlightMethod?.Target?.GetType() != this.chestsAnywhereType))
                 {
                     topContainer.ShowMenu();
                     continue;

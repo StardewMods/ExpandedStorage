@@ -33,6 +33,9 @@ internal interface IModConfig
     /// <summary>Gets the locations that crafting from storages will be disabled from.</summary>
     public HashSet<string> CraftFromChestDisableLocations { get; }
 
+    /// <summary>Gets a value indicating whether debug mode will be enabled.</summary>
+    public bool DebugMode { get; }
+
     /// <summary>Gets a value for the number of steps in the hue color picker.</summary>
     public int HslColorPickerHueSteps { get; }
 

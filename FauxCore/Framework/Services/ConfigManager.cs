@@ -33,7 +33,11 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     }
 
     /// <inheritdoc />
+#if DEBUG
+    public SimpleLogLevel LogLevel => SimpleLogLevel.More;
+#else
     public SimpleLogLevel LogLevel => this.Config.LogLevel;
+#endif
 
     private void OnGameLaunched(GameLaunchedEventArgs e)
     {

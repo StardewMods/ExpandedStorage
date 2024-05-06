@@ -27,6 +27,23 @@ internal abstract class BaseContainer<TSource> : BaseContainer, IStorageContaine
     public WeakReference<TSource> Source { get; }
 
     /// <inheritdoc />
+    public override void ShowMenu(bool playSound = false)
+    {
+        var oldID = Game1.activeClickableMenu?.currentlySnappedComponent?.myID ?? -1;
+        Game1.activeClickableMenu = this.GetItemGrabMenu(
+            playSound,
+            context: this.Source.TryGetTarget(out var target) ? target : null);
+
+        if (oldID == -1)
+        {
+            return;
+        }
+
+        Game1.activeClickableMenu.currentlySnappedComponent = Game1.activeClickableMenu.getComponentWithID(oldID);
+        Game1.activeClickableMenu.snapCursorToCurrentSnappedComponent();
+    }
+
+    /// <inheritdoc />
     protected override ItemGrabMenu GetItemGrabMenu(
         bool playSound = false,
         bool reverseGrab = false,
@@ -477,7 +494,7 @@ internal abstract class BaseContainer : IStorageContainer
     public virtual void ShowMenu(bool playSound = false)
     {
         var oldID = Game1.activeClickableMenu?.currentlySnappedComponent?.myID ?? -1;
-        Game1.activeClickableMenu = this.GetItemGrabMenu(playSound, context: this);
+        Game1.activeClickableMenu = this.GetItemGrabMenu(playSound);
         if (oldID == -1)
         {
             return;

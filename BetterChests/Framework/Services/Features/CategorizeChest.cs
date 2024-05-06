@@ -3,13 +3,13 @@ namespace StardewMods.BetterChests.Framework.Services.Features;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Events;
+using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
-using StardewValley.ItemTypeDefinitions;
 
 /// <summary>Restricts what items can be added into a chest.</summary>
 internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
@@ -63,149 +63,6 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
         this.Events.Unsubscribe<ItemsDisplayingEventArgs>(this.OnItemsDisplaying);
         this.Events.Unsubscribe<ItemTransferringEventArgs>(this.OnItemTransferring);
         this.Events.Unsubscribe<SearchChangedEventArgs>(this.OnSearchChanged);
-    }
-
-    private static IEnumerable<Item> GetItems(Func<Item, bool>? predicate)
-    {
-        foreach (var item in GetAll())
-        {
-            if (predicate is null || predicate(item))
-            {
-                yield return item;
-            }
-
-            if (item is not SObject obj
-                || obj.bigCraftable.Value
-                || item.QualifiedItemId == "(O)447"
-                || item.QualifiedItemId == "(O)812")
-            {
-                continue;
-            }
-
-            // Add silver quality item
-            obj = (SObject)item.getOne();
-            obj.Quality = SObject.medQuality;
-            if (predicate is null || predicate(obj))
-            {
-                yield return obj;
-            }
-
-            // Add gold quality item
-            obj = (SObject)item.getOne();
-            obj.Quality = SObject.highQuality;
-            if (predicate is null || predicate(obj))
-            {
-                yield return obj;
-            }
-
-            // Add iridium quality item
-            obj = (SObject)item.getOne();
-            obj.Quality = SObject.bestQuality;
-            if (predicate is null || predicate(obj))
-            {
-                yield return obj;
-            }
-        }
-
-        yield break;
-
-        IEnumerable<Item> GetAll(bool flavored = true, params string[]? identifiers)
-        {
-            foreach (var itemType in ItemRegistry.ItemTypes)
-            {
-                if (identifiers is not null && identifiers.Any() && !identifiers.Contains(itemType.Identifier))
-                {
-                    continue;
-                }
-
-                var definition = ItemRegistry.GetTypeDefinition(itemType.Identifier);
-                foreach (var itemId in itemType.GetAllIds())
-                {
-                    var item = ItemRegistry.Create(itemType.Identifier + itemId);
-                    if (!flavored)
-                    {
-                        yield return item;
-
-                        continue;
-                    }
-
-                    switch (definition)
-                    {
-                        case ObjectDataDefinition objectDataDefinition:
-                            if (item.QualifiedItemId == "(O)340")
-                            {
-                                yield return objectDataDefinition.CreateFlavoredHoney(null);
-
-                                continue;
-                            }
-
-                            var ingredient = item as SObject;
-                            switch (item.Category)
-                            {
-                                case SObject.FruitsCategory:
-                                    yield return objectDataDefinition.CreateFlavoredWine(ingredient);
-                                    yield return objectDataDefinition.CreateFlavoredJelly(ingredient);
-                                    yield return objectDataDefinition.CreateFlavoredDriedFruit(ingredient);
-
-                                    break;
-
-                                case SObject.VegetableCategory:
-                                    yield return objectDataDefinition.CreateFlavoredJuice(ingredient);
-                                    yield return objectDataDefinition.CreateFlavoredPickle(ingredient);
-
-                                    break;
-
-                                case SObject.flowersCategory:
-                                    yield return objectDataDefinition.CreateFlavoredHoney(ingredient);
-
-                                    break;
-
-                                case SObject.FishCategory:
-                                    yield return objectDataDefinition.CreateFlavoredBait(ingredient);
-                                    yield return objectDataDefinition.CreateFlavoredSmokedFish(ingredient);
-
-                                    break;
-
-                                case SObject.sellAtFishShopCategory when item.QualifiedItemId == "(O)812":
-                                    foreach (var fishPondData in DataLoader.FishPondData(Game1.content))
-                                    {
-                                        if (fishPondData.ProducedItems.All(
-                                            producedItem => producedItem.ItemId != item.QualifiedItemId))
-                                        {
-                                            continue;
-                                        }
-
-                                        foreach (var fishPondItem in GetAll(false, "(O)"))
-                                        {
-                                            if (fishPondItem is SObject fishPondObject
-                                                && fishPondData.RequiredTags.All(fishPondItem.HasContextTag))
-                                            {
-                                                yield return objectDataDefinition.CreateFlavoredRoe(fishPondObject);
-                                                yield return objectDataDefinition.CreateFlavoredAgedRoe(fishPondObject);
-                                            }
-                                        }
-                                    }
-
-                                    break;
-                            }
-
-                            if (item.HasContextTag("edible_mushroom"))
-                            {
-                                yield return objectDataDefinition.CreateFlavoredDriedMushroom(item as SObject);
-                            }
-
-                            yield return item;
-
-                            break;
-
-                        default:
-                            yield return item;
-
-                            break;
-                    }
-                }
-            }
-        }
     }
 
     private void OnItemHighlighting(ItemHighlightingEventArgs e)
@@ -272,7 +129,7 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
             return;
         }
 
-        this.cachedItems.Value = [..CategorizeChest.GetItems(e.SearchExpression.PartialMatch)];
+        this.cachedItems.Value = [..ItemRepository.GetItems(e.SearchExpression.PartialMatch)];
     }
 
     private bool CanAcceptItem(IStorageContainer container, Item item, out bool accepted)

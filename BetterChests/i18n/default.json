@@ -188,8 +188,9 @@
   "option.location.name": "Location",
   "option.world.name": "World",
   // Console Commands
-  "command.player-config.documentation": "Configure the player backpack.",
-  "command.reset-all.documentation": "Reset all storage options to default.",
+  "command.player-config": "Configure the player backpack.",
+  "command.reset-all": "Reset all storage options to default.",
+  "command.menu": "Open a Better Chests menu.",
   // Capacity Options
   "capacity.other.name": "{{slots}} slots",
   "capacity.unlimited.name": "Unlimited",

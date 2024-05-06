@@ -18,6 +18,7 @@ internal static class Extensions
         action(nameof(config.CarryChestSlowAmount), config.CarryChestSlowAmount);
         action(nameof(config.CarryChestSlowLimit), config.CarryChestSlowLimit);
         action(nameof(config.CraftFromChestDisableLocations), config.CraftFromChestDisableLocations);
+        action(nameof(config.DebugMode), config.DebugMode);
         action(nameof(config.HslColorPickerHueSteps), config.HslColorPickerHueSteps);
         action(nameof(config.HslColorPickerSaturationSteps), config.HslColorPickerSaturationSteps);
         action(nameof(config.HslColorPickerLightnessSteps), config.HslColorPickerLightnessSteps);

@@ -76,6 +76,9 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     /// <inheritdoc />
     public HashSet<string> CraftFromChestDisableLocations => this.Config.CraftFromChestDisableLocations;
 
+    /// <inheritdoc/>
+    public bool DebugMode => this.Config.DebugMode;
+
     /// <inheritdoc />
     public int HslColorPickerHueSteps => this.Config.HslColorPickerHueSteps;
 
@@ -1216,7 +1219,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     CraftFromChest = RangeOption.Disabled,
                     HslColorPicker = FeatureOption.Disabled,
                     OpenHeldChest = FeatureOption.Disabled,
-                    ResizeChest = ChestMenuOption.Disabled,
+                    ResizeChest = ChestMenuOption.Medium,
                     SearchItems = FeatureOption.Disabled,
                     ShopFromChest = FeatureOption.Disabled,
                     StashToChest = RangeOption.Disabled,

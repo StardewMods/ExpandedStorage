@@ -61,6 +61,9 @@ internal sealed class DefaultConfig : IModConfig
     /// <inheritdoc />
     public HashSet<string> CraftFromChestDisableLocations { get; set; } = [];
 
+    /// <inheritdoc/>
+    public bool DebugMode { get; set; }
+
     /// <inheritdoc />
     public int HslColorPickerHueSteps { get; set; } = 29;
 

@@ -65,6 +65,11 @@ internal class ObjectContainer : BaseContainer<SObject>
 
         this.Items.Remove(item);
         this.Items.RemoveEmptySlots();
+        if (!this.Items.HasAny())
+        {
+            this.Object.showNextIndex.Value = false;
+        }
+
         return true;
     }
 }

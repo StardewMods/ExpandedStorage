@@ -86,8 +86,8 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
             });
 
         // Commands
-        commandHelper.Add("bc_player_config", I18n.Command_PlayerConfig_Documentation(), this.ConfigurePlayer);
-        commandHelper.Add("bc_reset_all", I18n.Command_ResetAll_Documentation(), this.ResetAll);
+        commandHelper.Add("bc_player_config", I18n.Command_PlayerConfig(), this.ConfigurePlayer);
+        commandHelper.Add("bc_reset_all", I18n.Command_ResetAll(), this.ResetAll);
 
         // Patches
         this.patchManager.Add(
@@ -220,7 +220,8 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     {
         if (!Context.IsPlayerFree
             || !this.Config.Controls.ConfigureChest.JustPressed()
-            || !this.containerFactory.TryGetOne(Game1.player, Game1.player.CurrentToolIndex, out var container))
+            || (!this.containerFactory.TryGetOne(Game1.player, Game1.player.CurrentToolIndex, out var container)
+                && !this.containerFactory.TryGetOne(Game1.player.currentLocation, e.Cursor.Tile, out container)))
         {
             return;
         }
