@@ -14,13 +14,14 @@ using StardewValley.Menus;
 /// <summary>Adds a search bar to the top of the <see cref="ItemGrabMenu" />.</summary>
 internal sealed class SearchItems : BaseFeature<SearchItems>
 {
-    private readonly PerScreen<ClickableTextureComponent> existingStacksButton;
+    private readonly AssetHandler assetHandler;
+    private readonly PerScreen<ClickableTextureComponent?> existingStacksButton = new();
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<bool> isActive = new(() => true);
     private readonly MenuHandler menuHandler;
-    private readonly PerScreen<ClickableTextureComponent> rejectButton;
-    private readonly PerScreen<ClickableTextureComponent> saveButton;
-    private readonly PerScreen<SearchComponent?> searchBar = new();
+    private readonly PerScreen<ClickableTextureComponent?> rejectButton = new();
+    private readonly PerScreen<ClickableTextureComponent?> saveButton = new();
+    private readonly PerScreen<SearchBar?> searchBar = new();
     private readonly PerScreen<ISearchExpression?> searchExpression;
     private readonly SearchHandler searchHandler;
     private readonly PerScreen<string> searchText;
@@ -49,47 +50,12 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         PerScreen<string> searchText)
         : base(eventManager, log, manifest, modConfig)
     {
+        this.assetHandler = assetHandler;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
         this.searchExpression = searchExpression;
         this.searchHandler = searchHandler;
         this.searchText = searchText;
-
-        this.rejectButton = new PerScreen<ClickableTextureComponent>(
-            () => new ClickableTextureComponent(
-                new Rectangle(0, 0, 24, 24),
-                Game1.mouseCursors,
-                new Rectangle(322, 498, 12, 12),
-                2f)
-            {
-                name = "Reject",
-                hoverText = I18n.Button_RejectUncategorized_Name(),
-                myID = 8_675_308,
-            });
-
-        this.saveButton = new PerScreen<ClickableTextureComponent>(
-            () => new ClickableTextureComponent(
-                new Rectangle(0, 0, Game1.tileSize / 2, Game1.tileSize / 2),
-                assetHandler.UiTextures.Value,
-                new Rectangle(142, 0, 16, 16),
-                2f)
-            {
-                name = "Save",
-                hoverText = I18n.Button_SaveAsCategorization_Name(),
-                myID = 8_675_309,
-            });
-
-        this.existingStacksButton = new PerScreen<ClickableTextureComponent>(
-            () => new ClickableTextureComponent(
-                new Rectangle(0, 0, 27, 27),
-                Game1.mouseCursors,
-                new Rectangle(227, 425, 9, 9),
-                3f)
-            {
-                name = "ExistingStacks",
-                hoverText = I18n.Button_IncludeExistingStacks_Name(),
-                myID = 8_675_310,
-            });
     }
 
     /// <inheritdoc />
@@ -150,7 +116,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
                     return;
                 }
 
-                if (this.rejectButton.Value.containsPoint(mouseX, mouseY))
+                if (this.rejectButton.Value?.containsPoint(mouseX, mouseY) == true)
                 {
                     this.inputHelper.Suppress(e.Button);
                     container.CategorizeChestBlockItems = container.CategorizeChestBlockItems == FeatureOption.Enabled
@@ -160,14 +126,14 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
                     return;
                 }
 
-                if (this.saveButton.Value.containsPoint(mouseX, mouseY))
+                if (this.saveButton.Value?.containsPoint(mouseX, mouseY) == true)
                 {
                     this.inputHelper.Suppress(e.Button);
                     container.CategorizeChestSearchTerm = this.searchText.Value;
                     return;
                 }
 
-                if (this.existingStacksButton.Value.containsPoint(mouseX, mouseY))
+                if (this.existingStacksButton.Value?.containsPoint(mouseX, mouseY) == true)
                 {
                     this.inputHelper.Suppress(e.Button);
                     container.CategorizeChestIncludeStacks =
@@ -283,7 +249,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             - Game1.tileSize
             - (top.Rows == 3 ? 25 : 4);
 
-        this.searchBar.Value = new SearchComponent(
+        this.searchBar.Value = new SearchBar(
             x,
             y,
             width,
@@ -310,23 +276,52 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
 
         if (container.CategorizeChest != FeatureOption.Enabled)
         {
+            this.saveButton.Value = null;
+            this.existingStacksButton.Value = null;
+            this.rejectButton.Value = null;
             return;
         }
 
         x += width;
         y += 8;
 
-        this.saveButton.Value.bounds.X = x;
-        this.saveButton.Value.bounds.Y = y;
+        if (this.assetHandler.Icons.TryGetValue(this.ModId + "/Save", out var icon))
+        {
+            this.saveButton.Value = new ClickableTextureComponent(
+                new Rectangle(x, y, Game1.tileSize / 2, Game1.tileSize / 2),
+                this.assetHandler.UiTexture,
+                icon.Area,
+                2f)
+            {
+                name = "Save",
+                hoverText = I18n.Button_SaveAsCategorization_Name(),
+                myID = 8_675_309,
+            };
+        }
 
-        this.existingStacksButton.Value.bounds.X = x + 32;
-        this.existingStacksButton.Value.bounds.Y = y + 2;
-        this.existingStacksButton.Value.sourceRect = container.CategorizeChestIncludeStacks == FeatureOption.Enabled
-            ? new Rectangle(236, 425, 9, 9)
-            : new Rectangle(227, 425, 9, 9);
+        this.existingStacksButton.Value = new ClickableTextureComponent(
+            new Rectangle(x + 32, y + 2, 27, 27),
+            Game1.mouseCursors,
+            container.CategorizeChestIncludeStacks == FeatureOption.Enabled
+                ? new Rectangle(236, 425, 9, 9)
+                : new Rectangle(227, 425, 9, 9),
+            3f)
+        {
+            name = "ExistingStacks",
+            hoverText = I18n.Button_IncludeExistingStacks_Name(),
+            myID = 8_675_310,
+        };
 
-        this.rejectButton.Value.bounds.X = x + 64;
-        this.rejectButton.Value.bounds.Y = y + 2;
+        this.rejectButton.Value = new ClickableTextureComponent(
+            new Rectangle(x + 64, y + 2, 24, 24),
+            Game1.mouseCursors,
+            new Rectangle(322, 498, 12, 12),
+            2f)
+        {
+            name = "Reject",
+            hoverText = I18n.Button_RejectUncategorized_Name(),
+            myID = 8_675_308,
+        };
     }
 
     private void OnItemHighlighting(ItemHighlightingEventArgs e)
@@ -377,32 +372,41 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         }
 
         var (mouseX, mouseY) = Game1.getMousePosition(true);
-        this.saveButton.Value.tryHover(mouseX, mouseY);
-        this.existingStacksButton.Value.tryHover(mouseX, mouseY);
-        this.rejectButton.Value.tryHover(mouseX, mouseY);
 
-        this.saveButton.Value.draw(e.SpriteBatch);
-        this.existingStacksButton.Value.draw(e.SpriteBatch);
-        this.rejectButton.Value.draw(
-            e.SpriteBatch,
-            container.CategorizeChestBlockItems == FeatureOption.Enabled ? Color.White : Color.Gray,
-            1f);
-
-        if (this.saveButton.Value.containsPoint(mouseX, mouseY))
+        if (this.saveButton.Value is not null)
         {
-            itemGrabMenu.hoverText = this.saveButton.Value.hoverText;
-            return;
+            this.saveButton.Value.tryHover(mouseX, mouseY);
+            this.saveButton.Value.draw(e.SpriteBatch);
+            if (this.saveButton.Value.containsPoint(mouseX, mouseY))
+            {
+                itemGrabMenu.hoverText = this.saveButton.Value.hoverText;
+                return;
+            }
         }
 
-        if (this.existingStacksButton.Value.containsPoint(mouseX, mouseY))
+        if (this.existingStacksButton.Value is not null)
         {
-            itemGrabMenu.hoverText = this.existingStacksButton.Value.hoverText;
-            return;
+            this.existingStacksButton.Value.tryHover(mouseX, mouseY);
+            this.existingStacksButton.Value.draw(e.SpriteBatch);
+            if (this.existingStacksButton.Value.containsPoint(mouseX, mouseY))
+            {
+                itemGrabMenu.hoverText = this.existingStacksButton.Value.hoverText;
+                return;
+            }
         }
 
-        if (this.rejectButton.Value.containsPoint(mouseX, mouseY))
+        if (this.rejectButton.Value is not null)
         {
-            itemGrabMenu.hoverText = this.rejectButton.Value.hoverText;
+            this.rejectButton.Value.tryHover(mouseX, mouseY);
+            this.rejectButton.Value.draw(
+                e.SpriteBatch,
+                container.CategorizeChestBlockItems == FeatureOption.Enabled ? Color.White : Color.Gray,
+                1f);
+
+            if (this.rejectButton.Value.containsPoint(mouseX, mouseY))
+            {
+                itemGrabMenu.hoverText = this.rejectButton.Value.hoverText;
+            }
         }
     }
 

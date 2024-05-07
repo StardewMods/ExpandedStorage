@@ -8,7 +8,7 @@ using StardewValley.Menus;
 /// <summary>Menu for searching for chests which contain specific items.</summary>
 internal sealed class SearchOverlay : IClickableMenu
 {
-    private readonly SearchComponent searchComponent;
+    private readonly SearchBar searchBar;
 
     /// <summary>Initializes a new instance of the <see cref="SearchOverlay" /> class.</summary>
     /// <param name="getMethod">The function that gets the current search text.</param>
@@ -18,8 +18,8 @@ internal sealed class SearchOverlay : IClickableMenu
         var searchBarWidth = Math.Min(12 * Game1.tileSize, Game1.uiViewport.Width);
         var origin = Utility.getTopLeftPositionForCenteringOnScreen(searchBarWidth, 48);
 
-        this.searchComponent =
-            new SearchComponent((int)origin.X, Game1.tileSize, searchBarWidth, getMethod, setMethod)
+        this.searchBar =
+            new SearchBar((int)origin.X, Game1.tileSize, searchBarWidth, getMethod, setMethod)
             {
                 Selected = true,
             };
@@ -28,12 +28,12 @@ internal sealed class SearchOverlay : IClickableMenu
     /// <inheritdoc />
     public override void draw(SpriteBatch b)
     {
-        this.searchComponent.Draw(b);
+        this.searchBar.Draw(b);
         this.drawMouse(b);
     }
 
     /// <inheritdoc />
-    public override void performHoverAction(int x, int y) => this.searchComponent.Update(x, y);
+    public override void performHoverAction(int x, int y) => this.searchBar.Update(x, y);
 
     /// <inheritdoc />
     public override void receiveKeyPress(Keys key)
@@ -47,26 +47,26 @@ internal sealed class SearchOverlay : IClickableMenu
     /// <inheritdoc />
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
-        this.searchComponent.LeftClick(x, y);
-        if (this.searchComponent.Selected)
+        this.searchBar.LeftClick(x, y);
+        if (this.searchBar.Selected)
         {
             return;
         }
 
-        this.searchComponent.Selected = false;
+        this.searchBar.Selected = false;
         this.exitThisMenuNoSound();
     }
 
     /// <inheritdoc />
     public override void receiveRightClick(int x, int y, bool playSound = true)
     {
-        this.searchComponent.RightClick(x, y);
-        if (this.searchComponent.Selected)
+        this.searchBar.RightClick(x, y);
+        if (this.searchBar.Selected)
         {
             return;
         }
 
-        this.searchComponent.Selected = false;
+        this.searchBar.Selected = false;
         this.exitThisMenuNoSound();
     }
 }

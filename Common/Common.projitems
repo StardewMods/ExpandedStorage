@@ -85,5 +85,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ToolbarIcons\IToolbarIconsApi.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ToolbarIcons\ToolbarIconsIntegration.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Services\EventManager.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)UI\BaseMenu.cs" />
   </ItemGroup>
 </Project>

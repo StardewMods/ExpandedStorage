@@ -1,4 +1,4 @@
-namespace StardewMods.BetterChests.Framework.UI.Menus;
+namespace StardewMods.GarbageDay.Common.UI;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

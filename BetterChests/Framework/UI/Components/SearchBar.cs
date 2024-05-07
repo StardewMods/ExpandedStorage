@@ -5,7 +5,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
 
 /// <summary>Represents a search overlay control that allows the user to input text.</summary>
-internal sealed class SearchComponent : ClickableComponent
+internal sealed class SearchBar : ClickableComponent
 {
     private const int CountdownTimer = 20;
 
@@ -16,13 +16,13 @@ internal sealed class SearchComponent : ClickableComponent
     private string previousText;
     private int timeout;
 
-    /// <summary>Initializes a new instance of the <see cref="SearchComponent" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="SearchBar" /> class.</summary>
     /// <param name="x">The x-coordinate of the search bar.</param>
     /// <param name="y">The y-coordinate of the search bar.</param>
     /// <param name="width">The width of the search bar.</param>
     /// <param name="getMethod">The function that gets the current search text.</param>
     /// <param name="setMethod">The action that sets the search text.</param>
-    public SearchComponent(int x, int y, int width, Func<string> getMethod, Action<string> setMethod)
+    public SearchBar(int x, int y, int width, Func<string> getMethod, Action<string> setMethod)
         : base(new Rectangle(x, y, width, 48), "SearchBar")
     {
         this.previousText = getMethod();
@@ -112,7 +112,7 @@ internal sealed class SearchComponent : ClickableComponent
             return;
         }
 
-        this.timeout = SearchComponent.CountdownTimer;
+        this.timeout = SearchBar.CountdownTimer;
         this.previousText = this.textBox.Text;
     }
 }

@@ -22,7 +22,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
     private static HslColorPicker instance = null!;
 
     private readonly AssetHandler assetHandler;
-    private readonly PerScreen<HslComponent?> colorPicker = new();
+    private readonly PerScreen<HslPicker?> colorPicker = new();
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly IPatchManager patchManager;
@@ -221,8 +221,11 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
                     itemToDrawColored: Chest chest,
                 } chestColorPicker,
             } itemGrabMenu
-            || this.menuHandler.Top.Container is not ChestContainer container
-            || container.HslColorPicker != FeatureOption.Enabled)
+            || this.menuHandler.Top.Container is not ChestContainer
+            {
+                HslColorPicker: FeatureOption.Enabled,
+            } container
+            || !this.assetHandler.Icons.TryGetValue(this.ModId + "/HSL", out var icon))
         {
             this.colorPicker.Value = null;
             return;
@@ -234,10 +237,10 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
         }
 
         itemGrabMenu.chestColorPicker.visible = false;
-        itemGrabMenu.colorPickerToggleButton.texture = this.assetHandler.UiTextures.Value;
-        itemGrabMenu.colorPickerToggleButton.sourceRect = new Rectangle(126, 0, 16, 16);
+        itemGrabMenu.colorPickerToggleButton.texture = this.assetHandler.UiTexture;
+        itemGrabMenu.colorPickerToggleButton.sourceRect = icon.Area;
 
-        this.colorPicker.Value = new HslComponent(
+        this.colorPicker.Value = new HslPicker(
             this.assetHandler,
             chestColorPicker,
             this.inputHelper,

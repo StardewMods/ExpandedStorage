@@ -19,7 +19,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     private readonly PerScreen<ISearchExpression?> searchExpression;
     private readonly SearchHandler searchHandler;
     private readonly PerScreen<string> searchText;
-    private readonly PerScreen<List<TabComponent>> tabs = new(() => []);
+    private readonly PerScreen<List<TabIcon>> tabs = new(() => []);
 
     /// <summary>Initializes a new instance of the <see cref="InventoryTabs" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
@@ -140,7 +140,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
             }
 
             this.tabs.Value.Add(
-                new TabComponent(
+                new TabIcon(
                     x,
                     y,
                     icon,

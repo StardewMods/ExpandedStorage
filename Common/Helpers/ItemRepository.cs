@@ -5,6 +5,8 @@ using StardewValley.ItemTypeDefinitions;
 /// <summary>Provides methods for retrieving items based on a predicate.</summary>
 internal static class ItemRepository
 {
+    //TODO: Method for caching all context tags
+
     /// <summary>Retrieves items based on the provided predicate.</summary>
     /// <param name="predicate">The predicate used to filter the items. If null, all items are returned.</param>
     /// <returns>An enumerable collection of Item objects.</returns>

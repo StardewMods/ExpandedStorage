@@ -1,6 +1,5 @@
 namespace StardewMods.BetterChests.Framework.Services.Features;
 
-using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
@@ -80,16 +79,13 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         this.Events.Subscribe<WarpedEventArgs>(this.OnWarped);
 
         // Integrations
-        if (!this.toolbarIconsIntegration.IsLoaded)
+        if (!this.toolbarIconsIntegration.IsLoaded
+            || !this.assetHandler.Icons.TryGetValue(this.ModId + "/Search", out var icon))
         {
             return;
         }
 
-        this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.Id,
-            this.assetHandler.UiTextures.Name.BaseName,
-            new Rectangle(48, 0, 16, 16),
-            I18n.Button_FindChest_Name());
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(this.Id, icon.Path, icon.Area, I18n.Button_FindChest_Name());
 
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
     }

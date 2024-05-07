@@ -7,20 +7,20 @@ using StardewMods.BetterChests.Framework.Models;
 using StardewValley.Menus;
 
 /// <summary>Represents a component with an icon that expands into a label when hovered.</summary>
-internal sealed class TabComponent : ClickableComponent
+internal sealed class TabIcon : ClickableComponent
 {
     private readonly ClickableTextureComponent icon;
     private readonly Action onClick;
     private readonly Vector2 origin;
     private readonly int textWidth;
 
-    /// <summary>Initializes a new instance of the <see cref="TabComponent" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="TabIcon" /> class.</summary>
     /// <param name="x">The x-coordinate of the tab component.</param>
     /// <param name="y">The y-coordinate of the tab component.</param>
     /// <param name="icon">The tab icon.</param>
     /// <param name="tabData">The inventory tab data.</param>
     /// <param name="onClick">Action to perform when clicked.</param>
-    public TabComponent(int x, int y, Icon icon, TabData tabData, Action onClick)
+    public TabIcon(int x, int y, Icon icon, TabData tabData, Action onClick)
         : base(
             new Rectangle(x, y, Game1.tileSize, Game1.tileSize),
             ((int)Math.Pow(y, 2) + x).ToString(CultureInfo.InvariantCulture),

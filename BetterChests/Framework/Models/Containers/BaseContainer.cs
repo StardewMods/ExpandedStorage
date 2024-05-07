@@ -13,71 +13,16 @@ using StardewValley.Mods;
 using StardewValley.Network;
 
 /// <inheritdoc cref="IStorageContainer{TSource}" />
-internal abstract class BaseContainer<TSource> : BaseContainer, IStorageContainer<TSource>
+internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     where TSource : class
-{
-    /// <summary>Initializes a new instance of the <see cref="BaseContainer{TSource}" /> class.</summary>
-    /// <param name="source">The source of the container.</param>
-    protected BaseContainer(TSource source) => this.Source = new WeakReference<TSource>(source);
-
-    /// <inheritdoc />
-    public abstract bool IsAlive { get; }
-
-    /// <inheritdoc />
-    public WeakReference<TSource> Source { get; }
-
-    /// <inheritdoc />
-    public override void ShowMenu(bool playSound = false)
-    {
-        var oldID = Game1.activeClickableMenu?.currentlySnappedComponent?.myID ?? -1;
-        Game1.activeClickableMenu = this.GetItemGrabMenu(
-            playSound,
-            context: this.Source.TryGetTarget(out var target) ? target : null);
-
-        if (oldID == -1)
-        {
-            return;
-        }
-
-        Game1.activeClickableMenu.currentlySnappedComponent = Game1.activeClickableMenu.getComponentWithID(oldID);
-        Game1.activeClickableMenu.snapCursorToCurrentSnappedComponent();
-    }
-
-    /// <inheritdoc />
-    protected override ItemGrabMenu GetItemGrabMenu(
-        bool playSound = false,
-        bool reverseGrab = false,
-        bool showReceivingMenu = true,
-        bool snapToBottom = false,
-        bool canBeExitedWithKey = true,
-        bool playRightClickSound = true,
-        bool allowRightClick = true,
-        bool showOrganizeButton = true,
-        int source = ItemGrabMenu.source_chest,
-        Item? sourceItem = null,
-        int whichSpecialButton = -1,
-        object? context = null) =>
-        base.GetItemGrabMenu(
-            playSound,
-            reverseGrab,
-            showReceivingMenu,
-            snapToBottom,
-            canBeExitedWithKey,
-            playRightClickSound,
-            allowRightClick,
-            showOrganizeButton,
-            source,
-            sourceItem,
-            whichSpecialButton,
-            context ?? (this.Source.TryGetTarget(out var target) ? target : context));
-}
-
-/// <inheritdoc cref="StardewMods.Common.Services.Integrations.BetterChests.IStorageContainer" />
-internal abstract class BaseContainer : IStorageContainer
 {
     private readonly SortedList<StorageOption, Func<IStorageOptions>> storageOptions = [];
 
     private WeakReference<IStorageContainer?>? parent;
+
+    /// <summary>Initializes a new instance of the <see cref="BaseContainer{TSource}" /> class.</summary>
+    /// <param name="source">The source of the container.</param>
+    protected BaseContainer(TSource source) => this.Source = new WeakReference<TSource>(source);
 
     /// <inheritdoc />
     public IStorageOptions ActualOptions =>
@@ -114,6 +59,12 @@ internal abstract class BaseContainer : IStorageContainer
             return string.Empty;
         }
     }
+
+    /// <inheritdoc />
+    public abstract bool IsAlive { get; }
+
+    /// <inheritdoc />
+    public WeakReference<TSource> Source { get; }
 
     /// <inheritdoc />
     public abstract int Capacity { get; }
@@ -494,7 +445,10 @@ internal abstract class BaseContainer : IStorageContainer
     public virtual void ShowMenu(bool playSound = false)
     {
         var oldID = Game1.activeClickableMenu?.currentlySnappedComponent?.myID ?? -1;
-        Game1.activeClickableMenu = this.GetItemGrabMenu(playSound);
+        Game1.activeClickableMenu = this.GetItemGrabMenu(
+            playSound,
+            context: this.Source.TryGetTarget(out var target) ? target : null);
+
         if (oldID == -1)
         {
             return;
@@ -631,7 +585,7 @@ internal abstract class BaseContainer : IStorageContainer
             source,
             sourceItem,
             whichSpecialButton,
-            context);
+            context ?? (this.Source.TryGetTarget(out var target) ? target : context));
     }
 
     /// <summary>Initialize the individual mod data storage options for this container.</summary>

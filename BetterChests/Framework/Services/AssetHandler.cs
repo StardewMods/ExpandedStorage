@@ -22,7 +22,6 @@ internal sealed class AssetHandler : BaseService
     private readonly string hslTexturePath;
     private readonly string iconsPath;
     private readonly IModConfig modConfig;
-    private readonly IModContentHelper modContentHelper;
     private readonly Lazy<IManagedTexture> uiTextures;
     private HslColor[]? hslColors;
     private Texture2D? hslTexture;
@@ -51,12 +50,11 @@ internal sealed class AssetHandler : BaseService
         // Init
         this.gameContentHelper = gameContentHelper;
         this.modConfig = modConfig;
-        this.modContentHelper = modContentHelper;
         this.hslTexturePath = this.ModId + "/HueBar";
         this.iconsPath = this.ModId + "/Icons";
 
         this.uiTextures = new Lazy<IManagedTexture>(
-            () => themeHelper.AddAsset(this.ModId + "/UI", modContentHelper.Load<IRawTextureData>("assets/ui.png")));
+            () => themeHelper.AddAsset(this.ModId + "/UI", modContentHelper.Load<IRawTextureData>("assets/icons.png")));
 
         // Events
         eventSubscriber.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
@@ -102,8 +100,8 @@ internal sealed class AssetHandler : BaseService
         }
     }
 
-    /// <summary>Gets the managed icons texture.</summary>
-    public IManagedTexture UiTextures => this.uiTextures.Value;
+    /// <summary>Gets the texture used for UI elements.</summary>
+    public Texture2D UiTexture => this.uiTextures.Value.Value;
 
     private void OnAssetRequested(AssetRequestedEventArgs e)
     {
@@ -119,67 +117,136 @@ internal sealed class AssetHandler : BaseService
                 () => new Dictionary<string, Icon>
                 {
                     {
-                        this.ModId + "/Clothing",
-                        new Icon
+                        this.ModId + "/Clothing", new Icon
                         {
-                            Path = this.modContentHelper.GetInternalAssetName("assets/icons.png").Name,
+                            Path = this.uiTextures.Value.Name.Name,
                             Area = new Rectangle(0, 0, 16, 16),
                         }
                     },
                     {
-                        this.ModId + "/Cooking",
-                        new Icon
+                        this.ModId + "/Cooking", new Icon
                         {
-                            Path = this.modContentHelper.GetInternalAssetName("assets/icons.png").Name,
+                            Path = this.uiTextures.Value.Name.Name,
                             Area = new Rectangle(16, 0, 16, 16),
                         }
                     },
                     {
-                        this.ModId + "/Crops",
-                        new Icon
+                        this.ModId + "/Crops", new Icon
                         {
-                            Path = this.modContentHelper.GetInternalAssetName("assets/icons.png").Name,
+                            Path = this.uiTextures.Value.Name.Name,
                             Area = new Rectangle(32, 0, 16, 16),
                         }
                     },
                     {
-                        this.ModId + "/Equipment",
-                        new Icon
+                        this.ModId + "/Equipment", new Icon
                         {
-                            Path = this.modContentHelper.GetInternalAssetName("assets/icons.png").Name,
+                            Path = this.uiTextures.Value.Name.Name,
                             Area = new Rectangle(48, 0, 16, 16),
                         }
                     },
                     {
-                        this.ModId + "/Fishing",
-                        new Icon
+                        this.ModId + "/Fishing", new Icon
                         {
-                            Path = this.modContentHelper.GetInternalAssetName("assets/icons.png").Name,
+                            Path = this.uiTextures.Value.Name.Name,
                             Area = new Rectangle(64, 0, 16, 16),
                         }
                     },
                     {
-                        this.ModId + "/Materials",
-                        new Icon
+                        this.ModId + "/Materials", new Icon
                         {
-                            Path = this.modContentHelper.GetInternalAssetName("assets/icons.png").Name,
-                            Area = new Rectangle(80, 0, 16, 16),
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(0, 16, 16, 16),
                         }
                     },
                     {
-                        this.ModId + "/Miscellaneous",
-                        new Icon
+                        this.ModId + "/Miscellaneous", new Icon
                         {
-                            Path = this.modContentHelper.GetInternalAssetName("assets/icons.png").Name,
-                            Area = new Rectangle(96, 0, 16, 16),
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(16, 16, 16, 16),
                         }
                     },
                     {
-                        this.ModId + "/Seeds",
-                        new Icon
+                        this.ModId + "/Seeds", new Icon
                         {
-                            Path = this.modContentHelper.GetInternalAssetName("assets/icons.png").Name,
-                            Area = new Rectangle(112, 0, 16, 16),
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(32, 16, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Config", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(48, 16, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Stash", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(64, 16, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Craft", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(0, 32, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Search", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(16, 32, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Copy", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(32, 32, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Save", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(48, 32, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Paste", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(64, 32, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/TransferUp", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(0, 48, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/TransferDown", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(16, 48, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/HSL", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(32, 48, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Debug", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(48, 48, 16, 16),
                         }
                     },
                 },

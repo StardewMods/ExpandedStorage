@@ -84,7 +84,7 @@ internal sealed class SearchHandler : BaseService<SearchHandler>
 
         try
         {
-            searchExpression = AllExpression.ExpressionParser.ParseOrThrow($"({expression})");
+            searchExpression = AnyExpression.ExpressionParser.ParseOrThrow($"[{expression}]");
             return true;
         }
         catch (ParseException ex)

@@ -67,18 +67,17 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         this.Events.Subscribe<RenderingActiveMenuEventArgs>(this.OnRenderingActiveMenu);
 
         // Integrations
-        if (!this.toolbarIconsIntegration.IsLoaded)
+        if (this.toolbarIconsIntegration.IsLoaded
+            && this.assetHandler.Icons.TryGetValue(this.ModId + "/Stash", out var icon))
         {
-            return;
+            this.toolbarIconsIntegration.Api.AddToolbarIcon(
+                this.Id,
+                icon.Path,
+                icon.Area,
+                I18n.Button_StashToChest_Name());
+
+            this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
         }
-
-        this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.Id,
-            this.assetHandler.UiTextures.Name.BaseName,
-            new Rectangle(16, 0, 16, 16),
-            I18n.Button_StashToChest_Name());
-
-        this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
     }
 
     /// <inheritdoc />
@@ -207,15 +206,18 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
             return;
         }
 
-        itemGrabMenu.fillStacksButton.texture = this.assetHandler.UiTextures.Value;
-
-        itemGrabMenu.fillStacksButton.sourceRect = this.Config.Controls.TransferItemsReverse.IsDown()
-            ? new Rectangle(96, 0, 16, 16)
-            : new Rectangle(80, 0, 16, 16);
-
         itemGrabMenu.fillStacksButton.hoverText = this.Config.Controls.TransferItemsReverse.IsDown()
             ? I18n.Button_TransferDown_Name()
             : I18n.Button_TransferUp_Name();
+
+        var iconId = this.Config.Controls.TransferItemsReverse.IsDown() ? "TransferDown" : "TransferUp";
+        if (!this.assetHandler.Icons.TryGetValue(this.ModId + "/" + iconId, out var icon))
+        {
+            return;
+        }
+
+        itemGrabMenu.fillStacksButton.texture = this.assetHandler.UiTexture;
+        itemGrabMenu.fillStacksButton.sourceRect = icon.Area;
     }
 
     private void OnIconPressed(IIconPressedEventArgs e)

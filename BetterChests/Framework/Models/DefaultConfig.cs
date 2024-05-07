@@ -61,7 +61,7 @@ internal sealed class DefaultConfig : IModConfig
     /// <inheritdoc />
     public HashSet<string> CraftFromChestDisableLocations { get; set; } = [];
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool DebugMode { get; set; }
 
     /// <inheritdoc />

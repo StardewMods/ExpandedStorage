@@ -5,6 +5,11 @@
 ### Added
 
 * Added visual editors for configuring storage options.
+
+## 2.18.3 (May 7, 2024)
+
+### Added
+
 * Added configuration for Mini-Fridge storage type.
 * Added a toggleable feature to aid in debugging.
 
@@ -13,12 +18,13 @@
 * Removed `and` and `or` from search expressions.
 * Added `(` and `)` for grouping search expressions where all conditions must be met.
 * Added `[` and `]` for grouping search expressions where any conditions must be met.
+* Merged icons into a single asset.
 
 ### Fixed
 
 * Fixed chest menu launching without community center or color picker buttons.
 
-## 2.18.2 (May 5, 2025)
+## 2.18.2 (May 5, 2024)
 
 ### Changed
 

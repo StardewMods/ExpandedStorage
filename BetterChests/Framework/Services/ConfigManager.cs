@@ -76,7 +76,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     /// <inheritdoc />
     public HashSet<string> CraftFromChestDisableLocations => this.Config.CraftFromChestDisableLocations;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool DebugMode => this.Config.DebugMode;
 
     /// <inheritdoc />

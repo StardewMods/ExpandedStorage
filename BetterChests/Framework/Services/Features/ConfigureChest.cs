@@ -5,6 +5,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
+using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Models.StorageOptions;
@@ -22,13 +23,13 @@ using StardewValley.Menus;
 internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 {
     private static ConfigureChest instance = null!;
+    private readonly AssetHandler assetHandler;
 
-    private readonly PerScreen<ClickableTextureComponent> configButton;
+    private readonly PerScreen<ClickableTextureComponent?> configButton = new();
     private readonly ConfigManager configManager;
     private readonly ContainerFactory containerFactory;
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
     private readonly IInputHelper inputHelper;
-    private readonly PerScreen<bool> isActive = new();
     private readonly PerScreen<IStorageContainer?> lastContainer = new();
     private readonly LocalizedTextManager localizedTextManager;
     private readonly IManifest manifest;
@@ -37,7 +38,6 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
     /// <summary>Initializes a new instance of the <see cref="ConfigureChest" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
-    /// <param name="commandHelper">Dependency used for handling console commands.</param>
     /// <param name="configManager">Dependency used for accessing config data.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
@@ -50,7 +50,6 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     public ConfigureChest(
         AssetHandler assetHandler,
-        ICommandHelper commandHelper,
         ConfigManager configManager,
         ContainerFactory containerFactory,
         IEventManager eventManager,
@@ -64,6 +63,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         : base(eventManager, log, manifest, configManager)
     {
         ConfigureChest.instance = this;
+        this.assetHandler = assetHandler;
         this.configManager = configManager;
         this.containerFactory = containerFactory;
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
@@ -72,22 +72,6 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         this.localizedTextManager = localizedTextManager;
         this.manifest = manifest;
         this.patchManager = patchManager;
-        this.configButton = new PerScreen<ClickableTextureComponent>(
-            () => new ClickableTextureComponent(
-                new Rectangle(0, 0, Game1.tileSize, Game1.tileSize),
-                assetHandler.UiTextures.Value,
-                new Rectangle(0, 0, 16, 16),
-                Game1.pixelZoom)
-            {
-                name = this.Id,
-                hoverText = I18n.Button_Configure_Name(),
-                myID = 42_069,
-                region = ItemGrabMenu.region_organizationButtons,
-            });
-
-        // Commands
-        commandHelper.Add("bc_player_config", I18n.Command_PlayerConfig(), this.ConfigurePlayer);
-        commandHelper.Add("bc_reset_all", I18n.Command_ResetAll(), this.ResetAll);
 
         // Patches
         this.patchManager.Add(
@@ -104,6 +88,19 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     public override bool ShouldBeActive =>
         this.Config.DefaultOptions.ConfigureChest != FeatureOption.Disabled
         && this.genericModConfigMenuIntegration.IsLoaded;
+
+    /// <summary>Show the config menu for the current player.</summary>
+    /// <param name="command">The command to execute.</param>
+    /// <param name="args">The arguments for the command.</param>
+    public void Command(string command, string[] args)
+    {
+        switch (command)
+        {
+            case "bc_config":
+                this.Configure(args);
+                return;
+        }
+    }
 
     /// <inheritdoc />
     protected override void Activate()
@@ -137,7 +134,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static void ItemGrabMenu_RepositionSideButtons_postfix(ItemGrabMenu __instance)
     {
-        if (!ConfigureChest.instance.isActive.Value)
+        if (ConfigureChest.instance.configButton.Value is null)
         {
             return;
         }
@@ -193,7 +190,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
-        if (!this.isActive.Value
+        if (this.configButton.Value is null
             || e.Button is not (SButton.MouseLeft or SButton.ControllerA)
             || !this.menuHandler.CanFocus(this))
         {
@@ -234,51 +231,87 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     [Priority(1000)]
     private void OnInventoryMenuChanged(InventoryMenuChangedEventArgs e)
     {
+        Icon? icon;
         switch (e.Parent)
         {
             case ItemGrabMenu itemGrabMenu:
-                if (this.menuHandler.Top.Container?.ConfigureChest != FeatureOption.Enabled)
+                if (this.menuHandler.Top.Container?.ConfigureChest != FeatureOption.Enabled
+                    || !this.assetHandler.Icons.TryGetValue(this.ModId + "/Config", out icon))
                 {
-                    this.isActive.Value = false;
+                    this.configButton.Value = null;
                     return;
                 }
 
-                this.isActive.Value = true;
+                this.configButton.Value = new ClickableTextureComponent(
+                    new Rectangle(0, 0, Game1.tileSize, Game1.tileSize),
+                    this.assetHandler.UiTexture,
+                    icon.Area,
+                    Game1.pixelZoom)
+                {
+                    name = this.Id,
+                    hoverText = I18n.Button_Configure_Name(),
+                    myID = 42_069,
+                    region = ItemGrabMenu.region_organizationButtons,
+                };
+
                 itemGrabMenu.RepositionSideButtons();
                 return;
 
             case InventoryPage inventoryPage:
-                if (this.menuHandler.Bottom.Container?.ConfigureChest != FeatureOption.Enabled)
+                if (this.menuHandler.Bottom.Container?.ConfigureChest != FeatureOption.Enabled
+                    || !this.assetHandler.Icons.TryGetValue(this.ModId + "/Config", out icon))
                 {
-                    this.isActive.Value = false;
+                    this.configButton.Value = null;
                     return;
                 }
 
-                this.isActive.Value = true;
-                inventoryPage.allClickableComponents.Add(this.configButton.Value);
-                this.configButton.Value.bounds.X = inventoryPage.organizeButton.bounds.X;
-                this.configButton.Value.bounds.Y = inventoryPage.organizeButton.bounds.Y
-                    - Game1.tileSize
-                    - (IClickableMenu.borderWidth / 2);
+                this.configButton.Value = new ClickableTextureComponent(
+                    new Rectangle(
+                        inventoryPage.organizeButton.bounds.X,
+                        inventoryPage.organizeButton.bounds.Y - Game1.tileSize - (IClickableMenu.borderWidth / 2),
+                        Game1.tileSize,
+                        Game1.tileSize),
+                    this.assetHandler.UiTexture,
+                    icon.Area,
+                    Game1.pixelZoom)
+                {
+                    name = this.Id,
+                    hoverText = I18n.Button_Configure_Name(),
+                    myID = 42_069,
+                    region = ItemGrabMenu.region_organizationButtons,
+                };
 
+                inventoryPage.allClickableComponents.Add(this.configButton.Value);
                 return;
 
             case ShopMenu shopMenu:
-                if (this.menuHandler.Top.Container?.ConfigureChest != FeatureOption.Enabled)
+                if (this.menuHandler.Top.Container?.ConfigureChest != FeatureOption.Enabled
+                    || !this.assetHandler.Icons.TryGetValue(this.ModId + "/Config", out icon))
                 {
-                    this.isActive.Value = false;
+                    this.configButton.Value = null;
                     return;
                 }
 
-                this.isActive.Value = true;
-                this.configButton.Value.bounds.X =
-                    shopMenu.upArrow.bounds.X + Game1.tileSize + (IClickableMenu.borderWidth / 2);
+                this.configButton.Value = new ClickableTextureComponent(
+                    new Rectangle(
+                        shopMenu.upArrow.bounds.X + Game1.tileSize + (IClickableMenu.borderWidth / 2),
+                        shopMenu.upArrow.bounds.Y,
+                        Game1.tileSize,
+                        Game1.tileSize),
+                    this.assetHandler.UiTexture,
+                    icon.Area,
+                    Game1.pixelZoom)
+                {
+                    name = this.Id,
+                    hoverText = I18n.Button_Configure_Name(),
+                    myID = 42_069,
+                    region = ItemGrabMenu.region_organizationButtons,
+                };
 
-                this.configButton.Value.bounds.Y = shopMenu.upArrow.bounds.Y;
                 return;
 
             default:
-                this.isActive.Value = false;
+                this.configButton.Value = null;
                 return;
         }
     }
@@ -306,7 +339,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
     private void OnRenderedActiveMenu(RenderedActiveMenuEventArgs e)
     {
-        if (!this.isActive.Value)
+        if (this.configButton.Value is null)
         {
             return;
         }
@@ -345,26 +378,6 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
             case ShopMenu shopMenu:
                 shopMenu.hoverText = this.configButton.Value.hoverText;
                 return;
-        }
-    }
-
-    private void ConfigurePlayer(string commands, string[] args)
-    {
-        if (!this.containerFactory.TryGetOne(Game1.player, out var container))
-        {
-            return;
-        }
-
-        this.lastContainer.Value = container;
-        this.ShowMenu();
-    }
-
-    private void ResetAll(string commands, string[] args)
-    {
-        var defaultOptions = new DefaultStorageOptions();
-        foreach (var container in this.containerFactory.GetAll())
-        {
-            defaultOptions.CopyTo(container);
         }
     }
 
@@ -464,6 +477,29 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
             {
                 chestContainer.Chest.fridge.Value = this.lastContainer.Value.CookFromChest is not RangeOption.Disabled;
             }
+        }
+    }
+
+    private void Configure(IReadOnlyList<string> args)
+    {
+        if (args.Count != 1)
+        {
+            return;
+        }
+
+        switch (args[0])
+        {
+            case "backpack":
+                if (!this.containerFactory.TryGetOne(Game1.player, out var container))
+                {
+                    return;
+                }
+
+                this.lastContainer.Value = container;
+                this.ShowMenu();
+                return;
+
+            default: return;
         }
     }
 }

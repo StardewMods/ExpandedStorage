@@ -1,6 +1,5 @@
 namespace StardewMods.BetterChests.Framework.Services.Features;
 
-using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
@@ -105,12 +104,13 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
             this.betterCraftingIntegration.Api.MenuPopulateContainers += this.OnMenuPopulateContainers;
         }
 
-        if (this.toolbarIconsIntegration.IsLoaded)
+        if (this.toolbarIconsIntegration.IsLoaded
+            && this.assetHandler.Icons.TryGetValue(this.ModId + "/Craft", out var icon))
         {
             this.toolbarIconsIntegration.Api.AddToolbarIcon(
                 this.Id,
-                this.assetHandler.UiTextures.Name.BaseName,
-                new Rectangle(32, 0, 16, 16),
+                icon.Path,
+                icon.Area,
                 I18n.Button_CraftFromChest_Name());
 
             this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);

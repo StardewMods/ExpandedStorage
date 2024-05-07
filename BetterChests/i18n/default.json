@@ -228,6 +228,7 @@
   "button.save-as-categorization.name": "Save As Categorization",
   "button.include-existing-stacks.name": "Include Existing Stacks",
   "button.reject-uncategorized.name": "Reject Uncategorized Items",
+  "button.debug.name": "Debug",
   // UI - Tabs
   "tabs.Clothing.name": "Clothing",
   "tabs.Cooking.name": "Cooking",

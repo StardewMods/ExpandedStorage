@@ -10,9 +10,9 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Represents a component that allows the player to select a color using HSL sliders.</summary>
-internal sealed class HslComponent
+internal sealed class HslPicker
 {
-    private static readonly PerScreen<HslColor> SavedColor = new(() => HslComponent.Transparent);
+    private static readonly PerScreen<HslColor> SavedColor = new(() => HslPicker.Transparent);
     private static readonly HslColor Transparent = new(0, 0, 0);
 
     private readonly Chest chest;
@@ -38,7 +38,7 @@ internal sealed class HslComponent
     private bool hoverChest;
     private int lidFrameCount;
 
-    /// <summary>Initializes a new instance of the <see cref="HslComponent" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="HslPicker" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="colorPicker">The vanilla color picker component.</param>
     /// <param name="menu">The menu that the color picker is attached to.</param>
@@ -47,7 +47,7 @@ internal sealed class HslComponent
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="getColor">Get method for the current color.</param>
     /// <param name="setColor">Set method for the current color.</param>
-    public HslComponent(
+    public HslPicker(
         AssetHandler assetHandler,
         DiscreteColorPicker colorPicker,
         IInputHelper inputHelper,
@@ -78,7 +78,7 @@ internal sealed class HslComponent
         this.yPosition = this.menu.yPositionOnScreen - 56 + (IClickableMenu.borderWidth / 2);
 
         var playerChoiceColor = getColor();
-        this.CurrentColor = HslComponent.Transparent;
+        this.CurrentColor = HslPicker.Transparent;
         if (!playerChoiceColor.Equals(Color.Black))
         {
             this.CurrentColor = HslColor.FromColor(playerChoiceColor);
@@ -103,7 +103,7 @@ internal sealed class HslComponent
         this.copyArea = new Rectangle(this.xPosition + 30, this.yPosition - 4, 36, 36);
         this.copyComponent = new ClickableTextureComponent(
             new Rectangle(this.xPosition + 34, this.yPosition + 2, 8, 8),
-            assetHandler.UiTextures.Value,
+            assetHandler.UiTexture,
             new Rectangle(116, 4, 8, 8),
             3)
         {
@@ -304,7 +304,7 @@ internal sealed class HslComponent
 
         if (this.defaultColorArea.Contains(mouseX, mouseY))
         {
-            this.CurrentColor = HslComponent.Transparent;
+            this.CurrentColor = HslPicker.Transparent;
             this.colorPicker.colorSelection = 0;
             this.UpdateColor();
             return true;
@@ -312,7 +312,7 @@ internal sealed class HslComponent
 
         if (this.copyArea.Contains(mouseX, mouseY))
         {
-            HslComponent.SavedColor.Value = this.CurrentColor;
+            HslPicker.SavedColor.Value = this.CurrentColor;
             return true;
         }
 
@@ -350,7 +350,7 @@ internal sealed class HslComponent
 
         if (this.copyArea.Contains(mouseX, mouseY))
         {
-            this.CurrentColor = HslComponent.SavedColor.Value;
+            this.CurrentColor = HslPicker.SavedColor.Value;
             this.UpdateColor();
             return true;
         }
