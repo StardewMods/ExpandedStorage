@@ -13,16 +13,16 @@ using StardewMods.Common.Services.Integrations.ToolbarIcons;
 internal sealed class DebugMode : BaseFeature<DebugMode>
 {
     private readonly AssetHandler assetHandler;
-    private readonly ConfigureChest configureChest;
     private readonly ContainerFactory containerFactory;
+    private readonly ContainerHandler containerHandler;
     private readonly SearchHandler searchHandler;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="DebugMode" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="commandHelper">Dependency used for handling console commands.</param>
-    /// <param name="configureChest">Dependency used for configuring storages.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
+    /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
@@ -32,8 +32,8 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     public DebugMode(
         AssetHandler assetHandler,
         ICommandHelper commandHelper,
-        ConfigureChest configureChest,
         ContainerFactory containerFactory,
+        ContainerHandler containerHandler,
         IEventManager eventManager,
         ILog log,
         IManifest manifest,
@@ -44,8 +44,8 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     {
         // Init
         this.assetHandler = assetHandler;
-        this.configureChest = configureChest;
         this.containerFactory = containerFactory;
+        this.containerHandler = containerHandler;
         this.searchHandler = searchHandler;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
 
@@ -70,7 +70,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         switch (command)
         {
             case "bc_config":
-                this.configureChest.Command("bc_config", args);
+                this.Configure(args);
                 return;
             case "bc_reset":
                 this.ResetAll();
@@ -120,6 +120,28 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         foreach (var container in this.containerFactory.GetAll())
         {
             defaultOptions.CopyTo(container);
+        }
+    }
+
+    private void Configure(IReadOnlyList<string> args)
+    {
+        if (args.Count != 1)
+        {
+            return;
+        }
+
+        switch (args[0])
+        {
+            case "backpack":
+                if (!this.containerFactory.TryGetOne(Game1.player, out var container))
+                {
+                    return;
+                }
+
+                this.containerHandler.Configure(container);
+                return;
+
+            default: return;
         }
     }
 

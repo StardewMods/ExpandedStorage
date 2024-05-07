@@ -20,7 +20,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
     private readonly PerScreen<ClickableTextureComponent?> organizeButton = new();
 
     /// <summary>Initializes a new instance of the <see cref="SortInventory" /> class.</summary>
-    /// <param name="containerHandler">Dependency used for handling operations between containers.</param>
+    /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>

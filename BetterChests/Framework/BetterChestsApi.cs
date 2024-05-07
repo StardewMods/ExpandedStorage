@@ -13,7 +13,7 @@ public sealed class BetterChestsApi : IBetterChestsApi
     private readonly IModInfo modInfo;
 
     /// <summary>Initializes a new instance of the <see cref="BetterChestsApi" /> class.</summary>
-    /// <param name="containerHandler">Dependency used for handling operations between containers.</param>
+    /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="modInfo">Mod info from the calling mod.</param>
     internal BetterChestsApi(ContainerHandler containerHandler, ContainerFactory containerFactory, IModInfo modInfo)

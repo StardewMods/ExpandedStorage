@@ -6,9 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Models;
-using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Models.Events;
-using StardewMods.BetterChests.Framework.Models.StorageOptions;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
@@ -28,11 +26,10 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     private readonly PerScreen<ClickableTextureComponent?> configButton = new();
     private readonly ConfigManager configManager;
     private readonly ContainerFactory containerFactory;
+    private readonly ContainerHandler containerHandler;
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<IStorageContainer?> lastContainer = new();
-    private readonly LocalizedTextManager localizedTextManager;
-    private readonly IManifest manifest;
     private readonly MenuHandler menuHandler;
     private readonly IPatchManager patchManager;
 
@@ -40,11 +37,11 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="configManager">Dependency used for accessing config data.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
+    /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="localizedTextManager">Dependency used for formatting and translating text.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
@@ -52,11 +49,11 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         AssetHandler assetHandler,
         ConfigManager configManager,
         ContainerFactory containerFactory,
+        ContainerHandler containerHandler,
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
-        LocalizedTextManager localizedTextManager,
         ILog log,
         IManifest manifest,
         IPatchManager patchManager)
@@ -66,11 +63,10 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         this.assetHandler = assetHandler;
         this.configManager = configManager;
         this.containerFactory = containerFactory;
+        this.containerHandler = containerHandler;
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
-        this.localizedTextManager = localizedTextManager;
-        this.manifest = manifest;
         this.patchManager = patchManager;
 
         // Patches
@@ -88,19 +84,6 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     public override bool ShouldBeActive =>
         this.Config.DefaultOptions.ConfigureChest != FeatureOption.Disabled
         && this.genericModConfigMenuIntegration.IsLoaded;
-
-    /// <summary>Show the config menu for the current player.</summary>
-    /// <param name="command">The command to execute.</param>
-    /// <param name="args">The arguments for the command.</param>
-    public void Command(string command, string[] args)
-    {
-        switch (command)
-        {
-            case "bc_config":
-                this.Configure(args);
-                return;
-        }
-    }
 
     /// <inheritdoc />
     protected override void Activate()
@@ -383,123 +366,9 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
     private void ShowMenu()
     {
-        if (!this.genericModConfigMenuIntegration.IsLoaded || this.lastContainer.Value is null)
+        if (this.lastContainer.Value is not null)
         {
-            return;
-        }
-
-        this.Log.Info("{0}: Configuring {1}", this.Id, this.lastContainer.Value);
-
-        var gmcm = this.genericModConfigMenuIntegration.Api;
-        var options = new DefaultStorageOptions();
-        this.lastContainer.Value.ActualOptions.CopyTo(options);
-        var parentOptions = this.lastContainer.Value.GetParentOptions();
-        this.genericModConfigMenuIntegration.Register(() => new DefaultStorageOptions().CopyTo(options), Save);
-
-        gmcm.AddSectionTitle(
-            this.manifest,
-            () => this.lastContainer.Value.DisplayName,
-            this.lastContainer.Value.ToString);
-
-        gmcm.AddTextOption(
-            this.manifest,
-            () => options.StorageName,
-            value => options.StorageName = value,
-            I18n.Config_StorageName_Name,
-            I18n.Config_StorageName_Tooltip);
-
-        gmcm.AddTextOption(
-            this.manifest,
-            () => options.StorageIcon,
-            value => options.StorageIcon = value,
-            I18n.Config_StorageIcon_Name,
-            I18n.Config_StorageIcon_Tooltip);
-
-        // Access Chest Priority
-        if (this.lastContainer.Value.AccessChest is not RangeOption.Disabled)
-        {
-            gmcm.AddNumberOption(
-                this.manifest,
-                () => options.AccessChestPriority,
-                value => options.AccessChestPriority = value,
-                I18n.Config_AccessChestPriority_Name,
-                I18n.Config_AccessChestPriority_Tooltip);
-        }
-
-        // Stash to Chest Priority
-        if (this.lastContainer.Value.StashToChest is not RangeOption.Disabled)
-        {
-            gmcm.AddNumberOption(
-                this.manifest,
-                () => (int)options.StashToChestPriority,
-                value => options.StashToChestPriority = (StashPriority)value,
-                I18n.Config_StashToChestPriority_Name,
-                I18n.Config_StashToChestPriority_Tooltip,
-                -3,
-                3,
-                1,
-                this.localizedTextManager.FormatStashPriority);
-        }
-
-        // Categorize Chest
-        if (this.lastContainer.Value.CategorizeChest is not FeatureOption.Disabled)
-        {
-            gmcm.AddTextOption(
-                this.manifest,
-                () => options.CategorizeChestSearchTerm,
-                value => options.CategorizeChestSearchTerm = value,
-                I18n.Config_CategorizeChestSearchTerm_Name,
-                I18n.Config_CategorizeChestSearchTerm_Tooltip);
-
-            gmcm.AddTextOption(
-                this.manifest,
-                () => options.CategorizeChestIncludeStacks.ToStringFast(),
-                value => options.CategorizeChestIncludeStacks = FeatureOptionExtensions.TryParse(value, out var option)
-                    ? option
-                    : FeatureOption.Default,
-                I18n.Config_CategorizeChestIncludeStacks_Name,
-                I18n.Config_CategorizeChestIncludeStacks_Tooltip,
-                FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption(parentOptions?.CategorizeChestIncludeStacks));
-        }
-
-        gmcm.AddPageLink(this.manifest, "Main", I18n.Section_Main_Name, I18n.Section_Main_Description);
-        this.configManager.AddMainOption("Main", I18n.Section_Main_Name, options, parentOptions: parentOptions);
-        gmcm.OpenModMenu(this.manifest);
-        return;
-
-        void Save()
-        {
-            this.Log.Trace("Config changed: {0}\n{1}", this.lastContainer.Value, options);
-            options.CopyTo(this.lastContainer.Value);
-
-            if (this.lastContainer.Value is ChestContainer chestContainer)
-            {
-                chestContainer.Chest.fridge.Value = this.lastContainer.Value.CookFromChest is not RangeOption.Disabled;
-            }
-        }
-    }
-
-    private void Configure(IReadOnlyList<string> args)
-    {
-        if (args.Count != 1)
-        {
-            return;
-        }
-
-        switch (args[0])
-        {
-            case "backpack":
-                if (!this.containerFactory.TryGetOne(Game1.player, out var container))
-                {
-                    return;
-                }
-
-                this.lastContainer.Value = container;
-                this.ShowMenu();
-                return;
-
-            default: return;
+            this.containerHandler.Configure(this.lastContainer.Value);
         }
     }
 }

@@ -26,7 +26,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
     /// <summary>Initializes a new instance of the <see cref="StashToChest" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
-    /// <param name="containerHandler">Dependency used for handling operations between containers.</param>
+    /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>

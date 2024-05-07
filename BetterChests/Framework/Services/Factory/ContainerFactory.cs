@@ -761,9 +761,11 @@ internal sealed class ContainerFactory : BaseService
                 if (this.modConfig.StorageOptions.GetValueOrDefault("Furniture")?.GetValueOrDefault(@object.ItemId) is
                     not null)
                 {
-                    container.AddOptions(
-                        StorageOption.Type,
-                        () => this.modConfig.StorageOptions["Furniture"][@object.ItemId]);
+                    var furnitureOptions = new FurnitureStorageOptions(
+                        () => this.modConfig.StorageOptions["Furniture"][@object.ItemId],
+                        @object.ItemId);
+
+                    container.AddOptions(StorageOption.Type, () => furnitureOptions);
                 }
 
                 // Cache container to instance
