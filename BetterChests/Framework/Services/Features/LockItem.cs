@@ -16,26 +16,26 @@ using StardewValley.Menus;
 internal sealed class LockItem : BaseFeature<LockItem>
 {
     private readonly IInputHelper inputHelper;
-    private readonly MenuManager menuManager;
+    private readonly MenuHandler menuHandler;
 
     /// <summary>Initializes a new instance of the <see cref="LockItem" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="menuManager">Dependency used for managing the current menu.</param>
+    /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     public LockItem(
         IEventManager eventManager,
         IInputHelper inputHelper,
-        MenuManager menuManager,
+        MenuHandler menuHandler,
         ILog log,
         IManifest manifest,
         IModConfig modConfig)
         : base(eventManager, log, manifest, modConfig)
     {
         this.inputHelper = inputHelper;
-        this.menuManager = menuManager;
+        this.menuHandler = menuHandler;
     }
 
     /// <inheritdoc />
@@ -65,7 +65,7 @@ internal sealed class LockItem : BaseFeature<LockItem>
 
     private bool TryGetMenu(int mouseX, int mouseY, [NotNullWhen(true)] out InventoryMenu? inventoryMenu)
     {
-        inventoryMenu = this.menuManager.CurrentMenu switch
+        inventoryMenu = this.menuHandler.CurrentMenu switch
         {
             ItemGrabMenu
             {
@@ -90,14 +90,14 @@ internal sealed class LockItem : BaseFeature<LockItem>
 
     private void OnRenderedActiveMenu(RenderedActiveMenuEventArgs e)
     {
-        if (this.menuManager.Top.Menu is not null)
+        if (this.menuHandler.Top.InventoryMenu is not null && this.menuHandler.Top.Container is not null)
         {
-            this.DrawOverlay(e.SpriteBatch, this.menuManager.Top.Menu);
+            this.DrawOverlay(e.SpriteBatch, this.menuHandler.Top.InventoryMenu);
         }
 
-        if (this.menuManager.Bottom.Menu is not null)
+        if (this.menuHandler.Bottom.InventoryMenu is not null && this.menuHandler.Bottom.Container is not null)
         {
-            this.DrawOverlay(e.SpriteBatch, this.menuManager.Bottom.Menu);
+            this.DrawOverlay(e.SpriteBatch, this.menuHandler.Bottom.InventoryMenu);
         }
     }
 

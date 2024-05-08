@@ -55,7 +55,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<IEventSubscriber, EventManager>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
-        this.container.RegisterSingleton<MenuManager>();
+        this.container.RegisterSingleton<MenuHandler>();
         this.container.RegisterSingleton<LocalizedTextManager>();
         this.container.RegisterSingleton<ILog, Logger>();
         this.container.RegisterSingleton<IPatchManager, Patcher>();
@@ -77,17 +77,20 @@ public sealed class ModEntry : Mod
                 typeof(CarryChest),
                 typeof(CategorizeChest),
                 typeof(ChestFinder),
-                typeof(ChestInfo),
                 typeof(CollectItems),
                 typeof(ConfigureChest),
                 typeof(CraftFromChest),
+                typeof(DebugMode),
                 typeof(HslColorPicker),
+                typeof(InventoryTabs),
                 typeof(LockItem),
                 typeof(OpenHeldChest),
                 typeof(ResizeChest),
                 typeof(SearchItems),
                 typeof(ShopFromChest),
+                typeof(SortInventory),
                 typeof(StashToChest),
+                typeof(StorageInfo),
             },
             Lifestyle.Singleton);
 

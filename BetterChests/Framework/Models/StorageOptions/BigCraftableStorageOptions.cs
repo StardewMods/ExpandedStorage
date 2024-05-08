@@ -1,38 +1,33 @@
 namespace StardewMods.BetterChests.Framework.Models.StorageOptions;
 
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewValley.GameData.BigCraftables;
 using StardewValley.TokenizableStrings;
 
 /// <inheritdoc />
-internal sealed class BigCraftableStorageOptions : ChildStorageOptions
+internal sealed class BigCraftableStorageOptions : CustomFieldsStorageOptions
 {
-    private readonly Func<BigCraftableData> getData;
+    private readonly string itemId;
 
     /// <summary>Initializes a new instance of the <see cref="BigCraftableStorageOptions" /> class.</summary>
-    /// <param name="getDefault">Get the default storage options.</param>
-    /// <param name="getData">Get the big craftable data.</param>
-    public BigCraftableStorageOptions(Func<IStorageOptions> getDefault, Func<BigCraftableData> getData)
-        : base(getDefault, new CustomFieldsStorageOptions(BigCraftableStorageOptions.GetCustomFields(getData))) =>
-        this.getData = getData;
+    /// <param name="itemId">he big craftable object id.</param>
+    public BigCraftableStorageOptions(string itemId)
+        : base(BigCraftableStorageOptions.GetCustomFields(itemId)) =>
+        this.itemId = itemId;
+
+    /// <inheritdoc />
+    public override string Description => TokenParser.ParseText(this.Data.Description);
+
+    /// <inheritdoc />
+    public override string DisplayName => TokenParser.ParseText(this.Data.DisplayName);
 
     /// <summary>Gets the big craftable data.</summary>
-    public BigCraftableData Data => this.getData();
+    public BigCraftableData Data =>
+        Game1.bigCraftableData.TryGetValue(this.itemId, out var bigCraftableData)
+            ? bigCraftableData
+            : new BigCraftableData();
 
-    /// <inheritdoc />
-    public override string GetDescription() => TokenParser.ParseText(this.Data.Description);
-
-    /// <inheritdoc />
-    public override string GetDisplayName() => TokenParser.ParseText(this.Data.DisplayName);
-
-    private static Func<bool, Dictionary<string, string>> GetCustomFields(Func<BigCraftableData> getData) =>
-        init =>
-        {
-            if (init)
-            {
-                getData().CustomFields ??= [];
-            }
-
-            return getData().CustomFields ?? [];
-        };
+    private static Func<Dictionary<string, string>?> GetCustomFields(string itemId) =>
+        () => Game1.bigCraftableData.TryGetValue(itemId, out var bigCraftableData)
+            ? bigCraftableData.CustomFields
+            : null;
 }

@@ -1,5 +1,6 @@
 namespace StardewMods.BetterChests.Framework.Interfaces;
 
+using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Models.StorageOptions;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
@@ -29,11 +30,11 @@ internal interface IModConfig
     /// <summary>Gets the control scheme.</summary>
     public Controls Controls { get; }
 
-    /// <summary>
-    /// Gets a value indicating if the chest cannot be remotely crafted from while the player is in one of the listed
-    /// locations.
-    /// </summary>
+    /// <summary>Gets the locations that crafting from storages will be disabled from.</summary>
     public HashSet<string> CraftFromChestDisableLocations { get; }
+
+    /// <summary>Gets a value indicating whether debug mode will be enabled.</summary>
+    public bool DebugMode { get; }
 
     /// <summary>Gets a value for the number of steps in the hue color picker.</summary>
     public int HslColorPickerHueSteps { get; }
@@ -47,6 +48,9 @@ internal interface IModConfig
     /// <summary>Gets the placement for the Hsl Color Picker.</summary>
     public InventoryMenu.BorderSide HslColorPickerPlacement { get; }
 
+    /// <summary>Gets the inventory tabs.</summary>
+    public List<TabData> InventoryTabList { get; }
+
     /// <summary>Gets a value indicating whether the slot lock feature is enabled.</summary>
     public FeatureOption LockItem { get; }
 
@@ -56,9 +60,12 @@ internal interface IModConfig
     /// <summary>Gets a value indicating how searched items will be displayed.</summary>
     public FilterMethod SearchItemsMethod { get; }
 
-    /// <summary>
-    /// Gets a value indicating if the chest cannot be remotely crafted from while the player is in one of the listed
-    /// locations.
-    /// </summary>
+    /// <summary>Gets the locations that stashing into storages will be disabled from.</summary>
     public HashSet<string> StashToChestDisableLocations { get; }
+
+    /// <summary>Gets the info that will be displayed for storages that are being hovered over.</summary>
+    public HashSet<StorageInfoItem> StorageInfoHoverItems { get; }
+
+    /// <summary>Gets the info that will be displayed for storages from the inventory menu.</summary>
+    public HashSet<StorageInfoItem> StorageInfoMenuItems { get; }
 }

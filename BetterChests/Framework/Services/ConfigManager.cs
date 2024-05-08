@@ -1,14 +1,15 @@
 namespace StardewMods.BetterChests.Framework.Services;
 
 using StardewModdingAPI.Events;
+using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Models.StorageOptions;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewValley.Menus;
@@ -76,6 +77,9 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     public HashSet<string> CraftFromChestDisableLocations => this.Config.CraftFromChestDisableLocations;
 
     /// <inheritdoc />
+    public bool DebugMode => this.Config.DebugMode;
+
+    /// <inheritdoc />
     public int HslColorPickerHueSteps => this.Config.HslColorPickerHueSteps;
 
     /// <inheritdoc />
@@ -88,6 +92,9 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     public InventoryMenu.BorderSide HslColorPickerPlacement => this.Config.HslColorPickerPlacement;
 
     /// <inheritdoc />
+    public List<TabData> InventoryTabList => this.Config.InventoryTabList;
+
+    /// <inheritdoc />
     public FeatureOption LockItem => this.Config.LockItem;
 
     /// <inheritdoc />
@@ -98,6 +105,12 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
     /// <inheritdoc />
     public HashSet<string> StashToChestDisableLocations => this.Config.StashToChestDisableLocations;
+
+    /// <inheritdoc />
+    public HashSet<StorageInfoItem> StorageInfoHoverItems => this.Config.StorageInfoHoverItems;
+
+    /// <inheritdoc />
+    public HashSet<StorageInfoItem> StorageInfoMenuItems => this.Config.StorageInfoMenuItems;
 
     /// <summary>Setup the main config options.</summary>
     public void SetupMainConfig()
@@ -124,9 +137,31 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         gmcm.AddSectionTitle(this.manifest, I18n.Section_Storages_Name);
         gmcm.AddParagraph(this.manifest, I18n.Section_Storages_Description);
+
+        gmcm.AddPageLink(this.manifest, "BigCraftables", I18n.Section_BigCraftables_Name);
+        gmcm.AddParagraph(this.manifest, I18n.Section_BigCraftables_Description);
+
+        gmcm.AddPageLink(this.manifest, "Furniture", I18n.Section_Furniture_Name);
+        gmcm.AddParagraph(this.manifest, I18n.Section_Furniture_Description);
+
+        gmcm.AddPageLink(this.manifest, "Other", I18n.Section_Other_Name);
+        gmcm.AddParagraph(this.manifest, I18n.Section_Other_Description);
+
         var pages = new List<(string Id, string Title, string Description, IStorageOptions Options)>();
+        var furnitureData = ItemRegistry.RequireTypeDefinition("(F)");
         foreach (var (dataType, storageTypes) in config.StorageOptions)
         {
+            gmcm.AddPage(
+                this.manifest,
+                dataType switch { "BigCraftables" or "Furniture" => dataType, _ => "Other" },
+                dataType switch
+                {
+                    "BigCraftables" => I18n.Section_BigCraftables_Name,
+                    "Furniture" => I18n.Section_Furniture_Name,
+                    _ => I18n.Section_Other_Name,
+                });
+
+            var subPages = new List<(string Id, string Title, string Description, IStorageOptions Options)>();
             foreach (var (storageId, storageOptions) in storageTypes)
             {
                 string name;
@@ -146,6 +181,11 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                         name = TokenParser.ParseText(buildingData.Name);
                         description = TokenParser.ParseText(buildingData.Description);
                         break;
+                    case "Furniture":
+                        var data = furnitureData.GetData(storageId);
+                        name = TokenParser.ParseText(data.DisplayName);
+                        description = TokenParser.ParseText(data.Description);
+                        break;
                     case "Locations" when storageId == "FarmHouse":
                         name = I18n.Storage_Fridge_Name();
                         description = I18n.Storage_Fridge_Tooltip();
@@ -157,16 +197,18 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     default: continue;
                 }
 
-                pages.Add(($"{dataType}_{storageId}", name, description, storageOptions));
+                subPages.Add(($"{dataType}_{storageId}", name, description, storageOptions));
             }
+
+            foreach (var (id, title, description, _) in subPages.OrderBy(page => page.Title))
+            {
+                gmcm.AddPageLink(this.manifest, id, () => title, () => description);
+            }
+
+            pages.AddRange(subPages);
         }
 
-        foreach (var (id, title, description, _) in pages.OrderBy(page => page.Title))
-        {
-            gmcm.AddPageLink(this.manifest, id, () => title, () => description);
-        }
-
-        this.AddMainOption("Main", I18n.Section_Main_Name, config.DefaultOptions.GetActualOptions(), true);
+        this.AddMainOption("Main", I18n.Section_Main_Name, config.DefaultOptions, true);
 
         gmcm.AddPage(this.manifest, "Controls", I18n.Section_Controls_Name);
         this.AddControls(config.Controls);
@@ -176,7 +218,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         foreach (var (id, title, _, options) in pages)
         {
-            this.AddMainOption(id, () => title, options.GetActualOptions(), true, config.DefaultOptions);
+            this.AddMainOption(id, () => title, options, true, config.DefaultOptions);
         }
     }
 
@@ -208,6 +250,14 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 () => $"{I18n.Config_DefaultOption_Description(I18n.Config_DefaultOption_Indicator())}");
         }
 
+        var featureOptions = (isDefault && parentOptions is null
+            ? FeatureOptionExtensions.GetNames().Except(new[] { FeatureOption.Default.ToStringFast() })
+            : FeatureOptionExtensions.GetNames()).ToArray();
+
+        var rangeOptions = (isDefault && parentOptions is null
+            ? RangeOptionExtensions.GetNames().Except(new[] { RangeOption.Default.ToStringFast() })
+            : RangeOptionExtensions.GetNames()).ToArray();
+
         // Access Chest
         if (isDefault || this.DefaultOptions.AccessChest != RangeOption.Disabled)
         {
@@ -219,7 +269,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : RangeOption.Default,
                 I18n.Config_AccessChests_Name,
                 I18n.Config_AccessChests_Tooltip,
-                RangeOptionExtensions.GetNames(),
+                rangeOptions,
                 this.localizedTextManager.FormatRange(parentOptions?.AccessChest));
         }
 
@@ -234,7 +284,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : FeatureOption.Default,
                 I18n.Config_AutoOrganize_Name,
                 I18n.Config_AutoOrganize_Tooltip,
-                FeatureOptionExtensions.GetNames(),
+                featureOptions,
                 this.localizedTextManager.FormatOption(parentOptions?.AutoOrganize));
         }
 
@@ -249,7 +299,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : FeatureOption.Default,
                 I18n.Config_CarryChest_Name,
                 I18n.Config_CarryChest_Tooltip,
-                FeatureOptionExtensions.GetNames(),
+                featureOptions,
                 this.localizedTextManager.FormatOption(parentOptions?.CarryChest));
         }
 
@@ -264,7 +314,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : FeatureOption.Default,
                 I18n.Config_CategorizeChest_Name,
                 I18n.Config_CategorizeChest_Tooltip,
-                FeatureOptionExtensions.GetNames(),
+                featureOptions,
                 this.localizedTextManager.FormatOption(parentOptions?.CategorizeChest));
         }
 
@@ -279,23 +329,8 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : FeatureOption.Default,
                 I18n.Config_ChestFinder_Name,
                 I18n.Config_ChestFinder_Tooltip,
-                FeatureOptionExtensions.GetNames(),
+                featureOptions,
                 this.localizedTextManager.FormatOption(parentOptions?.ChestFinder));
-        }
-
-        // Chest Info
-        if (isDefault || this.DefaultOptions.ChestInfo != FeatureOption.Disabled)
-        {
-            gmcm.AddTextOption(
-                this.manifest,
-                () => options.ChestInfo.ToStringFast(),
-                value => options.ChestInfo = FeatureOptionExtensions.TryParse(value, out var option)
-                    ? option
-                    : FeatureOption.Default,
-                I18n.Config_ChestInfo_Name,
-                I18n.Config_ChestInfo_Tooltip,
-                FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption(parentOptions?.ChestInfo));
         }
 
         // Collect Items
@@ -309,7 +344,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : FeatureOption.Default,
                 I18n.Config_CollectItems_Name,
                 I18n.Config_CollectItems_Tooltip,
-                FeatureOptionExtensions.GetNames(),
+                featureOptions,
                 this.localizedTextManager.FormatOption(parentOptions?.CollectItems));
         }
 
@@ -324,7 +359,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : FeatureOption.Default,
                 I18n.Config_ConfigureChest_Name,
                 I18n.Config_ConfigureChest_Tooltip,
-                FeatureOptionExtensions.GetNames(),
+                featureOptions,
                 this.localizedTextManager.FormatOption(parentOptions?.ConfigureChest));
         }
 
@@ -339,7 +374,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : RangeOption.Default,
                 I18n.Config_CookFromChest_Name,
                 I18n.Config_CookFromChest_Tooltip,
-                RangeOptionExtensions.GetNames(),
+                rangeOptions,
                 this.localizedTextManager.FormatRange(parentOptions?.CookFromChest));
         }
 
@@ -385,7 +420,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 },
                 I18n.Config_CraftFromChest_Name,
                 I18n.Config_CraftFromChest_Tooltip,
-                (int)RangeOption.Default,
+                isDefault ? (int)RangeOption.Disabled : (int)RangeOption.Default,
                 (int)RangeOption.World,
                 1,
                 this.localizedTextManager.FormatDistance(
@@ -404,8 +439,23 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : FeatureOption.Default,
                 I18n.Config_HslColorPicker_Name,
                 I18n.Config_HslColorPicker_Tooltip,
-                FeatureOptionExtensions.GetNames(),
+                featureOptions,
                 this.localizedTextManager.FormatOption(parentOptions?.HslColorPicker));
+        }
+
+        // Inventory Tabs
+        if (isDefault || this.DefaultOptions.InventoryTabs != FeatureOption.Disabled)
+        {
+            gmcm.AddTextOption(
+                this.manifest,
+                () => options.InventoryTabs.ToStringFast(),
+                value => options.InventoryTabs = FeatureOptionExtensions.TryParse(value, out var option)
+                    ? option
+                    : FeatureOption.Default,
+                I18n.Config_InventoryTabs_Name,
+                I18n.Config_InventoryTabs_Tooltip,
+                featureOptions,
+                this.localizedTextManager.FormatOption(parentOptions?.InventoryTabs));
         }
 
         // Open Held Chest
@@ -419,7 +469,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : FeatureOption.Default,
                 I18n.Config_OpenHeldChest_Name,
                 I18n.Config_OpenHeldChest_Tooltip,
-                FeatureOptionExtensions.GetNames(),
+                featureOptions,
                 this.localizedTextManager.FormatOption(parentOptions?.OpenHeldChest));
         }
 
@@ -487,7 +537,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : FeatureOption.Default,
                 I18n.Config_SearchItems_Name,
                 I18n.Config_SearchItems_Tooltip,
-                FeatureOptionExtensions.GetNames(),
+                featureOptions,
                 this.localizedTextManager.FormatOption(parentOptions?.SearchItems));
         }
 
@@ -502,8 +552,30 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     : FeatureOption.Default,
                 I18n.Config_ShopFromChest_Name,
                 I18n.Config_ShopFromChest_Tooltip,
-                FeatureOptionExtensions.GetNames(),
+                featureOptions,
                 this.localizedTextManager.FormatOption(parentOptions?.ShopFromChest));
+        }
+
+        // Sort Inventory
+        if (isDefault || this.DefaultOptions.SortInventory != FeatureOption.Disabled)
+        {
+            gmcm.AddTextOption(
+                this.manifest,
+                () => options.SortInventory.ToStringFast(),
+                value => options.SortInventory = FeatureOptionExtensions.TryParse(value, out var option)
+                    ? option
+                    : FeatureOption.Default,
+                I18n.Config_SortInventory_Name,
+                I18n.Config_SortInventory_Tooltip,
+                featureOptions,
+                this.localizedTextManager.FormatOption(parentOptions?.SortInventory));
+
+            gmcm.AddTextOption(
+                this.manifest,
+                () => options.SortInventoryBy,
+                value => options.SortInventoryBy = value,
+                I18n.Config_SortInventoryBy_Name,
+                I18n.Config_SortInventoryBy_Tooltip);
         }
 
         // Stash to Chest
@@ -548,12 +620,38 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 },
                 I18n.Config_StashToChest_Name,
                 I18n.Config_StashToChest_Tooltip,
-                (int)RangeOption.Default,
+                isDefault ? (int)RangeOption.Disabled : (int)RangeOption.Default,
                 (int)RangeOption.World,
                 1,
                 this.localizedTextManager.FormatDistance(
                     parentOptions?.StashToChest,
                     parentOptions?.StashToChestDistance ?? 0));
+        }
+
+        // Storage Info
+        if (isDefault || this.DefaultOptions.StorageInfo != FeatureOption.Disabled)
+        {
+            gmcm.AddTextOption(
+                this.manifest,
+                () => options.StorageInfo.ToStringFast(),
+                value => options.StorageInfo = FeatureOptionExtensions.TryParse(value, out var option)
+                    ? option
+                    : FeatureOption.Default,
+                I18n.Config_StorageInfo_Name,
+                I18n.Config_StorageInfo_Tooltip,
+                featureOptions,
+                this.localizedTextManager.FormatOption(parentOptions?.StorageInfo));
+
+            gmcm.AddTextOption(
+                this.manifest,
+                () => options.StorageInfoHover.ToStringFast(),
+                value => options.StorageInfoHover = FeatureOptionExtensions.TryParse(value, out var option)
+                    ? option
+                    : FeatureOption.Default,
+                I18n.Config_StorageInfoHover_Name,
+                I18n.Config_StorageInfoHover_Tooltip,
+                featureOptions,
+                this.localizedTextManager.FormatOption(parentOptions?.StorageInfoHover));
         }
     }
 
@@ -589,6 +687,14 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             value => controls.AccessNextChest = value,
             I18n.Controls_AccessNextChest_Name,
             I18n.Controls_AccessNextChest_Tooltip);
+
+        // Clear Search
+        gmcm.AddKeybindList(
+            this.manifest,
+            () => controls.ClearSearch,
+            value => controls.ClearSearch = value,
+            I18n.Controls_ClearSearch_Name,
+            I18n.Controls_ClearSearch_Tooltip);
 
         // Configure Chest
         gmcm.AddKeybindList(
@@ -690,6 +796,22 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             value => controls.TransferItemsReverse = value,
             I18n.Controls_TransferItemsReverse_Name,
             I18n.Controls_TransferItemsReverse_Tooltip);
+
+        // Copy
+        gmcm.AddKeybindList(
+            this.manifest,
+            () => controls.Copy,
+            value => controls.Copy = value,
+            I18n.Controls_Copy_Name,
+            I18n.Controls_Copy_Tooltip);
+
+        // Paste
+        gmcm.AddKeybindList(
+            this.manifest,
+            () => controls.Paste,
+            value => controls.Paste = value,
+            I18n.Controls_Paste_Name,
+            I18n.Controls_Paste_Tooltip);
     }
 
     private void AddTweaks(DefaultConfig config)
@@ -817,10 +939,41 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             I18n.Config_SearchItemsMethod_Tooltip,
             FilterMethodExtensions.GetNames(),
             this.localizedTextManager.FormatMethod());
+
+        // Storage Info Hover Items
+        gmcm.AddTextOption(
+            this.manifest,
+            () => string.Join(',', config.StorageInfoHoverItems.Select(item => item.ToStringFast())),
+            value => config.StorageInfoHoverItems = [..GetStorageInfoItems(value)],
+            I18n.Config_StorageInfoHoverItems_Name,
+            I18n.Config_StorageInfoHoverItems_Tooltip);
+
+        // Storage Info Menu Items
+        gmcm.AddTextOption(
+            this.manifest,
+            () => string.Join(',', config.StorageInfoMenuItems.Select(item => item.ToStringFast())),
+            value => config.StorageInfoMenuItems = [..GetStorageInfoItems(value)],
+            I18n.Config_StorageInfoMenuItems_Name,
+            I18n.Config_StorageInfoMenuItems_Tooltip);
+
+        return;
+
+        IEnumerable<StorageInfoItem> GetStorageInfoItems(string value)
+        {
+            var items = value.Split(',');
+            foreach (var item in items)
+            {
+                if (StorageInfoItemExtensions.TryParse(item, out var infoItem))
+                {
+                    yield return infoItem;
+                }
+            }
+        }
     }
 
     private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e)
     {
+        this.InitializeDefaultOptions(this.Config.DefaultOptions);
         this.InitializeStorageTypes(this.Config);
         this.log.Trace("Config changed:\n{0}", e.Config);
     }
@@ -833,11 +986,46 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
     }
 
-    private void InitializeStorageTypes(DefaultConfig config)
+    private void InitializeDefaultOptions(IStorageOptions options)
+    {
+        var defaultOptions = this.GetDefault().DefaultOptions;
+        options.ForEachOption(
+            (name, option) =>
+            {
+                switch (option)
+                {
+                    case FeatureOption.Default when defaultOptions.TryGetOption(name, out FeatureOption defaultOption):
+                        options.SetOption(name, defaultOption);
+                        return;
+
+                    case RangeOption.Default when defaultOptions.TryGetOption(name, out RangeOption defaultOption):
+                        options.SetOption(name, defaultOption);
+                        return;
+
+                    case ChestMenuOption.Default when defaultOptions.TryGetOption(
+                        name,
+                        out ChestMenuOption defaultOption):
+                        options.SetOption(name, defaultOption);
+                        return;
+
+                    case string currentOption when string.IsNullOrWhiteSpace(currentOption)
+                        && defaultOptions.TryGetOption(name, out string defaultOption):
+                        options.SetOption(name, defaultOption);
+                        return;
+
+                    case 0 when defaultOptions.TryGetOption(name, out int defaultOption):
+                        options.SetOption(name, defaultOption);
+                        return;
+                }
+            });
+    }
+
+    private void InitializeStorageTypes(IModConfig config)
     {
         // Initialize Data Types
         config.StorageOptions.TryAdd("BigCraftables", []);
         config.StorageOptions.TryAdd("Buildings", []);
+        config.StorageOptions.TryAdd("Furniture", []);
         config.StorageOptions.TryAdd("Locations", []);
 
         // Initialize Chest
@@ -879,7 +1067,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         config
             .StorageOptions["BigCraftables"]
             .TryAdd(
-                "213",
+                "216",
                 new DefaultStorageOptions
                 {
                     CookFromChest = RangeOption.Location,
@@ -900,7 +1088,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     CarryChest = FeatureOption.Disabled,
                     CategorizeChest = FeatureOption.Disabled,
                     ChestFinder = FeatureOption.Disabled,
-                    ChestInfo = FeatureOption.Disabled,
                     CollectItems = FeatureOption.Disabled,
                     ConfigureChest = FeatureOption.Disabled,
                     CraftFromChest = RangeOption.Disabled,
@@ -946,7 +1133,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     CarryChest = FeatureOption.Disabled,
                     CategorizeChest = FeatureOption.Disabled,
                     ChestFinder = FeatureOption.Disabled,
-                    ChestInfo = FeatureOption.Disabled,
                     CollectItems = FeatureOption.Disabled,
                     ConfigureChest = FeatureOption.Disabled,
                     CraftFromChest = RangeOption.Disabled,
@@ -981,7 +1167,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     CarryChest = FeatureOption.Disabled,
                     CategorizeChest = FeatureOption.Disabled,
                     ChestFinder = FeatureOption.Disabled,
-                    ChestInfo = FeatureOption.Disabled,
                     CollectItems = FeatureOption.Disabled,
                     ConfigureChest = FeatureOption.Disabled,
                     CraftFromChest = RangeOption.Disabled,
@@ -1005,9 +1190,9 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     CarryChest = FeatureOption.Disabled,
                     CategorizeChest = FeatureOption.Disabled,
                     ChestFinder = FeatureOption.Disabled,
-                    ChestInfo = FeatureOption.Disabled,
                     CollectItems = FeatureOption.Disabled,
                     ConfigureChest = FeatureOption.Disabled,
+                    CookFromChest = RangeOption.Disabled,
                     CraftFromChest = RangeOption.Disabled,
                     HslColorPicker = FeatureOption.Disabled,
                     OpenHeldChest = FeatureOption.Disabled,
@@ -1028,17 +1213,52 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     CarryChest = FeatureOption.Disabled,
                     CategorizeChest = FeatureOption.Disabled,
                     ChestFinder = FeatureOption.Disabled,
-                    ChestInfo = FeatureOption.Disabled,
                     CollectItems = FeatureOption.Disabled,
                     ConfigureChest = FeatureOption.Disabled,
+                    CookFromChest = RangeOption.Disabled,
                     CraftFromChest = RangeOption.Disabled,
                     HslColorPicker = FeatureOption.Disabled,
                     OpenHeldChest = FeatureOption.Disabled,
-                    ResizeChest = ChestMenuOption.Disabled,
+                    ResizeChest = ChestMenuOption.Medium,
                     SearchItems = FeatureOption.Disabled,
                     ShopFromChest = FeatureOption.Disabled,
                     StashToChest = RangeOption.Disabled,
                 });
+
+        // Initialize Horse Overhaul Saddlebags
+        if (this.modRegistry.IsLoaded("Goldenrevolver.HorseOverhaul"))
+        {
+            config
+                .StorageOptions["Buildings"]
+                .TryAdd(
+                    "Stable",
+                    new DefaultStorageOptions
+                    {
+                        AutoOrganize = FeatureOption.Disabled,
+                        CarryChest = FeatureOption.Disabled,
+                        HslColorPicker = FeatureOption.Disabled,
+                    });
+        }
+
+        // Initialize Dressers
+        config.StorageOptions["Furniture"].TryAdd("704", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("709", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("714", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("719", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("JojaDresser", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("GrayJojaDresser", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("WizardDresser", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("JunimoDresser", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("RetroDresser", new DefaultStorageOptions());
+
+        // Initialize Fish Tanks
+        config.StorageOptions["Furniture"].TryAdd("2304", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("2312", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("2322", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("2400", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("2414", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("JungleTank", new DefaultStorageOptions());
+        config.StorageOptions["Furniture"].TryAdd("CCFishTank", new DefaultStorageOptions());
 
         // Initialize FarmHouse
         config
@@ -1067,20 +1287,5 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     ResizeChestCapacity = -1,
                     SearchItems = FeatureOption.Disabled,
                 });
-
-        // Initialize Horse Overhaul Saddlebags
-        if (this.modRegistry.IsLoaded("Goldenrevolver.HorseOverhaul"))
-        {
-            config
-                .StorageOptions["Buildings"]
-                .TryAdd(
-                    "Stable",
-                    new DefaultStorageOptions
-                    {
-                        AutoOrganize = FeatureOption.Disabled,
-                        CarryChest = FeatureOption.Disabled,
-                        HslColorPicker = FeatureOption.Disabled,
-                    });
-        }
     }
 }

@@ -3,23 +3,37 @@ namespace StardewMods.BetterChests.Framework.Models.StorageOptions;
 using System.Globalization;
 using NetEscapades.EnumGenerators;
 using StardewMods.Common.Helpers;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 
 /// <inheritdoc />
 internal abstract class DictionaryStorageOptions : IStorageOptions
 {
     private const string Prefix = "furyx639.BetterChests/";
+    private readonly Dictionary<string, CachedValue<ChestMenuOption>> cachedChestMenuOption = new();
 
     private readonly Dictionary<string, CachedValue<int>> cachedInt = new();
     private readonly Dictionary<string, CachedValue<FeatureOption>> cachedOption = new();
     private readonly Dictionary<string, CachedValue<RangeOption>> cachedRangeOption = new();
 
     /// <inheritdoc />
+    public virtual string DisplayName => I18n.Storage_Other_Tooltip();
+
+    /// <inheritdoc />
+    public virtual string Description => I18n.Storage_Other_Name();
+
+    /// <inheritdoc />
     public RangeOption AccessChest
     {
         get => this.Get(RangeOptionKey.AccessChest);
         set => this.Set(RangeOptionKey.AccessChest, value);
+    }
+
+    /// <inheritdoc />
+    public int AccessChestPriority
+    {
+        get => this.Get(IntegerKey.AccessChestPriority);
+        set => this.Set(IntegerKey.AccessChestPriority, value);
     }
 
     /// <inheritdoc />
@@ -72,13 +86,6 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
-    public FeatureOption ChestInfo
-    {
-        get => this.Get(OptionKey.ChestInfo);
-        set => this.Set(OptionKey.ChestInfo, value);
-    }
-
-    /// <inheritdoc />
     public FeatureOption CollectItems
     {
         get => this.Get(OptionKey.CollectItems);
@@ -121,6 +128,13 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
+    public FeatureOption InventoryTabs
+    {
+        get => this.Get(OptionKey.InventoryTabs);
+        set => this.Set(OptionKey.InventoryTabs, value);
+    }
+
+    /// <inheritdoc />
     public FeatureOption OpenHeldChest
     {
         get => this.Get(OptionKey.OpenHeldChest);
@@ -134,7 +148,7 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
             ChestMenuOptionExtensions.TryParse(this.Get(StringKey.ResizeChest), out var capacityOption)
                 ? capacityOption
                 : ChestMenuOption.Default;
-        set => this.Set(StringKey.ResizeChest, value.ToStringFast());
+        set => this.Set(StringKey.ResizeChest, value == ChestMenuOption.Default ? string.Empty : value.ToStringFast());
     }
 
     /// <inheritdoc />
@@ -156,6 +170,20 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
     {
         get => this.Get(OptionKey.ShopFromChest);
         set => this.Set(OptionKey.ShopFromChest, value);
+    }
+
+    /// <inheritdoc />
+    public FeatureOption SortInventory
+    {
+        get => this.Get(OptionKey.SortInventory);
+        set => this.Set(OptionKey.SortInventory, value);
+    }
+
+    /// <inheritdoc />
+    public string SortInventoryBy
+    {
+        get => this.Get(StringKey.SortInventoryBy);
+        set => this.Set(StringKey.SortInventoryBy, value);
     }
 
     /// <inheritdoc />
@@ -183,23 +211,32 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
+    public string StorageIcon
+    {
+        get => this.Get(StringKey.StorageIcon);
+        set => this.Set(StringKey.StorageIcon, value);
+    }
+
+    /// <inheritdoc />
+    public FeatureOption StorageInfo
+    {
+        get => this.Get(OptionKey.StorageInfo);
+        set => this.Set(OptionKey.StorageInfo, value);
+    }
+
+    /// <inheritdoc />
+    public FeatureOption StorageInfoHover
+    {
+        get => this.Get(OptionKey.StorageInfoHover);
+        set => this.Set(OptionKey.StorageInfoHover, value);
+    }
+
+    /// <inheritdoc />
     public string StorageName
     {
         get => this.Get(StringKey.StorageName);
         set => this.Set(StringKey.StorageName, value);
     }
-
-    /// <inheritdoc />
-    public IStorageOptions GetActualOptions() => this;
-
-    /// <inheritdoc />
-    public IStorageOptions GetParentOptions() => this;
-
-    /// <inheritdoc />
-    public virtual string GetDescription() => I18n.Storage_Other_Tooltip();
-
-    /// <inheritdoc />
-    public virtual string GetDisplayName() => I18n.Storage_Other_Name();
 
     /// <summary>Tries to get the data associated with the specified key.</summary>
     /// <param name="key">The key to search for.</param>
@@ -321,6 +358,7 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
     [EnumExtensions]
     internal enum IntegerKey
     {
+        AccessChestPriority,
         CraftFromChestDistance,
         ResizeChestCapacity,
         StashToChestDistance,
@@ -335,15 +373,16 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
         CategorizeChestBlockItems,
         CategorizeChestIncludeStacks,
         ChestFinder,
-        ChestInfo,
         CollectItems,
         ConfigureChest,
         HslColorPicker,
+        InventoryTabs,
         OpenHeldChest,
         SearchItems,
         ShopFromChest,
-        TransferItems,
-        UnloadChest,
+        SortInventory,
+        StorageInfo,
+        StorageInfoHover,
     }
 
     [EnumExtensions]
@@ -360,7 +399,9 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
     {
         CategorizeChestSearchTerm,
         ResizeChest,
+        SortInventoryBy,
         StashToChestPriority,
+        StorageIcon,
         StorageName,
     }
 }

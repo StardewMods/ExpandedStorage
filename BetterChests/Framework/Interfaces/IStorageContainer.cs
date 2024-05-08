@@ -1,6 +1,6 @@
 namespace StardewMods.BetterChests.Framework.Interfaces;
 
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
+using StardewMods.Common.Services.Integrations.BetterChests;
 
 /// <inheritdoc />
 /// <typeparam name="TSource">The source object type.</typeparam>

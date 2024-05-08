@@ -7,8 +7,8 @@ using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Inventories;
 using StardewValley.Locations;
@@ -252,13 +252,13 @@ internal sealed class ShopFromChest : BaseFeature<ShopFromChest>
 
     private static bool DefaultPredicate(IStorageContainer container) =>
         container is not FarmerContainer
-        && container.Options.ShopFromChest is not (FeatureOption.Disabled or FeatureOption.Default)
+        && container.ShopFromChest is not FeatureOption.Disabled
         && container.Items.Count > 0
         && !ShopFromChest.instance.Config.CraftFromChestDisableLocations.Contains(Game1.player.currentLocation.Name)
         && !(ShopFromChest.instance.Config.CraftFromChestDisableLocations.Contains("UndergroundMine")
             && Game1.player.currentLocation is MineShaft)
-        && container.Options.CraftFromChest.WithinRange(
-            container.Options.CraftFromChestDistance,
+        && container.CraftFromChest.WithinRange(
+            container.CraftFromChestDistance,
             container.Location,
             container.TileLocation);
 }

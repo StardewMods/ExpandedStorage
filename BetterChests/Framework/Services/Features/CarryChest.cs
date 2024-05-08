@@ -111,7 +111,7 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
         placedChest.GlobalInventoryId = chest.GlobalInventoryId;
         placedChest.playerChoiceColor.Value = chest.playerChoiceColor.Value;
         placedChest.fridge.Value = chest.fridge.Value;
-        foreach (var (key, value) in chest.modData.Pairs)
+        foreach (var (key, value) in __instance.modData.Pairs)
         {
             placedChest.modData[key] = value;
         }
@@ -165,8 +165,11 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
             return;
         }
 
-        if (!this.containerFactory.TryGetOne(Game1.currentLocation, e.Cursor.GrabTile, out var container)
-            || container.Options.CarryChest != FeatureOption.Enabled)
+        if (!this.containerFactory.TryGetOne(
+                Game1.currentLocation,
+                e.Cursor.AbsolutePixels / Game1.tileSize,
+                out var container)
+            || container.CarryChest != FeatureOption.Enabled)
         {
             return;
         }
@@ -197,7 +200,7 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
         this.Log.Info(
             "{0}: Grabbed chest from {1} at ({2}, {3})",
             this.Id,
-            Game1.player.currentLocation.Name,
+            Game1.currentLocation.Name,
             e.Cursor.GrabTile.X,
             e.Cursor.GrabTile.Y);
 

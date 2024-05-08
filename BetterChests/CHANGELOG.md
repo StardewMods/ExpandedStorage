@@ -1,16 +1,100 @@
 ﻿# Better Chests Change Log
 
-## 2.17.0-beta.1 (Unreleased)
+## 2.19.0 (Planned)
+
+### Added
+
+* Added visual editors for configuring storage options.
+
+## 2.18.3 (May 7, 2024)
+
+### Added
+
+* Added configuration for Mini-Fridge storage type.
+* Added a toggleable feature to aid in debugging.
+
+### Changed
+
+* Removed `and` and `or` from search expressions.
+* Added `(` and `)` for grouping search expressions where all conditions must be met.
+* Added `[` and `]` for grouping search expressions where any conditions must be met.
+* Merged icons into a single asset.
+
+### Fixed
+
+* Fixed chest menu launching without community center or color picker buttons.
+
+## 2.18.2 (May 5, 2024)
+
+### Changed
+
+* Overhauled the hierarchy system for storage options.
+
+### Fixed
+
+* Fixed cursor jumping to top-left corner when grabbing items.
+
+## 2.18.1 (May 4, 2024)
+
+### Changed
+
+* Added config button for dressers and fish tanks.
+
+### Fixed
+
+* Fixed storages showing the inventory of the chest next to it.
+
+## 2.18.0 (May 3, 2024)
+
+### Added
+
+* Added Access Chest Priority to configure sort/access order.
+* Added configurable icons that can be assigned to storages.
+* Added Name and Icon as info that can be displayed for storages.
+* Added support for storage furniture such as dressers and fish tanks.
+* Added flavored and quality items to categorize chest search.
+
+### Changed
+
+* When a storage is given a unique name, the dropdown will no longer show the location/tile.
+* Group storage type config options into separate pages for each storage type.
+
+### Fixed
+
+* Updated menu relaunch method to avoid breaking Chests Anywhere detection.
+
+## 2.17.1 (May 2, 2024)
+
+### Added
+
+* Initialize storage name from latent mod data.
+* Added support for copy+paste into search bar.
+* Added support for copy and paste into search bar.
+
+### Changed
+
+* Remove textbox limit for search.
+
+## 2.17.0 (May 1, 2024)
 
 ### Added
 
 * Added support for Horse Overhaul Saddle Bags.
 * Added console command for resetting all storage options back to default.
+* Added hotkey for clearing the search bar.
+* Added inventory tabs for saving search texts.
+* Added info tooltip when hovering over a storage.
+* Added customizable sort options for storages.
 
 ### Changed
 
 * Access Chests now includes container names and location when searching.
-* Love of Cooking will now use chests in the current location with Cook From Chest enabled. 
+* Love of Cooking will now use chests in the current location with Cook From
+  Chest enabled.
+* Multiple search terms separated by space will return items where any of the
+  terms match.
+* Default options now must be set to an enabled option or disabled.
+* If a default option is set to default, it will be overridden.
 
 ### Fixed
 

@@ -5,9 +5,6 @@ using StardewValley.GameData;
 /// <summary>Model used for custom bushes.</summary>
 public interface ICustomBush
 {
-    /// <summary>Gets the unique identifier of the custom bush.</summary>
-    public string Id { get; }
-
     /// <summary>Gets the age needed to produce.</summary>
     public int AgeToProduce { get; }
 

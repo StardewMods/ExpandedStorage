@@ -1,7 +1,7 @@
 namespace StardewMods.BetterChests.Framework.Models.StorageOptions;
 
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 
 /// <inheritdoc />
 internal sealed class BackpackStorageOptions : IStorageOptions
@@ -18,10 +18,23 @@ internal sealed class BackpackStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
+    public string DisplayName => I18n.Storage_Backpack_Name();
+
+    /// <inheritdoc />
+    public string Description => I18n.Storage_Backpack_Tooltip();
+
+    /// <inheritdoc />
     public RangeOption AccessChest
     {
         get => this.storageOptions.AccessChest;
         set => this.storageOptions.AccessChest = value;
+    }
+
+    /// <inheritdoc />
+    public int AccessChestPriority
+    {
+        get => this.storageOptions.AccessChestPriority;
+        set => this.storageOptions.AccessChestPriority = value;
     }
 
     /// <inheritdoc />
@@ -74,10 +87,24 @@ internal sealed class BackpackStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
-    public FeatureOption ChestInfo
+    public string StorageIcon
     {
-        get => this.storageOptions.ChestInfo;
-        set => this.storageOptions.ChestInfo = value;
+        get => this.storageOptions.StorageIcon;
+        set => this.storageOptions.StorageIcon = value;
+    }
+
+    /// <inheritdoc />
+    public FeatureOption StorageInfo
+    {
+        get => this.storageOptions.StorageInfo;
+        set => this.storageOptions.StorageInfo = value;
+    }
+
+    /// <inheritdoc />
+    public FeatureOption StorageInfoHover
+    {
+        get => this.storageOptions.StorageInfoHover;
+        set => this.storageOptions.StorageInfoHover = value;
     }
 
     /// <inheritdoc />
@@ -120,6 +147,13 @@ internal sealed class BackpackStorageOptions : IStorageOptions
     {
         get => this.storageOptions.HslColorPicker;
         set => this.storageOptions.HslColorPicker = value;
+    }
+
+    /// <inheritdoc />
+    public FeatureOption InventoryTabs
+    {
+        get => this.storageOptions.InventoryTabs;
+        set => this.storageOptions.InventoryTabs = value;
     }
 
     /// <inheritdoc />
@@ -166,6 +200,20 @@ internal sealed class BackpackStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
+    public FeatureOption SortInventory
+    {
+        get => this.storageOptions.SortInventory;
+        set => this.storageOptions.SortInventory = value;
+    }
+
+    /// <inheritdoc />
+    public string SortInventoryBy
+    {
+        get => this.storageOptions.SortInventoryBy;
+        set => this.storageOptions.SortInventoryBy = value;
+    }
+
+    /// <inheritdoc />
     public RangeOption StashToChest
     {
         get => this.storageOptions.StashToChest;
@@ -192,16 +240,4 @@ internal sealed class BackpackStorageOptions : IStorageOptions
         get => this.farmer.Name;
         set { }
     }
-
-    /// <inheritdoc />
-    public IStorageOptions GetActualOptions() => this;
-
-    /// <inheritdoc />
-    public IStorageOptions GetParentOptions() => this;
-
-    /// <inheritdoc />
-    public string GetDisplayName() => I18n.Storage_Backpack_Name();
-
-    /// <inheritdoc />
-    public string GetDescription() => I18n.Storage_Backpack_Tooltip();
 }

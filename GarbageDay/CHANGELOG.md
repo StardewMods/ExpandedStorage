@@ -1,5 +1,11 @@
 # Garbage Day Change Log
 
+## 3.1.9 (Unreleased)
+
+### Changed
+
+* Load Garbage Can texture from internal asset.
+
 ## 3.1.8 (April 15, 2024)
 
 ### Changed

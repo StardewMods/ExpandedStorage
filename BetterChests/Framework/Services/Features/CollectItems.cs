@@ -8,8 +8,8 @@ using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
 /// <summary>Debris such as mined or farmed items can be collected into a Chest in the farmer's inventory.</summary>
@@ -150,7 +150,7 @@ internal sealed class CollectItems : BaseFeature<CollectItems>
         this.cachedContainers.Value.Clear();
         foreach (var storage in this.containerFactory.GetAll(
             Game1.player,
-            container => container.Options.ChestFinder == FeatureOption.Enabled))
+            container => container.ChestFinder == FeatureOption.Enabled))
         {
             this.cachedContainers.Value.Add(storage);
         }

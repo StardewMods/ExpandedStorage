@@ -1,7 +1,6 @@
 namespace StardewMods.BetterChests.Framework.Models.Containers;
 
 using Microsoft.Xna.Framework;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewValley.Inventories;
 using StardewValley.Locations;
 using StardewValley.Menus;
@@ -12,11 +11,9 @@ using StardewValley.Network;
 internal sealed class FarmerContainer : BaseContainer<Farmer>
 {
     /// <summary>Initializes a new instance of the <see cref="FarmerContainer" /> class.</summary>
-    /// <param name="baseOptions">The type of storage object.</param>
     /// <param name="farmer">The farmer whose inventory is holding the container.</param>
-    public FarmerContainer(IStorageOptions baseOptions, Farmer farmer)
-        : base(baseOptions) =>
-        this.Source = new WeakReference<Farmer>(farmer);
+    public FarmerContainer(Farmer farmer)
+        : base(farmer) { }
 
     /// <summary>Gets the source farmer of the container.</summary>
     /// <exception cref="ObjectDisposedException">Thrown when the Farmer is disposed.</exception>
@@ -45,10 +42,8 @@ internal sealed class FarmerContainer : BaseContainer<Farmer>
     public override bool IsAlive => this.Source.TryGetTarget(out _);
 
     /// <inheritdoc />
-    public override WeakReference<Farmer> Source { get; }
-
-    /// <inheritdoc />
-    public override void ShowMenu(bool playSound = false) => Game1.activeClickableMenu = new GameMenu();
+    public override void ShowMenu(bool playSound = false) =>
+        Game1.activeClickableMenu = new GameMenu(playOpeningSound: playSound);
 
     /// <inheritdoc />
     public override bool TryAdd(Item item, out Item? remaining)

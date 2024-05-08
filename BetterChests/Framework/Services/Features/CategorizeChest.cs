@@ -3,36 +3,26 @@ namespace StardewMods.BetterChests.Framework.Services.Features;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Events;
+using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
 /// <summary>Restricts what items can be added into a chest.</summary>
 internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
 {
-    private static readonly Lazy<List<Item>> AllItems = new(
-        () =>
-        {
-            return ItemRegistry
-                .ItemTypes.SelectMany(
-                    itemType => itemType
-                        .GetAllIds()
-                        .Select(localId => ItemRegistry.Create(itemType.Identifier + localId)))
-                .ToList();
-        });
-
     private readonly PerScreen<List<Item>> cachedItems = new(() => []);
     private readonly ICacheTable<ISearchExpression?> cachedSearches;
-    private readonly MenuManager menuManager;
+    private readonly MenuHandler menuHandler;
     private readonly SearchHandler searchHandler;
 
     /// <summary>Initializes a new instance of the <see cref="CategorizeChest" /> class.</summary>
     /// <param name="cacheManager">Dependency used for managing cache tables.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="menuManager">Dependency used for managing the current menu.</param>
+    /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
@@ -40,7 +30,7 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
     public CategorizeChest(
         CacheManager cacheManager,
         IEventManager eventManager,
-        MenuManager menuManager,
+        MenuHandler menuHandler,
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
@@ -48,7 +38,7 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
         : base(eventManager, log, manifest, modConfig)
     {
         this.cachedSearches = cacheManager.GetCacheTable<ISearchExpression?>();
-        this.menuManager = menuManager;
+        this.menuHandler = menuHandler;
         this.searchHandler = searchHandler;
     }
 
@@ -77,9 +67,9 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
 
     private void OnItemHighlighting(ItemHighlightingEventArgs e)
     {
-        var top = this.menuManager.Top.Container;
-        if (e.Container == this.menuManager.Bottom.Container
-            && top?.Options is
+        var top = this.menuHandler.Top.Container;
+        if (e.Container == this.menuHandler.Bottom.Container
+            && top is
             {
                 CategorizeChest: FeatureOption.Enabled,
                 CategorizeChestBlockItems: FeatureOption.Enabled,
@@ -94,12 +84,9 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
         }
 
         // Unhighlight items not actually in container
-        if (e.Container == this.menuManager.Top.Container && this.cachedItems.Value.Any())
+        if (e.Container == top && !e.Container.Items.Contains(e.Item))
         {
-            if (!e.Container.Items.Contains(e.Item))
-            {
-                e.UnHighlight();
-            }
+            e.UnHighlight();
         }
     }
 
@@ -107,7 +94,9 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
     private void OnItemsDisplaying(ItemsDisplayingEventArgs e)
     {
         // Append searched items to the end of the list
-        if (e.Container == this.menuManager.Top.Container && this.cachedItems.Value.Any())
+        if (e.Container == this.menuHandler.Top.Container
+            && e.Container.CategorizeChest is FeatureOption.Enabled
+            && this.cachedItems.Value.Any())
         {
             e.Edit(items => items.Concat(this.cachedItems.Value.Except(e.Container.Items)));
         }
@@ -117,8 +106,7 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
     private void OnItemTransferring(ItemTransferringEventArgs e)
     {
         // Only test if categorize is enabled
-        if (e.Into.Options.CategorizeChest != FeatureOption.Enabled
-            || !this.CanAcceptItem(e.Into, e.Item, out var accepted))
+        if (e.Into.CategorizeChest != FeatureOption.Enabled || !this.CanAcceptItem(e.Into, e.Item, out var accepted))
         {
             return;
         }
@@ -127,7 +115,7 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
         {
             e.AllowTransfer();
         }
-        else if (e.Into.Options.CategorizeChestBlockItems == FeatureOption.Enabled)
+        else if (e.Into.CategorizeChestBlockItems == FeatureOption.Enabled)
         {
             e.PreventTransfer();
         }
@@ -141,13 +129,13 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
             return;
         }
 
-        this.cachedItems.Value = [..CategorizeChest.AllItems.Value.Where(e.SearchExpression.PartialMatch)];
+        this.cachedItems.Value = [..ItemRepository.GetItems(e.SearchExpression.PartialMatch)];
     }
 
     private bool CanAcceptItem(IStorageContainer container, Item item, out bool accepted)
     {
         accepted = false;
-        var includeStacks = container.Options.CategorizeChestIncludeStacks == FeatureOption.Enabled;
+        var includeStacks = container.CategorizeChestIncludeStacks == FeatureOption.Enabled;
         var hasStacks = container.Items.ContainsId(item.QualifiedItemId);
         if (includeStacks && hasStacks)
         {
@@ -156,17 +144,17 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
         }
 
         // Cannot handle if there is no search term
-        if (string.IsNullOrWhiteSpace(container.Options.CategorizeChestSearchTerm))
+        if (string.IsNullOrWhiteSpace(container.CategorizeChestSearchTerm))
         {
             return false;
         }
 
         // Retrieve search expression from cache or generate a new one
-        if (!this.cachedSearches.TryGetValue(container.Options.CategorizeChestSearchTerm, out var searchExpression))
+        if (!this.cachedSearches.TryGetValue(container.CategorizeChestSearchTerm, out var searchExpression))
         {
             this.cachedSearches.AddOrUpdate(
-                container.Options.CategorizeChestSearchTerm,
-                this.searchHandler.TryParseExpression(container.Options.CategorizeChestSearchTerm, out searchExpression)
+                container.CategorizeChestSearchTerm,
+                this.searchHandler.TryParseExpression(container.CategorizeChestSearchTerm, out searchExpression)
                     ? searchExpression
                     : null);
         }

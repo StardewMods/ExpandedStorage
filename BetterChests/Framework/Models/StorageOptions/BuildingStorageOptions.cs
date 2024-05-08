@@ -1,38 +1,37 @@
 namespace StardewMods.BetterChests.Framework.Models.StorageOptions;
 
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewValley.GameData.Buildings;
 using StardewValley.TokenizableStrings;
 
 /// <inheritdoc />
-internal sealed class BuildingStorageOptions : ChildStorageOptions
+internal class BuildingStorageOptions : CustomFieldsStorageOptions
 {
-    private readonly Func<BuildingData> getData;
+    private readonly string buildingType;
 
     /// <summary>Initializes a new instance of the <see cref="BuildingStorageOptions" /> class.</summary>
-    /// <param name="getDefault">Get the default storage options.</param>
-    /// <param name="getData">Get the building data.</param>
-    public BuildingStorageOptions(Func<IStorageOptions> getDefault, Func<BuildingData> getData)
-        : base(getDefault, new CustomFieldsStorageOptions(BuildingStorageOptions.GetCustomFields(getData))) =>
-        this.getData = getData;
+    /// <param name="buildingType">The building type.</param>
+    public BuildingStorageOptions(string buildingType)
+        : base(BuildingStorageOptions.GetCustomFields(buildingType)) =>
+        this.buildingType = buildingType;
+
+    /// <inheritdoc />
+    public override string Description =>
+        this.buildingType switch
+        {
+            "Stable" => I18n.Storage_Saddlebag_Tooltip(), _ => TokenParser.ParseText(this.Data.Description),
+        };
+
+    /// <inheritdoc />
+    public override string DisplayName =>
+        this.buildingType switch
+        {
+            "Stable" => I18n.Storage_Saddlebag_Name(), _ => TokenParser.ParseText(this.Data.Name),
+        };
 
     /// <summary>Gets the building data.</summary>
-    public BuildingData Data => this.getData();
+    public BuildingData Data =>
+        Game1.buildingData.TryGetValue(this.buildingType, out var buildingData) ? buildingData : new BuildingData();
 
-    /// <inheritdoc />
-    public override string GetDescription() => TokenParser.ParseText(this.Data.Description);
-
-    /// <inheritdoc />
-    public override string GetDisplayName() => TokenParser.ParseText(this.Data.Name);
-
-    private static Func<bool, Dictionary<string, string>> GetCustomFields(Func<BuildingData> getData) =>
-        init =>
-        {
-            if (init)
-            {
-                getData().CustomFields ??= [];
-            }
-
-            return getData().CustomFields ?? [];
-        };
+    private static Func<Dictionary<string, string>?> GetCustomFields(string buildingType) =>
+        () => Game1.buildingData.TryGetValue(buildingType, out var buildingData) ? buildingData.CustomFields : null;
 }

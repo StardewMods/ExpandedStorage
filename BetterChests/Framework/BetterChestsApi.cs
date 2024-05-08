@@ -3,8 +3,7 @@ namespace StardewMods.BetterChests.Framework;
 using Microsoft.Xna.Framework;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.Services.Factory;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
-using StardewMods.GarbageDay.Services.Integrations.BetterChests;
+using StardewMods.Common.Services.Integrations.BetterChests;
 
 /// <inheritdoc />
 public sealed class BetterChestsApi : IBetterChestsApi
@@ -14,7 +13,7 @@ public sealed class BetterChestsApi : IBetterChestsApi
     private readonly IModInfo modInfo;
 
     /// <summary>Initializes a new instance of the <see cref="BetterChestsApi" /> class.</summary>
-    /// <param name="containerHandler">Dependency used for handling operations between containers.</param>
+    /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="modInfo">Mod info from the calling mod.</param>
     internal BetterChestsApi(ContainerHandler containerHandler, ContainerFactory containerFactory, IModInfo modInfo)
@@ -23,9 +22,6 @@ public sealed class BetterChestsApi : IBetterChestsApi
         this.containerFactory = containerFactory;
         this.modInfo = modInfo;
     }
-
-    /// <inheritdoc />
-    public event EventHandler<EventArgs>? ItemTransferred;
 
     /// <inheritdoc />
     public IEnumerable<IStorageContainer> GetAllContainers(Func<IStorageContainer, bool>? predicate = default) =>
@@ -68,7 +64,7 @@ public sealed class BetterChestsApi : IBetterChestsApi
 
     /// <inheritdoc />
     public bool TryGetContainerFromMenu([NotNullWhen(true)] out IStorageContainer? container) =>
-        this.containerFactory.TryGetOne(out container);
+        this.containerFactory.TryGetOne(Game1.activeClickableMenu, out container);
 
     /// <inheritdoc />
     public bool TryGetContainerFromPlayer(

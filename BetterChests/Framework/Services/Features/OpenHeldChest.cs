@@ -19,11 +19,12 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
 {
     private readonly ContainerFactory containerFactory;
     private readonly IInputHelper inputHelper;
-    private readonly MenuManager menuManager;
+    private readonly MenuHandler menuHandler;
     private readonly IPatchManager patchManager;
+    private readonly ProxyChestFactory proxyChestFactory;
 
     /// <summary>Initializes a new instance of the <see cref="OpenHeldChest" /> class.</summary>
-    /// <param name="menuManager">Dependency used for managing the current menu.</param>
+    /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
@@ -31,21 +32,24 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
+    /// <param name="proxyChestFactory">Dependency used for creating virtualized chests.</param>
     public OpenHeldChest(
         ContainerFactory containerFactory,
         IEventManager eventManager,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
-        MenuManager menuManager,
+        MenuHandler menuHandler,
         IModConfig modConfig,
-        IPatchManager patchManager)
+        IPatchManager patchManager,
+        ProxyChestFactory proxyChestFactory)
         : base(eventManager, log, manifest, modConfig)
     {
         this.containerFactory = containerFactory;
         this.inputHelper = inputHelper;
-        this.menuManager = menuManager;
+        this.menuHandler = menuHandler;
         this.patchManager = patchManager;
+        this.proxyChestFactory = proxyChestFactory;
 
         this.patchManager.Add(
             this.UniqueId,
@@ -64,6 +68,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
         // Events
         this.Events.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         this.Events.Subscribe<ItemHighlightingEventArgs>(this.OnItemHighlighting);
+        this.Events.Subscribe<ItemTransferringEventArgs>(this.OnItemTransferring);
 
         // Patches
         this.patchManager.Patch(this.UniqueId);
@@ -75,6 +80,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
         // Events
         this.Events.Unsubscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         this.Events.Unsubscribe<ItemHighlightingEventArgs>(this.OnItemHighlighting);
+        this.Events.Unsubscribe<ItemTransferringEventArgs>(this.OnItemTransferring);
 
         // Patches
         this.patchManager.Unpatch(this.UniqueId);
@@ -103,7 +109,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
         if (!Context.IsPlayerFree
             || !e.Button.IsActionButton()
             || !this.containerFactory.TryGetOne(Game1.player, Game1.player.CurrentToolIndex, out var container)
-            || container.Options.OpenHeldChest != FeatureOption.Enabled)
+            || container.OpenHeldChest != FeatureOption.Enabled)
         {
             return;
         }
@@ -119,9 +125,18 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
 
     private void OnItemHighlighting(ItemHighlightingEventArgs e)
     {
-        if (e.Container is FarmerContainer && (this.menuManager.CurrentMenu as ItemGrabMenu)?.sourceItem == e.Item)
+        if (e.Container is FarmerContainer && (this.menuHandler.CurrentMenu as ItemGrabMenu)?.sourceItem == e.Item)
         {
             e.UnHighlight();
+        }
+    }
+
+    private void OnItemTransferring(ItemTransferringEventArgs e)
+    {
+        if (this.proxyChestFactory.TryGetProxy(e.Item, out var chest)
+            && (this.menuHandler.CurrentMenu as ItemGrabMenu)?.sourceItem == chest)
+        {
+            e.PreventTransfer();
         }
     }
 }

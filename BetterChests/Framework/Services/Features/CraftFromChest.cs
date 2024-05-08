@@ -1,13 +1,12 @@
 namespace StardewMods.BetterChests.Framework.Services.Features;
 
-using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewMods.Common.Services.Integrations.BetterCrafting;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
@@ -83,15 +82,19 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
                 this.betterCraftingInventoryProvider);
 
             this.betterCraftingIntegration.Api.RegisterInventoryProvider(
-                typeof(ChildContainer),
-                this.betterCraftingInventoryProvider);
-
-            this.betterCraftingIntegration.Api.RegisterInventoryProvider(
                 typeof(FarmerContainer),
                 this.betterCraftingInventoryProvider);
 
             this.betterCraftingIntegration.Api.RegisterInventoryProvider(
                 typeof(FridgeContainer),
+                this.betterCraftingInventoryProvider);
+
+            this.betterCraftingIntegration.Api.RegisterInventoryProvider(
+                typeof(FurnitureContainer),
+                this.betterCraftingInventoryProvider);
+
+            this.betterCraftingIntegration.Api.RegisterInventoryProvider(
+                typeof(NpcContainer),
                 this.betterCraftingInventoryProvider);
 
             this.betterCraftingIntegration.Api.RegisterInventoryProvider(
@@ -101,12 +104,13 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
             this.betterCraftingIntegration.Api.MenuPopulateContainers += this.OnMenuPopulateContainers;
         }
 
-        if (this.toolbarIconsIntegration.IsLoaded)
+        if (this.toolbarIconsIntegration.IsLoaded
+            && this.assetHandler.Icons.TryGetValue(this.ModId + "/Craft", out var icon))
         {
             this.toolbarIconsIntegration.Api.AddToolbarIcon(
                 this.Id,
-                this.assetHandler.Icons.Name.BaseName,
-                new Rectangle(32, 0, 16, 16),
+                icon.Path,
+                icon.Area,
                 I18n.Button_CraftFromChest_Name());
 
             this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
@@ -124,9 +128,10 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
         {
             this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(BuildingContainer));
             this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(ChestContainer));
-            this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(ChildContainer));
             this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(FarmerContainer));
             this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(FridgeContainer));
+            this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(FurnitureContainer));
+            this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(NpcContainer));
             this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(ObjectContainer));
             this.betterCraftingIntegration.Api.MenuPopulateContainers -= this.OnMenuPopulateContainers;
         }
@@ -140,24 +145,24 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
 
     private static bool DefaultPredicate(IStorageContainer container) =>
         container is not FarmerContainer
-        && container.Options.CraftFromChest is not (RangeOption.Disabled or RangeOption.Default)
+        && container.CraftFromChest is not RangeOption.Disabled
         && container.Items.Count > 0
         && !CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains(Game1.player.currentLocation.Name)
         && !(CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains("UndergroundMine")
             && Game1.player.currentLocation is MineShaft)
-        && container.Options.CraftFromChest.WithinRange(
-            container.Options.CraftFromChestDistance,
+        && container.CraftFromChest.WithinRange(
+            container.CraftFromChestDistance,
             container.Location,
             container.TileLocation);
 
     private static bool CookingPredicate(IStorageContainer container) =>
         container is not FarmerContainer
-        && container.Options.CookFromChest is not (RangeOption.Disabled or RangeOption.Default)
+        && container.CookFromChest is not RangeOption.Disabled
         && container.Items.Count > 0
         && !CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains(Game1.player.currentLocation.Name)
         && !(CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains("UndergroundMine")
             && Game1.player.currentLocation is MineShaft)
-        && container.Options.CookFromChest.WithinRange(-1, container.Location, container.TileLocation);
+        && container.CookFromChest.WithinRange(-1, container.Location, container.TileLocation);
 
     private void OnGameLaunched(GameLaunchedEventArgs obj)
     {
@@ -207,15 +212,14 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
 
         if (location.Objects.TryGetValue(position, out var obj) && obj is Workbench)
         {
-            var storageOptions = this.containerFactory.GetStorageOptions(obj);
             predicate = container => container is not FarmerContainer
-                && container.Options.CraftFromChest is not (RangeOption.Disabled or RangeOption.Default)
+                && container.CraftFromChest is not RangeOption.Disabled
                 && !CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains(
                     Game1.player.currentLocation.Name)
                 && !(CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains("UndergroundMine")
                     && Game1.player.currentLocation is MineShaft)
-                && storageOptions.CraftFromChest.WithinRange(
-                    storageOptions.CraftFromChestDistance,
+                && container.CraftFromChest.WithinRange(
+                    container.CraftFromChestDistance,
                     container.Location,
                     container.TileLocation);
         }

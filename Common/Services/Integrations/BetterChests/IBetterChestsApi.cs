@@ -1,14 +1,10 @@
-namespace StardewMods.GarbageDay.Services.Integrations.BetterChests;
+namespace StardewMods.Common.Services.Integrations.BetterChests;
 
 using Microsoft.Xna.Framework;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 
 /// <summary>Mod API for Better Chests.</summary>
 public interface IBetterChestsApi
 {
-    /// <summary>Represents an event that is raised before an item is transferred.</summary>
-    public event EventHandler<EventArgs> ItemTransferred;
-
     /// <summary>
     /// Retrieves all container items that satisfy the specified predicate, if provided. If no predicate is provided,
     /// returns all container items.

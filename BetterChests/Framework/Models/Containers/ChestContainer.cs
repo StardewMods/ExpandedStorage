@@ -1,9 +1,7 @@
 namespace StardewMods.BetterChests.Framework.Models.Containers;
 
 using Microsoft.Xna.Framework;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewValley.Inventories;
-using StardewValley.Menus;
 using StardewValley.Mods;
 using StardewValley.Network;
 using StardewValley.Objects;
@@ -12,11 +10,10 @@ using StardewValley.Objects;
 internal class ChestContainer : BaseContainer<Chest>
 {
     /// <summary>Initializes a new instance of the <see cref="ChestContainer" /> class.</summary>
-    /// <param name="baseOptions">The type of storage object.</param>
     /// <param name="chest">The chest storage of the container.</param>
-    public ChestContainer(IStorageOptions baseOptions, Chest chest)
-        : base(baseOptions) =>
-        this.Source = new WeakReference<Chest>(chest);
+    public ChestContainer(Chest chest)
+        : base(chest) =>
+        this.InitOptions();
 
     /// <summary>Gets the source chest of the container.</summary>
     public Chest Chest =>
@@ -29,10 +26,10 @@ internal class ChestContainer : BaseContainer<Chest>
     public override IInventory Items => this.Chest.GetItemsForPlayer();
 
     /// <inheritdoc />
-    public override GameLocation Location => this.Chest.Location;
+    public override GameLocation Location => this.Parent?.Location ?? this.Chest.Location;
 
     /// <inheritdoc />
-    public override Vector2 TileLocation => this.Chest.TileLocation;
+    public override Vector2 TileLocation => this.Parent?.TileLocation ?? this.Chest.TileLocation;
 
     /// <inheritdoc />
     public override ModDataDictionary ModData => this.Chest.modData;
@@ -44,33 +41,23 @@ internal class ChestContainer : BaseContainer<Chest>
     public override bool IsAlive => this.Source.TryGetTarget(out _);
 
     /// <inheritdoc />
-    public override WeakReference<Chest> Source { get; }
-
-    /// <inheritdoc />
     public override void ShowMenu(bool playSound = false)
     {
-        if (playSound)
+        var itemGrabMenu = this.GetItemGrabMenu(playSound, sourceItem: this.Chest);
+        if (this.Chest.SpecialChestType is Chest.SpecialChestTypes.MiniShippingBin)
         {
-            Game1.player.currentLocation.localSound("openChest");
+            itemGrabMenu.inventory.moveItemSound = "Ship";
         }
 
-        Game1.activeClickableMenu = new ItemGrabMenu(
-            this.Items,
-            false,
-            true,
-            InventoryMenu.highlightAllItems,
-            this.GrabItemFromInventory,
-            null,
-            this.GrabItemFromChest,
-            false,
-            true,
-            true,
-            true,
-            true,
-            1,
-            this.Chest,
-            -1,
-            this.Chest);
+        var oldID = Game1.activeClickableMenu?.currentlySnappedComponent?.myID ?? -1;
+        Game1.activeClickableMenu = itemGrabMenu;
+        if (oldID == -1)
+        {
+            return;
+        }
+
+        Game1.activeClickableMenu.currentlySnappedComponent = Game1.activeClickableMenu.getComponentWithID(oldID);
+        Game1.activeClickableMenu.snapCursorToCurrentSnappedComponent();
     }
 
     /// <inheritdoc />

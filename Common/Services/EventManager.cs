@@ -51,163 +51,163 @@ internal sealed class EventManager : BaseEventManager
         {
             // Content
             case nameof(AssetRequestedEventArgs):
-                this.modEvents.Content.AssetRequested += this.PublishEvent;
+                this.modEvents.Content.AssetRequested += this.PublishEventLate;
                 return;
             case nameof(AssetsInvalidatedEventArgs):
-                this.modEvents.Content.AssetsInvalidated += this.PublishEvent;
+                this.modEvents.Content.AssetsInvalidated += this.PublishEventLate;
                 return;
             case nameof(AssetReadyEventArgs):
                 this.modEvents.Content.AssetReady += this.PublishEvent;
                 return;
             case nameof(LocaleChangedEventArgs):
-                this.modEvents.Content.LocaleChanged += this.PublishEvent;
+                this.modEvents.Content.LocaleChanged += this.PublishEventLate;
                 return;
 
             // Display
             case nameof(MenuChangedEventArgs):
-                this.modEvents.Display.MenuChanged += this.PublishEvent;
+                this.modEvents.Display.MenuChanged += this.PublishEventLate;
                 return;
             case nameof(RenderingEventArgs):
-                this.modEvents.Display.Rendering += this.PublishEvent;
+                this.modEvents.Display.Rendering += this.PublishEventEarly;
                 return;
             case nameof(RenderedEventArgs):
-                this.modEvents.Display.Rendered += this.PublishEvent;
+                this.modEvents.Display.Rendered += this.PublishEventLate;
                 return;
             case nameof(RenderingWorldEventArgs):
-                this.modEvents.Display.RenderingWorld += this.PublishEvent;
+                this.modEvents.Display.RenderingWorld += this.PublishEventEarly;
                 return;
             case nameof(RenderedWorldEventArgs):
-                this.modEvents.Display.RenderedWorld += this.PublishEvent;
+                this.modEvents.Display.RenderedWorld += this.PublishEventLate;
                 return;
             case nameof(RenderingActiveMenuEventArgs):
-                this.modEvents.Display.RenderingActiveMenu += this.PublishEvent;
+                this.modEvents.Display.RenderingActiveMenu += this.PublishEventEarly;
                 return;
             case nameof(RenderedActiveMenuEventArgs):
-                this.modEvents.Display.RenderedActiveMenu += this.PublishEvent;
+                this.modEvents.Display.RenderedActiveMenu += this.PublishEventLate;
                 return;
             case nameof(RenderingHudEventArgs):
-                this.modEvents.Display.RenderingHud += this.PublishEvent;
+                this.modEvents.Display.RenderingHud += this.PublishEventEarly;
                 return;
             case nameof(RenderedHudEventArgs):
-                this.modEvents.Display.RenderedHud += this.PublishEvent;
+                this.modEvents.Display.RenderedHud += this.PublishEventLate;
                 return;
             case nameof(WindowResizedEventArgs):
-                this.modEvents.Display.WindowResized += this.PublishEvent;
+                this.modEvents.Display.WindowResized += this.PublishEventLate;
                 return;
 
             // Game loop
             case nameof(GameLaunchedEventArgs):
-                this.modEvents.GameLoop.GameLaunched += this.PublishEvent;
+                this.modEvents.GameLoop.GameLaunched += this.PublishEventLate;
                 return;
             case nameof(UpdateTickedEventArgs):
-                this.modEvents.GameLoop.UpdateTicked += this.PublishEvent;
+                this.modEvents.GameLoop.UpdateTicked += this.PublishEventLate;
                 return;
             case nameof(UpdateTickingEventArgs):
-                this.modEvents.GameLoop.UpdateTicking += this.PublishEvent;
+                this.modEvents.GameLoop.UpdateTicking += this.PublishEventEarly;
                 return;
             case nameof(OneSecondUpdateTickedEventArgs):
-                this.modEvents.GameLoop.OneSecondUpdateTicked += this.PublishEvent;
+                this.modEvents.GameLoop.OneSecondUpdateTicked += this.PublishEventLate;
                 return;
             case nameof(OneSecondUpdateTickingEventArgs):
-                this.modEvents.GameLoop.OneSecondUpdateTicking += this.PublishEvent;
+                this.modEvents.GameLoop.OneSecondUpdateTicking += this.PublishEventEarly;
                 return;
             case nameof(SaveCreatedEventArgs):
-                this.modEvents.GameLoop.SaveCreated += this.PublishEvent;
+                this.modEvents.GameLoop.SaveCreated += this.PublishEventLate;
                 return;
             case nameof(SaveCreatingEventArgs):
-                this.modEvents.GameLoop.SaveCreating += this.PublishEvent;
+                this.modEvents.GameLoop.SaveCreating += this.PublishEventEarly;
                 return;
             case nameof(SavedEventArgs):
-                this.modEvents.GameLoop.Saved += this.PublishEvent;
+                this.modEvents.GameLoop.Saved += this.PublishEventLate;
                 return;
             case nameof(SavingEventArgs):
-                this.modEvents.GameLoop.Saving += this.PublishEvent;
+                this.modEvents.GameLoop.Saving += this.PublishEventEarly;
                 return;
             case nameof(SaveLoadedEventArgs):
-                this.modEvents.GameLoop.SaveLoaded += this.PublishEvent;
+                this.modEvents.GameLoop.SaveLoaded += this.PublishEventLate;
                 return;
             case nameof(DayStartedEventArgs):
-                this.modEvents.GameLoop.DayStarted += this.PublishEvent;
+                this.modEvents.GameLoop.DayStarted += this.PublishEventLate;
                 return;
             case nameof(DayEndingEventArgs):
-                this.modEvents.GameLoop.DayEnding += this.PublishEvent;
+                this.modEvents.GameLoop.DayEnding += this.PublishEventEarly;
                 return;
             case nameof(TimeChangedEventArgs):
-                this.modEvents.GameLoop.TimeChanged += this.PublishEvent;
+                this.modEvents.GameLoop.TimeChanged += this.PublishEventLate;
                 return;
             case nameof(ReturnedToTitleEventArgs):
-                this.modEvents.GameLoop.ReturnedToTitle += this.PublishEvent;
+                this.modEvents.GameLoop.ReturnedToTitle += this.PublishEventLate;
                 return;
 
             // Input
             case nameof(ButtonsChangedEventArgs):
-                this.modEvents.Input.ButtonsChanged += this.PublishEvent;
+                this.modEvents.Input.ButtonsChanged += this.PublishEventEarly;
                 return;
             case nameof(ButtonPressedEventArgs):
-                this.modEvents.Input.ButtonPressed += this.PublishEvent;
+                this.modEvents.Input.ButtonPressed += this.PublishEventEarly;
                 return;
             case nameof(ButtonReleasedEventArgs):
-                this.modEvents.Input.ButtonReleased += this.PublishEvent;
+                this.modEvents.Input.ButtonReleased += this.PublishEventEarly;
                 return;
             case nameof(CursorMovedEventArgs):
-                this.modEvents.Input.CursorMoved += this.PublishEvent;
+                this.modEvents.Input.CursorMoved += this.PublishEventEarly;
                 return;
             case nameof(MouseWheelScrolledEventArgs):
-                this.modEvents.Input.MouseWheelScrolled += this.PublishEvent;
+                this.modEvents.Input.MouseWheelScrolled += this.PublishEventEarly;
                 return;
 
             // Multiplayer
             case nameof(PeerContextReceivedEventArgs):
-                this.modEvents.Multiplayer.PeerContextReceived += this.PublishEvent;
+                this.modEvents.Multiplayer.PeerContextReceived += this.PublishEventLate;
                 return;
             case nameof(PeerConnectedEventArgs):
-                this.modEvents.Multiplayer.PeerConnected += this.PublishEvent;
+                this.modEvents.Multiplayer.PeerConnected += this.PublishEventLate;
                 return;
             case nameof(ModMessageReceivedEventArgs):
-                this.modEvents.Multiplayer.ModMessageReceived += this.PublishEvent;
+                this.modEvents.Multiplayer.ModMessageReceived += this.PublishEventLate;
                 return;
             case nameof(PeerDisconnectedEventArgs):
-                this.modEvents.Multiplayer.PeerDisconnected += this.PublishEvent;
+                this.modEvents.Multiplayer.PeerDisconnected += this.PublishEventLate;
                 return;
 
             // Player
             case nameof(InventoryChangedEventArgs):
-                this.modEvents.Player.InventoryChanged += this.PublishEvent;
+                this.modEvents.Player.InventoryChanged += this.PublishEventLate;
                 return;
             case nameof(LevelChangedEventArgs):
-                this.modEvents.Player.LevelChanged += this.PublishEvent;
+                this.modEvents.Player.LevelChanged += this.PublishEventLate;
                 return;
             case nameof(WarpedEventArgs):
-                this.modEvents.Player.Warped += this.PublishEvent;
+                this.modEvents.Player.Warped += this.PublishEventLate;
                 return;
 
             // World
             case nameof(LocationListChangedEventArgs):
-                this.modEvents.World.LocationListChanged += this.PublishEvent;
+                this.modEvents.World.LocationListChanged += this.PublishEventLate;
                 return;
             case nameof(BuildingListChangedEventArgs):
-                this.modEvents.World.BuildingListChanged += this.PublishEvent;
+                this.modEvents.World.BuildingListChanged += this.PublishEventLate;
                 return;
             case nameof(ChestInventoryChangedEventArgs):
-                this.modEvents.World.ChestInventoryChanged += this.PublishEvent;
+                this.modEvents.World.ChestInventoryChanged += this.PublishEventLate;
                 return;
             case nameof(DebrisListChangedEventArgs):
-                this.modEvents.World.DebrisListChanged += this.PublishEvent;
+                this.modEvents.World.DebrisListChanged += this.PublishEventLate;
                 return;
             case nameof(FurnitureListChangedEventArgs):
-                this.modEvents.World.FurnitureListChanged += this.PublishEvent;
+                this.modEvents.World.FurnitureListChanged += this.PublishEventLate;
                 return;
             case nameof(LargeTerrainFeatureListChangedEventArgs):
-                this.modEvents.World.LargeTerrainFeatureListChanged += this.PublishEvent;
+                this.modEvents.World.LargeTerrainFeatureListChanged += this.PublishEventLate;
                 return;
             case nameof(NpcListChangedEventArgs):
-                this.modEvents.World.NpcListChanged += this.PublishEvent;
+                this.modEvents.World.NpcListChanged += this.PublishEventLate;
                 return;
             case nameof(ObjectListChangedEventArgs):
-                this.modEvents.World.ObjectListChanged += this.PublishEvent;
+                this.modEvents.World.ObjectListChanged += this.PublishEventLate;
                 return;
             case nameof(TerrainFeatureListChangedEventArgs):
-                this.modEvents.World.TerrainFeatureListChanged += this.PublishEvent;
+                this.modEvents.World.TerrainFeatureListChanged += this.PublishEventLate;
                 return;
         }
     }
@@ -223,168 +223,178 @@ internal sealed class EventManager : BaseEventManager
         {
             // Content
             case nameof(AssetRequestedEventArgs):
-                this.modEvents.Content.AssetRequested -= this.PublishEvent;
+                this.modEvents.Content.AssetRequested -= this.PublishEventLate;
                 return;
             case nameof(AssetsInvalidatedEventArgs):
-                this.modEvents.Content.AssetsInvalidated -= this.PublishEvent;
+                this.modEvents.Content.AssetsInvalidated -= this.PublishEventLate;
                 return;
             case nameof(AssetReadyEventArgs):
                 this.modEvents.Content.AssetReady -= this.PublishEvent;
                 return;
             case nameof(LocaleChangedEventArgs):
-                this.modEvents.Content.LocaleChanged -= this.PublishEvent;
+                this.modEvents.Content.LocaleChanged -= this.PublishEventLate;
                 return;
 
             // Display
             case nameof(MenuChangedEventArgs):
-                this.modEvents.Display.MenuChanged -= this.PublishEvent;
+                this.modEvents.Display.MenuChanged -= this.PublishEventLate;
                 return;
             case nameof(RenderingEventArgs):
-                this.modEvents.Display.Rendering -= this.PublishEvent;
+                this.modEvents.Display.Rendering -= this.PublishEventEarly;
                 return;
             case nameof(RenderedEventArgs):
-                this.modEvents.Display.Rendered -= this.PublishEvent;
+                this.modEvents.Display.Rendered -= this.PublishEventLate;
                 return;
             case nameof(RenderingWorldEventArgs):
-                this.modEvents.Display.RenderingWorld -= this.PublishEvent;
+                this.modEvents.Display.RenderingWorld -= this.PublishEventEarly;
                 return;
             case nameof(RenderedWorldEventArgs):
-                this.modEvents.Display.RenderedWorld -= this.PublishEvent;
+                this.modEvents.Display.RenderedWorld -= this.PublishEventLate;
                 return;
             case nameof(RenderingActiveMenuEventArgs):
-                this.modEvents.Display.RenderingActiveMenu -= this.PublishEvent;
+                this.modEvents.Display.RenderingActiveMenu -= this.PublishEventEarly;
                 return;
             case nameof(RenderedActiveMenuEventArgs):
-                this.modEvents.Display.RenderedActiveMenu -= this.PublishEvent;
+                this.modEvents.Display.RenderedActiveMenu -= this.PublishEventLate;
                 return;
             case nameof(RenderingHudEventArgs):
-                this.modEvents.Display.RenderingHud -= this.PublishEvent;
+                this.modEvents.Display.RenderingHud -= this.PublishEventEarly;
                 return;
             case nameof(RenderedHudEventArgs):
-                this.modEvents.Display.RenderedHud -= this.PublishEvent;
+                this.modEvents.Display.RenderedHud -= this.PublishEventLate;
                 return;
             case nameof(WindowResizedEventArgs):
-                this.modEvents.Display.WindowResized -= this.PublishEvent;
+                this.modEvents.Display.WindowResized -= this.PublishEventLate;
                 return;
 
             // Game loop
             case nameof(GameLaunchedEventArgs):
-                this.modEvents.GameLoop.GameLaunched -= this.PublishEvent;
+                this.modEvents.GameLoop.GameLaunched -= this.PublishEventLate;
                 return;
             case nameof(UpdateTickedEventArgs):
-                this.modEvents.GameLoop.UpdateTicked -= this.PublishEvent;
+                this.modEvents.GameLoop.UpdateTicked -= this.PublishEventLate;
                 return;
             case nameof(UpdateTickingEventArgs):
-                this.modEvents.GameLoop.UpdateTicking -= this.PublishEvent;
+                this.modEvents.GameLoop.UpdateTicking -= this.PublishEventEarly;
                 return;
             case nameof(OneSecondUpdateTickedEventArgs):
-                this.modEvents.GameLoop.OneSecondUpdateTicked -= this.PublishEvent;
+                this.modEvents.GameLoop.OneSecondUpdateTicked -= this.PublishEventLate;
                 return;
             case nameof(OneSecondUpdateTickingEventArgs):
-                this.modEvents.GameLoop.OneSecondUpdateTicking -= this.PublishEvent;
+                this.modEvents.GameLoop.OneSecondUpdateTicking -= this.PublishEventEarly;
                 return;
             case nameof(SaveCreatedEventArgs):
-                this.modEvents.GameLoop.SaveCreated -= this.PublishEvent;
+                this.modEvents.GameLoop.SaveCreated -= this.PublishEventLate;
                 return;
             case nameof(SaveCreatingEventArgs):
-                this.modEvents.GameLoop.SaveCreating -= this.PublishEvent;
+                this.modEvents.GameLoop.SaveCreating -= this.PublishEventEarly;
                 return;
             case nameof(SavedEventArgs):
-                this.modEvents.GameLoop.Saved -= this.PublishEvent;
+                this.modEvents.GameLoop.Saved -= this.PublishEventLate;
                 return;
             case nameof(SavingEventArgs):
-                this.modEvents.GameLoop.Saving -= this.PublishEvent;
+                this.modEvents.GameLoop.Saving -= this.PublishEventEarly;
                 return;
             case nameof(SaveLoadedEventArgs):
-                this.modEvents.GameLoop.SaveLoaded -= this.PublishEvent;
+                this.modEvents.GameLoop.SaveLoaded -= this.PublishEventLate;
                 return;
             case nameof(DayStartedEventArgs):
-                this.modEvents.GameLoop.DayStarted -= this.PublishEvent;
+                this.modEvents.GameLoop.DayStarted -= this.PublishEventLate;
                 return;
             case nameof(DayEndingEventArgs):
-                this.modEvents.GameLoop.DayEnding -= this.PublishEvent;
+                this.modEvents.GameLoop.DayEnding -= this.PublishEventEarly;
                 return;
             case nameof(TimeChangedEventArgs):
-                this.modEvents.GameLoop.TimeChanged -= this.PublishEvent;
+                this.modEvents.GameLoop.TimeChanged -= this.PublishEventLate;
                 return;
             case nameof(ReturnedToTitleEventArgs):
-                this.modEvents.GameLoop.ReturnedToTitle -= this.PublishEvent;
+                this.modEvents.GameLoop.ReturnedToTitle -= this.PublishEventLate;
                 return;
 
             // Input
             case nameof(ButtonsChangedEventArgs):
-                this.modEvents.Input.ButtonsChanged -= this.PublishEvent;
+                this.modEvents.Input.ButtonsChanged -= this.PublishEventEarly;
                 return;
             case nameof(ButtonPressedEventArgs):
-                this.modEvents.Input.ButtonPressed -= this.PublishEvent;
+                this.modEvents.Input.ButtonPressed -= this.PublishEventEarly;
                 return;
             case nameof(ButtonReleasedEventArgs):
-                this.modEvents.Input.ButtonReleased -= this.PublishEvent;
+                this.modEvents.Input.ButtonReleased -= this.PublishEventEarly;
                 return;
             case nameof(CursorMovedEventArgs):
-                this.modEvents.Input.CursorMoved -= this.PublishEvent;
+                this.modEvents.Input.CursorMoved -= this.PublishEventEarly;
                 return;
             case nameof(MouseWheelScrolledEventArgs):
-                this.modEvents.Input.MouseWheelScrolled -= this.PublishEvent;
+                this.modEvents.Input.MouseWheelScrolled -= this.PublishEventEarly;
                 return;
 
             // Multiplayer
             case nameof(PeerContextReceivedEventArgs):
-                this.modEvents.Multiplayer.PeerContextReceived -= this.PublishEvent;
+                this.modEvents.Multiplayer.PeerContextReceived -= this.PublishEventLate;
                 return;
             case nameof(PeerConnectedEventArgs):
-                this.modEvents.Multiplayer.PeerConnected -= this.PublishEvent;
+                this.modEvents.Multiplayer.PeerConnected -= this.PublishEventLate;
                 return;
             case nameof(ModMessageReceivedEventArgs):
-                this.modEvents.Multiplayer.ModMessageReceived -= this.PublishEvent;
+                this.modEvents.Multiplayer.ModMessageReceived -= this.PublishEventLate;
                 return;
             case nameof(PeerDisconnectedEventArgs):
-                this.modEvents.Multiplayer.PeerDisconnected -= this.PublishEvent;
+                this.modEvents.Multiplayer.PeerDisconnected -= this.PublishEventLate;
                 return;
 
             // Player
             case nameof(InventoryChangedEventArgs):
-                this.modEvents.Player.InventoryChanged -= this.PublishEvent;
+                this.modEvents.Player.InventoryChanged -= this.PublishEventLate;
                 return;
             case nameof(LevelChangedEventArgs):
-                this.modEvents.Player.LevelChanged -= this.PublishEvent;
+                this.modEvents.Player.LevelChanged -= this.PublishEventLate;
                 return;
             case nameof(WarpedEventArgs):
-                this.modEvents.Player.Warped -= this.PublishEvent;
+                this.modEvents.Player.Warped -= this.PublishEventLate;
                 return;
 
             // World
             case nameof(LocationListChangedEventArgs):
-                this.modEvents.World.LocationListChanged -= this.PublishEvent;
+                this.modEvents.World.LocationListChanged -= this.PublishEventLate;
                 return;
             case nameof(BuildingListChangedEventArgs):
-                this.modEvents.World.BuildingListChanged -= this.PublishEvent;
+                this.modEvents.World.BuildingListChanged -= this.PublishEventLate;
                 return;
             case nameof(ChestInventoryChangedEventArgs):
-                this.modEvents.World.ChestInventoryChanged -= this.PublishEvent;
+                this.modEvents.World.ChestInventoryChanged -= this.PublishEventLate;
                 return;
             case nameof(DebrisListChangedEventArgs):
-                this.modEvents.World.DebrisListChanged -= this.PublishEvent;
+                this.modEvents.World.DebrisListChanged -= this.PublishEventLate;
                 return;
             case nameof(FurnitureListChangedEventArgs):
-                this.modEvents.World.FurnitureListChanged -= this.PublishEvent;
+                this.modEvents.World.FurnitureListChanged -= this.PublishEventLate;
                 return;
             case nameof(LargeTerrainFeatureListChangedEventArgs):
-                this.modEvents.World.LargeTerrainFeatureListChanged -= this.PublishEvent;
+                this.modEvents.World.LargeTerrainFeatureListChanged -= this.PublishEventLate;
                 return;
             case nameof(NpcListChangedEventArgs):
-                this.modEvents.World.NpcListChanged -= this.PublishEvent;
+                this.modEvents.World.NpcListChanged -= this.PublishEventLate;
                 return;
             case nameof(ObjectListChangedEventArgs):
-                this.modEvents.World.ObjectListChanged -= this.PublishEvent;
+                this.modEvents.World.ObjectListChanged -= this.PublishEventLate;
                 return;
             case nameof(TerrainFeatureListChangedEventArgs):
-                this.modEvents.World.TerrainFeatureListChanged -= this.PublishEvent;
+                this.modEvents.World.TerrainFeatureListChanged -= this.PublishEventLate;
                 return;
         }
     }
 
     private void PublishEvent<TEventArgs>(object? sender, TEventArgs eventArgs)
+        where TEventArgs : EventArgs =>
+        this.Publish(eventArgs);
+
+    [EventPriority(EventPriority.High)]
+    private void PublishEventEarly<TEventArgs>(object? sender, TEventArgs eventArgs)
+        where TEventArgs : EventArgs =>
+        this.Publish(eventArgs);
+
+    [EventPriority(EventPriority.Low)]
+    private void PublishEventLate<TEventArgs>(object? sender, TEventArgs eventArgs)
         where TEventArgs : EventArgs =>
         this.Publish(eventArgs);
 }

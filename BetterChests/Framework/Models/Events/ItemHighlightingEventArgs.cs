@@ -1,9 +1,9 @@
 namespace StardewMods.BetterChests.Framework.Models.Events;
 
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
+using StardewMods.Common.Services.Integrations.BetterChests;
 
-/// <inheritdoc cref="StardewMods.Common.Services.Integrations.BetterChests.Interfaces.IItemHighlighting" />
-public class ItemHighlightingEventArgs : EventArgs, IItemHighlighting
+/// <summary>The event arguments before an item is highlighted.</summary>
+public class ItemHighlightingEventArgs : EventArgs
 {
     /// <summary>Initializes a new instance of the <see cref="ItemHighlightingEventArgs" /> class.</summary>
     /// <param name="container">The container with the item being highlighted.</param>
@@ -14,15 +14,15 @@ public class ItemHighlightingEventArgs : EventArgs, IItemHighlighting
         this.Item = item;
     }
 
-    /// <inheritdoc />
+    /// <summary>Gets the container with the item being highlighted.</summary>
     public IStorageContainer Container { get; }
 
-    /// <inheritdoc />
+    /// <summary>Gets the item being highlighted.</summary>
     public Item Item { get; }
 
-    /// <inheritdoc />
+    /// <summary>Gets a value indicating whether the item is highlighted.</summary>
     public bool IsHighlighted { get; private set; } = true;
 
-    /// <inheritdoc />
+    /// <summary>UnHighlight the item.</summary>
     public void UnHighlight() => this.IsHighlighted = false;
 }

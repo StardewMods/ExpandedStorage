@@ -20,12 +20,14 @@ internal sealed class AssetHandler : BaseService
 {
     private readonly IGameContentHelper gameContentHelper;
     private readonly string hslTexturePath;
-    private readonly Lazy<IManagedTexture> icons;
+    private readonly string iconsPath;
     private readonly IModConfig modConfig;
-
+    private readonly Lazy<IManagedTexture> uiTextures;
     private HslColor[]? hslColors;
     private Texture2D? hslTexture;
     private Color[]? hslTextureData;
+
+    private Dictionary<string, Icon>? icons;
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
@@ -49,11 +51,10 @@ internal sealed class AssetHandler : BaseService
         this.gameContentHelper = gameContentHelper;
         this.modConfig = modConfig;
         this.hslTexturePath = this.ModId + "/HueBar";
+        this.iconsPath = this.ModId + "/Icons";
 
-        this.icons = new Lazy<IManagedTexture>(
-            () => themeHelper.AddAsset(
-                this.ModId + "/Icons",
-                modContentHelper.Load<IRawTextureData>("assets/icons.png")));
+        this.uiTextures = new Lazy<IManagedTexture>(
+            () => themeHelper.AddAsset(this.ModId + "/UI", modContentHelper.Load<IRawTextureData>("assets/icons.png")));
 
         // Events
         eventSubscriber.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
@@ -79,14 +80,178 @@ internal sealed class AssetHandler : BaseService
     /// <summary>Gets the hsl texture.</summary>
     public Texture2D HslTexture => this.hslTexture ??= this.gameContentHelper.Load<Texture2D>(this.hslTexturePath);
 
-    /// <summary>Gets the managed icons texture.</summary>
-    public IManagedTexture Icons => this.icons.Value;
+    /// <summary>Gets the tab icons.</summary>
+    public Dictionary<string, Icon> Icons
+    {
+        get
+        {
+            if (this.icons is not null)
+            {
+                return this.icons;
+            }
+
+            this.icons = this.gameContentHelper.Load<Dictionary<string, Icon>>(this.iconsPath);
+            foreach (var (id, icon) in this.icons)
+            {
+                icon.Id = id;
+            }
+
+            return this.icons;
+        }
+    }
+
+    /// <summary>Gets the texture used for UI elements.</summary>
+    public Texture2D UiTexture => this.uiTextures.Value.Value;
 
     private void OnAssetRequested(AssetRequestedEventArgs e)
     {
         if (e.Name.IsEquivalentTo(this.hslTexturePath))
         {
             e.LoadFromModFile<Texture2D>("assets/hue.png", AssetLoadPriority.Exclusive);
+            return;
+        }
+
+        if (e.Name.IsEquivalentTo(this.iconsPath))
+        {
+            e.LoadFrom(
+                () => new Dictionary<string, Icon>
+                {
+                    {
+                        this.ModId + "/Clothing", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(0, 0, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Cooking", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(16, 0, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Crops", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(32, 0, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Equipment", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(48, 0, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Fishing", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(64, 0, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Materials", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(0, 16, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Miscellaneous", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(16, 16, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Seeds", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(32, 16, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Config", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(48, 16, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Stash", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(64, 16, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Craft", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(0, 32, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Search", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(16, 32, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Copy", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(32, 32, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Save", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(48, 32, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Paste", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(64, 32, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/TransferUp", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(0, 48, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/TransferDown", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(16, 48, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/HSL", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(32, 48, 16, 16),
+                        }
+                    },
+                    {
+                        this.ModId + "/Debug", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(48, 48, 16, 16),
+                        }
+                    },
+                },
+                AssetLoadPriority.Exclusive);
+
             return;
         }
 
@@ -105,15 +270,8 @@ internal sealed class AssetHandler : BaseService
                         }
 
                         bigCraftableData.CustomFields ??= new Dictionary<string, string>();
-                        var customFieldStorageOptions =
-                            new CustomFieldsStorageOptions(_ => bigCraftableData.CustomFields);
-
-                        var temporaryStorageOptions = new TemporaryStorageOptions(
-                            customFieldStorageOptions,
-                            storageOptions);
-
-                        temporaryStorageOptions.Reset();
-                        temporaryStorageOptions.Save();
+                        var typeOptions = new CustomFieldsStorageOptions(() => bigCraftableData.CustomFields);
+                        storageOptions.CopyTo(typeOptions);
                     }
                 });
 
@@ -135,13 +293,8 @@ internal sealed class AssetHandler : BaseService
                         }
 
                         buildingData.CustomFields ??= new Dictionary<string, string>();
-                        var customFieldStorageOptions = new CustomFieldsStorageOptions(_ => buildingData.CustomFields);
-                        var temporaryStorageOptions = new TemporaryStorageOptions(
-                            customFieldStorageOptions,
-                            storageOptions);
-
-                        temporaryStorageOptions.Reset();
-                        temporaryStorageOptions.Save();
+                        var typeOptions = new CustomFieldsStorageOptions(() => buildingData.CustomFields);
+                        storageOptions.CopyTo(typeOptions);
                     }
                 });
 
@@ -163,13 +316,8 @@ internal sealed class AssetHandler : BaseService
                         }
 
                         locationData.CustomFields ??= new Dictionary<string, string>();
-                        var customFieldStorageOptions = new CustomFieldsStorageOptions(_ => locationData.CustomFields);
-                        var temporaryStorageOptions = new TemporaryStorageOptions(
-                            customFieldStorageOptions,
-                            storageOptions);
-
-                        temporaryStorageOptions.Reset();
-                        temporaryStorageOptions.Save();
+                        var typeOptions = new CustomFieldsStorageOptions(() => locationData.CustomFields);
+                        storageOptions.CopyTo(typeOptions);
                     }
                 });
         }

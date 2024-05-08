@@ -1,10 +1,10 @@
 # Custom Bush Change Log
 
-## 1.2.1 (Unreleased)
+## 1.2.1 (May 1, 2024)
 
 ### Added
 
-* Inject an Id property to the ICustomBush interface.
+* Added new API method for retrieving the Id of a Custom Bush.
 
 ## 1.2.0 (April 15, 2024)
 

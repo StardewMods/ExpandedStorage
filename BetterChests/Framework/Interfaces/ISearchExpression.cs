@@ -1,5 +1,7 @@
 namespace StardewMods.BetterChests.Framework.Interfaces;
 
+using StardewMods.Common.Services.Integrations.BetterChests;
+
 /// <summary>Represents a search expression.</summary>
 internal interface ISearchExpression
 {
@@ -13,13 +15,13 @@ internal interface ISearchExpression
     /// <returns>true if the item matches; otherwise, false.</returns>
     bool PartialMatch(Item item);
 
-    /// <summary>Determines if the expression exactly matches the specified term.</summary>
-    /// <param name="term">The term to be matched.</param>
-    /// <returns>true if the term matches; otherwise, false.</returns>
-    bool ExactMatch(string term);
+    /// <summary>Determines if the expression exactly matches the specified container.</summary>
+    /// <param name="container">The container to search.</param>
+    /// <returns>true if the container matches; otherwise, false.</returns>
+    bool ExactMatch(IStorageContainer container);
 
-    /// <summary>Determines if the expression partially matches the specified term.</summary>
-    /// <param name="term">The term to be matched.</param>
-    /// <returns>true if the term matches; otherwise, false.</returns>
-    bool PartialMatch(string term);
+    /// <summary>Determines if the expression partially matches the specified container.</summary>
+    /// <param name="container">The container to search.</param>
+    /// <returns>true if the container matches; otherwise, false.</returns>
+    bool PartialMatch(IStorageContainer container);
 }

@@ -34,15 +34,21 @@ public sealed class CustomBushApi : ICustomBushApi
     public bool IsCustomBush(Bush bush) => this.modPatches.IsCustomBush(bush);
 
     /// <inheritdoc />
-    public bool TryGetCustomBush(Bush bush, out ICustomBush? customBush)
+    public bool TryGetCustomBush(Bush bush, out ICustomBush? customBush) =>
+        this.TryGetCustomBush(bush, out customBush, out _);
+
+    /// <inheritdoc />
+    public bool TryGetCustomBush(Bush bush, out ICustomBush? customBush, out string? id)
     {
         if (this.modPatches.TryGetCustomBush(bush, out var customBushInstance))
         {
             customBush = customBushInstance;
+            id = customBushInstance.Id;
             return true;
         }
 
         customBush = null;
+        id = null;
         return false;
     }
 

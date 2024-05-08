@@ -1,9 +1,7 @@
 namespace StardewMods.BetterChests.Framework.Models.Containers;
 
 using Microsoft.Xna.Framework;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewValley.Inventories;
-using StardewValley.Menus;
 using StardewValley.Mods;
 using StardewValley.Network;
 using StardewValley.Objects;
@@ -12,14 +10,13 @@ using StardewValley.Objects;
 internal class ObjectContainer : BaseContainer<SObject>
 {
     /// <summary>Initializes a new instance of the <see cref="ObjectContainer" /> class.</summary>
-    /// <param name="baseOptions">The type of storage object.</param>
     /// <param name="obj">The storage object.</param>
     /// <param name="chest">The chest storage of the container.</param>
-    public ObjectContainer(IStorageOptions baseOptions, SObject obj, Chest chest)
-        : base(baseOptions)
+    public ObjectContainer(SObject obj, Chest chest)
+        : base(obj)
     {
-        this.Source = new WeakReference<SObject>(obj);
         this.Chest = chest;
+        this.InitOptions();
     }
 
     /// <summary>Gets the source object of the container.</summary>
@@ -51,36 +48,6 @@ internal class ObjectContainer : BaseContainer<SObject>
     public override bool IsAlive => this.Source.TryGetTarget(out _);
 
     /// <inheritdoc />
-    public override WeakReference<SObject> Source { get; }
-
-    /// <inheritdoc />
-    public override void ShowMenu(bool playSound = false)
-    {
-        if (playSound)
-        {
-            Game1.player.currentLocation.localSound("openChest");
-        }
-
-        Game1.activeClickableMenu = new ItemGrabMenu(
-            this.Items,
-            false,
-            true,
-            InventoryMenu.highlightAllItems,
-            this.GrabItemFromInventory,
-            null,
-            this.GrabItemFromChest,
-            false,
-            true,
-            true,
-            true,
-            true,
-            1,
-            this.Object,
-            -1,
-            this.Object);
-    }
-
-    /// <inheritdoc />
     public override bool TryAdd(Item item, out Item? remaining)
     {
         var stack = item.Stack;
@@ -98,6 +65,11 @@ internal class ObjectContainer : BaseContainer<SObject>
 
         this.Items.Remove(item);
         this.Items.RemoveEmptySlots();
+        if (!this.Items.HasAny())
+        {
+            this.Object.showNextIndex.Value = false;
+        }
+
         return true;
     }
 }

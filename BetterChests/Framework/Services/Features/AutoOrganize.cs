@@ -4,8 +4,8 @@ using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
-using StardewMods.Common.Services.Integrations.BetterChests.Interfaces;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
@@ -17,7 +17,7 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
 
     /// <summary>Initializes a new instance of the <see cref="AutoOrganize" /> class.</summary>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
-    /// <param name="containerHandler">Dependency used for handling operations between containers.</param>
+    /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
@@ -49,8 +49,8 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
     private void OrganizeAll()
     {
         var containerGroupsTo = this
-            .containerFactory.GetAll(container => container.Options.AutoOrganize == FeatureOption.Enabled)
-            .GroupBy(container => (int)container.Options.StashToChestPriority)
+            .containerFactory.GetAll(container => container.AutoOrganize == FeatureOption.Enabled)
+            .GroupBy(container => (int)container.StashToChestPriority)
             .ToDictionary(containerGroup => containerGroup.Key, group => group.ToList());
 
         var containerGroupsFrom = new Dictionary<int, List<IStorageContainer>>();

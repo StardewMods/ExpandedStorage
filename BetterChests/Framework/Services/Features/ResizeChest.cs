@@ -68,14 +68,14 @@ internal sealed class ResizeChest : BaseFeature<ResizeChest>
         __result = Math.Max(
             container.Items.Count, // Guarantee space for existing items
             Math.Max(
-                (int)container.Options.ResizeChest, // Guarantee space for menu size
-                container.Options.ResizeChestCapacity switch
+                (int)container.ResizeChest, // Guarantee space for menu size
+                container.ResizeChestCapacity switch
                 {
                     // Always allocate +1 space for unlimited storage
                     < 0 => container.Items.Count + 1,
 
                     // Allocate assigned space
-                    > 0 => container.Options.ResizeChestCapacity,
+                    > 0 => container.ResizeChestCapacity,
 
                     // Allocate vanilla space
                     _ => __result,

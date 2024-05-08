@@ -24,23 +24,29 @@ internal sealed class AssetHandler : BaseService
     private readonly HashSet<string> invalidGarbageCans = [];
     private readonly string itemId;
     private readonly IModConfig modConfig;
+    private readonly IModContentHelper modContentHelper;
     private readonly string qualifiedItemId;
-    private readonly string texturePath;
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
-    public AssetHandler(IEventSubscriber eventSubscriber, ILog log, IManifest manifest, IModConfig modConfig)
+    /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
+    public AssetHandler(
+        IEventSubscriber eventSubscriber,
+        ILog log,
+        IManifest manifest,
+        IModConfig modConfig,
+        IModContentHelper modContentHelper)
         : base(log, manifest)
     {
         // Init
         this.IconTexturePath = this.ModId + "/Icons";
         this.itemId = this.ModId + "/GarbageCan";
         this.qualifiedItemId = "(BC)" + this.itemId;
-        this.texturePath = this.ModId + "/Texture";
         this.modConfig = modConfig;
+        this.modContentHelper = modContentHelper;
 
         // Events
         eventSubscriber.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
@@ -70,13 +76,6 @@ internal sealed class AssetHandler : BaseService
 
     private void OnAssetRequested(AssetRequestedEventArgs e)
     {
-        // Load Garbage Can Texture
-        if (e.NameWithoutLocale.IsEquivalentTo(this.texturePath))
-        {
-            e.LoadFromModFile<Texture2D>("assets/GarbageCan.png", AssetLoadPriority.Exclusive);
-            return;
-        }
-
         if (e.Name.IsEquivalentTo(this.IconTexturePath))
         {
             e.LoadFromModFile<Texture2D>("assets/icons.png", AssetLoadPriority.Exclusive);
@@ -97,7 +96,7 @@ internal sealed class AssetHandler : BaseService
                         Description = I18n.GarbageCan_Description(),
                         Fragility = 2,
                         IsLamp = false,
-                        Texture = this.texturePath,
+                        Texture = this.modContentHelper.GetInternalAssetName("assets/GarbageCan.png").Name,
                         CustomFields = new Dictionary<string, string>
                         {
                             { "furyx639.ExpandedStorage/Enabled", "true" },
@@ -110,7 +109,6 @@ internal sealed class AssetHandler : BaseService
                             { "furyx639.BetterChests/AutoOrganize", "Disabled" },
                             { "furyx639.BetterChests/CarryChest", "Disabled" },
                             { "furyx639.BetterChests/CategorizeChest", "Disabled" },
-                            { "furyx639.BetterChests/ChestInfo", "Disabled" },
                             { "furyx639.BetterChests/CollectItems", "Disabled" },
                             { "furyx639.BetterChests/ConfigureChest", "Disabled" },
                             { "furyx639.BetterChests/CookFromChest", "Disabled" },
@@ -122,6 +120,7 @@ internal sealed class AssetHandler : BaseService
                             { "furyx639.BetterChests/ResizeChestCapacity", "9" },
                             { "furyx639.BetterChests/SearchItems", "Disabled" },
                             { "furyx639.BetterChests/StashToChest", "Disabled" },
+                            { "furyx639.BetterChests/StorageInfo", "Disabled" },
                         },
                     };
 

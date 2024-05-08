@@ -89,7 +89,7 @@ internal sealed class ModPatches : BaseService
     /// null.
     /// </param>
     /// <returns>true if the custom bush associated with the given bush is found; otherwise, false.</returns>
-    public bool TryGetCustomBush(Bush bush, out CustomBush? customBush)
+    public bool TryGetCustomBush(Bush bush, [NotNullWhen(true)] out CustomBush? customBush)
     {
         customBush = null;
         return bush.modData.TryGetValue(this.modDataId, out var id)

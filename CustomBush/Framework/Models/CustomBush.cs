@@ -9,7 +9,7 @@ internal sealed class CustomBush : ICustomBush
     /// <summary>Gets or sets the items produced by this custom bush.</summary>
     public List<CustomBushDrop> ItemsProduced { get; set; } = [];
 
-    /// <inheritdoc />
+    /// <summary>Gets or sets the id of the custom bush.</summary>
     public string Id { get; set; } = string.Empty;
 
     /// <inheritdoc />
