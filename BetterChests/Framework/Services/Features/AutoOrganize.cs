@@ -84,7 +84,6 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
                         var containerFrom = containersFrom[indexFrom];
                         if (!this.containerHandler.Transfer(containerFrom, containerTo, out var amounts))
                         {
-                            containersFrom.RemoveAt(indexFrom);
                             continue;
                         }
 

@@ -6,6 +6,11 @@
 
 * Added visual editors for configuring storage options.
 
+### Fixed
+
+* Fixed AutoOrganize not grabbing items from chests after they fail too insert
+  into the first chest.
+
 ## 2.18.3 (May 7, 2024)
 
 ### Added
@@ -16,8 +21,10 @@
 ### Changed
 
 * Removed `and` and `or` from search expressions.
-* Added `(` and `)` for grouping search expressions where all conditions must be met.
-* Added `[` and `]` for grouping search expressions where any conditions must be met.
+* Added `(` and `)` for grouping search expressions where all conditions must be
+  met.
+* Added `[` and `]` for grouping search expressions where any conditions must be
+  met.
 * Merged icons into a single asset.
 
 ### Fixed
@@ -56,7 +63,8 @@
 
 ### Changed
 
-* When a storage is given a unique name, the dropdown will no longer show the location/tile.
+* When a storage is given a unique name, the dropdown will no longer show the
+  location/tile.
 * Group storage type config options into separate pages for each storage type.
 
 ### Fixed
