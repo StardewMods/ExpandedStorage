@@ -1,5 +1,11 @@
 # Toolbar Icons Change Log
 
+## 2.7.3 (Unreleased)
+
+### Changed
+
+* If config file is missing, it will attempt to restore from global data.
+
 ## 2.7.2 (April 12, 2024)
 
 ### Changed

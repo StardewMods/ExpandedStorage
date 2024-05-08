@@ -20,6 +20,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
     /// <summary>Initializes a new instance of the <see cref="ConfigManager" /> class.</summary>
     /// <param name="components">Dependency used for the toolbar icon components.</param>
+    /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
     /// <param name="getToolbarIconsOption">Gets a new instance of <see cref="ToolbarIconOption" />.</param>
@@ -27,12 +28,13 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     /// <param name="modHelper">Dependency for events, input, and content.</param>
     public ConfigManager(
         Dictionary<string, ClickableTextureComponent> components,
+        IDataHelper dataHelper,
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
         Func<ToolbarIconOption> getToolbarIconsOption,
         IManifest manifest,
         IModHelper modHelper)
-        : base(eventManager, modHelper)
+        : base(dataHelper, eventManager, modHelper)
     {
         this.manifest = manifest;
         this.components = components;

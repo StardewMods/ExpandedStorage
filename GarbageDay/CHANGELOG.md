@@ -5,6 +5,7 @@
 ### Changed
 
 * Load Garbage Can texture from internal asset.
+* If config file is missing, it will attempt to restore from global data.
 
 ## 3.1.8 (April 15, 2024)
 

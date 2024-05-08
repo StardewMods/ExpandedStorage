@@ -1,5 +1,11 @@
 # FauxCore Change Log
 
+## 1.1.2 (Unreleased)
+
+### Changed
+
+* If config file is missing, it will attempt to restore from global data.
+
 ### 1.1.1 (April 12, 2024)
 
 ### Changed

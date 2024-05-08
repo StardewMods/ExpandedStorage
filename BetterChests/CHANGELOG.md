@@ -7,6 +7,10 @@
 * Added visual editors for configuring storage options.
 * Added support for searching by item attributes.
 
+### Changed
+
+* If config file is missing, it will attempt to restore from global data.
+
 ### Fixed
 
 * Fixed AutoOrganize not grabbing items from chests after they fail too insert

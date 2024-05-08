@@ -25,6 +25,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     private readonly IModRegistry modRegistry;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigManager" /> class.</summary>
+    /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
     /// <param name="localizedTextManager">Dependency used for formatting and translating text.</param>
@@ -33,6 +34,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     /// <param name="modHelper">Dependency for events, input, and content.</param>
     /// <param name="modRegistry">Dependency used for fetching metadata about loaded mods.</param>
     public ConfigManager(
+        IDataHelper dataHelper,
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
         LocalizedTextManager localizedTextManager,
@@ -40,7 +42,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         IManifest manifest,
         IModHelper modHelper,
         IModRegistry modRegistry)
-        : base(eventManager, modHelper)
+        : base(dataHelper, eventManager, modHelper)
     {
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
         this.localizedTextManager = localizedTextManager;

@@ -8,16 +8,19 @@ using StardewMods.Common.Models.Events;
 internal class ConfigManager<TConfig>
     where TConfig : class, new()
 {
+    private readonly IDataHelper dataHelper;
     private readonly IEventPublisher eventPublisher;
     private readonly IModHelper modHelper;
 
     private bool initialized;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigManager{TConfig}" /> class.</summary>
+    /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
     /// <param name="eventPublisher">Dependency used for publishing events.</param>
     /// <param name="modHelper">Dependency for events, input, and content.</param>
-    public ConfigManager(IEventPublisher eventPublisher, IModHelper modHelper)
+    protected ConfigManager(IDataHelper dataHelper, IEventPublisher eventPublisher, IModHelper modHelper)
     {
+        this.dataHelper = dataHelper;
         this.eventPublisher = eventPublisher;
         this.modHelper = modHelper;
         this.Config = this.GetNew();
@@ -47,16 +50,28 @@ internal class ConfigManager<TConfig>
     public virtual TConfig GetNew()
     {
         TConfig? config;
+
+        // Try to load config from mod folder
         try
         {
-            config = this.modHelper.ReadConfig<TConfig>();
+            return this.modHelper.ReadConfig<TConfig>();
         }
         catch
         {
-            config = null;
+            // ignored
         }
 
-        return config ?? this.GetDefault();
+        // Try to restore from global data
+        try
+        {
+            return this.dataHelper.ReadGlobalData<TConfig>("config") ?? throw new InvalidOperationException();
+        }
+        catch
+        {
+            // ignored
+        }
+
+        return this.GetDefault();
     }
 
     /// <summary>Resets the configuration by reassigning to <see cref="TConfig" />.</summary>
@@ -71,6 +86,7 @@ internal class ConfigManager<TConfig>
     public void Save(TConfig config)
     {
         this.modHelper.WriteConfig(config);
+        this.dataHelper.WriteGlobalData("config", config);
         this.Config = config;
         this.eventPublisher.Publish(new ConfigChangedEventArgs<TConfig>(this.Config));
     }
