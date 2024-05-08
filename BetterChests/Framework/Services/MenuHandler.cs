@@ -244,10 +244,10 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static void InventoryMenu_draw_postfix(InventoryMenu __instance, ref MenuManager? __state)
     {
-        __state = __instance.Equals(MenuHandler.instance.topMenu.Value.InventoryMenu)
-            ? MenuHandler.instance.topMenu.Value
-            : __instance.Equals(MenuHandler.instance.bottomMenu.Value.InventoryMenu)
-                ? MenuHandler.instance.bottomMenu.Value
+        __state = __instance.Equals(MenuHandler.instance.Top.InventoryMenu)
+            ? MenuHandler.instance.Top
+            : __instance.Equals(MenuHandler.instance.Bottom.InventoryMenu)
+                ? MenuHandler.instance.Bottom
                 : null;
 
         if (__state?.Container is null)
@@ -328,8 +328,8 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
     [Priority(int.MaxValue)]
     private void OnInventoryMenuChanged(InventoryMenuChangedEventArgs e)
     {
-        this.topMenu.Value.Set(e.Parent, e.Top);
-        this.bottomMenu.Value.Set(e.Parent, e.Bottom);
+        this.Top.Set(e.Parent, e.Top);
+        this.Bottom.Set(e.Parent, e.Bottom);
     }
 
     private void OnUpdateTicking(UpdateTickingEventArgs e) => this.UpdateMenuIfRequired();
@@ -425,17 +425,14 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
 
             if (parent is null)
             {
-                this.topMenu.Value.Container = null;
-                this.bottomMenu.Value.Container = null;
+                this.Top.Container = null;
+                this.Bottom.Container = null;
                 this.eventManager.Publish(new InventoryMenuChangedEventArgs(parent, top, bottom));
                 return;
             }
 
             // Update top menu
-            this.topMenu.Value.Container = this.containerFactory.TryGetOne(top, out var topContainer)
-                ? topContainer
-                : null;
-
+            this.Top.Container = this.containerFactory.TryGetOne(top, out var topContainer) ? topContainer : null;
             if (topContainer is not null && this.CurrentMenu is ItemGrabMenu itemGrabMenu)
             {
                 // Relaunch menu once
@@ -499,8 +496,8 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
         {
             case ItemGrabMenu itemGrabMenu:
                 // Draw overlay
-                this.topMenu.Value.Draw(e.SpriteBatch);
-                this.bottomMenu.Value.Draw(e.SpriteBatch);
+                this.Top.Draw(e.SpriteBatch);
+                this.Bottom.Draw(e.SpriteBatch);
 
                 // Redraw foreground
                 if (this.focus.Value is null)
@@ -558,8 +555,8 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
 
             case InventoryPage inventoryPage:
                 // Draw overlay
-                this.topMenu.Value.Draw(e.SpriteBatch);
-                this.bottomMenu.Value.Draw(e.SpriteBatch);
+                this.Top.Draw(e.SpriteBatch);
+                this.Bottom.Draw(e.SpriteBatch);
 
                 // Redraw foreground
                 if (this.focus.Value is null)
@@ -597,8 +594,8 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
 
             case ShopMenu shopMenu:
                 // Draw overlay
-                this.topMenu.Value.Draw(e.SpriteBatch);
-                this.bottomMenu.Value.Draw(e.SpriteBatch);
+                this.Top.Draw(e.SpriteBatch);
+                this.Bottom.Draw(e.SpriteBatch);
 
                 // Redraw foreground
                 if (this.focus.Value is null)

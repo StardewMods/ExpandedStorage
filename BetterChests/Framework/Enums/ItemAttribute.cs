@@ -2,9 +2,9 @@ namespace StardewMods.BetterChests.Framework.Enums;
 
 using NetEscapades.EnumGenerators;
 
-/// <summary>Represents the item attributes that can be used for sorting.</summary>
+/// <summary>Represents the item attributes that can be used for searching.</summary>
 [EnumExtensions]
-internal enum SortBy
+internal enum ItemAttribute
 {
     /// <summary>Sort by category.</summary>
     Category,
@@ -18,6 +18,6 @@ internal enum SortBy
     /// <summary>Sort by quality.</summary>
     Quality,
 
-    /// <summary>Sort by type.</summary>
-    Type,
+    /// <summary>Sort by tag.</summary>
+    Tags,
 }

@@ -265,18 +265,19 @@ internal sealed class SearchMenu : BaseMenu
                     b.DrawString(Game1.smallFont, "- [NOT]", new Vector2(currentX - 10, currentY), Game1.textColor);
                     currentY += Game1.smallFont.MeasureString("- [NOT]").ToPoint().Y;
                     currentX += indent;
-                    Enqueue(not.InnerExpression);
+                    Enqueue(not.Expression);
                     currentX -= indent;
                     break;
 
-                case SearchTerm searchTerm:
+                case MatchExpression:
+                case StringTerm:
                     b.DrawString(
                         Game1.smallFont,
-                        searchTerm.ToString(),
+                        currentExpression.ToString(),
                         new Vector2(currentX, currentY),
                         Game1.textColor);
 
-                    currentY += Game1.smallFont.MeasureString(searchTerm.ToString()).ToPoint().Y;
+                    currentY += Game1.smallFont.MeasureString(currentExpression.ToString()).ToPoint().Y;
                     break;
             }
         }

@@ -72,33 +72,29 @@ internal sealed class ItemSorter : IComparer<Item>
         }
 
         // Attribute
-        if (!SortByExtensions.TryParse(parts[0], out var sortBy, true))
+        if (!ItemAttributeExtensions.TryParse(parts[0], out var attribute, true))
         {
             return;
         }
 
-        switch (sortBy)
+        switch (attribute)
         {
-            case SortBy.Category:
+            case ItemAttribute.Category:
                 this.sortables.Add(
                     new LiteralAttribute(ascending, negative, compareTo, item => item.getCategoryName()));
 
                 return;
 
-            case SortBy.Name:
+            case ItemAttribute.Name:
                 this.sortables.Add(new LiteralAttribute(ascending, negative, compareTo, item => item.DisplayName));
                 return;
 
-            case SortBy.Quantity:
+            case ItemAttribute.Quantity:
                 this.sortables.Add(new NumericalAttribute(ascending, negative, compareTo, item => item.Stack));
                 return;
 
-            case SortBy.Quality:
+            case ItemAttribute.Quality:
                 this.sortables.Add(new NumericalAttribute(ascending, negative, compareTo, item => item.Quality));
-                return;
-
-            case SortBy.Type:
-                this.sortables.Add(new LiteralAttribute(ascending, negative, compareTo, item => item.TypeDefinitionId));
                 return;
 
             default: throw new ArgumentOutOfRangeException(nameof(entry));

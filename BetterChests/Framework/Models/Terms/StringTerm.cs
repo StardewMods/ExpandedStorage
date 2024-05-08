@@ -4,10 +4,27 @@ using Pidgin;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.Common.Services.Integrations.BetterChests;
 
-/// <summary>Represents a search term.</summary>
-internal sealed class SearchTerm : ISearchExpression
+/// <summary>Represents a basic term.</summary>
+internal sealed class StringTerm : ISearchExpression
 {
     /// <summary>The search term parser.</summary>
+#if DEBUG
+    public static Parser<char, ISearchExpression> TermParser =>
+        Parser
+            .AnyCharExcept(
+                AnyExpression.BeginChar,
+                AnyExpression.EndChar,
+                AllExpression.BeginChar,
+                AllExpression.EndChar,
+                NotExpression.Char,
+                MatchExpression.Char,
+                ' ')
+            .ManyString()
+            .Between(Parser.SkipWhitespaces)
+            .Where(term => !string.IsNullOrWhiteSpace(term))
+            .Select(term => new StringTerm(term))
+            .OfType<ISearchExpression>();
+#else
     public static readonly Parser<char, ISearchExpression> TermParser = Parser
         .AnyCharExcept(
             AnyExpression.BeginChar,
@@ -15,16 +32,18 @@ internal sealed class SearchTerm : ISearchExpression
             AllExpression.BeginChar,
             AllExpression.EndChar,
             NotExpression.Char,
+            MatchExpression.Char,
             ' ')
         .ManyString()
         .Between(Parser.SkipWhitespaces)
         .Where(term => !string.IsNullOrWhiteSpace(term))
-        .Select(term => new SearchTerm(term))
+        .Select(term => new StringTerm(term))
         .OfType<ISearchExpression>();
+#endif
 
-    /// <summary>Initializes a new instance of the <see cref="SearchTerm" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="StringTerm" /> class.</summary>
     /// <param name="term">The search value.</param>
-    private SearchTerm(string term) => this.Term = term;
+    private StringTerm(string term) => this.Term = term;
 
     /// <summary>Gets the value.</summary>
     public string Term { get; }

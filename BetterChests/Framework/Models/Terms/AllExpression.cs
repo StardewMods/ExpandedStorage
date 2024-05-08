@@ -5,7 +5,7 @@ using Pidgin;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.Common.Services.Integrations.BetterChests;
 
-/// <summary>Represents an and expression.</summary>
+/// <summary>Represents a grouped expression where all sub-expressions must match.</summary>
 internal sealed class AllExpression : ISearchExpression
 {
     /// <summary>The begin group character.</summary>
@@ -15,24 +15,43 @@ internal sealed class AllExpression : ISearchExpression
     public const char EndChar = ')';
 
     /// <summary>The expression parser.</summary>
+#if DEBUG
+    public static Parser<char, ISearchExpression> ExpressionParser =>
+        Parser
+            .Rec(
+                () => Parser.OneOf(
+                    AnyExpression.ExpressionParser,
+                    AllExpression.ExpressionParser!,
+                    NotExpression.ExpressionParser,
+                    MatchExpression.ExpressionParser,
+                    StringTerm.TermParser))
+            .Many()
+            .Between(Parser.Char(AllExpression.BeginChar), Parser.Char(AllExpression.EndChar))
+            .Between(Parser.SkipWhitespaces)
+            .Select(expressions => new AllExpression(expressions))
+            .OfType<ISearchExpression>();
+#else
     public static readonly Parser<char, ISearchExpression> ExpressionParser = Parser
         .Rec(
             () => Parser.OneOf(
                 AnyExpression.ExpressionParser,
                 AllExpression.ExpressionParser!,
                 NotExpression.ExpressionParser,
-                SearchTerm.TermParser))
+                MatchExpression.ExpressionParser,
+                StringTerm.TermParser))
         .Many()
         .Between(Parser.Char(AllExpression.BeginChar), Parser.Char(AllExpression.EndChar))
+        .Between(Parser.SkipWhitespaces)
         .Select(expressions => new AllExpression(expressions))
         .OfType<ISearchExpression>();
+#endif
 
     /// <summary>Initializes a new instance of the <see cref="AllExpression" /> class.</summary>
     /// <param name="expressions">The grouped expressions.</param>
     private AllExpression(IEnumerable<ISearchExpression> expressions) =>
         this.Expressions = expressions.ToImmutableArray();
 
-    /// <summary>Gets the grouped expressions.</summary>
+    /// <summary>Gets the grouped sub-expressions.</summary>
     public ImmutableArray<ISearchExpression> Expressions { get; }
 
     /// <inheritdoc />
