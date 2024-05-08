@@ -120,42 +120,18 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         this.inputHelper.Suppress(e.Button);
         Game1.playSound("Ship");
 
-        // Stash to existing stacks only
-        if (!this.Config.Controls.TransferItems.IsDown()
-            || this.menuHandler.Top.Container.StashToChest is RangeOption.Disabled)
-        {
-            this.containerHandler.Transfer(
-                this.menuHandler.Bottom.Container,
-                this.menuHandler.Top.Container,
-                out _,
-                existingOnly: true);
+        var existingOnly = !this.Config.Controls.TransferItems.IsDown()
+            || this.menuHandler.Top.Container.StashToChest is RangeOption.Disabled;
 
-            return;
-        }
-
-        // Stash using categorization rules
-        var (from, to) = this.Config.Controls.TransferItemsReverse.IsDown()
+        var (from, to) = !existingOnly && this.Config.Controls.TransferItemsReverse.IsDown()
             ? (this.menuHandler.Top.Container, this.menuHandler.Bottom.Container)
             : (this.menuHandler.Bottom.Container, this.menuHandler.Top.Container);
 
         var force = to is FarmerContainer;
-        if (!this.containerHandler.Transfer(from, to, out var amounts, force))
-        {
-            return;
-        }
 
-        foreach (var (name, amount) in amounts)
+        if (this.containerHandler.Transfer(from, to, out var amounts, force, existingOnly))
         {
-            if (amount > 0)
-            {
-                this.Log.Trace(
-                    "{0}: {{ Item: {1}, Quantity: {2}, From: {3}, To: {4} }}",
-                    this.Id,
-                    name,
-                    amount,
-                    from,
-                    to);
-            }
+            this.LogTransfer(from, to, amounts);
         }
     }
 
@@ -266,21 +242,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
                 }
 
                 stashedAny = true;
-                foreach (var (name, amount) in amounts)
-                {
-                    if (amount <= 0)
-                    {
-                        continue;
-                    }
-
-                    this.Log.Trace(
-                        "{0}: {{ Item: {1}, Quantity: {2}, From: {3}, To: {4} }}",
-                        this.Id,
-                        name,
-                        amount,
-                        containerFrom,
-                        containerTo);
-                }
+                this.LogTransfer(containerFrom, containerTo, amounts);
             }
         }
 
@@ -313,11 +275,14 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
             return;
         }
 
-        if (!this.containerHandler.Transfer(containerFrom, containerTo, out var amounts))
+        if (this.containerHandler.Transfer(containerFrom, containerTo, out var amounts))
         {
-            return;
+            this.LogTransfer(containerFrom, containerTo, amounts);
         }
+    }
 
+    private void LogTransfer(IStorageContainer from, IStorageContainer to, Dictionary<string, int> amounts)
+    {
         foreach (var (name, amount) in amounts)
         {
             if (amount > 0)
@@ -327,8 +292,8 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
                     this.Id,
                     name,
                     amount,
-                    containerFrom,
-                    containerTo);
+                    from,
+                    to);
             }
         }
     }

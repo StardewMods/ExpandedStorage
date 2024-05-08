@@ -5,6 +5,7 @@
 ### Added
 
 * Added visual editors for configuring storage options.
+* Added support for searching by item attributes.
 
 ### Fixed
 
