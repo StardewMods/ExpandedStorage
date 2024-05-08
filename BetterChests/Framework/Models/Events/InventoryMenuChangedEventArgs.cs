@@ -16,12 +16,12 @@ internal sealed class InventoryMenuChangedEventArgs : EventArgs
         this.Bottom = bottom;
     }
 
+    /// <summary>Gets the bottom menu.</summary>
+    public IClickableMenu? Bottom { get; }
+
     /// <summary>Gets the parent menu.</summary>
     public IClickableMenu? Parent { get; }
 
     /// <summary>Gets the top menu.</summary>
     public IClickableMenu? Top { get; }
-
-    /// <summary>Gets the bottom menu.</summary>
-    public IClickableMenu? Bottom { get; }
 }

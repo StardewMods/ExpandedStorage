@@ -9,10 +9,10 @@ using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 internal class DefaultStorageOptions : IStorageOptions
 {
     /// <inheritdoc />
-    public string DisplayName => I18n.Storage_Other_Tooltip();
+    public string Description => I18n.Storage_Other_Name();
 
     /// <inheritdoc />
-    public string Description => I18n.Storage_Other_Name();
+    public string DisplayName => I18n.Storage_Other_Tooltip();
 
     /// <inheritdoc />
     public RangeOption AccessChest { get; set; } = RangeOption.Default;
@@ -33,10 +33,10 @@ internal class DefaultStorageOptions : IStorageOptions
     public FeatureOption CategorizeChestBlockItems { get; set; } = FeatureOption.Default;
 
     /// <inheritdoc />
-    public string CategorizeChestSearchTerm { get; set; } = string.Empty;
+    public FeatureOption CategorizeChestIncludeStacks { get; set; } = FeatureOption.Default;
 
     /// <inheritdoc />
-    public FeatureOption CategorizeChestIncludeStacks { get; set; } = FeatureOption.Default;
+    public string CategorizeChestSearchTerm { get; set; } = string.Empty;
 
     /// <inheritdoc />
     public FeatureOption ChestFinder { get; set; } = FeatureOption.Default;

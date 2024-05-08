@@ -63,27 +63,27 @@ internal sealed class MenuManager : BaseService
         eventManager.Subscribe<ItemsDisplayingEventArgs>(this.OnItemsDisplaying);
     }
 
-    /// <summary>Gets or sets the method used to highlight an item in the inventory menu.</summary>
-    public InventoryMenu.highlightThisItem? OriginalHighlightMethod { get; set; }
-
-    /// <summary>Gets the instance of the menu that is being managed.</summary>
-    public IClickableMenu? Menu => this.source.TryGetTarget(out var target) ? target : null;
-
-    /// <summary>Gets the instance of the inventory menu that is being managed.</summary>
-    public InventoryMenu? InventoryMenu => this.Menu as InventoryMenu;
-
     /// <summary>Gets the capacity of the inventory menu.</summary>
     public int Capacity =>
         this.InventoryMenu?.capacity switch { null => 36, > 70 => 70, _ => this.InventoryMenu?.capacity ?? 0 };
 
-    /// <summary>Gets the number of rows of the inventory menu.</summary>
-    public int Rows => this.InventoryMenu?.rows ?? 3;
-
     /// <summary>Gets the number of columns of the inventory menu.</summary>
     public int Columns => this.Capacity / this.Rows;
 
+    /// <summary>Gets the instance of the inventory menu that is being managed.</summary>
+    public InventoryMenu? InventoryMenu => this.Menu as InventoryMenu;
+
+    /// <summary>Gets the instance of the menu that is being managed.</summary>
+    public IClickableMenu? Menu => this.source.TryGetTarget(out var target) ? target : null;
+
+    /// <summary>Gets the number of rows of the inventory menu.</summary>
+    public int Rows => this.InventoryMenu?.rows ?? 3;
+
     /// <summary>Gets or sets the container associated with the menu.</summary>
     public IStorageContainer? Container { get; set; }
+
+    /// <summary>Gets or sets the method used to highlight an item in the inventory menu.</summary>
+    public InventoryMenu.highlightThisItem? OriginalHighlightMethod { get; set; }
 
     /// <summary>Draws overlay components to the SpriteBatch.</summary>
     /// <param name="spriteBatch">The SpriteBatch used to draw the game object.</param>
@@ -108,6 +108,22 @@ internal sealed class MenuManager : BaseService
         {
             this.downArrow.draw(spriteBatch);
         }
+    }
+
+    /// <summary>Highlights an item using the provided highlight methods.</summary>
+    /// <param name="item">The item to highlight.</param>
+    /// <returns>true if the item is successfully highlighted; otherwise, false.</returns>
+    public bool HighlightMethod(Item item)
+    {
+        var original = this.OriginalHighlightMethod is null || this.OriginalHighlightMethod(item);
+        if (!original || this.Container is null)
+        {
+            return original;
+        }
+
+        var itemHighlightingEventArgs = new ItemHighlightingEventArgs(this.Container, item);
+        this.eventManager.Publish(itemHighlightingEventArgs);
+        return itemHighlightingEventArgs.IsHighlighted;
     }
 
     /// <summary>Set the menu, clearing all operations, cached items, and set new arrow positions and neighbor IDs.</summary>
@@ -142,22 +158,6 @@ internal sealed class MenuManager : BaseService
         inventoryMenu.inventory[bottomSlot].rightNeighborID = this.downArrow.myID;
         this.upArrow.downNeighborID = this.downArrow.myID;
         this.downArrow.upNeighborID = this.upArrow.myID;
-    }
-
-    /// <summary>Highlights an item using the provided highlight methods.</summary>
-    /// <param name="item">The item to highlight.</param>
-    /// <returns>true if the item is successfully highlighted; otherwise, false.</returns>
-    public bool HighlightMethod(Item item)
-    {
-        var original = this.OriginalHighlightMethod is null || this.OriginalHighlightMethod(item);
-        if (!original || this.Container is null)
-        {
-            return original;
-        }
-
-        var itemHighlightingEventArgs = new ItemHighlightingEventArgs(this.Container, item);
-        this.eventManager.Publish(itemHighlightingEventArgs);
-        return itemHighlightingEventArgs.IsHighlighted;
     }
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
@@ -202,18 +202,6 @@ internal sealed class MenuManager : BaseService
         }
     }
 
-    private void OnMouseWheelScrolled(MouseWheelScrolledEventArgs e)
-    {
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (this.InventoryMenu?.isWithinBounds(mouseX, mouseY) != true)
-        {
-            return;
-        }
-
-        var scroll = this.modConfig.Controls.ScrollPage.IsDown() ? this.Rows : 1;
-        this.scrolled += e.Delta > 0 ? -scroll : scroll;
-    }
-
     [Priority(int.MinValue)]
     private void OnItemsDisplaying(ItemsDisplayingEventArgs e)
     {
@@ -232,5 +220,17 @@ internal sealed class MenuManager : BaseService
         }
 
         e.Edit(items => items.Skip(this.scrolled * this.Columns).Take(this.Capacity));
+    }
+
+    private void OnMouseWheelScrolled(MouseWheelScrolledEventArgs e)
+    {
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        if (this.InventoryMenu?.isWithinBounds(mouseX, mouseY) != true)
+        {
+            return;
+        }
+
+        var scroll = this.modConfig.Controls.ScrollPage.IsDown() ? this.Rows : 1;
+        this.scrolled += e.Delta > 0 ? -scroll : scroll;
     }
 }

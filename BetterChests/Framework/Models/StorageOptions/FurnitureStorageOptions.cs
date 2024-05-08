@@ -23,8 +23,6 @@ internal sealed class FurnitureStorageOptions : IStorageOptions
     /// <summary>Gets the item data.</summary>
     public ParsedItemData Data => ItemRegistry.RequireTypeDefinition("(F)").GetData(this.itemId);
 
-    private IStorageOptions Options => this.getOptions();
-
     /// <inheritdoc />
     public string Description => TokenParser.ParseText(this.Data.Description);
 
@@ -74,17 +72,17 @@ internal sealed class FurnitureStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
-    public string CategorizeChestSearchTerm
-    {
-        get => this.Options.CategorizeChestSearchTerm;
-        set => this.Options.CategorizeChestSearchTerm = value;
-    }
-
-    /// <inheritdoc />
     public FeatureOption CategorizeChestIncludeStacks
     {
         get => this.Options.CategorizeChestIncludeStacks;
         set => this.Options.CategorizeChestIncludeStacks = value;
+    }
+
+    /// <inheritdoc />
+    public string CategorizeChestSearchTerm
+    {
+        get => this.Options.CategorizeChestSearchTerm;
+        set => this.Options.CategorizeChestSearchTerm = value;
     }
 
     /// <inheritdoc />
@@ -240,4 +238,6 @@ internal sealed class FurnitureStorageOptions : IStorageOptions
         get => this.Options.StorageName;
         set => this.Options.StorageName = value;
     }
+
+    private IStorageOptions Options => this.getOptions();
 }

@@ -5,54 +5,6 @@ using StardewValley.ItemTypeDefinitions;
 /// <summary>Provides methods for retrieving items based on a predicate.</summary>
 internal static class ItemRepository
 {
-    //TODO: Method for caching all context tags
-
-    /// <summary>Retrieves items based on the provided predicate.</summary>
-    /// <param name="predicate">The predicate used to filter the items. If null, all items are returned.</param>
-    /// <returns>An enumerable collection of Item objects.</returns>
-    public static IEnumerable<Item> GetItems(Func<Item, bool>? predicate)
-    {
-        foreach (var item in ItemRepository.GetAll())
-        {
-            if (predicate is null || predicate(item))
-            {
-                yield return item;
-            }
-
-            if (item is not SObject obj
-                || obj.bigCraftable.Value
-                || item.QualifiedItemId == "(O)447"
-                || item.QualifiedItemId == "(O)812")
-            {
-                continue;
-            }
-
-            // Add silver quality item
-            obj = (SObject)item.getOne();
-            obj.Quality = SObject.medQuality;
-            if (predicate is null || predicate(obj))
-            {
-                yield return obj;
-            }
-
-            // Add gold quality item
-            obj = (SObject)item.getOne();
-            obj.Quality = SObject.highQuality;
-            if (predicate is null || predicate(obj))
-            {
-                yield return obj;
-            }
-
-            // Add iridium quality item
-            obj = (SObject)item.getOne();
-            obj.Quality = SObject.bestQuality;
-            if (predicate is null || predicate(obj))
-            {
-                yield return obj;
-            }
-        }
-    }
-
     /// <summary>Retrieves all items from the item registry.</summary>
     /// <param name="flavored">Indicates whether flavored items should be included.</param>
     /// <param name="identifiers">Identifiers of specific items to retrieve. If null or empty, retrieves all items.</param>
@@ -151,6 +103,54 @@ internal static class ItemRepository
 
                         break;
                 }
+            }
+        }
+    }
+
+    // TODO: Method for caching all context tags
+
+    /// <summary>Retrieves items based on the provided predicate.</summary>
+    /// <param name="predicate">The predicate used to filter the items. If null, all items are returned.</param>
+    /// <returns>An enumerable collection of Item objects.</returns>
+    public static IEnumerable<Item> GetItems(Func<Item, bool>? predicate)
+    {
+        foreach (var item in ItemRepository.GetAll())
+        {
+            if (predicate is null || predicate(item))
+            {
+                yield return item;
+            }
+
+            if (item is not SObject obj
+                || obj.bigCraftable.Value
+                || item.QualifiedItemId == "(O)447"
+                || item.QualifiedItemId == "(O)812")
+            {
+                continue;
+            }
+
+            // Add silver quality item
+            obj = (SObject)item.getOne();
+            obj.Quality = SObject.medQuality;
+            if (predicate is null || predicate(obj))
+            {
+                yield return obj;
+            }
+
+            // Add gold quality item
+            obj = (SObject)item.getOne();
+            obj.Quality = SObject.highQuality;
+            if (predicate is null || predicate(obj))
+            {
+                yield return obj;
+            }
+
+            // Add iridium quality item
+            obj = (SObject)item.getOne();
+            obj.Quality = SObject.bestQuality;
+            if (predicate is null || predicate(obj))
+            {
+                yield return obj;
             }
         }
     }

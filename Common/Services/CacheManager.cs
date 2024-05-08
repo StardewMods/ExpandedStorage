@@ -12,16 +12,15 @@ internal sealed class CacheManager
     private int lastTicks;
 
     /// <summary>Initializes a new instance of the <see cref="CacheManager" /> class.</summary>
-    /// <param name="eventSubscriber">The event subscriber used for subscribing to events.</param>
-    public CacheManager(IEventSubscriber eventSubscriber) =>
-        eventSubscriber.Subscribe<DayEndingEventArgs>(this.OnDayEnding);
+    /// <param name="eventManager">The event subscriber used for subscribing to events.</param>
+    public CacheManager(IEventManager eventManager) => eventManager.Subscribe<DayEndingEventArgs>(this.OnDayEnding);
 
     /// <summary>Retrieves a cache table of type T.</summary>
     /// <typeparam name="T">The type of objects stored in the cache table.</typeparam>
     /// <returns>The cache table of type T.</returns>
-    public ICacheTable<T> GetCacheTable<T>()
+    public GenericCacheTable<T> GetCacheTable<T>()
     {
-        var cacheTable = new CacheTable<T>();
+        var cacheTable = new GenericCacheTable<T>();
         this.cacheTables.Add(cacheTable);
         return cacheTable;
     }

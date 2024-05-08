@@ -150,43 +150,6 @@ internal sealed class ToolbarManager : BaseService
                 this.components.Remove(id);
             });
 
-    private bool TryGetButton([NotNullWhen(true)] out ClickableComponent? button)
-    {
-        var activeToolbar = Game1.onScreenMenus.OfType<Toolbar>().FirstOrDefault();
-        if (this.lastToolbar.IsActiveForScreen() && activeToolbar == this.lastToolbar.Value)
-        {
-            button = this.lastButton.Value;
-            return true;
-        }
-
-        if (activeToolbar is null)
-        {
-            button = null;
-            return false;
-        }
-
-        this.lastToolbar.Value = activeToolbar;
-        var buttons = this.reflectionHelper.GetField<List<ClickableComponent>>(activeToolbar, "buttons").GetValue();
-        button = this.lastButton.Value = buttons.First();
-        return true;
-    }
-
-    private void OnUpdateTicked(UpdateTickedEventArgs e)
-    {
-        if (!this.contentPatcherIntegration.IsLoaded && ++this.ticks < 2)
-        {
-            return;
-        }
-
-        while (this.actionQueue.TryDequeue(out var action))
-        {
-            action();
-        }
-    }
-
-    private void OnConditionsApiReady(ConditionsApiReadyEventArgs e) =>
-        this.eventManager.Subscribe<UpdateTickedEventArgs>(this.OnUpdateTicked);
-
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
         if (!ToolbarManager.ShowToolbar || this.inputHelper.IsSuppressed(e.Button))
@@ -215,6 +178,9 @@ internal sealed class ToolbarManager : BaseService
 
         this.inputHelper.Suppress(e.Button);
     }
+
+    private void OnConditionsApiReady(ConditionsApiReadyEventArgs e) =>
+        this.eventManager.Subscribe<UpdateTickedEventArgs>(this.OnUpdateTicked);
 
     private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e)
     {
@@ -299,6 +265,19 @@ internal sealed class ToolbarManager : BaseService
         this.eventManager.Subscribe<RenderingHudEventArgs>(this.OnRenderingHud);
     }
 
+    private void OnUpdateTicked(UpdateTickedEventArgs e)
+    {
+        if (!this.contentPatcherIntegration.IsLoaded && ++this.ticks < 2)
+        {
+            return;
+        }
+
+        while (this.actionQueue.TryDequeue(out var action))
+        {
+            action();
+        }
+    }
+
     private void ReorientComponents()
     {
         if (!this.TryGetButton(out var button) || this.components.Values.All(component => !component.visible))
@@ -375,5 +354,26 @@ internal sealed class ToolbarManager : BaseService
                 }
             }
         }
+    }
+
+    private bool TryGetButton([NotNullWhen(true)] out ClickableComponent? button)
+    {
+        var activeToolbar = Game1.onScreenMenus.OfType<Toolbar>().FirstOrDefault();
+        if (this.lastToolbar.IsActiveForScreen() && activeToolbar == this.lastToolbar.Value)
+        {
+            button = this.lastButton.Value;
+            return true;
+        }
+
+        if (activeToolbar is null)
+        {
+            button = null;
+            return false;
+        }
+
+        this.lastToolbar.Value = activeToolbar;
+        var buttons = this.reflectionHelper.GetField<List<ClickableComponent>>(activeToolbar, "buttons").GetValue();
+        button = this.lastButton.Value = buttons.First();
+        return true;
     }
 }

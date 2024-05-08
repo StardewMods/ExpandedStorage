@@ -151,6 +151,16 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         }
     }
 
+    private void OnIconPressed(IIconPressedEventArgs e)
+    {
+        if (e.Id == this.Id)
+        {
+            this.OpenSearchBar();
+        }
+    }
+
+    private void OnMenuChanged(MenuChangedEventArgs e) => this.ReinitializePointers();
+
     private void OnRenderedHud(RenderedHudEventArgs e)
     {
         if (this.menuHandler.CurrentMenu is not SearchOverlay && (!Game1.displayHUD || !Context.IsPlayerFree))
@@ -163,8 +173,6 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
             pointer.Draw(e.SpriteBatch);
         }
     }
-
-    private void OnMenuChanged(MenuChangedEventArgs e) => this.ReinitializePointers();
 
     private void OnSearchChanged(SearchChangedEventArgs e) => this.ReinitializePointers();
 
@@ -193,13 +201,10 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
                 this.Events.Publish(new SearchChangedEventArgs(this.searchExpression.Value));
             });
 
-    private void OnIconPressed(IIconPressedEventArgs e)
-    {
-        if (e.Id == this.Id)
-        {
-            this.OpenSearchBar();
-        }
-    }
+    private bool Predicate(IStorageContainer container) =>
+        container is not FarmerContainer
+        && container.ChestFinder is FeatureOption.Enabled
+        && (this.searchExpression.Value is null || this.searchExpression.Value.PartialMatch(container));
 
     private void ReinitializePointers()
     {
@@ -219,9 +224,4 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         this.Log.Info("{0}: Found {1} chests", this.Id, this.pointers.Value.Count);
         this.currentIndex.Value = 0;
     }
-
-    private bool Predicate(IStorageContainer container) =>
-        container is not FarmerContainer
-        && container.ChestFinder is FeatureOption.Enabled
-        && (this.searchExpression.Value is null || this.searchExpression.Value.PartialMatch(container));
 }

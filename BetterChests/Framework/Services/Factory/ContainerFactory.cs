@@ -614,22 +614,22 @@ internal sealed class ContainerFactory : BaseService
             };
     }
 
-    private IEnumerable<IStorageContainer> GetAllFromPlayers(
+    private IEnumerable<IStorageContainer> GetAllFromContainers(
         ISet<IStorageContainer> foundContainers,
         Queue<IStorageContainer> containerQueue,
         Func<IStorageContainer, bool>? predicate = default)
     {
-        foreach (var farmer in Game1.getAllFarmers())
+        while (containerQueue.TryDequeue(out var container))
         {
-            foreach (var container in this.GetAll(farmer, predicate))
+            foreach (var childContainer in this.GetAll(container, predicate))
             {
-                if (!foundContainers.Add(container))
+                if (!foundContainers.Add(childContainer))
                 {
                     continue;
                 }
 
-                containerQueue.Enqueue(container);
-                yield return container;
+                containerQueue.Enqueue(childContainer);
+                yield return childContainer;
             }
         }
     }
@@ -680,22 +680,22 @@ internal sealed class ContainerFactory : BaseService
         }
     }
 
-    private IEnumerable<IStorageContainer> GetAllFromContainers(
+    private IEnumerable<IStorageContainer> GetAllFromPlayers(
         ISet<IStorageContainer> foundContainers,
         Queue<IStorageContainer> containerQueue,
         Func<IStorageContainer, bool>? predicate = default)
     {
-        while (containerQueue.TryDequeue(out var container))
+        foreach (var farmer in Game1.getAllFarmers())
         {
-            foreach (var childContainer in this.GetAll(container, predicate))
+            foreach (var container in this.GetAll(farmer, predicate))
             {
-                if (!foundContainers.Add(childContainer))
+                if (!foundContainers.Add(container))
                 {
                     continue;
                 }
 
-                containerQueue.Enqueue(childContainer);
-                yield return childContainer;
+                containerQueue.Enqueue(container);
+                yield return container;
             }
         }
     }

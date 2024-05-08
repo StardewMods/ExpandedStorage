@@ -10,7 +10,7 @@ using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.EasyAccess.Framework.Interfaces;
 
 /// <summary>Handles collecting items.</summary>
-internal sealed class CollectService : BaseService<CollectService>
+internal sealed class CollectService : GenericBaseService<CollectService>
 {
     private readonly AssetHandler assetHandler;
     private readonly IInputHelper inputHelper;
@@ -19,7 +19,7 @@ internal sealed class CollectService : BaseService<CollectService>
 
     /// <summary>Initializes a new instance of the <see cref="CollectService" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
@@ -27,7 +27,7 @@ internal sealed class CollectService : BaseService<CollectService>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public CollectService(
         AssetHandler assetHandler,
-        IEventSubscriber eventSubscriber,
+        IEventManager eventManager,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
@@ -42,24 +42,8 @@ internal sealed class CollectService : BaseService<CollectService>
         this.toolbarIconsIntegration = toolbarIconsIntegration;
 
         // Events
-        eventSubscriber.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
-        eventSubscriber.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
-    }
-
-    private void OnGameLaunched(GameLaunchedEventArgs obj)
-    {
-        if (!this.toolbarIconsIntegration.IsLoaded)
-        {
-            return;
-        }
-
-        this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.UniqueId,
-            this.assetHandler.IconTexture.Name.BaseName,
-            new Rectangle(0, 0, 16, 16),
-            I18n.Button_CollectOutputs_Name());
-
-        this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
+        eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
+        eventManager.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
     }
 
     private void CollectItems()
@@ -166,6 +150,22 @@ internal sealed class CollectService : BaseService<CollectService>
 
         this.inputHelper.SuppressActiveKeybinds(this.modConfig.ControlScheme.CollectItems);
         this.CollectItems();
+    }
+
+    private void OnGameLaunched(GameLaunchedEventArgs obj)
+    {
+        if (!this.toolbarIconsIntegration.IsLoaded)
+        {
+            return;
+        }
+
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(
+            this.UniqueId,
+            this.assetHandler.IconTexture.Name.BaseName,
+            new Rectangle(0, 0, 16, 16),
+            I18n.Button_CollectOutputs_Name());
+
+        this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
     }
 
     private void OnIconPressed(IIconPressedEventArgs e)

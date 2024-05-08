@@ -18,10 +18,10 @@ internal sealed class BackpackStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
-    public string DisplayName => I18n.Storage_Backpack_Name();
+    public string Description => I18n.Storage_Backpack_Tooltip();
 
     /// <inheritdoc />
-    public string Description => I18n.Storage_Backpack_Tooltip();
+    public string DisplayName => I18n.Storage_Backpack_Name();
 
     /// <inheritdoc />
     public RangeOption AccessChest
@@ -66,13 +66,6 @@ internal sealed class BackpackStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
-    public string CategorizeChestSearchTerm
-    {
-        get => this.storageOptions.CategorizeChestSearchTerm;
-        set => this.storageOptions.CategorizeChestSearchTerm = value;
-    }
-
-    /// <inheritdoc />
     public FeatureOption CategorizeChestIncludeStacks
     {
         get => this.storageOptions.CategorizeChestIncludeStacks;
@@ -80,31 +73,17 @@ internal sealed class BackpackStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
+    public string CategorizeChestSearchTerm
+    {
+        get => this.storageOptions.CategorizeChestSearchTerm;
+        set => this.storageOptions.CategorizeChestSearchTerm = value;
+    }
+
+    /// <inheritdoc />
     public FeatureOption ChestFinder
     {
         get => this.storageOptions.ChestFinder;
         set => this.storageOptions.ChestFinder = value;
-    }
-
-    /// <inheritdoc />
-    public string StorageIcon
-    {
-        get => this.storageOptions.StorageIcon;
-        set => this.storageOptions.StorageIcon = value;
-    }
-
-    /// <inheritdoc />
-    public FeatureOption StorageInfo
-    {
-        get => this.storageOptions.StorageInfo;
-        set => this.storageOptions.StorageInfo = value;
-    }
-
-    /// <inheritdoc />
-    public FeatureOption StorageInfoHover
-    {
-        get => this.storageOptions.StorageInfoHover;
-        set => this.storageOptions.StorageInfoHover = value;
     }
 
     /// <inheritdoc />
@@ -232,6 +211,27 @@ internal sealed class BackpackStorageOptions : IStorageOptions
     {
         get => this.storageOptions.StashToChestPriority;
         set => this.storageOptions.StashToChestPriority = value;
+    }
+
+    /// <inheritdoc />
+    public string StorageIcon
+    {
+        get => this.storageOptions.StorageIcon;
+        set => this.storageOptions.StorageIcon = value;
+    }
+
+    /// <inheritdoc />
+    public FeatureOption StorageInfo
+    {
+        get => this.storageOptions.StorageInfo;
+        set => this.storageOptions.StorageInfo = value;
+    }
+
+    /// <inheritdoc />
+    public FeatureOption StorageInfoHover
+    {
+        get => this.storageOptions.StorageInfoHover;
+        set => this.storageOptions.StorageInfoHover = value;
     }
 
     /// <inheritdoc />

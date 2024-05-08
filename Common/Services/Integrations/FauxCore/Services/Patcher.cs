@@ -12,13 +12,13 @@ internal sealed class Patcher : IPatchManager
     private bool initialized;
 
     /// <summary>Initializes a new instance of the <see cref="Patcher"/> class.</summary>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="fauxCoreIntegration">Dependency used for FauxCore integration.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
-    public Patcher(IEventSubscriber eventSubscriber, FauxCoreIntegration fauxCoreIntegration, ILog log)
+    public Patcher(IEventManager eventManager, FauxCoreIntegration fauxCoreIntegration, ILog log)
     {
         this.patchManager = new Lazy<IPatchManager>(() => fauxCoreIntegration.Api!.CreatePatchService(log));
-        eventSubscriber.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
+        eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
     }
 
     /// <inheritdoc />

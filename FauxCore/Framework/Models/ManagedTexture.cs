@@ -21,11 +21,11 @@ internal sealed class ManagedTexture : IManagedTexture
         this.Name = gameContentHelper.ParseAssetName(path);
     }
 
-    /// <summary>Gets the raw data for the base texture.</summary>
-    public IRawTextureData RawData { get; }
-
     /// <inheritdoc />
     public IAssetName Name { get; }
+
+    /// <summary>Gets the raw data for the base texture.</summary>
+    public IRawTextureData RawData { get; }
 
     /// <inheritdoc />
     public Texture2D Value => this.cachedTexture ??= this.gameContentHelper.Load<Texture2D>(this.Name);

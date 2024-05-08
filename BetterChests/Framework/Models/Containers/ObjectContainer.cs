@@ -19,15 +19,14 @@ internal class ObjectContainer : BaseContainer<SObject>
         this.InitOptions();
     }
 
-    /// <summary>Gets the source object of the container.</summary>
-    public SObject Object =>
-        this.Source.TryGetTarget(out var target) ? target : throw new ObjectDisposedException(nameof(ObjectContainer));
-
     /// <inheritdoc />
     public override int Capacity => this.Chest.GetActualCapacity();
 
     /// <summary>Gets the source chest of the container.</summary>
     public Chest Chest { get; }
+
+    /// <inheritdoc />
+    public override bool IsAlive => this.Source.TryGetTarget(out _);
 
     /// <inheritdoc />
     public override IInventory Items => this.Chest.GetItemsForPlayer();
@@ -36,16 +35,17 @@ internal class ObjectContainer : BaseContainer<SObject>
     public override GameLocation Location => this.Object.Location;
 
     /// <inheritdoc />
-    public override Vector2 TileLocation => this.Object.TileLocation;
-
-    /// <inheritdoc />
     public override ModDataDictionary ModData => this.Object.modData;
 
     /// <inheritdoc />
     public override NetMutex Mutex => this.Chest.GetMutex();
 
+    /// <summary>Gets the source object of the container.</summary>
+    public SObject Object =>
+        this.Source.TryGetTarget(out var target) ? target : throw new ObjectDisposedException(nameof(ObjectContainer));
+
     /// <inheritdoc />
-    public override bool IsAlive => this.Source.TryGetTarget(out _);
+    public override Vector2 TileLocation => this.Object.TileLocation;
 
     /// <inheritdoc />
     public override bool TryAdd(Item item, out Item? remaining)

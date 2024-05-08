@@ -58,9 +58,6 @@ internal sealed class SearchBar : ClickableComponent
         set => this.setMethod(value);
     }
 
-    /// <summary>Reset the value of the text box.</summary>
-    public void Reset() => this.textBox.Text = this.Text;
-
     /// <summary>Draws the search overlay to the screen.</summary>
     /// <param name="spriteBatch">The SpriteBatch used for drawing.</param>
     public void Draw(SpriteBatch spriteBatch)
@@ -78,6 +75,9 @@ internal sealed class SearchBar : ClickableComponent
         this.Selected = this.bounds.Contains(mouseX, mouseY);
         return this.Selected;
     }
+
+    /// <summary>Reset the value of the text box.</summary>
+    public void Reset() => this.textBox.Text = this.Text;
 
     /// <summary>Performs a right click at the specified coordinates on the screen.</summary>
     /// <param name="mouseX">The X-coordinate of the mouse click.</param>

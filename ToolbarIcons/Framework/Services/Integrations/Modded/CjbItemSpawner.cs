@@ -13,13 +13,13 @@ internal sealed class CjbItemSpawner : IActionIntegration
     public CjbItemSpawner(IReflectionHelper reflectionHelper) => this.reflectionHelper = reflectionHelper;
 
     /// <inheritdoc />
-    public string ModId => "CJBok.ItemSpawner";
+    public string HoverText => I18n.Button_ItemSpawner();
 
     /// <inheritdoc />
     public int Index => 5;
 
     /// <inheritdoc />
-    public string HoverText => I18n.Button_ItemSpawner();
+    public string ModId => "CJBok.ItemSpawner";
 
     /// <inheritdoc />
     public Action? GetAction(IMod mod)

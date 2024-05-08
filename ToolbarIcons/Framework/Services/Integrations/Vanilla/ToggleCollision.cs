@@ -6,10 +6,10 @@ using StardewMods.ToolbarIcons.Framework.Interfaces;
 internal sealed class ToggleCollision : IVanillaIntegration
 {
     /// <inheritdoc />
-    public int Index => 10;
+    public string HoverText => I18n.Button_NoClip();
 
     /// <inheritdoc />
-    public string HoverText => I18n.Button_NoClip();
+    public int Index => 10;
 
     /// <inheritdoc />
     public void DoAction()

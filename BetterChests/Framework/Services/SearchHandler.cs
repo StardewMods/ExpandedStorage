@@ -8,7 +8,7 @@ using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
 /// <summary>Responsible for handling search.</summary>
-internal sealed class SearchHandler : BaseService<SearchHandler>
+internal sealed class SearchHandler : GenericBaseService<SearchHandler>
 {
     /// <summary>Initializes a new instance of the <see cref="SearchHandler" /> class.</summary>
     /// <param name="log">Dependency used for logging debug information to the console.</param>

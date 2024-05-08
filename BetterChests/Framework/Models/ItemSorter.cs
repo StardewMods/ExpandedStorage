@@ -19,18 +19,6 @@ internal sealed class ItemSorter : IComparer<Item>
     public int Compare(Item? x, Item? y) =>
         this.sortables.Select(sortable => sortable.Compare(x, y)).FirstOrDefault(result => result != 0);
 
-    private void ParseAttributes(string sortBy)
-    {
-        // Split sort key into entries
-        var entries = sortBy.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
-
-        // Parse each part into attributes
-        foreach (var entry in entries)
-        {
-            this.ParseAttribute(entry);
-        }
-    }
-
     private void ParseAttribute(string entry)
     {
         var parts = entry.Split('~', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
@@ -98,6 +86,18 @@ internal sealed class ItemSorter : IComparer<Item>
                 return;
 
             default: throw new ArgumentOutOfRangeException(nameof(entry));
+        }
+    }
+
+    private void ParseAttributes(string sortBy)
+    {
+        // Split sort key into entries
+        var entries = sortBy.Split(',', StringSplitOptions.TrimEntries | StringSplitOptions.RemoveEmptyEntries);
+
+        // Parse each part into attributes
+        foreach (var entry in entries)
+        {
+            this.ParseAttribute(entry);
         }
     }
 

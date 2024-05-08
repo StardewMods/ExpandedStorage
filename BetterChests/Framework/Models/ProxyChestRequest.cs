@@ -25,18 +25,6 @@ internal sealed class ProxyChestRequest
     /// <summary>Gets the item that represents a proxy chest.</summary>
     public SObject Item { get; }
 
-    /// <summary>Confirm a proxy chest request.</summary>
-    public void Confirm()
-    {
-        if (this.done)
-        {
-            return;
-        }
-
-        this.done = true;
-        this.confirm();
-    }
-
     /// <summary>Cancel a proxy chest request.</summary>
     public void Cancel()
     {
@@ -47,5 +35,17 @@ internal sealed class ProxyChestRequest
 
         this.done = true;
         this.cancel();
+    }
+
+    /// <summary>Confirm a proxy chest request.</summary>
+    public void Confirm()
+    {
+        if (this.done)
+        {
+            return;
+        }
+
+        this.done = true;
+        this.confirm();
     }
 }

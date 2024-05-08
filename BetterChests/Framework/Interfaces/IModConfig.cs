@@ -9,12 +9,6 @@ using StardewValley.Menus;
 /// <summary>Mod config data for Better Chests.</summary>
 internal interface IModConfig
 {
-    /// <summary>Gets the default storage options.</summary>
-    public DefaultStorageOptions DefaultOptions { get; }
-
-    /// <summary>Gets the default options for different storage types.</summary>
-    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions { get; }
-
     /// <summary>Gets a value indicating whether to show arrows when accessing chests.</summary>
     public bool AccessChestsShowArrows { get; }
 
@@ -36,17 +30,20 @@ internal interface IModConfig
     /// <summary>Gets a value indicating whether debug mode will be enabled.</summary>
     public bool DebugMode { get; }
 
-    /// <summary>Gets a value for the number of steps in the hue color picker.</summary>
-    public int HslColorPickerHueSteps { get; }
+    /// <summary>Gets the default storage options.</summary>
+    public DefaultStorageOptions DefaultOptions { get; }
 
     /// <summary>Gets a value for the number of steps in the hue color picker.</summary>
-    public int HslColorPickerSaturationSteps { get; }
+    public int HslColorPickerHueSteps { get; }
 
     /// <summary>Gets a value for the number of steps in the hue color picker.</summary>
     public int HslColorPickerLightnessSteps { get; }
 
     /// <summary>Gets the placement for the Hsl Color Picker.</summary>
     public InventoryMenu.BorderSide HslColorPickerPlacement { get; }
+
+    /// <summary>Gets a value for the number of steps in the hue color picker.</summary>
+    public int HslColorPickerSaturationSteps { get; }
 
     /// <summary>Gets the inventory tabs.</summary>
     public List<TabData> InventoryTabList { get; }
@@ -68,4 +65,7 @@ internal interface IModConfig
 
     /// <summary>Gets the info that will be displayed for storages from the inventory menu.</summary>
     public HashSet<StorageInfoItem> StorageInfoMenuItems { get; }
+
+    /// <summary>Gets the default options for different storage types.</summary>
+    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions { get; }
 }

@@ -30,7 +30,7 @@ internal sealed class AssetHandler : BaseService
     private Dictionary<string, Icon>? icons;
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
@@ -38,7 +38,7 @@ internal sealed class AssetHandler : BaseService
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public AssetHandler(
-        IEventSubscriber eventSubscriber,
+        IEventManager eventManager,
         IGameContentHelper gameContentHelper,
         ILog log,
         IManifest manifest,
@@ -57,8 +57,8 @@ internal sealed class AssetHandler : BaseService
             () => themeHelper.AddAsset(this.ModId + "/UI", modContentHelper.Load<IRawTextureData>("assets/icons.png")));
 
         // Events
-        eventSubscriber.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
-        eventSubscriber.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
+        eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
+        eventManager.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
     }
 
     /// <summary>Gets the hsl colors data.</summary>

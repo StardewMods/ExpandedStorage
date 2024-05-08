@@ -23,34 +23,10 @@ internal sealed class BetterCraftingInventoryProvider : BaseService, IInventoryP
         this.containerHandler = containerHandler;
 
     /// <inheritdoc />
-    public bool IsValid(object obj, GameLocation? location, Farmer? who) => obj is IStorageContainer;
-
-    /// <inheritdoc />
-    public bool CanInsertItems(object obj, GameLocation? location, Farmer? who) => obj is IStorageContainer;
-
-    /// <inheritdoc />
     public bool CanExtractItems(object obj, GameLocation? location, Farmer? who) => obj is IStorageContainer;
 
     /// <inheritdoc />
-    public Rectangle? GetMultiTileRegion(object obj, GameLocation? location, Farmer? who) => null;
-
-    /// <inheritdoc />
-    public Vector2? GetTilePosition(object obj, GameLocation? location, Farmer? who) =>
-        (obj as IStorageContainer)?.TileLocation;
-
-    /// <inheritdoc />
-    public NetMutex? GetMutex(object obj, GameLocation? location, Farmer? who) => (obj as IStorageContainer)?.Mutex;
-
-    /// <inheritdoc />
-    public IList<Item?>? GetItems(object obj, GameLocation? location, Farmer? who) => (obj as IStorageContainer)?.Items;
-
-    /// <inheritdoc />
-    public IInventory? GetInventory(object obj, GameLocation? location, Farmer? who) =>
-        (obj as IStorageContainer)?.Items;
-
-    /// <inheritdoc />
-    public bool IsItemValid(object obj, GameLocation? location, Farmer? who, Item item) =>
-        obj is IStorageContainer container && this.containerHandler.CanAddItem(container, item, true);
+    public bool CanInsertItems(object obj, GameLocation? location, Farmer? who) => obj is IStorageContainer;
 
     /// <inheritdoc />
     public void CleanInventory(object obj, GameLocation? location, Farmer? who) =>
@@ -59,4 +35,28 @@ internal sealed class BetterCraftingInventoryProvider : BaseService, IInventoryP
     /// <inheritdoc />
     public int GetActualCapacity(object obj, GameLocation? location, Farmer? who) =>
         (obj as IStorageContainer)?.Capacity ?? Chest.capacity;
+
+    /// <inheritdoc />
+    public IInventory? GetInventory(object obj, GameLocation? location, Farmer? who) =>
+        (obj as IStorageContainer)?.Items;
+
+    /// <inheritdoc />
+    public IList<Item?>? GetItems(object obj, GameLocation? location, Farmer? who) => (obj as IStorageContainer)?.Items;
+
+    /// <inheritdoc />
+    public Rectangle? GetMultiTileRegion(object obj, GameLocation? location, Farmer? who) => null;
+
+    /// <inheritdoc />
+    public NetMutex? GetMutex(object obj, GameLocation? location, Farmer? who) => (obj as IStorageContainer)?.Mutex;
+
+    /// <inheritdoc />
+    public Vector2? GetTilePosition(object obj, GameLocation? location, Farmer? who) =>
+        (obj as IStorageContainer)?.TileLocation;
+
+    /// <inheritdoc />
+    public bool IsItemValid(object obj, GameLocation? location, Farmer? who, Item item) =>
+        obj is IStorageContainer container && this.containerHandler.CanAddItem(container, item, true);
+
+    /// <inheritdoc />
+    public bool IsValid(object obj, GameLocation? location, Farmer? who) => obj is IStorageContainer;
 }

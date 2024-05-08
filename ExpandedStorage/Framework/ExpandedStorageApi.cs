@@ -15,11 +15,11 @@ public sealed class ExpandedStorageApi : IExpandedStorageApi
     private readonly IModInfo modInfo;
 
     /// <summary>Initializes a new instance of the <see cref="ExpandedStorageApi" /> class.</summary>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="log">Dependency used for monitoring and logging.</param>
     /// <param name="modInfo">Mod info from the calling mod.</param>
     /// <param name="assetHandler">Dependency for managing expanded storage chests.</param>
-    internal ExpandedStorageApi(IEventSubscriber eventSubscriber, ILog log, IModInfo modInfo, AssetHandler assetHandler)
+    internal ExpandedStorageApi(IEventManager eventManager, ILog log, IModInfo modInfo, AssetHandler assetHandler)
     {
         // Init
         this.modInfo = modInfo;
@@ -27,19 +27,19 @@ public sealed class ExpandedStorageApi : IExpandedStorageApi
         this.eventManager = new BaseEventManager(log, modInfo.Manifest);
 
         // Events
-        eventSubscriber.Subscribe<ChestCreatedEventArgs>(this.OnChestCreated);
+        eventManager.Subscribe<ChestCreatedEventArgs>(this.OnChestCreated);
     }
+
+    /// <inheritdoc />
+    public void Subscribe<TEventArgs>(Action<TEventArgs> handler) => this.eventManager.Subscribe(handler);
 
     /// <inheritdoc />
     public bool TryGetData(Item item, [NotNullWhen(true)] out IStorageData? storageData) =>
         this.assetHandler.TryGetData(item, out storageData);
 
     /// <inheritdoc />
-    public void Subscribe<TEventArgs>(Action<TEventArgs> handler) => this.eventManager.Subscribe(handler);
-
-    /// <inheritdoc />
     public void Unsubscribe<TEventArgs>(Action<TEventArgs> handler) => this.eventManager.Unsubscribe(handler);
 
     private void OnChestCreated(ChestCreatedEventArgs e) =>
-        this.eventManager.Publish<IChestCreatedEventArgs, ChestCreatedEventArgs>(e);
+        this.eventManager.Publish<IChestCreated, ChestCreatedEventArgs>(e);
 }

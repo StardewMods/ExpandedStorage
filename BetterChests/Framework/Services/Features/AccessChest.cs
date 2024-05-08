@@ -107,12 +107,6 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         this.Events.Unsubscribe<SearchChangedEventArgs>(this.OnSearchChanged);
     }
 
-    private bool Predicate(IStorageContainer container) =>
-        container is not FarmerContainer
-        && container.AccessChest is not RangeOption.Disabled
-        && (this.searchExpression.Value is null || this.searchExpression.Value.PartialMatch(container))
-        && container.AccessChest.WithinRange(-1, container.Location, container.TileLocation);
-
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
         if (this.dropDown.Value is null
@@ -240,6 +234,52 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
 
             var nextContainer = this.currentContainers.Value.ElementAtOrDefault(nextIndex);
             nextContainer?.ShowMenu();
+        }
+    }
+
+    private void OnInventoryMenuChanged(InventoryMenuChangedEventArgs e)
+    {
+        this.isActive.Value = false;
+        var top = this.menuHandler.Top;
+        if (top.Container?.AccessChest is RangeOption.Disabled or null)
+        {
+            this.dropDown.Value = null;
+            return;
+        }
+
+        var name = string.IsNullOrWhiteSpace(top.Container.StorageName)
+            ? top.Container.DisplayName
+            : top.Container.StorageName;
+
+        var x = Math.Max(IClickableMenu.borderWidth / 2, (Game1.uiViewport.Width / 2) - (Game1.tileSize * 10));
+        var y = IClickableMenu.borderWidth / 2;
+
+        this.leftArrow.Value.bounds.X = x;
+        this.leftArrow.Value.bounds.Y = y + Game1.tileSize + 20;
+        this.leftArrow.Value.bounds.Y = y + 10;
+
+        this.rightArrow.Value.bounds.X = x + (Game1.tileSize * 2);
+        this.rightArrow.Value.bounds.Y = y + Game1.tileSize + 20;
+        this.rightArrow.Value.bounds.Y = y + 10;
+
+        var (width, height) = Game1.smallFont.MeasureString(name);
+        this.dropDown.Value = new ClickableComponent(
+            new Rectangle(
+                x + (Game1.tileSize * 3),
+                y,
+                (int)width + IClickableMenu.borderWidth,
+                (int)height + IClickableMenu.borderWidth),
+            name,
+            top.Container.ToString());
+
+        this.ReinitializeContainers();
+    }
+
+    private void OnItemHighlighting(ItemHighlightingEventArgs e)
+    {
+        if (this.isActive.Value)
+        {
+            e.UnHighlight();
         }
     }
 
@@ -441,51 +481,11 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         }
     }
 
-    private void OnInventoryMenuChanged(InventoryMenuChangedEventArgs e)
-    {
-        this.isActive.Value = false;
-        var top = this.menuHandler.Top;
-        if (top.Container?.AccessChest is RangeOption.Disabled or null)
-        {
-            this.dropDown.Value = null;
-            return;
-        }
-
-        var name = string.IsNullOrWhiteSpace(top.Container.StorageName)
-            ? top.Container.DisplayName
-            : top.Container.StorageName;
-
-        var x = Math.Max(IClickableMenu.borderWidth / 2, (Game1.uiViewport.Width / 2) - (Game1.tileSize * 10));
-        var y = IClickableMenu.borderWidth / 2;
-
-        this.leftArrow.Value.bounds.X = x;
-        this.leftArrow.Value.bounds.Y = y + Game1.tileSize + 20;
-        this.leftArrow.Value.bounds.Y = y + 10;
-
-        this.rightArrow.Value.bounds.X = x + (Game1.tileSize * 2);
-        this.rightArrow.Value.bounds.Y = y + Game1.tileSize + 20;
-        this.rightArrow.Value.bounds.Y = y + 10;
-
-        var (width, height) = Game1.smallFont.MeasureString(name);
-        this.dropDown.Value = new ClickableComponent(
-            new Rectangle(
-                x + (Game1.tileSize * 3),
-                y,
-                (int)width + IClickableMenu.borderWidth,
-                (int)height + IClickableMenu.borderWidth),
-            name,
-            top.Container.ToString());
-
-        this.ReinitializeContainers();
-    }
-
-    private void OnItemHighlighting(ItemHighlightingEventArgs e)
-    {
-        if (this.isActive.Value)
-        {
-            e.UnHighlight();
-        }
-    }
+    private bool Predicate(IStorageContainer container) =>
+        container is not FarmerContainer
+        && container.AccessChest is not RangeOption.Disabled
+        && (this.searchExpression.Value is null || this.searchExpression.Value.PartialMatch(container))
+        && container.AccessChest.WithinRange(-1, container.Location, container.TileLocation);
 
     private void ReinitializeContainers()
     {

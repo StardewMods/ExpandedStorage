@@ -1,4 +1,6 @@
-﻿namespace StardewMods.Common.Services.Integrations.ContentPatcher;
+﻿// ReSharper disable All
+#pragma warning disable
+namespace StardewMods.Common.Services.Integrations.ContentPatcher;
 
 using StardewModdingAPI.Events;
 

@@ -120,25 +120,6 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
         CarryChest.instance.proxyChestFactory.TryRestoreProxy(placedChest);
     }
 
-    private void OnOneSecondUpdateTicked(OneSecondUpdateTickedEventArgs e)
-    {
-        if (this.Config.CarryChestSlowLimit == 0)
-        {
-            return;
-        }
-
-        if (Game1.player.Items.Count(this.proxyChestFactory.IsProxy) >= this.Config.CarryChestSlowLimit)
-        {
-            this.statusEffectManager.AddEffect(StatusEffect.Overburdened);
-            return;
-        }
-
-        if (this.statusEffectManager.HasEffect(StatusEffect.Overburdened))
-        {
-            this.statusEffectManager.RemoveEffect(StatusEffect.Overburdened);
-        }
-    }
-
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
         if (!Context.IsPlayerFree
@@ -208,5 +189,24 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
         Game1.currentLocation.Objects.Remove(e.Cursor.GrabTile);
         Game1.playSound("pickUpItem");
         this.inputHelper.Suppress(e.Button);
+    }
+
+    private void OnOneSecondUpdateTicked(OneSecondUpdateTickedEventArgs e)
+    {
+        if (this.Config.CarryChestSlowLimit == 0)
+        {
+            return;
+        }
+
+        if (Game1.player.Items.Count(this.proxyChestFactory.IsProxy) >= this.Config.CarryChestSlowLimit)
+        {
+            this.statusEffectManager.AddEffect(StatusEffect.Overburdened);
+            return;
+        }
+
+        if (this.statusEffectManager.HasEffect(StatusEffect.Overburdened))
+        {
+            this.statusEffectManager.RemoveEffect(StatusEffect.Overburdened);
+        }
     }
 }

@@ -12,13 +12,13 @@ internal sealed class AlwaysScrollMap : IActionIntegration
     public AlwaysScrollMap(IReflectionHelper reflectionHelper) => this.reflectionHelper = reflectionHelper;
 
     /// <inheritdoc />
-    public string ModId => "bcmpinc.AlwaysScrollMap";
+    public string HoverText => I18n.Button_AlwaysScrollMap();
 
     /// <inheritdoc />
     public int Index => 6;
 
     /// <inheritdoc />
-    public string HoverText => I18n.Button_AlwaysScrollMap();
+    public string ModId => "bcmpinc.AlwaysScrollMap";
 
     /// <inheritdoc />
     public Action? GetAction(IMod mod)

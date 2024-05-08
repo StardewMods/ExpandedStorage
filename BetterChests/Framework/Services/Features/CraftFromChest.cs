@@ -143,6 +143,15 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
         }
     }
 
+    private static bool CookingPredicate(IStorageContainer container) =>
+        container is not FarmerContainer
+        && container.CookFromChest is not RangeOption.Disabled
+        && container.Items.Count > 0
+        && !CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains(Game1.player.currentLocation.Name)
+        && !(CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains("UndergroundMine")
+            && Game1.player.currentLocation is MineShaft)
+        && container.CookFromChest.WithinRange(-1, container.Location, container.TileLocation);
+
     private static bool DefaultPredicate(IStorageContainer container) =>
         container is not FarmerContainer
         && container.CraftFromChest is not RangeOption.Disabled
@@ -154,23 +163,6 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
             container.CraftFromChestDistance,
             container.Location,
             container.TileLocation);
-
-    private static bool CookingPredicate(IStorageContainer container) =>
-        container is not FarmerContainer
-        && container.CookFromChest is not RangeOption.Disabled
-        && container.Items.Count > 0
-        && !CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains(Game1.player.currentLocation.Name)
-        && !(CraftFromChest.instance.Config.CraftFromChestDisableLocations.Contains("UndergroundMine")
-            && Game1.player.currentLocation is MineShaft)
-        && container.CookFromChest.WithinRange(-1, container.Location, container.TileLocation);
-
-    private void OnGameLaunched(GameLaunchedEventArgs obj)
-    {
-        if (!this.betterCraftingIntegration.IsLoaded)
-        {
-            this.Log.Warn("Better Crafting is not loaded. CraftFromChest will not be active.");
-        }
-    }
 
     private void OnButtonsChanged(ButtonsChangedEventArgs e)
     {
@@ -187,6 +179,14 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
             Game1.player.Tile,
             null,
             false);
+    }
+
+    private void OnGameLaunched(GameLaunchedEventArgs obj)
+    {
+        if (!this.betterCraftingIntegration.IsLoaded)
+        {
+            this.Log.Warn("Better Crafting is not loaded. CraftFromChest will not be active.");
+        }
     }
 
     private void OnIconPressed(IIconPressedEventArgs e)

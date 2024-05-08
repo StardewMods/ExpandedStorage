@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 using StardewValley.Objects;
 
 /// <summary>Represents the event arguments for the ChestCreated event.</summary>
-public interface IChestCreatedEventArgs
+public interface IChestCreated
 {
     /// <summary>Gets the chest being created.</summary>
     Chest Chest { get; }

@@ -11,7 +11,7 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Objects;
 
 /// <summary>Manages the global inventories and chest/item creation and retrieval operations.</summary>
-internal sealed class ProxyChestFactory : BaseService<ProxyChestFactory>
+internal sealed class ProxyChestFactory : GenericBaseService<ProxyChestFactory>
 {
     private const string AlphaNumeric = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private const string ColorKey = "PlayerChoiceColor";
@@ -65,6 +65,15 @@ internal sealed class ProxyChestFactory : BaseService<ProxyChestFactory>
                 typeof(ProxyChestFactory),
                 nameof(ProxyChestFactory.Object_maximumStackSize_postfix)));
     }
+
+    /// <summary>Determines if the given item represents a proxy chest.</summary>
+    /// <param name="salable">The item to check.</param>
+    /// <returns>True if the item is a proxy; otherwise, false.</returns>
+    public bool IsProxy(ISalable salable) =>
+        salable is Item item
+        && item.modData.TryGetValue(this.Prefix + ProxyChestFactory.GlobalInventoryIdKey, out var id)
+        && Game1.player.team.globalInventories.ContainsKey(id)
+        && this.proxyChests.ContainsKey(id);
 
     /// <summary>
     /// Tries to create a chest request object and returns a boolean indicating whether the creation was successful or
@@ -139,15 +148,6 @@ internal sealed class ProxyChestFactory : BaseService<ProxyChestFactory>
             this.proxyChests.Remove(id);
         }
     }
-
-    /// <summary>Determines if the given item represents a proxy chest.</summary>
-    /// <param name="salable">The item to check.</param>
-    /// <returns>True if the item is a proxy; otherwise, false.</returns>
-    public bool IsProxy(ISalable salable) =>
-        salable is Item item
-        && item.modData.TryGetValue(this.Prefix + ProxyChestFactory.GlobalInventoryIdKey, out var id)
-        && Game1.player.team.globalInventories.ContainsKey(id)
-        && this.proxyChests.ContainsKey(id);
 
     /// <summary>Tries to get the proxy chest from the specified source object.</summary>
     /// <param name="item">The item representing a proxy chest.</param>

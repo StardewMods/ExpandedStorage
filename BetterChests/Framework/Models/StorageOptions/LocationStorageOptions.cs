@@ -13,15 +13,15 @@ internal sealed class LocationStorageOptions : CustomFieldsStorageOptions
         : base(LocationStorageOptions.GetCustomFields(locationName)) =>
         this.locationName = locationName;
 
+    /// <summary>Gets the location data.</summary>
+    public LocationData Data =>
+        DataLoader.Locations(Game1.content).GetValueOrDefault(this.locationName) ?? new LocationData();
+
     /// <inheritdoc />
     public override string Description => I18n.Storage_Fridge_Tooltip();
 
     /// <inheritdoc />
     public override string DisplayName => I18n.Storage_Fridge_Name();
-
-    /// <summary>Gets the location data.</summary>
-    public LocationData Data =>
-        DataLoader.Locations(Game1.content).GetValueOrDefault(this.locationName) ?? new LocationData();
 
     private static Func<Dictionary<string, string>?> GetCustomFields(string locationName) =>
         () => DataLoader.Locations(Game1.content).GetValueOrDefault(locationName)?.CustomFields;

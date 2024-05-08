@@ -17,8 +17,6 @@ internal sealed class HeldItemsWrapper : IInventory
     /// <param name="furniture">The storage furniture.</param>
     public HeldItemsWrapper(StorageFurniture furniture) => this.furniture = furniture;
 
-    private NetObjectList<Item?> Items => this.furniture.heldItems;
-
     /// <inheritdoc />
     public int Count => this.Items.Count;
 
@@ -28,6 +26,8 @@ internal sealed class HeldItemsWrapper : IInventory
     /// <inheritdoc />
     public long LastTickSlotChanged { get; }
 
+    private NetObjectList<Item?> Items => this.furniture.heldItems;
+
     /// <inheritdoc />
     public Item? this[int index]
     {
@@ -36,13 +36,10 @@ internal sealed class HeldItemsWrapper : IInventory
     }
 
     /// <inheritdoc />
-    public IEnumerator<Item> GetEnumerator() => this.Items.GetEnumerator();
-
-    /// <inheritdoc />
-    IEnumerator IEnumerable.GetEnumerator() => this.Items.GetEnumerator();
-
-    /// <inheritdoc />
     public void Add(Item? item) => this.Items.Add(item);
+
+    /// <inheritdoc />
+    public void AddRange(ICollection<Item> collection) => this.Items.AddRange(collection);
 
     /// <inheritdoc />
     public void Clear()
@@ -60,78 +57,6 @@ internal sealed class HeldItemsWrapper : IInventory
         }
 
         return this.GetItemsById().TryGetMutable(item.QualifiedItemId, out var list) && list.Contains(item);
-    }
-
-    /// <inheritdoc />
-    public void CopyTo(Item[] array, int arrayIndex) => this.Items.CopyTo(array, arrayIndex);
-
-    /// <inheritdoc />
-    public bool Remove(Item? item) => item != null && this.Items.Remove(item);
-
-    /// <inheritdoc />
-    public int IndexOf(Item? item) => this.Items.IndexOf(item);
-
-    /// <inheritdoc />
-    public void Insert(int index, Item? item) => this.Items.Insert(index, item);
-
-    /// <inheritdoc />
-    public void RemoveAt(int index) => this.Items.RemoveAt(index);
-
-    /// <inheritdoc />
-    public bool HasAny() => this.GetItemsById().CountKeys() > 0;
-
-    /// <inheritdoc />
-    public bool HasEmptySlots() => this.Count > this.CountItemStacks();
-
-    /// <inheritdoc />
-    public int CountItemStacks()
-    {
-        var itemStacksCount = this.cachedItemStackCount;
-        if (itemStacksCount.HasValue)
-        {
-            return itemStacksCount.GetValueOrDefault();
-        }
-
-        var num = this.cachedItemStackCount = this.GetItemsById().CountItems();
-        return num.Value;
-    }
-
-    /// <inheritdoc />
-    public void OverwriteWith(IList<Item?> list)
-    {
-        if (this == list || this.Items == list)
-        {
-            return;
-        }
-
-        this.ClearIndex();
-        this.Items.CopyFrom(list);
-    }
-
-    /// <inheritdoc />
-    public IList<Item?> GetRange(int index, int count) => this.Items.GetRange(index, count);
-
-    /// <inheritdoc />
-    public void AddRange(ICollection<Item> collection) => this.Items.AddRange(collection);
-
-    /// <inheritdoc />
-    public void RemoveRange(int index, int count) => this.Items.RemoveRange(index, count);
-
-    /// <inheritdoc />
-    public void RemoveEmptySlots()
-    {
-        if (!this.HasEmptySlots())
-        {
-            return;
-        }
-
-        for (var i = this.Count - 1; i >= 0; i--)
-        {
-            if (this[i] == null)
-            {
-                this.RemoveAt(i);
-            }
-        }
     }
 
     /// <inheritdoc />
@@ -181,6 +106,9 @@ internal sealed class HeldItemsWrapper : IInventory
     }
 
     /// <inheritdoc />
+    public void CopyTo(Item[] array, int arrayIndex) => this.Items.CopyTo(array, arrayIndex);
+
+    /// <inheritdoc />
     public int CountId(string itemId)
     {
         itemId = ItemRegistry.QualifyItemId(itemId);
@@ -209,6 +137,19 @@ internal sealed class HeldItemsWrapper : IInventory
     }
 
     /// <inheritdoc />
+    public int CountItemStacks()
+    {
+        var itemStacksCount = this.cachedItemStackCount;
+        if (itemStacksCount.HasValue)
+        {
+            return itemStacksCount.GetValueOrDefault();
+        }
+
+        var num = this.cachedItemStackCount = this.GetItemsById().CountItems();
+        return num.Value;
+    }
+
+    /// <inheritdoc />
     public IEnumerable<Item> GetById(string itemId)
     {
         itemId = ItemRegistry.QualifyItemId(itemId);
@@ -218,6 +159,36 @@ internal sealed class HeldItemsWrapper : IInventory
         }
 
         return items;
+    }
+
+    /// <inheritdoc />
+    public IEnumerator<Item> GetEnumerator() => this.Items.GetEnumerator();
+
+    /// <inheritdoc />
+    public IList<Item?> GetRange(int index, int count) => this.Items.GetRange(index, count);
+
+    /// <inheritdoc />
+    public bool HasAny() => this.GetItemsById().CountKeys() > 0;
+
+    /// <inheritdoc />
+    public bool HasEmptySlots() => this.Count > this.CountItemStacks();
+
+    /// <inheritdoc />
+    public int IndexOf(Item? item) => this.Items.IndexOf(item);
+
+    /// <inheritdoc />
+    public void Insert(int index, Item? item) => this.Items.Insert(index, item);
+
+    /// <inheritdoc />
+    public void OverwriteWith(IList<Item?> list)
+    {
+        if (this == list || this.Items == list)
+        {
+            return;
+        }
+
+        this.ClearIndex();
+        this.Items.CopyFrom(list);
     }
 
     /// <inheritdoc />
@@ -279,6 +250,12 @@ internal sealed class HeldItemsWrapper : IInventory
     }
 
     /// <inheritdoc />
+    public bool Remove(Item? item) => item != null && this.Items.Remove(item);
+
+    /// <inheritdoc />
+    public void RemoveAt(int index) => this.Items.RemoveAt(index);
+
+    /// <inheritdoc />
     public bool RemoveButKeepEmptySlot(Item? item)
     {
         if (item == null)
@@ -296,8 +273,31 @@ internal sealed class HeldItemsWrapper : IInventory
         return true;
     }
 
-    /// <summary>Get an index of items by ID.</summary>
-    private InventoryIndex GetItemsById() => this.inventoryIndex ??= InventoryIndex.ById(this.Items);
+    /// <inheritdoc />
+    public void RemoveEmptySlots()
+    {
+        if (!this.HasEmptySlots())
+        {
+            return;
+        }
+
+        for (var i = this.Count - 1; i >= 0; i--)
+        {
+            if (this[i] == null)
+            {
+                this.RemoveAt(i);
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public void RemoveRange(int index, int count) => this.Items.RemoveRange(index, count);
 
     private void ClearIndex() => this.inventoryIndex = null;
+
+    /// <inheritdoc />
+    IEnumerator IEnumerable.GetEnumerator() => this.Items.GetEnumerator();
+
+    /// <summary>Get an index of items by ID.</summary>
+    private InventoryIndex GetItemsById() => this.inventoryIndex ??= InventoryIndex.ById(this.Items);
 }

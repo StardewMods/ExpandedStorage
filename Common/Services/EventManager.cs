@@ -1,10 +1,9 @@
 namespace StardewMods.Common.Services;
 
 using StardewModdingAPI.Events;
-using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
-/// <inheritdoc cref="IEventPublisher" />
+/// <inheritdoc />
 internal sealed class EventManager : BaseEventManager
 {
     private readonly IModEvents? modEvents;
@@ -212,6 +211,20 @@ internal sealed class EventManager : BaseEventManager
         }
     }
 
+    private void PublishEvent<TEventArgs>(object? sender, TEventArgs eventArgs)
+        where TEventArgs : EventArgs =>
+        this.Publish(eventArgs);
+
+    [EventPriority(EventPriority.High)]
+    private void PublishEventEarly<TEventArgs>(object? sender, TEventArgs eventArgs)
+        where TEventArgs : EventArgs =>
+        this.Publish(eventArgs);
+
+    [EventPriority(EventPriority.Low)]
+    private void PublishEventLate<TEventArgs>(object? sender, TEventArgs eventArgs)
+        where TEventArgs : EventArgs =>
+        this.Publish(eventArgs);
+
     private void RemoveSmapiEvent(string eventName)
     {
         if (this.modEvents is null)
@@ -383,18 +396,4 @@ internal sealed class EventManager : BaseEventManager
                 return;
         }
     }
-
-    private void PublishEvent<TEventArgs>(object? sender, TEventArgs eventArgs)
-        where TEventArgs : EventArgs =>
-        this.Publish(eventArgs);
-
-    [EventPriority(EventPriority.High)]
-    private void PublishEventEarly<TEventArgs>(object? sender, TEventArgs eventArgs)
-        where TEventArgs : EventArgs =>
-        this.Publish(eventArgs);
-
-    [EventPriority(EventPriority.Low)]
-    private void PublishEventLate<TEventArgs>(object? sender, TEventArgs eventArgs)
-        where TEventArgs : EventArgs =>
-        this.Publish(eventArgs);
 }

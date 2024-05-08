@@ -43,8 +43,6 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<AssetHandler>();
         this.container.RegisterSingleton<ContentPatcherIntegration>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
-        this.container.RegisterSingleton<IEventPublisher, EventManager>();
-        this.container.RegisterSingleton<IEventSubscriber, EventManager>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.container.RegisterSingleton<IModConfig, ConfigManager>();
@@ -74,15 +72,14 @@ public sealed class ModEntry : Mod
         this.container.Verify();
 
         // Events
-        var eventSubscriber = this.container.GetInstance<IEventSubscriber>();
-        eventSubscriber.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
+        this.container.GetInstance<IEventManager>().Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
     }
 
     /// <inheritdoc />
     public override object GetApi(IModInfo mod) =>
         new ToolbarIconsApi(
             mod,
-            this.container.GetInstance<IEventSubscriber>(),
+            this.container.GetInstance<IEventManager>(),
             this.container.GetInstance<IGameContentHelper>(),
             this.container.GetInstance<ILog>(),
             this.container.GetInstance<ToolbarManager>());

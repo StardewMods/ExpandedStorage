@@ -55,12 +55,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     }
 
     /// <inheritdoc />
-    public DefaultStorageOptions DefaultOptions => this.Config.DefaultOptions;
-
-    /// <inheritdoc />
-    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions => this.Config.StorageOptions;
-
-    /// <inheritdoc />
     public bool AccessChestsShowArrows => this.Config.AccessChestsShowArrows;
 
     /// <inheritdoc />
@@ -82,16 +76,19 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     public bool DebugMode => this.Config.DebugMode;
 
     /// <inheritdoc />
-    public int HslColorPickerHueSteps => this.Config.HslColorPickerHueSteps;
+    public DefaultStorageOptions DefaultOptions => this.Config.DefaultOptions;
 
     /// <inheritdoc />
-    public int HslColorPickerSaturationSteps => this.Config.HslColorPickerSaturationSteps;
+    public int HslColorPickerHueSteps => this.Config.HslColorPickerHueSteps;
 
     /// <inheritdoc />
     public int HslColorPickerLightnessSteps => this.Config.HslColorPickerLightnessSteps;
 
     /// <inheritdoc />
     public InventoryMenu.BorderSide HslColorPickerPlacement => this.Config.HslColorPickerPlacement;
+
+    /// <inheritdoc />
+    public int HslColorPickerSaturationSteps => this.Config.HslColorPickerSaturationSteps;
 
     /// <inheritdoc />
     public List<TabData> InventoryTabList => this.Config.InventoryTabList;
@@ -114,115 +111,8 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     /// <inheritdoc />
     public HashSet<StorageInfoItem> StorageInfoMenuItems => this.Config.StorageInfoMenuItems;
 
-    /// <summary>Setup the main config options.</summary>
-    public void SetupMainConfig()
-    {
-        if (!this.genericModConfigMenuIntegration.IsLoaded)
-        {
-            return;
-        }
-
-        var gmcm = this.genericModConfigMenuIntegration.Api;
-        var config = this.GetNew();
-        this.InitializeStorageTypes(config);
-
-        this.genericModConfigMenuIntegration.Register(this.Reset, () => this.Save(config));
-
-        gmcm.AddPageLink(this.manifest, "Main", I18n.Section_Main_Name);
-        gmcm.AddParagraph(this.manifest, I18n.Section_Main_Description);
-
-        gmcm.AddPageLink(this.manifest, "Controls", I18n.Section_Controls_Name);
-        gmcm.AddParagraph(this.manifest, I18n.Section_Controls_Description);
-
-        gmcm.AddPageLink(this.manifest, "Tweaks", I18n.Section_Tweaks_Name);
-        gmcm.AddParagraph(this.manifest, I18n.Section_Tweaks_Description);
-
-        gmcm.AddSectionTitle(this.manifest, I18n.Section_Storages_Name);
-        gmcm.AddParagraph(this.manifest, I18n.Section_Storages_Description);
-
-        gmcm.AddPageLink(this.manifest, "BigCraftables", I18n.Section_BigCraftables_Name);
-        gmcm.AddParagraph(this.manifest, I18n.Section_BigCraftables_Description);
-
-        gmcm.AddPageLink(this.manifest, "Furniture", I18n.Section_Furniture_Name);
-        gmcm.AddParagraph(this.manifest, I18n.Section_Furniture_Description);
-
-        gmcm.AddPageLink(this.manifest, "Other", I18n.Section_Other_Name);
-        gmcm.AddParagraph(this.manifest, I18n.Section_Other_Description);
-
-        var pages = new List<(string Id, string Title, string Description, IStorageOptions Options)>();
-        var furnitureData = ItemRegistry.RequireTypeDefinition("(F)");
-        foreach (var (dataType, storageTypes) in config.StorageOptions)
-        {
-            gmcm.AddPage(
-                this.manifest,
-                dataType switch { "BigCraftables" or "Furniture" => dataType, _ => "Other" },
-                dataType switch
-                {
-                    "BigCraftables" => I18n.Section_BigCraftables_Name,
-                    "Furniture" => I18n.Section_Furniture_Name,
-                    _ => I18n.Section_Other_Name,
-                });
-
-            var subPages = new List<(string Id, string Title, string Description, IStorageOptions Options)>();
-            foreach (var (storageId, storageOptions) in storageTypes)
-            {
-                string name;
-                string description;
-
-                switch (dataType)
-                {
-                    case "BigCraftables" when Game1.bigCraftableData.TryGetValue(storageId, out var bigCraftableData):
-                        name = TokenParser.ParseText(bigCraftableData.DisplayName);
-                        description = TokenParser.ParseText(bigCraftableData.Description);
-                        break;
-                    case "Buildings" when storageId == "Stable":
-                        name = I18n.Storage_Saddlebag_Name();
-                        description = I18n.Storage_Saddlebag_Tooltip();
-                        break;
-                    case "Buildings" when Game1.buildingData.TryGetValue(storageId, out var buildingData):
-                        name = TokenParser.ParseText(buildingData.Name);
-                        description = TokenParser.ParseText(buildingData.Description);
-                        break;
-                    case "Furniture":
-                        var data = furnitureData.GetData(storageId);
-                        name = TokenParser.ParseText(data.DisplayName);
-                        description = TokenParser.ParseText(data.Description);
-                        break;
-                    case "Locations" when storageId == "FarmHouse":
-                        name = I18n.Storage_Fridge_Name();
-                        description = I18n.Storage_Fridge_Tooltip();
-                        break;
-                    case "Locations" when storageId == "IslandFarmHouse":
-                        name = I18n.Storage_IslandFridge_Name();
-                        description = I18n.Storage_IslandFridge_Tooltip();
-                        break;
-                    default: continue;
-                }
-
-                subPages.Add(($"{dataType}_{storageId}", name, description, storageOptions));
-            }
-
-            foreach (var (id, title, description, _) in subPages.OrderBy(page => page.Title))
-            {
-                gmcm.AddPageLink(this.manifest, id, () => title, () => description);
-            }
-
-            pages.AddRange(subPages);
-        }
-
-        this.AddMainOption("Main", I18n.Section_Main_Name, config.DefaultOptions, true);
-
-        gmcm.AddPage(this.manifest, "Controls", I18n.Section_Controls_Name);
-        this.AddControls(config.Controls);
-
-        gmcm.AddPage(this.manifest, "Tweaks", I18n.Section_Tweaks_Name);
-        this.AddTweaks(config);
-
-        foreach (var (id, title, _, options) in pages)
-        {
-            this.AddMainOption(id, () => title, options, true, config.DefaultOptions);
-        }
-    }
+    /// <inheritdoc />
+    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions => this.Config.StorageOptions;
 
     /// <summary>Adds the main options to the config menu.</summary>
     /// <param name="id">The page id.</param>
@@ -657,6 +547,116 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
     }
 
+    /// <summary>Setup the main config options.</summary>
+    public void SetupMainConfig()
+    {
+        if (!this.genericModConfigMenuIntegration.IsLoaded)
+        {
+            return;
+        }
+
+        var gmcm = this.genericModConfigMenuIntegration.Api;
+        var config = this.GetNew();
+        this.InitializeStorageTypes(config);
+
+        this.genericModConfigMenuIntegration.Register(this.Reset, () => this.Save(config));
+
+        gmcm.AddPageLink(this.manifest, "Main", I18n.Section_Main_Name);
+        gmcm.AddParagraph(this.manifest, I18n.Section_Main_Description);
+
+        gmcm.AddPageLink(this.manifest, "Controls", I18n.Section_Controls_Name);
+        gmcm.AddParagraph(this.manifest, I18n.Section_Controls_Description);
+
+        gmcm.AddPageLink(this.manifest, "Tweaks", I18n.Section_Tweaks_Name);
+        gmcm.AddParagraph(this.manifest, I18n.Section_Tweaks_Description);
+
+        gmcm.AddSectionTitle(this.manifest, I18n.Section_Storages_Name);
+        gmcm.AddParagraph(this.manifest, I18n.Section_Storages_Description);
+
+        gmcm.AddPageLink(this.manifest, "BigCraftables", I18n.Section_BigCraftables_Name);
+        gmcm.AddParagraph(this.manifest, I18n.Section_BigCraftables_Description);
+
+        gmcm.AddPageLink(this.manifest, "Furniture", I18n.Section_Furniture_Name);
+        gmcm.AddParagraph(this.manifest, I18n.Section_Furniture_Description);
+
+        gmcm.AddPageLink(this.manifest, "Other", I18n.Section_Other_Name);
+        gmcm.AddParagraph(this.manifest, I18n.Section_Other_Description);
+
+        var pages = new List<(string Id, string Title, string Description, IStorageOptions Options)>();
+        var furnitureData = ItemRegistry.RequireTypeDefinition("(F)");
+        foreach (var (dataType, storageTypes) in config.StorageOptions)
+        {
+            gmcm.AddPage(
+                this.manifest,
+                dataType switch { "BigCraftables" or "Furniture" => dataType, _ => "Other" },
+                dataType switch
+                {
+                    "BigCraftables" => I18n.Section_BigCraftables_Name,
+                    "Furniture" => I18n.Section_Furniture_Name,
+                    _ => I18n.Section_Other_Name,
+                });
+
+            var subPages = new List<(string Id, string Title, string Description, IStorageOptions Options)>();
+            foreach (var (storageId, storageOptions) in storageTypes)
+            {
+                string name;
+                string description;
+
+                switch (dataType)
+                {
+                    case "BigCraftables" when Game1.bigCraftableData.TryGetValue(storageId, out var bigCraftableData):
+                        name = TokenParser.ParseText(bigCraftableData.DisplayName);
+                        description = TokenParser.ParseText(bigCraftableData.Description);
+                        break;
+                    case "Buildings" when storageId == "Stable":
+                        name = I18n.Storage_Saddlebag_Name();
+                        description = I18n.Storage_Saddlebag_Tooltip();
+                        break;
+                    case "Buildings" when Game1.buildingData.TryGetValue(storageId, out var buildingData):
+                        name = TokenParser.ParseText(buildingData.Name);
+                        description = TokenParser.ParseText(buildingData.Description);
+                        break;
+                    case "Furniture":
+                        var data = furnitureData.GetData(storageId);
+                        name = TokenParser.ParseText(data.DisplayName);
+                        description = TokenParser.ParseText(data.Description);
+                        break;
+                    case "Locations" when storageId == "FarmHouse":
+                        name = I18n.Storage_Fridge_Name();
+                        description = I18n.Storage_Fridge_Tooltip();
+                        break;
+                    case "Locations" when storageId == "IslandFarmHouse":
+                        name = I18n.Storage_IslandFridge_Name();
+                        description = I18n.Storage_IslandFridge_Tooltip();
+                        break;
+                    default: continue;
+                }
+
+                subPages.Add(($"{dataType}_{storageId}", name, description, storageOptions));
+            }
+
+            foreach (var (id, title, description, _) in subPages.OrderBy(page => page.Title))
+            {
+                gmcm.AddPageLink(this.manifest, id, () => title, () => description);
+            }
+
+            pages.AddRange(subPages);
+        }
+
+        this.AddMainOption("Main", I18n.Section_Main_Name, config.DefaultOptions, true);
+
+        gmcm.AddPage(this.manifest, "Controls", I18n.Section_Controls_Name);
+        this.AddControls(config.Controls);
+
+        gmcm.AddPage(this.manifest, "Tweaks", I18n.Section_Tweaks_Name);
+        this.AddTweaks(config);
+
+        foreach (var (id, title, _, options) in pages)
+        {
+            this.AddMainOption(id, () => title, options, true, config.DefaultOptions);
+        }
+    }
+
     private void AddControls(Controls controls)
     {
         if (!this.genericModConfigMenuIntegration.IsLoaded)
@@ -973,21 +973,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
     }
 
-    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e)
-    {
-        this.InitializeDefaultOptions(this.Config.DefaultOptions);
-        this.InitializeStorageTypes(this.Config);
-        this.log.Trace("Config changed:\n{0}", e.Config);
-    }
-
-    private void OnGameLaunched(GameLaunchedEventArgs e)
-    {
-        if (this.genericModConfigMenuIntegration.IsLoaded)
-        {
-            this.SetupMainConfig();
-        }
-    }
-
     private void InitializeDefaultOptions(IStorageOptions options)
     {
         var defaultOptions = this.GetDefault().DefaultOptions;
@@ -1289,5 +1274,20 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                     ResizeChestCapacity = -1,
                     SearchItems = FeatureOption.Disabled,
                 });
+    }
+
+    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e)
+    {
+        this.InitializeDefaultOptions(this.Config.DefaultOptions);
+        this.InitializeStorageTypes(this.Config);
+        this.log.Trace("Config changed:\n{0}", e.Config);
+    }
+
+    private void OnGameLaunched(GameLaunchedEventArgs e)
+    {
+        if (this.genericModConfigMenuIntegration.IsLoaded)
+        {
+            this.SetupMainConfig();
+        }
     }
 }

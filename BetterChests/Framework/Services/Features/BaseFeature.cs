@@ -8,7 +8,7 @@ using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
 /// <inheritdoc cref="StardewMods.BetterChests.Framework.Interfaces.IFeature" />
-internal abstract class BaseFeature<TFeature> : BaseService<TFeature>, IFeature
+internal abstract class BaseFeature<TFeature> : GenericBaseService<TFeature>, IFeature
     where TFeature : class, IFeature
 {
     private bool isActivated;
@@ -26,14 +26,14 @@ internal abstract class BaseFeature<TFeature> : BaseService<TFeature>, IFeature
         this.Events.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
     }
 
-    /// <summary>Gets the dependency used for managing events.</summary>
-    protected IEventManager Events { get; }
+    /// <inheritdoc />
+    public abstract bool ShouldBeActive { get; }
 
     /// <summary>Gets the dependency used for accessing config data.</summary>
     protected IModConfig Config { get; }
 
-    /// <inheritdoc />
-    public abstract bool ShouldBeActive { get; }
+    /// <summary>Gets the dependency used for managing events.</summary>
+    protected IEventManager Events { get; }
 
     /// <summary>Activate this feature.</summary>
     protected abstract void Activate();

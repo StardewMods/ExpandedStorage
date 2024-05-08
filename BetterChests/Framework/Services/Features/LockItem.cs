@@ -63,44 +63,6 @@ internal sealed class LockItem : BaseFeature<LockItem>
         this.Events.Unsubscribe<ItemHighlightingEventArgs>(this.OnItemHighlighting);
     }
 
-    private bool TryGetMenu(int mouseX, int mouseY, [NotNullWhen(true)] out InventoryMenu? inventoryMenu)
-    {
-        inventoryMenu = this.menuHandler.CurrentMenu switch
-        {
-            ItemGrabMenu
-            {
-                inventory:
-                { } inventory,
-            } when inventory.isWithinBounds(mouseX, mouseY) => inventory,
-            ItemGrabMenu
-            {
-                ItemsToGrabMenu:
-                { } itemsToGrabMenu,
-            } when itemsToGrabMenu.isWithinBounds(mouseX, mouseY) => itemsToGrabMenu,
-            InventoryPage
-            {
-                inventory:
-                { } inventoryPage,
-            } => inventoryPage,
-            _ => null,
-        };
-
-        return inventoryMenu is not null;
-    }
-
-    private void OnRenderedActiveMenu(RenderedActiveMenuEventArgs e)
-    {
-        if (this.menuHandler.Top.InventoryMenu is not null && this.menuHandler.Top.Container is not null)
-        {
-            this.DrawOverlay(e.SpriteBatch, this.menuHandler.Top.InventoryMenu);
-        }
-
-        if (this.menuHandler.Bottom.InventoryMenu is not null && this.menuHandler.Bottom.Container is not null)
-        {
-            this.DrawOverlay(e.SpriteBatch, this.menuHandler.Bottom.InventoryMenu);
-        }
-    }
-
     private void DrawOverlay(SpriteBatch spriteBatch, InventoryMenu inventoryMenu)
     {
         foreach (var slot in inventoryMenu.inventory)
@@ -131,6 +93,9 @@ internal sealed class LockItem : BaseFeature<LockItem>
                 1f);
         }
     }
+
+    private bool IsUnlocked(Item item) =>
+        !item.modData.TryGetValue(this.UniqueId, out var locked) || locked != "Locked";
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
@@ -209,6 +174,19 @@ internal sealed class LockItem : BaseFeature<LockItem>
         }
     }
 
+    private void OnRenderedActiveMenu(RenderedActiveMenuEventArgs e)
+    {
+        if (this.menuHandler.Top.InventoryMenu is not null && this.menuHandler.Top.Container is not null)
+        {
+            this.DrawOverlay(e.SpriteBatch, this.menuHandler.Top.InventoryMenu);
+        }
+
+        if (this.menuHandler.Bottom.InventoryMenu is not null && this.menuHandler.Bottom.Container is not null)
+        {
+            this.DrawOverlay(e.SpriteBatch, this.menuHandler.Bottom.InventoryMenu);
+        }
+    }
+
     private void ToggleLock(Item item)
     {
         if (this.IsUnlocked(item))
@@ -223,6 +201,28 @@ internal sealed class LockItem : BaseFeature<LockItem>
         }
     }
 
-    private bool IsUnlocked(Item item) =>
-        !item.modData.TryGetValue(this.UniqueId, out var locked) || locked != "Locked";
+    private bool TryGetMenu(int mouseX, int mouseY, [NotNullWhen(true)] out InventoryMenu? inventoryMenu)
+    {
+        inventoryMenu = this.menuHandler.CurrentMenu switch
+        {
+            ItemGrabMenu
+            {
+                inventory:
+                { } inventory,
+            } when inventory.isWithinBounds(mouseX, mouseY) => inventory,
+            ItemGrabMenu
+            {
+                ItemsToGrabMenu:
+                { } itemsToGrabMenu,
+            } when itemsToGrabMenu.isWithinBounds(mouseX, mouseY) => itemsToGrabMenu,
+            InventoryPage
+            {
+                inventory:
+                { } inventoryPage,
+            } => inventoryPage,
+            _ => null,
+        };
+
+        return inventoryMenu is not null;
+    }
 }

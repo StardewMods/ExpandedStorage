@@ -20,8 +20,8 @@ using StardewValley.Objects;
 internal sealed class ModPatches : BaseService
 {
     private const string ChestOpenSound = "openChest";
-    private const string LidOpenSound = "doorCreak";
     private const string LidCloseSound = "doorCreakReverse";
+    private const string LidOpenSound = "doorCreak";
     private const string MiniShippingBinOpenSound = "shwip";
 
     private static ModPatches instance = null!;
@@ -55,16 +55,6 @@ internal sealed class ModPatches : BaseService
     }
 
     private static IEnumerable<CodeInstruction>
-        Chest_checkForAction_transpiler(IEnumerable<CodeInstruction> instructions) =>
-        new CodeMatcher(instructions)
-            .MatchEndForward(new CodeMatch(instruction => instruction.LoadsConstant(ModPatches.ChestOpenSound)))
-            .Advance(1)
-            .InsertAndAdvance(
-                new CodeInstruction(OpCodes.Ldarg_0),
-                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound)))
-            .InstructionEnumeration();
-
-    private static IEnumerable<CodeInstruction>
         Chest_checkForAction_delegate_transpiler(IEnumerable<CodeInstruction> instructions) =>
         new CodeMatcher(instructions)
             .MatchEndForward(new CodeMatch(instruction => instruction.LoadsConstant(ModPatches.ChestOpenSound)))
@@ -73,6 +63,16 @@ internal sealed class ModPatches : BaseService
                 new CodeInstruction(OpCodes.Ldarg_0),
                 CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound)))
             .MatchEndForward(new CodeMatch(instruction => instruction.LoadsConstant(ModPatches.LidOpenSound)))
+            .Advance(1)
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0),
+                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound)))
+            .InstructionEnumeration();
+
+    private static IEnumerable<CodeInstruction>
+        Chest_checkForAction_transpiler(IEnumerable<CodeInstruction> instructions) =>
+        new CodeMatcher(instructions)
+            .MatchEndForward(new CodeMatch(instruction => instruction.LoadsConstant(ModPatches.ChestOpenSound)))
             .Advance(1)
             .InsertAndAdvance(
                 new CodeInstruction(OpCodes.Ldarg_0),
@@ -257,6 +257,19 @@ internal sealed class ModPatches : BaseService
                 CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSound)))
             .InstructionEnumeration();
 
+    private static IEnumerable<CodeInstruction>
+        Chest_SpecialChestType_transpiler(IEnumerable<CodeInstruction> instructions) =>
+        new CodeMatcher(instructions)
+            .MatchEndForward(
+                new CodeMatch(
+                    instruction =>
+                        instruction.Calls(AccessTools.PropertyGetter(typeof(Chest), nameof(Chest.SpecialChestType)))))
+            .Advance(1)
+            .InsertAndAdvance(
+                new CodeInstruction(OpCodes.Ldarg_0),
+                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSpecialChestType)))
+            .InstructionEnumeration();
+
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static IEnumerable<CodeInstruction>
@@ -291,9 +304,31 @@ internal sealed class ModPatches : BaseService
         };
     }
 
+    private static Chest.SpecialChestTypes GetSpecialChestType(
+        Chest.SpecialChestTypes specialChestType,
+        Item sourceItem)
+    {
+        if (!ModPatches.instance.assetHandler.TryGetData(sourceItem, out var storage) || !storage.OpenNearby)
+        {
+            return specialChestType;
+        }
+
+        return Chest.SpecialChestTypes.None;
+    }
+
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static void ItemGrabMenu_constructor_postfix(ItemGrabMenu __instance, ref Item ___sourceItem) =>
+        ModPatches.UpdateColorPicker(__instance, ___sourceItem);
+
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
+    [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
+    private static void ItemGrabMenu_gameWindowSizeChanged_postfix(ItemGrabMenu __instance, ref Item ___sourceItem) =>
+        ModPatches.UpdateColorPicker(__instance, ___sourceItem);
+
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
+    [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
+    private static void ItemGrabMenu_setSourceItem_postfix(ItemGrabMenu __instance, ref Item ___sourceItem) =>
         ModPatches.UpdateColorPicker(__instance, ___sourceItem);
 
     private static IEnumerable<CodeInstruction>
@@ -309,41 +344,6 @@ internal sealed class ModPatches : BaseService
                 CodeInstruction.LoadField(typeof(ItemGrabMenu), nameof(ItemGrabMenu.sourceItem)),
                 CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSpecialChestType)))
             .InstructionEnumeration();
-
-    private static IEnumerable<CodeInstruction>
-        Chest_SpecialChestType_transpiler(IEnumerable<CodeInstruction> instructions) =>
-        new CodeMatcher(instructions)
-            .MatchEndForward(
-                new CodeMatch(
-                    instruction =>
-                        instruction.Calls(AccessTools.PropertyGetter(typeof(Chest), nameof(Chest.SpecialChestType)))))
-            .Advance(1)
-            .InsertAndAdvance(
-                new CodeInstruction(OpCodes.Ldarg_0),
-                CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.GetSpecialChestType)))
-            .InstructionEnumeration();
-
-    private static Chest.SpecialChestTypes GetSpecialChestType(
-        Chest.SpecialChestTypes specialChestType,
-        Item sourceItem)
-    {
-        if (!ModPatches.instance.assetHandler.TryGetData(sourceItem, out var storage) || !storage.OpenNearby)
-        {
-            return specialChestType;
-        }
-
-        return Chest.SpecialChestTypes.None;
-    }
-
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
-    [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
-    private static void ItemGrabMenu_gameWindowSizeChanged_postfix(ItemGrabMenu __instance, ref Item ___sourceItem) =>
-        ModPatches.UpdateColorPicker(__instance, ___sourceItem);
-
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
-    [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
-    private static void ItemGrabMenu_setSourceItem_postfix(ItemGrabMenu __instance, ref Item ___sourceItem) =>
-        ModPatches.UpdateColorPicker(__instance, ___sourceItem);
 
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]

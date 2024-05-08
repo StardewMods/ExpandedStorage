@@ -40,16 +40,13 @@ internal sealed class BuildingContainer : BaseContainer<Building>
     public override int Capacity => this.chest?.GetActualCapacity() ?? int.MaxValue;
 
     /// <inheritdoc />
+    public override bool IsAlive => this.Source.TryGetTarget(out _);
+
+    /// <inheritdoc />
     public override IInventory Items => this.chest?.GetItemsForPlayer() ?? Game1.getFarm().getShippingBin(Game1.player);
 
     /// <inheritdoc />
     public override GameLocation Location => this.Building.GetParentLocation();
-
-    /// <inheritdoc />
-    public override Vector2 TileLocation =>
-        new(
-            this.Building.tileX.Value + (this.Building.tilesWide.Value / 2f),
-            this.Building.tileY.Value + (this.Building.tilesHigh.Value / 2f));
 
     /// <inheritdoc />
     public override ModDataDictionary ModData => this.Building.modData;
@@ -58,7 +55,44 @@ internal sealed class BuildingContainer : BaseContainer<Building>
     public override NetMutex? Mutex => this.chest?.GetMutex();
 
     /// <inheritdoc />
-    public override bool IsAlive => this.Source.TryGetTarget(out _);
+    public override Vector2 TileLocation =>
+        new(
+            this.Building.tileX.Value + (this.Building.tilesWide.Value / 2f),
+            this.Building.tileY.Value + (this.Building.tilesHigh.Value / 2f));
+
+    /// <inheritdoc />
+    public override void GrabItemFromChest(Item? item, Farmer who)
+    {
+        if (item is null || !who.couldInventoryAcceptThisItem(item))
+        {
+            return;
+        }
+
+        if (this.Building is ShippingBin && item == Game1.getFarm().lastItemShipped)
+        {
+            Game1.getFarm().lastItemShipped = this.Items.LastOrDefault();
+        }
+
+        this.Items.RemoveEmptySlots();
+        this.ShowMenu();
+    }
+
+    /// <inheritdoc />
+    public override void GrabItemFromInventory(Item? item, Farmer who)
+    {
+        if (this.Building is not ShippingBin)
+        {
+            base.GrabItemFromInventory(item, who);
+            return;
+        }
+
+        Game1.playSound("Ship");
+        base.GrabItemFromInventory(item, who);
+    }
+
+    /// <inheritdoc />
+    public override bool HighlightItems(Item? item) =>
+        this.Building is ShippingBin ? Utility.highlightShippableObjects(item) : base.HighlightItems(item);
 
     /// <inheritdoc />
     public override void ShowMenu(bool playSound = false)
@@ -166,38 +200,4 @@ internal sealed class BuildingContainer : BaseContainer<Building>
         this.Items.RemoveEmptySlots();
         return true;
     }
-
-    /// <inheritdoc />
-    public override void GrabItemFromInventory(Item? item, Farmer who)
-    {
-        if (this.Building is not ShippingBin)
-        {
-            base.GrabItemFromInventory(item, who);
-            return;
-        }
-
-        Game1.playSound("Ship");
-        base.GrabItemFromInventory(item, who);
-    }
-
-    /// <inheritdoc />
-    public override void GrabItemFromChest(Item? item, Farmer who)
-    {
-        if (item is null || !who.couldInventoryAcceptThisItem(item))
-        {
-            return;
-        }
-
-        if (this.Building is ShippingBin && item == Game1.getFarm().lastItemShipped)
-        {
-            Game1.getFarm().lastItemShipped = this.Items.LastOrDefault();
-        }
-
-        this.Items.RemoveEmptySlots();
-        this.ShowMenu();
-    }
-
-    /// <inheritdoc />
-    public override bool HighlightItems(Item? item) =>
-        this.Building is ShippingBin ? Utility.highlightShippableObjects(item) : base.HighlightItems(item);
 }

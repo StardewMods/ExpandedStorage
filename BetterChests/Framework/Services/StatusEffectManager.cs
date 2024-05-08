@@ -7,7 +7,7 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Buffs;
 
 /// <summary>Responsible for adding or removing custom buffs.</summary>
-internal sealed class StatusEffectManager : BaseService<StatusEffectManager>
+internal sealed class StatusEffectManager : GenericBaseService<StatusEffectManager>
 {
     private readonly IModConfig modConfig;
 
@@ -56,12 +56,6 @@ internal sealed class StatusEffectManager : BaseService<StatusEffectManager>
         Game1.player.buffs.Remove(id);
     }
 
-    private string GetId(StatusEffect statusEffect) =>
-        statusEffect switch
-        {
-            StatusEffect.Overburdened => this.Prefix + StatusEffect.Overburdened.ToStringFast(), _ => string.Empty,
-        };
-
     private Buff? GetEffect(StatusEffect statusEffect) =>
         statusEffect switch
         {
@@ -73,5 +67,11 @@ internal sealed class StatusEffectManager : BaseService<StatusEffectManager>
                 iconSheetIndex: 13,
                 effects: new BuffEffects { Speed = { this.modConfig.CarryChestSlowAmount } }),
             _ => null,
+        };
+
+    private string GetId(StatusEffect statusEffect) =>
+        statusEffect switch
+        {
+            StatusEffect.Overburdened => this.Prefix + StatusEffect.Overburdened.ToStringFast(), _ => string.Empty,
         };
 }

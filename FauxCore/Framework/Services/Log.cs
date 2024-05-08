@@ -23,28 +23,28 @@ internal sealed class Log : ILog
     }
 
     /// <inheritdoc />
+    public void Alert(string message, object?[]? args = null) => this.Raise(message, LogLevel.Alert, false, args);
+
+    /// <inheritdoc />
+    public void Debug(string message, object?[]? args = null) => this.Raise(message, LogLevel.Debug, false, args);
+
+    /// <inheritdoc />
+    public void Error(string message, object?[]? args = null) => this.Raise(message, LogLevel.Error, false, args);
+
+    /// <inheritdoc />
+    public void Info(string message, object?[]? args = null) => this.Raise(message, LogLevel.Info, false, args);
+
+    /// <inheritdoc />
     public void Trace(string message, object?[]? args = null) => this.Raise(message, LogLevel.Trace, false, args);
 
     /// <inheritdoc />
     public void TraceOnce(string message, params object?[]? args) => this.Raise(message, LogLevel.Trace, true, args);
 
     /// <inheritdoc />
-    public void Debug(string message, object?[]? args = null) => this.Raise(message, LogLevel.Debug, false, args);
-
-    /// <inheritdoc />
-    public void Info(string message, object?[]? args = null) => this.Raise(message, LogLevel.Info, false, args);
-
-    /// <inheritdoc />
     public void Warn(string message, object?[]? args = null) => this.Raise(message, LogLevel.Warn, false, args);
 
     /// <inheritdoc />
     public void WarnOnce(string message, object?[]? args = null) => this.Raise(message, LogLevel.Warn, true, args);
-
-    /// <inheritdoc />
-    public void Error(string message, object?[]? args = null) => this.Raise(message, LogLevel.Error, false, args);
-
-    /// <inheritdoc />
-    public void Alert(string message, object?[]? args = null) => this.Raise(message, LogLevel.Alert, false, args);
 
     private void Raise(string message, LogLevel level, bool once, object?[]? args = null)
     {

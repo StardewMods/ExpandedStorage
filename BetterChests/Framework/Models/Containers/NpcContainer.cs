@@ -21,13 +21,11 @@ internal sealed class NpcContainer : BaseContainer<NPC>
         this.InitOptions();
     }
 
-    /// <summary>Gets the source NPC of the container.</summary>
-    /// <exception cref="ObjectDisposedException">Thrown when the NPC is disposed.</exception>
-    public NPC Npc =>
-        this.Source.TryGetTarget(out var target) ? target : throw new ObjectDisposedException(nameof(NpcContainer));
-
     /// <inheritdoc />
     public override int Capacity => this.chest.GetActualCapacity();
+
+    /// <inheritdoc />
+    public override bool IsAlive => this.Source.TryGetTarget(out _);
 
     /// <inheritdoc />
     public override IInventory Items => this.chest.GetItemsForPlayer();
@@ -36,16 +34,18 @@ internal sealed class NpcContainer : BaseContainer<NPC>
     public override GameLocation Location => this.Npc.currentLocation;
 
     /// <inheritdoc />
-    public override Vector2 TileLocation => this.Npc.Tile;
-
-    /// <inheritdoc />
     public override ModDataDictionary ModData => this.Npc.modData;
 
     /// <inheritdoc />
     public override NetMutex? Mutex => this.chest.GetMutex();
 
+    /// <summary>Gets the source NPC of the container.</summary>
+    /// <exception cref="ObjectDisposedException">Thrown when the NPC is disposed.</exception>
+    public NPC Npc =>
+        this.Source.TryGetTarget(out var target) ? target : throw new ObjectDisposedException(nameof(NpcContainer));
+
     /// <inheritdoc />
-    public override bool IsAlive => this.Source.TryGetTarget(out _);
+    public override Vector2 TileLocation => this.Npc.Tile;
 
     /// <inheritdoc />
     public override bool TryAdd(Item item, out Item? remaining)

@@ -7,8 +7,8 @@ using StardewValley.GameData;
 public sealed class CustomBushDrop : GenericSpawnItemDataWithCondition, ICustomBushDrop
 {
     /// <inheritdoc />
-    public Season? Season { get; set; }
+    public float Chance { get; set; } = 1f;
 
     /// <inheritdoc />
-    public float Chance { get; set; } = 1f;
+    public Season? Season { get; set; }
 }

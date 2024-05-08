@@ -25,14 +25,14 @@ internal sealed class FridgeContainer : BaseContainer<GameLocation>
     public override int Capacity => this.chest.GetActualCapacity();
 
     /// <inheritdoc />
+    public override bool IsAlive => this.Source.TryGetTarget(out _);
+
+    /// <inheritdoc />
     public override IInventory Items => this.chest.GetItemsForPlayer();
 
     /// <inheritdoc />
     public override GameLocation Location =>
         this.Source.TryGetTarget(out var target) ? target : throw new ObjectDisposedException(nameof(FridgeContainer));
-
-    /// <inheritdoc />
-    public override Vector2 TileLocation => this.Location.GetFridgePosition()?.ToVector2() ?? Vector2.Zero;
 
     /// <inheritdoc />
     public override ModDataDictionary ModData => this.Location.modData;
@@ -41,7 +41,7 @@ internal sealed class FridgeContainer : BaseContainer<GameLocation>
     public override NetMutex? Mutex => this.chest.GetMutex();
 
     /// <inheritdoc />
-    public override bool IsAlive => this.Source.TryGetTarget(out _);
+    public override Vector2 TileLocation => this.Location.GetFridgePosition()?.ToVector2() ?? Vector2.Zero;
 
     /// <inheritdoc />
     public override void ShowMenu(bool playSound = false)

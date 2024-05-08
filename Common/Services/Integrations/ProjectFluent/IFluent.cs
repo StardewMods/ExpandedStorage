@@ -1,4 +1,6 @@
-﻿namespace StardewMods.Common.Services.Integrations.ProjectFluent;
+﻿// ReSharper disable All
+#pragma warning disable
+namespace StardewMods.Common.Services.Integrations.ProjectFluent;
 
 /// <summary>A type allowing access to Project Fluent translations.</summary>
 /// <typeparam name="Key">The type of values this instance allows retrieving translations for.</typeparam>

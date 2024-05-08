@@ -8,13 +8,13 @@ using StardewValley.Menus;
 internal sealed class ToDew : IActionIntegration
 {
     /// <inheritdoc />
-    public string ModId => "jltaylor-us.ToDew";
+    public string HoverText => I18n.Button_ToDew();
 
     /// <inheritdoc />
     public int Index => 7;
 
     /// <inheritdoc />
-    public string HoverText => I18n.Button_ToDew();
+    public string ModId => "jltaylor-us.ToDew";
 
     /// <inheritdoc />
     public Action? GetAction(IMod mod)

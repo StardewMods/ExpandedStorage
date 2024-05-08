@@ -83,29 +83,6 @@ internal sealed class ShopFromChest : BaseFeature<ShopFromChest>
     /// <inheritdoc />
     protected override void Deactivate() => this.patchManager.Unpatch(this.UniqueId);
 
-    private static bool ContainsId(Inventory items, string itemId, int minimum)
-    {
-        var amount = Game1.player.Items.CountId(itemId);
-        var remaining = minimum - amount;
-        if (remaining <= 0)
-        {
-            return true;
-        }
-
-        var containers = ShopFromChest.instance.containerFactory.GetAll(ShopFromChest.DefaultPredicate).ToList();
-        foreach (var container in containers)
-        {
-            amount = container.Items.CountId(itemId);
-            remaining -= amount;
-            if (remaining < 0)
-            {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static bool CarpenterMenu_ConsumeResources_prefix(CarpenterMenu __instance)
@@ -189,6 +166,41 @@ internal sealed class ShopFromChest : BaseFeature<ShopFromChest>
             AccessTools.DeclaredMethod(typeof(Inventory), nameof(Inventory.ContainsId), [typeof(string), typeof(int)]),
             AccessTools.DeclaredMethod(typeof(ShopFromChest), nameof(ShopFromChest.ContainsId)));
 
+    private static bool ContainsId(Inventory items, string itemId, int minimum)
+    {
+        var amount = Game1.player.Items.CountId(itemId);
+        var remaining = minimum - amount;
+        if (remaining <= 0)
+        {
+            return true;
+        }
+
+        var containers = ShopFromChest.instance.containerFactory.GetAll(ShopFromChest.DefaultPredicate).ToList();
+        foreach (var container in containers)
+        {
+            amount = container.Items.CountId(itemId);
+            remaining -= amount;
+            if (remaining < 0)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    private static bool DefaultPredicate(IStorageContainer container) =>
+        container is not FarmerContainer
+        && container.ShopFromChest is not FeatureOption.Disabled
+        && container.Items.Count > 0
+        && !ShopFromChest.instance.Config.CraftFromChestDisableLocations.Contains(Game1.player.currentLocation.Name)
+        && !(ShopFromChest.instance.Config.CraftFromChestDisableLocations.Contains("UndergroundMine")
+            && Game1.player.currentLocation is MineShaft)
+        && container.CraftFromChest.WithinRange(
+            container.CraftFromChestDistance,
+            container.Location,
+            container.TileLocation);
+
     private static bool ShopMenu_ConsumeTradeItem_prefix(string itemId, int count)
     {
         itemId = ItemRegistry.QualifyItemId(itemId);
@@ -249,16 +261,4 @@ internal sealed class ShopFromChest : BaseFeature<ShopFromChest>
             return;
         }
     }
-
-    private static bool DefaultPredicate(IStorageContainer container) =>
-        container is not FarmerContainer
-        && container.ShopFromChest is not FeatureOption.Disabled
-        && container.Items.Count > 0
-        && !ShopFromChest.instance.Config.CraftFromChestDisableLocations.Contains(Game1.player.currentLocation.Name)
-        && !(ShopFromChest.instance.Config.CraftFromChestDisableLocations.Contains("UndergroundMine")
-            && Game1.player.currentLocation is MineShaft)
-        && container.CraftFromChest.WithinRange(
-            container.CraftFromChestDistance,
-            container.Location,
-            container.TileLocation);
 }

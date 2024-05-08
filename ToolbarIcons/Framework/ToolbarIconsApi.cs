@@ -23,13 +23,13 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
 
     /// <summary>Initializes a new instance of the <see cref="ToolbarIconsApi" /> class.</summary>
     /// <param name="modInfo">Mod info from the calling mod.</param>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="log">Dependency used for monitoring and logging.</param>
     /// <param name="toolbarManager">Dependency for managing the toolbar icons.</param>
     internal ToolbarIconsApi(
         IModInfo modInfo,
-        IEventSubscriber eventSubscriber,
+        IEventManager eventManager,
         IGameContentHelper gameContentHelper,
         ILog log,
         ToolbarManager toolbarManager)
@@ -43,7 +43,7 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
         this.eventManager = new BaseEventManager(log, modInfo.Manifest);
 
         // Events
-        eventSubscriber.Subscribe<IIconPressedEventArgs>(this.OnIconPressed);
+        eventManager.Subscribe<IIconPressedEventArgs>(this.OnIconPressed);
     }
 
     /// <inheritdoc />

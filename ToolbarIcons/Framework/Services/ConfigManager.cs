@@ -62,6 +62,10 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         return defaultConfig;
     }
 
+    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) => this.ReloadConfig();
+
+    private void OnToolbarIconsLoaded(ToolbarIconsLoadedEventArgs e) => this.ReloadConfig();
+
     private void ReloadConfig()
     {
         if (!this.genericModConfigMenuIntegration.IsLoaded)
@@ -91,8 +95,4 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             index++;
         }
     }
-
-    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) => this.ReloadConfig();
-
-    private void OnToolbarIconsLoaded(ToolbarIconsLoadedEventArgs e) => this.ReloadConfig();
 }

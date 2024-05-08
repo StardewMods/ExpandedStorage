@@ -18,12 +18,15 @@ internal sealed class FurnitureContainer : BaseContainer<StorageFurniture>
         this.InitOptions();
     }
 
+    /// <inheritdoc />
+    public override int Capacity => int.MaxValue;
+
     /// <summary>Gets the source furniture of the container.</summary>
     public StorageFurniture Furniture =>
         this.Source.TryGetTarget(out var target) ? target : throw new ObjectDisposedException(nameof(StorageFurniture));
 
     /// <inheritdoc />
-    public override int Capacity => int.MaxValue;
+    public override bool IsAlive => this.Source.TryGetTarget(out _);
 
     /// <inheritdoc />
     public override IInventory Items { get; }
@@ -32,16 +35,34 @@ internal sealed class FurnitureContainer : BaseContainer<StorageFurniture>
     public override GameLocation Location => this.Furniture.Location;
 
     /// <inheritdoc />
-    public override Vector2 TileLocation => this.Furniture.TileLocation;
-
-    /// <inheritdoc />
     public override ModDataDictionary ModData => this.Furniture.modData;
 
     /// <inheritdoc />
     public override NetMutex? Mutex => this.Furniture.mutex;
 
     /// <inheritdoc />
-    public override bool IsAlive => this.Source.TryGetTarget(out _);
+    public override Vector2 TileLocation => this.Furniture.TileLocation;
+
+    /// <inheritdoc />
+    public override void GrabItemFromInventory(Item? item, Farmer who)
+    {
+        if (this.Furniture is not FishTankFurniture)
+        {
+            base.GrabItemFromInventory(item, who);
+            return;
+        }
+
+        Game1.playSound("dropItemInWater");
+        base.GrabItemFromInventory(item, who);
+    }
+
+    /// <inheritdoc />
+    public override bool HighlightItems(Item? item) =>
+        this.Furniture switch
+        {
+            FishTankFurniture fishTankFurniture => fishTankFurniture.HasRoomForThisItem(item),
+            _ => base.HighlightItems(item),
+        };
 
     /// <inheritdoc />
     public override void ShowMenu(bool playSound = false)
@@ -86,25 +107,4 @@ internal sealed class FurnitureContainer : BaseContainer<StorageFurniture>
         this.Items.RemoveEmptySlots();
         return true;
     }
-
-    /// <inheritdoc />
-    public override void GrabItemFromInventory(Item? item, Farmer who)
-    {
-        if (this.Furniture is not FishTankFurniture)
-        {
-            base.GrabItemFromInventory(item, who);
-            return;
-        }
-
-        Game1.playSound("dropItemInWater");
-        base.GrabItemFromInventory(item, who);
-    }
-
-    /// <inheritdoc />
-    public override bool HighlightItems(Item? item) =>
-        this.Furniture switch
-        {
-            FishTankFurniture fishTankFurniture => fishTankFurniture.HasRoomForThisItem(item),
-            _ => base.HighlightItems(item),
-        };
 }

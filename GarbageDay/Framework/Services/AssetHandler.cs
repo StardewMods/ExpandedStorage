@@ -28,13 +28,13 @@ internal sealed class AssetHandler : BaseService
     private readonly string qualifiedItemId;
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     public AssetHandler(
-        IEventSubscriber eventSubscriber,
+        IEventManager eventManager,
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
@@ -49,8 +49,8 @@ internal sealed class AssetHandler : BaseService
         this.modContentHelper = modContentHelper;
 
         // Events
-        eventSubscriber.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
-        eventSubscriber.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
+        eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
+        eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
     }
 
     /// <summary>Gets the found garbage cans.</summary>
@@ -65,14 +65,6 @@ internal sealed class AssetHandler : BaseService
     /// <summary>Invalidates a garbage can.</summary>
     /// <param name="whichCan">The name of the garbage can to invalidate.</param>
     public void InvalidateGarbageCan(string whichCan) => this.invalidGarbageCans.Add(whichCan);
-
-    private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
-    {
-        if (e.Names.Any(assetName => assetName.IsEquivalentTo(AssetHandler.GarbageCanPath)))
-        {
-            this.FoundGarbageCans.Clear();
-        }
-    }
 
     private void OnAssetRequested(AssetRequestedEventArgs e)
     {
@@ -179,6 +171,14 @@ internal sealed class AssetHandler : BaseService
                 }
             },
             (AssetEditPriority)int.MaxValue);
+    }
+
+    private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
+    {
+        if (e.Names.Any(assetName => assetName.IsEquivalentTo(AssetHandler.GarbageCanPath)))
+        {
+            this.FoundGarbageCans.Clear();
+        }
     }
 
     private bool TryAddFound(string whichCan, IAssetName assetName, int x, int y)

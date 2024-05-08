@@ -98,6 +98,23 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
     }
 
+    private void LogTransfer(IStorageContainer from, IStorageContainer to, Dictionary<string, int> amounts)
+    {
+        foreach (var (name, amount) in amounts)
+        {
+            if (amount > 0)
+            {
+                this.Log.Trace(
+                    "{0}: {{ Item: {1}, Quantity: {2}, From: {3}, To: {4} }}",
+                    this.Id,
+                    name,
+                    amount,
+                    from,
+                    to);
+            }
+        }
+    }
+
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
         if (e.Button is not SButton.MouseLeft
@@ -162,6 +179,14 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         Game1.playSound("Ship");
     }
 
+    private void OnIconPressed(IIconPressedEventArgs e)
+    {
+        if (e.Id == this.Id)
+        {
+            this.StashIntoAll();
+        }
+    }
+
     private void OnRenderingActiveMenu(RenderingActiveMenuEventArgs obj)
     {
         var container = this.menuHandler.Top.Container;
@@ -194,14 +219,6 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
 
         itemGrabMenu.fillStacksButton.texture = this.assetHandler.UiTexture;
         itemGrabMenu.fillStacksButton.sourceRect = icon.Area;
-    }
-
-    private void OnIconPressed(IIconPressedEventArgs e)
-    {
-        if (e.Id == this.Id)
-        {
-            this.StashIntoAll();
-        }
     }
 
     private void StashIntoAll()
@@ -278,23 +295,6 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         if (this.containerHandler.Transfer(containerFrom, containerTo, out var amounts))
         {
             this.LogTransfer(containerFrom, containerTo, amounts);
-        }
-    }
-
-    private void LogTransfer(IStorageContainer from, IStorageContainer to, Dictionary<string, int> amounts)
-    {
-        foreach (var (name, amount) in amounts)
-        {
-            if (amount > 0)
-            {
-                this.Log.Trace(
-                    "{0}: {{ Item: {1}, Quantity: {2}, From: {3}, To: {4} }}",
-                    this.Id,
-                    name,
-                    amount,
-                    from,
-                    to);
-            }
         }
     }
 }

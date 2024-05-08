@@ -1,4 +1,6 @@
-﻿namespace StardewMods.Common.Services.Integrations.ContentPatcher;
+﻿// ReSharper disable All
+#pragma warning disable
+namespace StardewMods.Common.Services.Integrations.ContentPatcher;
 
 /// <summary>
 /// A set of parsed conditions linked to the Content Patcher context. These conditions are

@@ -12,10 +12,6 @@ internal sealed class ModDataStorageOptions : DictionaryStorageOptions
     public ModDataStorageOptions(ModDataDictionary modData) => this.modData = modData;
 
     /// <inheritdoc />
-    protected override bool TryGetValue(string key, [NotNullWhen(true)] out string? value) =>
-        this.modData.TryGetValue(key, out value);
-
-    /// <inheritdoc />
     protected override void SetValue(string key, string value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -26,4 +22,8 @@ internal sealed class ModDataStorageOptions : DictionaryStorageOptions
 
         this.modData[key] = value;
     }
+
+    /// <inheritdoc />
+    protected override bool TryGetValue(string key, [NotNullWhen(true)] out string? value) =>
+        this.modData.TryGetValue(key, out value);
 }

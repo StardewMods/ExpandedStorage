@@ -6,7 +6,7 @@ using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
 /// <inheritdoc cref="IPatchManager" />
-internal sealed class PatchManager : BaseService<PatchManager>, IPatchManager
+internal sealed class PatchManager : GenericBaseService<PatchManager>, IPatchManager
 {
     private readonly HashSet<string> appliedPatches = [];
     private readonly Lazy<Harmony> harmony;

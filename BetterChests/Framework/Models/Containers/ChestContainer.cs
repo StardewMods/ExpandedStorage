@@ -15,12 +15,15 @@ internal class ChestContainer : BaseContainer<Chest>
         : base(chest) =>
         this.InitOptions();
 
+    /// <inheritdoc />
+    public override int Capacity => this.Chest.GetActualCapacity();
+
     /// <summary>Gets the source chest of the container.</summary>
     public Chest Chest =>
         this.Source.TryGetTarget(out var target) ? target : throw new ObjectDisposedException(nameof(ChestContainer));
 
     /// <inheritdoc />
-    public override int Capacity => this.Chest.GetActualCapacity();
+    public override bool IsAlive => this.Source.TryGetTarget(out _);
 
     /// <inheritdoc />
     public override IInventory Items => this.Chest.GetItemsForPlayer();
@@ -29,16 +32,13 @@ internal class ChestContainer : BaseContainer<Chest>
     public override GameLocation Location => this.Parent?.Location ?? this.Chest.Location;
 
     /// <inheritdoc />
-    public override Vector2 TileLocation => this.Parent?.TileLocation ?? this.Chest.TileLocation;
-
-    /// <inheritdoc />
     public override ModDataDictionary ModData => this.Chest.modData;
 
     /// <inheritdoc />
     public override NetMutex Mutex => this.Chest.GetMutex();
 
     /// <inheritdoc />
-    public override bool IsAlive => this.Source.TryGetTarget(out _);
+    public override Vector2 TileLocation => this.Parent?.TileLocation ?? this.Chest.TileLocation;
 
     /// <inheritdoc />
     public override void ShowMenu(bool playSound = false)

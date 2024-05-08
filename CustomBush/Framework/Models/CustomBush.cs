@@ -6,12 +6,6 @@ using StardewValley.GameData;
 /// <inheritdoc />
 internal sealed class CustomBush : ICustomBush
 {
-    /// <summary>Gets or sets the items produced by this custom bush.</summary>
-    public List<CustomBushDrop> ItemsProduced { get; set; } = [];
-
-    /// <summary>Gets or sets the id of the custom bush.</summary>
-    public string Id { get; set; } = string.Empty;
-
     /// <inheritdoc />
     public int AgeToProduce { get; set; } = 20;
 
@@ -24,14 +18,20 @@ internal sealed class CustomBush : ICustomBush
     /// <inheritdoc />
     public string DisplayName { get; set; } = string.Empty;
 
+    /// <summary>Gets or sets the id of the custom bush.</summary>
+    public string Id { get; set; } = string.Empty;
+
     /// <inheritdoc />
     public string IndoorTexture { get; set; } = string.Empty;
 
-    /// <inheritdoc />
-    public List<Season> Seasons { get; set; } = [];
+    /// <summary>Gets or sets the items produced by this custom bush.</summary>
+    public List<CustomBushDrop> ItemsProduced { get; set; } = [];
 
     /// <inheritdoc />
     public List<PlantableRule> PlantableLocationRules { get; set; } = [];
+
+    /// <inheritdoc />
+    public List<Season> Seasons { get; set; } = [];
 
     /// <inheritdoc />
     public string Texture { get; set; } = string.Empty;

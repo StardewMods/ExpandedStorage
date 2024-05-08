@@ -17,13 +17,13 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Responsible for handling containers.</summary>
-internal sealed class ContainerHandler : BaseService<ContainerHandler>
+internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
 {
     private static ContainerHandler instance = null!;
 
     private readonly ConfigManager configManager;
     private readonly ContainerFactory containerFactory;
-    private readonly IEventPublisher eventPublisher;
+    private readonly IEventManager eventManager;
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
     private readonly LocalizedTextManager localizedTextManager;
     private readonly IManifest manifest;
@@ -32,7 +32,7 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
     /// <summary>Initializes a new instance of the <see cref="ContainerHandler" /> class.</summary>
     /// <param name="configManager">Dependency used for accessing config data.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
-    /// <param name="eventPublisher">Dependency used for publishing events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
     /// <param name="localizedTextManager">Dependency used for formatting and translating text.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
@@ -42,7 +42,7 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
     public ContainerHandler(
         ConfigManager configManager,
         ContainerFactory containerFactory,
-        IEventPublisher eventPublisher,
+        IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
         LocalizedTextManager localizedTextManager,
         ILog log,
@@ -54,7 +54,7 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
         ContainerHandler.instance = this;
         this.configManager = configManager;
         this.containerFactory = containerFactory;
-        this.eventPublisher = eventPublisher;
+        this.eventManager = eventManager;
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
         this.localizedTextManager = localizedTextManager;
         this.manifest = manifest;
@@ -110,7 +110,7 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
             itemTransferringEventArgs.AllowTransfer();
         }
 
-        this.eventPublisher.Publish(itemTransferringEventArgs);
+        this.eventManager.Publish(itemTransferringEventArgs);
 
         // Automatically block if prevented
         if (itemTransferringEventArgs.IsPrevented)
@@ -120,98 +120,6 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
 
         // Return true if forced or allowed
         return force || itemTransferringEventArgs.IsAllowed;
-    }
-
-    /// <summary>Sort a a container.</summary>
-    /// <param name="container">The container to sort.</param>
-    /// <param name="reverse">Indicates whether to reverse the sort order.</param>
-    public void Sort(IStorageContainer container, bool reverse = false)
-    {
-        var containerSortingEventArgs = new ContainerSortingEventArgs(container);
-        ItemGrabMenu.organizeItemsInList(container.Items);
-        this.eventPublisher.Publish(containerSortingEventArgs);
-
-        if (!reverse)
-        {
-            return;
-        }
-
-        var copy = container.Items.Reverse().ToList();
-        container.Items.OverwriteWith(copy);
-    }
-
-    /// <summary>Transfers items from one container to another.</summary>
-    /// <param name="from">The container to transfer items from.</param>
-    /// <param name="to">The container to transfer items to.</param>
-    /// <param name="amounts">Output parameter that contains the transferred item amounts.</param>
-    /// <param name="force">Indicates whether to attempt to force the transfer.</param>
-    /// <param name="existingOnly">Indicates whether to only transfer to existing stacks.</param>
-    /// <returns>true if the transfer was successful; otherwise, false.</returns>
-    public bool Transfer(
-        IStorageContainer from,
-        IStorageContainer to,
-        [NotNullWhen(true)] out Dictionary<string, int>? amounts,
-        bool force = false,
-        bool existingOnly = false)
-    {
-        var items = new Dictionary<string, int>();
-        from.ForEachItem(
-            item =>
-            {
-                var hasItem = to.Items.ContainsId(item.QualifiedItemId);
-
-                // Stop iterating if destination container is already at capacity
-                if (to.Items.CountItemStacks() >= to.Capacity && !hasItem)
-                {
-                    return false;
-                }
-
-                var itemTransferringEventArgs = new ItemTransferringEventArgs(to, item);
-                if (existingOnly && hasItem)
-                {
-                    itemTransferringEventArgs.AllowTransfer();
-                }
-
-                this.eventPublisher.Publish(itemTransferringEventArgs);
-
-                // Automatically block if prevented
-                if (itemTransferringEventArgs.IsPrevented)
-                {
-                    return true;
-                }
-
-                // Block if existing only and item is not in destination container
-                if (existingOnly && !hasItem)
-                {
-                    return true;
-                }
-
-                // Block if not forced or allowed
-                if (!force && !itemTransferringEventArgs.IsAllowed)
-                {
-                    return true;
-                }
-
-                var stack = item.Stack;
-                items.TryAdd(item.QualifiedItemId, 0);
-                if (!to.TryAdd(item, out var remaining) || !from.TryRemove(item))
-                {
-                    return true;
-                }
-
-                var amount = stack - (remaining?.Stack ?? 0);
-                items[item.QualifiedItemId] += amount;
-                return true;
-            });
-
-        if (items.Any())
-        {
-            amounts = items;
-            return true;
-        }
-
-        amounts = null;
-        return false;
     }
 
     /// <summary>Configure the container.</summary>
@@ -310,6 +218,98 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
                 chestContainer.Chest.fridge.Value = container.CookFromChest is not RangeOption.Disabled;
             }
         }
+    }
+
+    /// <summary>Sort a a container.</summary>
+    /// <param name="container">The container to sort.</param>
+    /// <param name="reverse">Indicates whether to reverse the sort order.</param>
+    public void Sort(IStorageContainer container, bool reverse = false)
+    {
+        var containerSortingEventArgs = new ContainerSortingEventArgs(container);
+        ItemGrabMenu.organizeItemsInList(container.Items);
+        this.eventManager.Publish(containerSortingEventArgs);
+
+        if (!reverse)
+        {
+            return;
+        }
+
+        var copy = container.Items.Reverse().ToList();
+        container.Items.OverwriteWith(copy);
+    }
+
+    /// <summary>Transfers items from one container to another.</summary>
+    /// <param name="from">The container to transfer items from.</param>
+    /// <param name="to">The container to transfer items to.</param>
+    /// <param name="amounts">Output parameter that contains the transferred item amounts.</param>
+    /// <param name="force">Indicates whether to attempt to force the transfer.</param>
+    /// <param name="existingOnly">Indicates whether to only transfer to existing stacks.</param>
+    /// <returns>true if the transfer was successful; otherwise, false.</returns>
+    public bool Transfer(
+        IStorageContainer from,
+        IStorageContainer to,
+        [NotNullWhen(true)] out Dictionary<string, int>? amounts,
+        bool force = false,
+        bool existingOnly = false)
+    {
+        var items = new Dictionary<string, int>();
+        from.ForEachItem(
+            item =>
+            {
+                var hasItem = to.Items.ContainsId(item.QualifiedItemId);
+
+                // Stop iterating if destination container is already at capacity
+                if (to.Items.CountItemStacks() >= to.Capacity && !hasItem)
+                {
+                    return false;
+                }
+
+                var itemTransferringEventArgs = new ItemTransferringEventArgs(to, item);
+                if (existingOnly && hasItem)
+                {
+                    itemTransferringEventArgs.AllowTransfer();
+                }
+
+                this.eventManager.Publish(itemTransferringEventArgs);
+
+                // Automatically block if prevented
+                if (itemTransferringEventArgs.IsPrevented)
+                {
+                    return true;
+                }
+
+                // Block if existing only and item is not in destination container
+                if (existingOnly && !hasItem)
+                {
+                    return true;
+                }
+
+                // Block if not forced or allowed
+                if (!force && !itemTransferringEventArgs.IsAllowed)
+                {
+                    return true;
+                }
+
+                var stack = item.Stack;
+                items.TryAdd(item.QualifiedItemId, 0);
+                if (!to.TryAdd(item, out var remaining) || !from.TryRemove(item))
+                {
+                    return true;
+                }
+
+                var amount = stack - (remaining?.Stack ?? 0);
+                items[item.QualifiedItemId] += amount;
+                return true;
+            });
+
+        if (items.Any())
+        {
+            amounts = items;
+            return true;
+        }
+
+        amounts = null;
+        return false;
     }
 
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]

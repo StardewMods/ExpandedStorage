@@ -4,12 +4,12 @@ using Microsoft.Xna.Framework;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
 using StardewValley.Objects;
 
-/// <inheritdoc cref="IChestCreatedEventArgs" />
+/// <inheritdoc cref="IChestCreated" />
 internal sealed class ChestCreatedEventArgs(
     Chest chest,
     GameLocation location,
     Vector2 tileLocation,
-    IStorageData storageData) : EventArgs, IChestCreatedEventArgs
+    IStorageData storageData) : EventArgs, IChestCreated
 {
     /// <inheritdoc />
     public Chest Chest { get; } = chest;
@@ -18,8 +18,8 @@ internal sealed class ChestCreatedEventArgs(
     public GameLocation Location { get; } = location;
 
     /// <inheritdoc />
-    public Vector2 TileLocation { get; } = tileLocation;
+    public IStorageData StorageData { get; } = storageData;
 
     /// <inheritdoc />
-    public IStorageData StorageData { get; } = storageData;
+    public Vector2 TileLocation { get; } = tileLocation;
 }

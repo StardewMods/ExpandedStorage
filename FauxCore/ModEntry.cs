@@ -37,8 +37,6 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<IModConfig, ConfigManager>();
         this.container.RegisterSingleton<ConfigManager, ConfigManager>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
-        this.container.RegisterSingleton<IEventPublisher, EventManager>();
-        this.container.RegisterSingleton<IEventSubscriber, EventManager>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.container.RegisterSingleton<ILog, Log>();
         this.container.RegisterSingleton<IThemeHelper, ThemeHelper>();

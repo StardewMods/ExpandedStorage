@@ -15,13 +15,16 @@ internal sealed class FarmerContainer : BaseContainer<Farmer>
     public FarmerContainer(Farmer farmer)
         : base(farmer) { }
 
+    /// <inheritdoc />
+    public override int Capacity => this.Farmer.MaxItems;
+
     /// <summary>Gets the source farmer of the container.</summary>
     /// <exception cref="ObjectDisposedException">Thrown when the Farmer is disposed.</exception>
     public Farmer Farmer =>
         this.Source.TryGetTarget(out var target) ? target : throw new ObjectDisposedException(nameof(FarmerContainer));
 
     /// <inheritdoc />
-    public override int Capacity => this.Farmer.MaxItems;
+    public override bool IsAlive => this.Source.TryGetTarget(out _);
 
     /// <inheritdoc />
     public override IInventory Items => this.Farmer.Items;
@@ -30,16 +33,13 @@ internal sealed class FarmerContainer : BaseContainer<Farmer>
     public override GameLocation Location => this.Farmer.currentLocation;
 
     /// <inheritdoc />
-    public override Vector2 TileLocation => this.Farmer.Tile;
-
-    /// <inheritdoc />
     public override ModDataDictionary ModData => this.Farmer.modData;
 
     /// <inheritdoc />
     public override NetMutex? Mutex => (Utility.getHomeOfFarmer(this.Farmer) as Cabin)?.inventoryMutex;
 
     /// <inheritdoc />
-    public override bool IsAlive => this.Source.TryGetTarget(out _);
+    public override Vector2 TileLocation => this.Farmer.Tile;
 
     /// <inheritdoc />
     public override void ShowMenu(bool playSound = false) =>

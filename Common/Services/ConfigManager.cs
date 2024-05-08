@@ -9,37 +9,25 @@ internal class ConfigManager<TConfig>
     where TConfig : class, new()
 {
     private readonly IDataHelper dataHelper;
-    private readonly IEventPublisher eventPublisher;
+    private readonly IEventManager eventManager;
     private readonly IModHelper modHelper;
 
     private bool initialized;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigManager{TConfig}" /> class.</summary>
     /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
-    /// <param name="eventPublisher">Dependency used for publishing events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="modHelper">Dependency for events, input, and content.</param>
-    protected ConfigManager(IDataHelper dataHelper, IEventPublisher eventPublisher, IModHelper modHelper)
+    protected ConfigManager(IDataHelper dataHelper, IEventManager eventManager, IModHelper modHelper)
     {
         this.dataHelper = dataHelper;
-        this.eventPublisher = eventPublisher;
+        this.eventManager = eventManager;
         this.modHelper = modHelper;
         this.Config = this.GetNew();
     }
 
     /// <summary>Gets the backing config.</summary>
     protected TConfig Config { get; private set; }
-
-    /// <summary>Perform initialization routine.</summary>
-    public void Init()
-    {
-        if (this.initialized)
-        {
-            return;
-        }
-
-        this.initialized = true;
-        this.eventPublisher.Publish(new ConfigChangedEventArgs<TConfig>(this.Config));
-    }
 
     /// <summary>Returns a new instance of IModConfig.</summary>
     /// <returns>The new instance of IModConfig.</returns>
@@ -49,8 +37,6 @@ internal class ConfigManager<TConfig>
     /// <returns>The new instance of IModConfig.</returns>
     public virtual TConfig GetNew()
     {
-        TConfig? config;
-
         // Try to load config from mod folder
         try
         {
@@ -74,11 +60,23 @@ internal class ConfigManager<TConfig>
         return this.GetDefault();
     }
 
+    /// <summary>Perform initialization routine.</summary>
+    public void Init()
+    {
+        if (this.initialized)
+        {
+            return;
+        }
+
+        this.initialized = true;
+        this.eventManager.Publish(new ConfigChangedEventArgs<TConfig>(this.Config));
+    }
+
     /// <summary>Resets the configuration by reassigning to <see cref="TConfig" />.</summary>
     public void Reset()
     {
         this.Config = this.GetNew();
-        this.eventPublisher.Publish(new ConfigChangedEventArgs<TConfig>(this.Config));
+        this.eventManager.Publish(new ConfigChangedEventArgs<TConfig>(this.Config));
     }
 
     /// <summary>Saves the provided config.</summary>
@@ -88,6 +86,6 @@ internal class ConfigManager<TConfig>
         this.modHelper.WriteConfig(config);
         this.dataHelper.WriteGlobalData("config", config);
         this.Config = config;
-        this.eventPublisher.Publish(new ConfigChangedEventArgs<TConfig>(this.Config));
+        this.eventManager.Publish(new ConfigChangedEventArgs<TConfig>(this.Config));
     }
 }

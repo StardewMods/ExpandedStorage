@@ -29,20 +29,7 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
         this.storageOptions.TryGetValue(StorageOption.Individual, out var getOptions) ? getOptions() : this;
 
     /// <inheritdoc />
-    public virtual string DisplayName
-    {
-        get
-        {
-            if (this.storageOptions.TryGetValue(StorageOption.Type, out var storageOption)
-                || this.storageOptions.TryGetValue(StorageOption.Individual, out storageOption)
-                || this.storageOptions.TryGetValue(StorageOption.Global, out storageOption))
-            {
-                return storageOption().DisplayName;
-            }
-
-            return string.Empty;
-        }
-    }
+    public abstract int Capacity { get; }
 
     /// <inheritdoc />
     public virtual string Description
@@ -61,13 +48,23 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     }
 
     /// <inheritdoc />
+    public virtual string DisplayName
+    {
+        get
+        {
+            if (this.storageOptions.TryGetValue(StorageOption.Type, out var storageOption)
+                || this.storageOptions.TryGetValue(StorageOption.Individual, out storageOption)
+                || this.storageOptions.TryGetValue(StorageOption.Global, out storageOption))
+            {
+                return storageOption().DisplayName;
+            }
+
+            return string.Empty;
+        }
+    }
+
+    /// <inheritdoc />
     public abstract bool IsAlive { get; }
-
-    /// <inheritdoc />
-    public WeakReference<TSource> Source { get; }
-
-    /// <inheritdoc />
-    public abstract int Capacity { get; }
 
     /// <inheritdoc />
     public abstract IInventory Items { get; }
@@ -76,20 +73,16 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     public abstract GameLocation Location { get; }
 
     /// <inheritdoc />
-    public abstract Vector2 TileLocation { get; }
-
-    /// <inheritdoc />
     public abstract ModDataDictionary ModData { get; }
 
     /// <inheritdoc />
     public abstract NetMutex? Mutex { get; }
 
     /// <inheritdoc />
-    public IStorageContainer? Parent
-    {
-        get => this.parent?.TryGetTarget(out var target) == true ? target : null;
-        set => this.parent = new WeakReference<IStorageContainer?>(value);
-    }
+    public WeakReference<TSource> Source { get; }
+
+    /// <inheritdoc />
+    public abstract Vector2 TileLocation { get; }
 
     /// <inheritdoc />
     public RangeOption AccessChest
@@ -146,17 +139,6 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     }
 
     /// <inheritdoc />
-    public string CategorizeChestSearchTerm
-    {
-        get => this.Get(options => options.CategorizeChestSearchTerm);
-        set =>
-            this.Set(
-                options => options.CategorizeChestSearchTerm,
-                (options, newValue) => options.CategorizeChestSearchTerm = newValue,
-                value);
-    }
-
-    /// <inheritdoc />
     public FeatureOption CategorizeChestIncludeStacks
     {
         get => this.Get(options => options.CategorizeChestIncludeStacks);
@@ -164,6 +146,17 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
             this.Set(
                 options => options.CategorizeChestIncludeStacks,
                 (options, newValue) => options.CategorizeChestIncludeStacks = newValue,
+                value);
+    }
+
+    /// <inheritdoc />
+    public string CategorizeChestSearchTerm
+    {
+        get => this.Get(options => options.CategorizeChestSearchTerm);
+        set =>
+            this.Set(
+                options => options.CategorizeChestSearchTerm,
+                (options, newValue) => options.CategorizeChestSearchTerm = newValue,
                 value);
     }
 
@@ -247,6 +240,13 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
         get => this.Get(options => options.OpenHeldChest);
         set =>
             this.Set(options => options.OpenHeldChest, (options, newValue) => options.OpenHeldChest = newValue, value);
+    }
+
+    /// <inheritdoc />
+    public IStorageContainer? Parent
+    {
+        get => this.parent?.TryGetTarget(out var target) == true ? target : null;
+        set => this.parent = new WeakReference<IStorageContainer?>(value);
     }
 
     /// <inheritdoc />
@@ -367,6 +367,23 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
         this.storageOptions.Add(storageOption, getOptions);
 
     /// <inheritdoc />
+    public void ForEachItem(Func<Item, bool> action)
+    {
+        for (var index = this.Items.Count - 1; index >= 0; --index)
+        {
+            if (this.Items[index] is null)
+            {
+                continue;
+            }
+
+            if (!action(this.Items[index]))
+            {
+                break;
+            }
+        }
+    }
+
+    /// <inheritdoc />
     public IStorageOptions GetParentOptions()
     {
         var currentOptions = new DefaultStorageOptions();
@@ -425,44 +442,17 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     }
 
     /// <inheritdoc />
-    public void ForEachItem(Func<Item, bool> action)
+    public virtual void GrabItemFromChest(Item? item, Farmer who)
     {
-        for (var index = this.Items.Count - 1; index >= 0; --index)
-        {
-            if (this.Items[index] is null)
-            {
-                continue;
-            }
-
-            if (!action(this.Items[index]))
-            {
-                break;
-            }
-        }
-    }
-
-    /// <inheritdoc />
-    public virtual void ShowMenu(bool playSound = false)
-    {
-        var oldID = Game1.activeClickableMenu?.currentlySnappedComponent?.myID ?? -1;
-        Game1.activeClickableMenu = this.GetItemGrabMenu(
-            playSound,
-            context: this.Source.TryGetTarget(out var target) ? target : null);
-
-        if (oldID == -1)
+        if (item is null || !who.couldInventoryAcceptThisItem(item))
         {
             return;
         }
 
-        Game1.activeClickableMenu.currentlySnappedComponent = Game1.activeClickableMenu.getComponentWithID(oldID);
-        Game1.activeClickableMenu.snapCursorToCurrentSnappedComponent();
+        this.Items.Remove(item);
+        this.Items.RemoveEmptySlots();
+        this.ShowMenu();
     }
-
-    /// <inheritdoc />
-    public abstract bool TryAdd(Item item, out Item? remaining);
-
-    /// <inheritdoc />
-    public abstract bool TryRemove(Item item);
 
     /// <inheritdoc />
     public virtual void GrabItemFromInventory(Item? item, Farmer who)
@@ -501,20 +491,24 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     }
 
     /// <inheritdoc />
-    public virtual void GrabItemFromChest(Item? item, Farmer who)
+    public virtual bool HighlightItems(Item? item) => InventoryMenu.highlightAllItems(item);
+
+    /// <inheritdoc />
+    public virtual void ShowMenu(bool playSound = false)
     {
-        if (item is null || !who.couldInventoryAcceptThisItem(item))
+        var oldID = Game1.activeClickableMenu?.currentlySnappedComponent?.myID ?? -1;
+        Game1.activeClickableMenu = this.GetItemGrabMenu(
+            playSound,
+            context: this.Source.TryGetTarget(out var target) ? target : null);
+
+        if (oldID == -1)
         {
             return;
         }
 
-        this.Items.Remove(item);
-        this.Items.RemoveEmptySlots();
-        this.ShowMenu();
+        Game1.activeClickableMenu.currentlySnappedComponent = Game1.activeClickableMenu.getComponentWithID(oldID);
+        Game1.activeClickableMenu.snapCursorToCurrentSnappedComponent();
     }
-
-    /// <inheritdoc />
-    public virtual bool HighlightItems(Item? item) => InventoryMenu.highlightAllItems(item);
 
     /// <inheritdoc />
     public override string ToString()
@@ -532,6 +526,12 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
         sb.Append(CultureInfo.InvariantCulture, $"({this.TileLocation.X:n0}, {this.TileLocation.Y:n0})");
         return sb.ToString();
     }
+
+    /// <inheritdoc />
+    public abstract bool TryAdd(Item item, out Item? remaining);
+
+    /// <inheritdoc />
+    public abstract bool TryRemove(Item item);
 
     /// <summary>Opens an item grab menu for this container.</summary>
     /// <param name="playSound">Whether to play the container open sound.</param>

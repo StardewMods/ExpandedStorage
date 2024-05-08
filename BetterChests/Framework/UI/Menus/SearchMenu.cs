@@ -291,44 +291,6 @@ internal sealed class SearchMenu : BaseMenu
     }
 
     /// <inheritdoc />
-    public override void releaseLeftClick(int x, int y)
-    {
-        base.releaseLeftClick(x, y);
-        this.scrolling = false;
-    }
-
-    /// <inheritdoc />
-    public override void receiveScrollWheelAction(int direction)
-    {
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        base.receiveScrollWheelAction(direction);
-        if (direction < 0
-            && this.inventory.isWithinBounds(mouseX, mouseY)
-            && this.rowOffset < this.totalRows - this.inventory.rows - 1)
-        {
-            this.rowOffset++;
-            this.inventory.actualInventory = this
-                .allItems.Skip(this.rowOffset * (this.inventory.capacity / this.inventory.rows))
-                .Take(this.inventory.capacity)
-                .ToList();
-
-            Game1.playSound("shiny4");
-            return;
-        }
-
-        if (direction > 0 && this.inventory.isWithinBounds(mouseX, mouseY) && this.rowOffset > 0)
-        {
-            this.rowOffset--;
-            this.inventory.actualInventory = this
-                .allItems.Skip(this.rowOffset * (this.inventory.capacity / this.inventory.rows))
-                .Take(this.inventory.capacity)
-                .ToList();
-
-            Game1.playSound("shiny4");
-        }
-    }
-
-    /// <inheritdoc />
     public override void performHoverAction(int x, int y)
     {
         base.performHoverAction(x, y);
@@ -427,6 +389,44 @@ internal sealed class SearchMenu : BaseMenu
         }
 
         this.searchBar.Selected = false;
+    }
+
+    /// <inheritdoc />
+    public override void receiveScrollWheelAction(int direction)
+    {
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        base.receiveScrollWheelAction(direction);
+        if (direction < 0
+            && this.inventory.isWithinBounds(mouseX, mouseY)
+            && this.rowOffset < this.totalRows - this.inventory.rows - 1)
+        {
+            this.rowOffset++;
+            this.inventory.actualInventory = this
+                .allItems.Skip(this.rowOffset * (this.inventory.capacity / this.inventory.rows))
+                .Take(this.inventory.capacity)
+                .ToList();
+
+            Game1.playSound("shiny4");
+            return;
+        }
+
+        if (direction > 0 && this.inventory.isWithinBounds(mouseX, mouseY) && this.rowOffset > 0)
+        {
+            this.rowOffset--;
+            this.inventory.actualInventory = this
+                .allItems.Skip(this.rowOffset * (this.inventory.capacity / this.inventory.rows))
+                .Take(this.inventory.capacity)
+                .ToList();
+
+            Game1.playSound("shiny4");
+        }
+    }
+
+    /// <inheritdoc />
+    public override void releaseLeftClick(int x, int y)
+    {
+        base.releaseLeftClick(x, y);
+        this.scrolling = false;
     }
 
     private bool HighlightMethod(Item item) => true;

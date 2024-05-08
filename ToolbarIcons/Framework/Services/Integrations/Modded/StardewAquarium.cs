@@ -6,17 +6,17 @@ using StardewMods.ToolbarIcons.Framework.Interfaces;
 internal sealed class StardewAquarium : IMethodIntegration
 {
     /// <inheritdoc />
-    public int Index => 1;
+    public object?[] Arguments => ["aquariumprogress", Array.Empty<string>()];
 
     /// <inheritdoc />
     public string HoverText => I18n.Button_StardewAquarium();
 
     /// <inheritdoc />
-    public string ModId => "Cherry.StardewAquarium";
+    public int Index => 1;
 
     /// <inheritdoc />
     public string MethodName => "OpenAquariumCollectionMenu";
 
     /// <inheritdoc />
-    public object?[] Arguments => ["aquariumprogress", Array.Empty<string>()];
+    public string ModId => "Cherry.StardewAquarium";
 }

@@ -39,22 +39,18 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
     private bool initialize;
 
     /// <summary>Initializes a new instance of the <see cref="ThemeHelper" /> class.</summary>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public ThemeHelper(
-        IEventSubscriber eventSubscriber,
-        IGameContentHelper gameContentHelper,
-        ILog log,
-        IManifest manifest)
+    public ThemeHelper(IEventManager eventManager, IGameContentHelper gameContentHelper, ILog log, IManifest manifest)
         : base(log, manifest)
     {
         this.gameContentHelper = gameContentHelper;
-        eventSubscriber.Subscribe<AssetReadyEventArgs>(this.OnAssetReady);
-        eventSubscriber.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
-        eventSubscriber.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
-        eventSubscriber.Subscribe<SaveLoadedEventArgs>(this.OnSaveLoaded);
+        eventManager.Subscribe<AssetReadyEventArgs>(this.OnAssetReady);
+        eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
+        eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
+        eventManager.Subscribe<SaveLoadedEventArgs>(this.OnSaveLoaded);
     }
 
     /// <inheritdoc />

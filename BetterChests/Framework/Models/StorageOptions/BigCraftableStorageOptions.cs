@@ -14,17 +14,17 @@ internal sealed class BigCraftableStorageOptions : CustomFieldsStorageOptions
         : base(BigCraftableStorageOptions.GetCustomFields(itemId)) =>
         this.itemId = itemId;
 
-    /// <inheritdoc />
-    public override string Description => TokenParser.ParseText(this.Data.Description);
-
-    /// <inheritdoc />
-    public override string DisplayName => TokenParser.ParseText(this.Data.DisplayName);
-
     /// <summary>Gets the big craftable data.</summary>
     public BigCraftableData Data =>
         Game1.bigCraftableData.TryGetValue(this.itemId, out var bigCraftableData)
             ? bigCraftableData
             : new BigCraftableData();
+
+    /// <inheritdoc />
+    public override string Description => TokenParser.ParseText(this.Data.Description);
+
+    /// <inheritdoc />
+    public override string DisplayName => TokenParser.ParseText(this.Data.DisplayName);
 
     private static Func<Dictionary<string, string>?> GetCustomFields(string itemId) =>
         () => Game1.bigCraftableData.TryGetValue(itemId, out var bigCraftableData)

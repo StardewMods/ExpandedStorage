@@ -1,4 +1,6 @@
-﻿namespace StardewMods.Common.Services.Integrations.ProjectFluent;
+﻿// ReSharper disable All
+#pragma warning disable
+namespace StardewMods.Common.Services.Integrations.ProjectFluent;
 
 /// <summary>The Project Fluent API which other mods can access.</summary>
 public interface IProjectFluentApi

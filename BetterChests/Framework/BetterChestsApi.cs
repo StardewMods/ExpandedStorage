@@ -56,6 +56,14 @@ public sealed class BetterChestsApi : IBetterChestsApi
     }
 
     /// <inheritdoc />
+    public bool TryGetContainerFromBackpack(Farmer farmer, [NotNullWhen(true)] out IStorageContainer? container) =>
+        this.containerFactory.TryGetOne(farmer, out container);
+
+    /// <inheritdoc />
+    public bool TryGetContainerFromItem(Item item, [NotNullWhen(true)] out IStorageContainer? container) =>
+        this.containerFactory.TryGetOne(item, out container);
+
+    /// <inheritdoc />
     public bool TryGetContainerFromLocation(
         GameLocation location,
         Vector2 pos,
@@ -72,12 +80,4 @@ public sealed class BetterChestsApi : IBetterChestsApi
         int index,
         [NotNullWhen(true)] out IStorageContainer? container) =>
         this.containerFactory.TryGetOne(farmer, index, out container);
-
-    /// <inheritdoc />
-    public bool TryGetContainerFromBackpack(Farmer farmer, [NotNullWhen(true)] out IStorageContainer? container) =>
-        this.containerFactory.TryGetOne(farmer, out container);
-
-    /// <inheritdoc />
-    public bool TryGetContainerFromItem(Item item, [NotNullWhen(true)] out IStorageContainer? container) =>
-        this.containerFactory.TryGetOne(item, out container);
 }

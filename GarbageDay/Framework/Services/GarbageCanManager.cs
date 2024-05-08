@@ -15,7 +15,7 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Represents a manager for managing garbage cans in a game.</summary>
-internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
+internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
 {
     private readonly AssetHandler assetHandler;
     private readonly PerScreen<NPC?> currentNpc = new();
@@ -29,7 +29,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
 
     /// <summary>Initializes a new instance of the <see cref="GarbageCanManager" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
@@ -38,7 +38,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public GarbageCanManager(
         AssetHandler assetHandler,
-        IEventSubscriber eventSubscriber,
+        IEventManager eventManager,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
@@ -55,28 +55,11 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
         this.multiplayer = reflectionHelper.GetField<Multiplayer>(typeof(Game1), "multiplayer");
 
         // Events
-        eventSubscriber.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
-        eventSubscriber.Subscribe<MenuChangedEventArgs>(this.OnMenuChanged);
-        eventSubscriber.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
-        eventSubscriber.Subscribe<DayEndingEventArgs>(this.OnDayEnding);
-        eventSubscriber.Subscribe<DayStartedEventArgs>(this.OnDayStarted);
-    }
-
-    private void OnGameLaunched(GameLaunchedEventArgs e)
-    {
-        // Integrations
-        if (!this.toolbarIconsIntegration.IsLoaded)
-        {
-            return;
-        }
-
-        this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.Id,
-            this.assetHandler.IconTexturePath,
-            new Rectangle(0, 0, 16, 16),
-            I18n.Button_GarbageFill_Name());
-
-        this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
+        eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
+        eventManager.Subscribe<MenuChangedEventArgs>(this.OnMenuChanged);
+        eventManager.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
+        eventManager.Subscribe<DayEndingEventArgs>(this.OnDayEnding);
+        eventManager.Subscribe<DayStartedEventArgs>(this.OnDayStarted);
     }
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
@@ -179,6 +162,23 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
 
             garbageCan.AddLoot(this.Log);
         }
+    }
+
+    private void OnGameLaunched(GameLaunchedEventArgs e)
+    {
+        // Integrations
+        if (!this.toolbarIconsIntegration.IsLoaded)
+        {
+            return;
+        }
+
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(
+            this.Id,
+            this.assetHandler.IconTexturePath,
+            new Rectangle(0, 0, 16, 16),
+            I18n.Button_GarbageFill_Name());
+
+        this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
     }
 
     private void OnIconPressed(IIconPressedEventArgs e)

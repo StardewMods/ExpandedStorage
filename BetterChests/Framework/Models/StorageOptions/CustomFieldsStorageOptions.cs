@@ -12,10 +12,6 @@ internal class CustomFieldsStorageOptions : DictionaryStorageOptions
     private Dictionary<string, string> Data => this.getData() ?? [];
 
     /// <inheritdoc />
-    protected override bool TryGetValue(string key, [NotNullWhen(true)] out string? value) =>
-        this.Data.TryGetValue(key, out value);
-
-    /// <inheritdoc />
     protected override void SetValue(string key, string value)
     {
         if (string.IsNullOrWhiteSpace(value))
@@ -26,4 +22,8 @@ internal class CustomFieldsStorageOptions : DictionaryStorageOptions
 
         this.Data[key] = value;
     }
+
+    /// <inheritdoc />
+    protected override bool TryGetValue(string key, [NotNullWhen(true)] out string? value) =>
+        this.Data.TryGetValue(key, out value);
 }

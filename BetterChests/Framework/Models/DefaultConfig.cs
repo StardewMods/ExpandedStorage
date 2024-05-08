@@ -12,6 +12,27 @@ using StardewValley.Menus;
 internal sealed class DefaultConfig : IModConfig
 {
     /// <inheritdoc />
+    public bool AccessChestsShowArrows { get; set; } = true;
+
+    /// <inheritdoc />
+    public int CarryChestLimit { get; set; } = 3;
+
+    /// <inheritdoc />
+    public float CarryChestSlowAmount { get; set; } = -1f;
+
+    /// <inheritdoc />
+    public int CarryChestSlowLimit { get; set; } = 1;
+
+    /// <inheritdoc />
+    public Controls Controls { get; set; } = new();
+
+    /// <inheritdoc />
+    public HashSet<string> CraftFromChestDisableLocations { get; set; } = [];
+
+    /// <inheritdoc />
+    public bool DebugMode { get; set; }
+
+    /// <inheritdoc />
     public DefaultStorageOptions DefaultOptions { get; set; } = new()
     {
         AccessChest = RangeOption.Location,
@@ -41,40 +62,16 @@ internal sealed class DefaultConfig : IModConfig
     };
 
     /// <inheritdoc />
-    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions { get; set; } = [];
-
-    /// <inheritdoc />
-    public bool AccessChestsShowArrows { get; set; } = true;
-
-    /// <inheritdoc />
-    public int CarryChestLimit { get; set; } = 3;
-
-    /// <inheritdoc />
-    public float CarryChestSlowAmount { get; set; } = -1f;
-
-    /// <inheritdoc />
-    public int CarryChestSlowLimit { get; set; } = 1;
-
-    /// <inheritdoc />
-    public Controls Controls { get; set; } = new();
-
-    /// <inheritdoc />
-    public HashSet<string> CraftFromChestDisableLocations { get; set; } = [];
-
-    /// <inheritdoc />
-    public bool DebugMode { get; set; }
-
-    /// <inheritdoc />
     public int HslColorPickerHueSteps { get; set; } = 29;
-
-    /// <inheritdoc />
-    public int HslColorPickerSaturationSteps { get; set; } = 16;
 
     /// <inheritdoc />
     public int HslColorPickerLightnessSteps { get; set; } = 16;
 
     /// <inheritdoc />
     public InventoryMenu.BorderSide HslColorPickerPlacement { get; set; } = InventoryMenu.BorderSide.Right;
+
+    /// <inheritdoc />
+    public int HslColorPickerSaturationSteps { get; set; } = 16;
 
     /// <inheritdoc />
     public List<TabData> InventoryTabList { get; set; } =
@@ -164,6 +161,9 @@ internal sealed class DefaultConfig : IModConfig
         StorageInfoItem.UniqueItems,
         StorageInfoItem.TotalValue,
     ];
+
+    /// <inheritdoc />
+    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions { get; set; } = [];
 
     /// <inheritdoc />
     public override string ToString()

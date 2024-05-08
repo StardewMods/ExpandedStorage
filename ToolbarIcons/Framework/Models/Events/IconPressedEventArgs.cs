@@ -6,8 +6,8 @@ using StardewMods.Common.Services.Integrations.ToolbarIcons;
 internal sealed class IconPressedEventArgs(string id, SButton button) : EventArgs, IIconPressedEventArgs
 {
     /// <inheritdoc />
-    public string Id { get; } = id;
+    public SButton Button { get; } = button;
 
     /// <inheritdoc />
-    public SButton Button { get; } = button;
+    public string Id { get; } = id;
 }

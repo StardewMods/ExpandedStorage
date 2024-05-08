@@ -14,6 +14,10 @@ internal class BuildingStorageOptions : CustomFieldsStorageOptions
         : base(BuildingStorageOptions.GetCustomFields(buildingType)) =>
         this.buildingType = buildingType;
 
+    /// <summary>Gets the building data.</summary>
+    public BuildingData Data =>
+        Game1.buildingData.TryGetValue(this.buildingType, out var buildingData) ? buildingData : new BuildingData();
+
     /// <inheritdoc />
     public override string Description =>
         this.buildingType switch
@@ -27,10 +31,6 @@ internal class BuildingStorageOptions : CustomFieldsStorageOptions
         {
             "Stable" => I18n.Storage_Saddlebag_Name(), _ => TokenParser.ParseText(this.Data.Name),
         };
-
-    /// <summary>Gets the building data.</summary>
-    public BuildingData Data =>
-        Game1.buildingData.TryGetValue(this.buildingType, out var buildingData) ? buildingData : new BuildingData();
 
     private static Func<Dictionary<string, string>?> GetCustomFields(string buildingType) =>
         () => Game1.buildingData.TryGetValue(buildingType, out var buildingData) ? buildingData.CustomFields : null;

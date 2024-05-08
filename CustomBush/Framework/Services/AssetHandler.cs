@@ -17,21 +17,17 @@ internal sealed class AssetHandler : BaseService
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public AssetHandler(
-        IGameContentHelper gameContentHelper,
-        IEventSubscriber eventSubscriber,
-        ILog log,
-        IManifest manifest)
+    public AssetHandler(IGameContentHelper gameContentHelper, IEventManager eventManager, ILog log, IManifest manifest)
         : base(log, manifest)
     {
         this.gameContentHelper = gameContentHelper;
         this.dataPath = this.ModId + "/Data";
-        eventSubscriber.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
-        eventSubscriber.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
-        eventSubscriber.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
+        eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
+        eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
+        eventManager.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
     }
 
     /// <summary>Gets the data model for all Custom Bush.</summary>
@@ -54,16 +50,6 @@ internal sealed class AssetHandler : BaseService
         }
     }
 
-    private void OnConditionsApiReady(ConditionsApiReadyEventArgs e) => this.data = null;
-
-    private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
-    {
-        if (e.Names.Any(assetName => assetName.IsEquivalentTo(this.dataPath)))
-        {
-            this.data = null;
-        }
-    }
-
     private void OnAssetRequested(AssetRequestedEventArgs e)
     {
         if (e.Name.IsEquivalentTo(this.dataPath))
@@ -73,4 +59,14 @@ internal sealed class AssetHandler : BaseService
                 AssetLoadPriority.Exclusive);
         }
     }
+
+    private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
+    {
+        if (e.Names.Any(assetName => assetName.IsEquivalentTo(this.dataPath)))
+        {
+            this.data = null;
+        }
+    }
+
+    private void OnConditionsApiReady(ConditionsApiReadyEventArgs e) => this.data = null;
 }

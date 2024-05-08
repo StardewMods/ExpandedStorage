@@ -96,6 +96,19 @@ internal sealed class ModPatches : BaseService
             && this.assetHandler.Data.TryGetValue(id, out customBush);
     }
 
+    [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
+    private static Bush AddModData(Bush bush, SObject obj)
+    {
+        if (!ModPatches.instance.assetHandler.Data.ContainsKey(obj.QualifiedItemId))
+        {
+            return bush;
+        }
+
+        bush.modData[ModPatches.instance.modDataId] = obj.QualifiedItemId;
+        bush.setUpSourceRect();
+        return bush;
+    }
+
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static void Automate_GetOutput_postfix(object __instance, ref object __result)
@@ -115,19 +128,6 @@ internal sealed class ModPatches : BaseService
             item.SetValue(newItem);
             count.SetValue(newItem.Stack);
         }
-    }
-
-    [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
-    private static Bush AddModData(Bush bush, SObject obj)
-    {
-        if (!ModPatches.instance.assetHandler.Data.ContainsKey(obj.QualifiedItemId))
-        {
-            return bush;
-        }
-
-        bush.modData[ModPatches.instance.modDataId] = obj.QualifiedItemId;
-        bush.setUpSourceRect();
-        return bush;
     }
 
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
@@ -366,28 +366,6 @@ internal sealed class ModPatches : BaseService
                 CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.CreateObjectDebris)))
             .InstructionEnumeration();
 
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
-    [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
-    private static void GameLocation_CheckItemPlantRules_postfix(
-        GameLocation __instance,
-        ref bool __result,
-        string itemId,
-        bool isGardenPot,
-        bool defaultAllowed,
-        ref string deniedMessage)
-    {
-        var metadata = ItemRegistry.GetMetadata(itemId);
-        if (metadata is null
-            || !ModPatches.instance.assetHandler.Data.TryGetValue(metadata.QualifiedItemId, out var bushModel))
-        {
-            return;
-        }
-
-        var parameters = new object[] { bushModel.PlantableLocationRules, isGardenPot, defaultAllowed, null! };
-        __result = (bool)ModPatches.instance.checkItemPlantRules.Invoke(__instance, parameters)!;
-        deniedMessage = (string)parameters[3];
-    }
-
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
     private static Item CreateBushItem(string itemId, int amount, int quality, bool allowNull, Bush bush)
     {
@@ -496,6 +474,28 @@ internal sealed class ModPatches : BaseService
     }
 
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
+    [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
+    private static void GameLocation_CheckItemPlantRules_postfix(
+        GameLocation __instance,
+        ref bool __result,
+        string itemId,
+        bool isGardenPot,
+        bool defaultAllowed,
+        ref string deniedMessage)
+    {
+        var metadata = ItemRegistry.GetMetadata(itemId);
+        if (metadata is null
+            || !ModPatches.instance.assetHandler.Data.TryGetValue(metadata.QualifiedItemId, out var bushModel))
+        {
+            return;
+        }
+
+        var parameters = new object[] { bushModel.PlantableLocationRules, isGardenPot, defaultAllowed, null! };
+        __result = (bool)ModPatches.instance.checkItemPlantRules.Invoke(__instance, parameters)!;
+        deniedMessage = (string)parameters[3];
+    }
+
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("ReSharper", "IdentifierTypo", Justification = "Harmony")]
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static void HoeDirt_canPlantThisSeedHere_postfix(string itemId, ref bool __result)
@@ -590,83 +590,6 @@ internal sealed class ModPatches : BaseService
                 CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.AddModData)))
             .InstructionEnumeration();
 
-    private bool TryToProduceRandomItem(Bush bush, CustomBush customBush, [NotNullWhen(true)] out Item? item)
-    {
-        foreach (var drop in customBush.ItemsProduced)
-        {
-            item = this.TryToProduceItem(bush, drop);
-            if (item is null)
-            {
-                continue;
-            }
-
-            return true;
-        }
-
-        item = null;
-        return false;
-    }
-
-    [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
-    private Item? TryToProduceItem(Bush bush, ICustomBushDrop drop)
-    {
-        if (!Game1.random.NextBool(drop.Chance))
-        {
-            return null;
-        }
-
-        if (drop.Condition != null
-            && !GameStateQuery.CheckConditions(
-                drop.Condition,
-                bush.Location,
-                null,
-                null,
-                null,
-                null,
-                bush.Location.SeedsIgnoreSeasonsHere() ? GameStateQuery.SeasonQueryKeys : null))
-        {
-            ModPatches.instance.Log.Trace(
-                "{0} did not select {1}. Failed: {2}",
-                bush.modData[ModPatches.instance.modDataId],
-                drop.Id,
-                drop.Condition);
-
-            return null;
-        }
-
-        if (drop.Season.HasValue
-            && bush.Location.SeedsIgnoreSeasonsHere()
-            && drop.Season != Game1.GetSeasonForLocation(bush.Location))
-        {
-            ModPatches.instance.Log.Trace(
-                "{0} did not select {1}. Failed: {2}",
-                bush.modData[ModPatches.instance.modDataId],
-                drop.Id,
-                drop.Season.ToString());
-
-            return null;
-        }
-
-        var item = ItemQueryResolver.TryResolveRandomItem(
-            drop,
-            new ItemQueryContext(bush.Location, null, null),
-            false,
-            null,
-            null,
-            null,
-            delegate(string query, string error)
-            {
-                this.Log.Error(
-                    "{0} failed parsing item query {1} for item {2}: {3}",
-                    bush.modData[ModPatches.instance.modDataId],
-                    query,
-                    drop.Id,
-                    error);
-            });
-
-        return item;
-    }
-
     private void OnGameLaunched(GameLaunchedEventArgs e)
     {
         // Patches
@@ -746,5 +669,82 @@ internal sealed class ModPatches : BaseService
         }
 
         this.patchManager.Patch(this.ModId);
+    }
+
+    [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
+    private Item? TryToProduceItem(Bush bush, ICustomBushDrop drop)
+    {
+        if (!Game1.random.NextBool(drop.Chance))
+        {
+            return null;
+        }
+
+        if (drop.Condition != null
+            && !GameStateQuery.CheckConditions(
+                drop.Condition,
+                bush.Location,
+                null,
+                null,
+                null,
+                null,
+                bush.Location.SeedsIgnoreSeasonsHere() ? GameStateQuery.SeasonQueryKeys : null))
+        {
+            ModPatches.instance.Log.Trace(
+                "{0} did not select {1}. Failed: {2}",
+                bush.modData[ModPatches.instance.modDataId],
+                drop.Id,
+                drop.Condition);
+
+            return null;
+        }
+
+        if (drop.Season.HasValue
+            && bush.Location.SeedsIgnoreSeasonsHere()
+            && drop.Season != Game1.GetSeasonForLocation(bush.Location))
+        {
+            ModPatches.instance.Log.Trace(
+                "{0} did not select {1}. Failed: {2}",
+                bush.modData[ModPatches.instance.modDataId],
+                drop.Id,
+                drop.Season.ToString());
+
+            return null;
+        }
+
+        var item = ItemQueryResolver.TryResolveRandomItem(
+            drop,
+            new ItemQueryContext(bush.Location, null, null),
+            false,
+            null,
+            null,
+            null,
+            delegate(string query, string error)
+            {
+                this.Log.Error(
+                    "{0} failed parsing item query {1} for item {2}: {3}",
+                    bush.modData[ModPatches.instance.modDataId],
+                    query,
+                    drop.Id,
+                    error);
+            });
+
+        return item;
+    }
+
+    private bool TryToProduceRandomItem(Bush bush, CustomBush customBush, [NotNullWhen(true)] out Item? item)
+    {
+        foreach (var drop in customBush.ItemsProduced)
+        {
+            item = this.TryToProduceItem(bush, drop);
+            if (item is null)
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        item = null;
+        return false;
     }
 }

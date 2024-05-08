@@ -1,3 +1,5 @@
+// ReSharper disable All
+#pragma warning disable
 namespace StardewMods.Common.Services.Integrations.BetterCrafting;
 #nullable enable
 

@@ -7,10 +7,10 @@ using StardewValley.Menus;
 internal sealed class SpecialOrders : IVanillaIntegration
 {
     /// <inheritdoc />
-    public int Index => 8;
+    public string HoverText => I18n.Button_SpecialOrders();
 
     /// <inheritdoc />
-    public string HoverText => I18n.Button_SpecialOrders();
+    public int Index => 8;
 
     /// <inheritdoc />
     public void DoAction() => Game1.activeClickableMenu = new SpecialOrdersBoard();

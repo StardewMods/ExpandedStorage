@@ -17,10 +17,10 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
     private readonly Dictionary<string, CachedValue<RangeOption>> cachedRangeOption = new();
 
     /// <inheritdoc />
-    public virtual string DisplayName => I18n.Storage_Other_Tooltip();
+    public virtual string Description => I18n.Storage_Other_Name();
 
     /// <inheritdoc />
-    public virtual string Description => I18n.Storage_Other_Name();
+    public virtual string DisplayName => I18n.Storage_Other_Tooltip();
 
     /// <inheritdoc />
     public RangeOption AccessChest
@@ -65,17 +65,17 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
-    public string CategorizeChestSearchTerm
-    {
-        get => this.Get(StringKey.CategorizeChestSearchTerm);
-        set => this.Set(StringKey.CategorizeChestSearchTerm, value);
-    }
-
-    /// <inheritdoc />
     public FeatureOption CategorizeChestIncludeStacks
     {
         get => this.Get(OptionKey.CategorizeChestIncludeStacks);
         set => this.Set(OptionKey.CategorizeChestIncludeStacks, value);
+    }
+
+    /// <inheritdoc />
+    public string CategorizeChestSearchTerm
+    {
+        get => this.Get(StringKey.CategorizeChestSearchTerm);
+        set => this.Set(StringKey.CategorizeChestSearchTerm, value);
     }
 
     /// <inheritdoc />
@@ -238,16 +238,16 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
         set => this.Set(StringKey.StorageName, value);
     }
 
+    /// <summary>Sets the value for a given key in the derived class.</summary>
+    /// <param name="key">The key associated with the value.</param>
+    /// <param name="value">The value to be set.</param>
+    protected abstract void SetValue(string key, string value);
+
     /// <summary>Tries to get the data associated with the specified key.</summary>
     /// <param name="key">The key to search for.</param>
     /// <param name="value">When this method returns, contains the value associated with the specified key; otherwise, null.</param>
     /// <returns>true if the key was found; otherwise, false.</returns>
     protected abstract bool TryGetValue(string key, [NotNullWhen(true)] out string? value);
-
-    /// <summary>Sets the value for a given key in the derived class.</summary>
-    /// <param name="key">The key associated with the value.</param>
-    /// <param name="value">The value to be set.</param>
-    protected abstract void SetValue(string key, string value);
 
     private FeatureOption Get(OptionKey optionKey)
     {

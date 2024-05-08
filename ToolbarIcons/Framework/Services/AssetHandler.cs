@@ -7,7 +7,7 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.ToolbarIcons.Framework.Models;
 
 /// <summary>Responsible for handling assets provided by this mod.</summary>
-internal sealed class AssetHandler : BaseService<AssetHandler>
+internal sealed class AssetHandler : GenericBaseService<AssetHandler>
 {
     /// <summary>Represents the width of the default icon texture.</summary>
     public const int IconTextureWidth = 128;
@@ -19,14 +19,14 @@ internal sealed class AssetHandler : BaseService<AssetHandler>
     private readonly Lazy<IManagedTexture> icons;
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public AssetHandler(
-        IEventSubscriber eventSubscriber,
+        IEventManager eventManager,
         IGameContentHelper gameContentHelper,
         ILog log,
         IManifest manifest,
@@ -49,7 +49,7 @@ internal sealed class AssetHandler : BaseService<AssetHandler>
                 modContentHelper.Load<IRawTextureData>("assets/icons.png")));
 
         // Events
-        eventSubscriber.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
+        eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
     }
 
     /// <summary>Gets the managed arrows texture.</summary>

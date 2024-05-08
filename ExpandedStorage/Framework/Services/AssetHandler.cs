@@ -19,14 +19,14 @@ internal sealed class AssetHandler : BaseService
     private readonly Dictionary<string, IStorageData> data = new();
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
-    /// <param name="eventSubscriber">Dependency used for subscribing to events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public AssetHandler(IEventSubscriber eventSubscriber, ILog log, IManifest manifest)
+    public AssetHandler(IEventManager eventManager, ILog log, IManifest manifest)
         : base(log, manifest)
     {
-        eventSubscriber.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
-        eventSubscriber.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
+        eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
+        eventManager.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
     }
 
     /// <summary>Tries to retrieve the storage data associated with the specified item.</summary>

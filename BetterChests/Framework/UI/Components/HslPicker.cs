@@ -195,6 +195,162 @@ internal sealed class HslPicker
     /// <summary>Gets the current hsl color.</summary>
     public HslColor CurrentColor { get; private set; }
 
+    /// <summary>Draw the color picker.</summary>
+    /// <param name="spriteBatch">The sprite batch used for drawing.</param>
+    public void Draw(SpriteBatch spriteBatch)
+    {
+        // Get Input states
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+
+        // Update components
+        this.hue.Update(mouseX, mouseY);
+        this.saturation.Update(mouseX, mouseY);
+        this.lightness.Update(mouseX, mouseY);
+
+        // Background
+        IClickableMenu.drawTextureBox(
+            spriteBatch,
+            this.xPosition - (IClickableMenu.borderWidth / 2),
+            this.yPosition - (IClickableMenu.borderWidth / 2),
+            58 + IClickableMenu.borderWidth,
+            558 + IClickableMenu.borderWidth,
+            Color.LightGray);
+
+        // Default color component
+        this.defaultColorComponent.draw(spriteBatch);
+
+        // Copy component
+        this.copyComponent.draw(spriteBatch);
+
+        // Hue slider
+        this.hue.Draw(spriteBatch);
+
+        // Saturation slider
+        this.saturation.Draw(spriteBatch);
+
+        // Lightness slider
+        this.lightness.Draw(spriteBatch);
+
+        // Default color selected
+        if (this.colorPicker.colorSelection == 0)
+        {
+            IClickableMenu.drawTextureBox(
+                spriteBatch,
+                Game1.mouseCursors,
+                new Rectangle(375, 357, 3, 3),
+                this.defaultColorArea.X,
+                this.defaultColorArea.Y,
+                36,
+                36,
+                Color.Black,
+                Game1.pixelZoom,
+                false);
+        }
+
+        // Chest
+        var hovering = this.chestComponent.containsPoint(mouseX, mouseY);
+        if (hovering != this.hoverChest)
+        {
+            this.lidFrameCount = 0;
+            this.hoverChest = hovering;
+        }
+        else if (++this.lidFrameCount < 5)
+        {
+            // Do nothing
+        }
+        else if (this.hoverChest)
+        {
+            this.lidFrameCount = 0;
+            var nextFrame = Math.Min(this.chest.getLastLidFrame(), this.currentLidFrame.GetValue() + 1);
+            this.currentLidFrame.SetValue(nextFrame);
+        }
+        else
+        {
+            this.lidFrameCount = 0;
+            var nextFrame = Math.Max(this.chest.startingLidFrame.Value, this.currentLidFrame.GetValue() - 1);
+            this.currentLidFrame.SetValue(nextFrame);
+        }
+
+        this.chest.draw(spriteBatch, this.chestComponent.bounds.X, this.chestComponent.bounds.Y, local: true);
+
+        var isDown = this.inputHelper.IsDown(SButton.MouseLeft) || this.inputHelper.IsSuppressed(SButton.MouseLeft);
+        if (!isDown)
+        {
+            if (this.holding is not null)
+            {
+                this.holding.Holding = false;
+                this.holding = null;
+            }
+        }
+    }
+
+    /// <summary>Performs a left-click action based on the given mouse coordinates.</summary>
+    /// <param name="mouseX">The x-coordinate of the mouse.</param>
+    /// <param name="mouseY">The y-coordinate of the mouse.</param>
+    /// <returns>true if the left-click action was successfully performed; otherwise, false.</returns>
+    public bool LeftClick(int mouseX, int mouseY)
+    {
+        if (this.holding is not null)
+        {
+            return false;
+        }
+
+        if (this.defaultColorArea.Contains(mouseX, mouseY))
+        {
+            this.CurrentColor = HslPicker.Transparent;
+            this.colorPicker.colorSelection = 0;
+            this.UpdateColor();
+            return true;
+        }
+
+        if (this.copyArea.Contains(mouseX, mouseY))
+        {
+            HslPicker.SavedColor.Value = this.CurrentColor;
+            return true;
+        }
+
+        if (this.hue.LeftClick(mouseX, mouseY))
+        {
+            this.holding = this.hue;
+            return true;
+        }
+
+        if (this.saturation.LeftClick(mouseX, mouseY))
+        {
+            this.holding = this.saturation;
+            return true;
+        }
+
+        if (this.lightness.LeftClick(mouseX, mouseY))
+        {
+            this.holding = this.lightness;
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <summary>Performs a right-click action based on the given mouse coordinates.</summary>
+    /// <param name="mouseX">The x-coordinate of the mouse.</param>
+    /// <param name="mouseY">The y-coordinate of the mouse.</param>
+    /// <returns>true if the right-click action was successfully performed; otherwise, false.</returns>
+    public bool RightClick(int mouseX, int mouseY)
+    {
+        if (this.holding is not null)
+        {
+            return false;
+        }
+
+        if (this.copyArea.Contains(mouseX, mouseY))
+        {
+            this.CurrentColor = HslPicker.SavedColor.Value;
+            this.UpdateColor();
+            return true;
+        }
+
+        return false;
+    }
+
     /// <summary>Sets up the border neighbors for the color picker.</summary>
     public void SetupBorderNeighbors()
     {
@@ -288,162 +444,6 @@ internal sealed class HslPicker
                 borderNeighbors.MinBy(c => Math.Abs(c.bounds.Center.Y - localNeighbor.bounds.Center.Y));
 
             setLocalNeighbor(localNeighbor, borderNeighbor?.myID ?? -1);
-        }
-    }
-
-    /// <summary>Performs a left-click action based on the given mouse coordinates.</summary>
-    /// <param name="mouseX">The x-coordinate of the mouse.</param>
-    /// <param name="mouseY">The y-coordinate of the mouse.</param>
-    /// <returns>true if the left-click action was successfully performed; otherwise, false.</returns>
-    public bool LeftClick(int mouseX, int mouseY)
-    {
-        if (this.holding is not null)
-        {
-            return false;
-        }
-
-        if (this.defaultColorArea.Contains(mouseX, mouseY))
-        {
-            this.CurrentColor = HslPicker.Transparent;
-            this.colorPicker.colorSelection = 0;
-            this.UpdateColor();
-            return true;
-        }
-
-        if (this.copyArea.Contains(mouseX, mouseY))
-        {
-            HslPicker.SavedColor.Value = this.CurrentColor;
-            return true;
-        }
-
-        if (this.hue.LeftClick(mouseX, mouseY))
-        {
-            this.holding = this.hue;
-            return true;
-        }
-
-        if (this.saturation.LeftClick(mouseX, mouseY))
-        {
-            this.holding = this.saturation;
-            return true;
-        }
-
-        if (this.lightness.LeftClick(mouseX, mouseY))
-        {
-            this.holding = this.lightness;
-            return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>Performs a right-click action based on the given mouse coordinates.</summary>
-    /// <param name="mouseX">The x-coordinate of the mouse.</param>
-    /// <param name="mouseY">The y-coordinate of the mouse.</param>
-    /// <returns>true if the right-click action was successfully performed; otherwise, false.</returns>
-    public bool RightClick(int mouseX, int mouseY)
-    {
-        if (this.holding is not null)
-        {
-            return false;
-        }
-
-        if (this.copyArea.Contains(mouseX, mouseY))
-        {
-            this.CurrentColor = HslPicker.SavedColor.Value;
-            this.UpdateColor();
-            return true;
-        }
-
-        return false;
-    }
-
-    /// <summary>Draw the color picker.</summary>
-    /// <param name="spriteBatch">The sprite batch used for drawing.</param>
-    public void Draw(SpriteBatch spriteBatch)
-    {
-        // Get Input states
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-
-        // Update components
-        this.hue.Update(mouseX, mouseY);
-        this.saturation.Update(mouseX, mouseY);
-        this.lightness.Update(mouseX, mouseY);
-
-        // Background
-        IClickableMenu.drawTextureBox(
-            spriteBatch,
-            this.xPosition - (IClickableMenu.borderWidth / 2),
-            this.yPosition - (IClickableMenu.borderWidth / 2),
-            58 + IClickableMenu.borderWidth,
-            558 + IClickableMenu.borderWidth,
-            Color.LightGray);
-
-        // Default color component
-        this.defaultColorComponent.draw(spriteBatch);
-
-        // Copy component
-        this.copyComponent.draw(spriteBatch);
-
-        // Hue slider
-        this.hue.Draw(spriteBatch);
-
-        // Saturation slider
-        this.saturation.Draw(spriteBatch);
-
-        // Lightness slider
-        this.lightness.Draw(spriteBatch);
-
-        // Default color selected
-        if (this.colorPicker.colorSelection == 0)
-        {
-            IClickableMenu.drawTextureBox(
-                spriteBatch,
-                Game1.mouseCursors,
-                new Rectangle(375, 357, 3, 3),
-                this.defaultColorArea.X,
-                this.defaultColorArea.Y,
-                36,
-                36,
-                Color.Black,
-                Game1.pixelZoom,
-                false);
-        }
-
-        // Chest
-        var hovering = this.chestComponent.containsPoint(mouseX, mouseY);
-        if (hovering != this.hoverChest)
-        {
-            this.lidFrameCount = 0;
-            this.hoverChest = hovering;
-        }
-        else if (++this.lidFrameCount < 5)
-        {
-            // Do nothing
-        }
-        else if (this.hoverChest)
-        {
-            this.lidFrameCount = 0;
-            var nextFrame = Math.Min(this.chest.getLastLidFrame(), this.currentLidFrame.GetValue() + 1);
-            this.currentLidFrame.SetValue(nextFrame);
-        }
-        else
-        {
-            this.lidFrameCount = 0;
-            var nextFrame = Math.Max(this.chest.startingLidFrame.Value, this.currentLidFrame.GetValue() - 1);
-            this.currentLidFrame.SetValue(nextFrame);
-        }
-
-        this.chest.draw(spriteBatch, this.chestComponent.bounds.X, this.chestComponent.bounds.Y, local: true);
-
-        var isDown = this.inputHelper.IsDown(SButton.MouseLeft) || this.inputHelper.IsSuppressed(SButton.MouseLeft);
-        if (!isDown)
-        {
-            if (this.holding is not null)
-            {
-                this.holding.Holding = false;
-                this.holding = null;
-            }
         }
     }
 

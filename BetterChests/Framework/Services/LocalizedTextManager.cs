@@ -87,26 +87,6 @@ internal sealed class LocalizedTextManager : BaseService
             return sb.ToString();
         };
 
-    /// <summary>Formats menu size using localized text when available.</summary>
-    /// <param name="parentOption">The menu size this value inherits from.</param>
-    /// <returns>Localized text for the menu size.</returns>
-    public Func<string, string> FormatMenuSize(ChestMenuOption? parentOption = null) =>
-        value =>
-        {
-            var actualOption = ChestMenuOptionExtensions.TryParse(value, out var option)
-                ? option
-                : ChestMenuOption.Default;
-
-            var sb = new StringBuilder();
-            if (parentOption?.Equals(actualOption) == true)
-            {
-                sb.Append(I18n.Config_DefaultOption_Indicator());
-            }
-
-            sb.Append(this.FormatMenuSize(actualOption));
-            return sb.ToString();
-        };
-
     /// <summary>Formats range distance using localized text when available.</summary>
     /// <param name="parentOption">The range this value inherits from.</param>
     /// <param name="parentValue">The distance this value inherits from.</param>
@@ -148,6 +128,26 @@ internal sealed class LocalizedTextManager : BaseService
             }
 
             sb.Append(actualValue);
+            return sb.ToString();
+        };
+
+    /// <summary>Formats menu size using localized text when available.</summary>
+    /// <param name="parentOption">The menu size this value inherits from.</param>
+    /// <returns>Localized text for the menu size.</returns>
+    public Func<string, string> FormatMenuSize(ChestMenuOption? parentOption = null) =>
+        value =>
+        {
+            var actualOption = ChestMenuOptionExtensions.TryParse(value, out var option)
+                ? option
+                : ChestMenuOption.Default;
+
+            var sb = new StringBuilder();
+            if (parentOption?.Equals(actualOption) == true)
+            {
+                sb.Append(I18n.Config_DefaultOption_Indicator());
+            }
+
+            sb.Append(this.FormatMenuSize(actualOption));
             return sb.ToString();
         };
 

@@ -10,10 +10,10 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 {
     /// <summary>Initializes a new instance of the <see cref="ConfigManager" /> class.</summary>
     /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
-    /// <param name="eventPublisher">Dependency used for publishing events.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="modHelper">Dependency for events, input, and content.</param>
-    public ConfigManager(IDataHelper dataHelper, IEventPublisher eventPublisher, IModHelper modHelper)
-        : base(dataHelper, eventPublisher, modHelper) { }
+    public ConfigManager(IDataHelper dataHelper, IEventManager eventManager, IModHelper modHelper)
+        : base(dataHelper, eventManager, modHelper) { }
 
     /// <inheritdoc />
     public DayOfWeek GarbageDay => this.Config.GarbageDay;

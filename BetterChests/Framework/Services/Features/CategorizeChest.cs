@@ -15,7 +15,7 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
 {
     private readonly PerScreen<List<Item>> cachedItems = new(() => []);
-    private readonly ICacheTable<ISearchExpression?> cachedSearches;
+    private readonly GenericCacheTable<ISearchExpression?> cachedSearches;
     private readonly MenuHandler menuHandler;
     private readonly SearchHandler searchHandler;
 
@@ -63,6 +63,44 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
         this.Events.Unsubscribe<ItemsDisplayingEventArgs>(this.OnItemsDisplaying);
         this.Events.Unsubscribe<ItemTransferringEventArgs>(this.OnItemTransferring);
         this.Events.Unsubscribe<SearchChangedEventArgs>(this.OnSearchChanged);
+    }
+
+    private bool CanAcceptItem(IStorageContainer container, Item item, out bool accepted)
+    {
+        accepted = false;
+        var includeStacks = container.CategorizeChestIncludeStacks == FeatureOption.Enabled;
+        var hasStacks = container.Items.ContainsId(item.QualifiedItemId);
+        if (includeStacks && hasStacks)
+        {
+            accepted = true;
+            return true;
+        }
+
+        // Cannot handle if there is no search term
+        if (string.IsNullOrWhiteSpace(container.CategorizeChestSearchTerm))
+        {
+            return false;
+        }
+
+        // Retrieve search expression from cache or generate a new one
+        if (!this.cachedSearches.TryGetValue(container.CategorizeChestSearchTerm, out var searchExpression))
+        {
+            this.cachedSearches.AddOrUpdate(
+                container.CategorizeChestSearchTerm,
+                this.searchHandler.TryParseExpression(container.CategorizeChestSearchTerm, out searchExpression)
+                    ? searchExpression
+                    : null);
+        }
+
+        // Cannot handle if search term is invalid
+        if (searchExpression is null)
+        {
+            return false;
+        }
+
+        // Check if item matches search expressions
+        accepted = searchExpression.PartialMatch(item);
+        return true;
     }
 
     private void OnItemHighlighting(ItemHighlightingEventArgs e)
@@ -130,43 +168,5 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
         }
 
         this.cachedItems.Value = [..ItemRepository.GetItems(e.SearchExpression.PartialMatch)];
-    }
-
-    private bool CanAcceptItem(IStorageContainer container, Item item, out bool accepted)
-    {
-        accepted = false;
-        var includeStacks = container.CategorizeChestIncludeStacks == FeatureOption.Enabled;
-        var hasStacks = container.Items.ContainsId(item.QualifiedItemId);
-        if (includeStacks && hasStacks)
-        {
-            accepted = true;
-            return true;
-        }
-
-        // Cannot handle if there is no search term
-        if (string.IsNullOrWhiteSpace(container.CategorizeChestSearchTerm))
-        {
-            return false;
-        }
-
-        // Retrieve search expression from cache or generate a new one
-        if (!this.cachedSearches.TryGetValue(container.CategorizeChestSearchTerm, out var searchExpression))
-        {
-            this.cachedSearches.AddOrUpdate(
-                container.CategorizeChestSearchTerm,
-                this.searchHandler.TryParseExpression(container.CategorizeChestSearchTerm, out searchExpression)
-                    ? searchExpression
-                    : null);
-        }
-
-        // Cannot handle if search term is invalid
-        if (searchExpression is null)
-        {
-            return false;
-        }
-
-        // Check if item matches search expressions
-        accepted = searchExpression.PartialMatch(item);
-        return true;
     }
 }

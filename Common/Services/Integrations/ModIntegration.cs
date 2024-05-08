@@ -21,11 +21,6 @@ internal abstract class ModIntegration<T> : IModIntegration
         this.modApi = new Lazy<T?>(() => this.ModRegistry.GetApi<T>(this.UniqueId));
     }
 
-    /// <summary>Gets the Mod's API through SMAPI's standard interface.</summary>
-    protected internal T? Api => this.IsLoaded ? this.modApi.Value : default(T?);
-
-    private IModRegistry ModRegistry { get; }
-
     /// <inheritdoc />
     [MemberNotNullWhen(true, nameof(ModIntegration<T>.Api), nameof(ModIntegration<T>.ModInfo))]
     public bool IsLoaded =>
@@ -40,4 +35,9 @@ internal abstract class ModIntegration<T> : IModIntegration
 
     /// <inheritdoc />
     public string? Version { get; }
+
+    /// <summary>Gets the Mod's API through SMAPI's standard interface.</summary>
+    protected internal T? Api => this.IsLoaded ? this.modApi.Value : default(T?);
+
+    private IModRegistry ModRegistry { get; }
 }
