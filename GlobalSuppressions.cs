@@ -7,6 +7,7 @@
 [assembly: SuppressMessage("StyleCop", "SA1010", Justification = "Reviewed.", Scope = "module")]
 [assembly: SuppressMessage("StyleCop", "SA1118", Justification = "Reviewed.", Scope = "module")]
 [assembly: SuppressMessage("StyleCop", "SA1407", Justification = "Reviewed.", Scope = "module")]
+[assembly: SuppressMessage("StyleCop", "SA1502", Justification = "Reviewed.", Scope = "module")]
 [assembly: SuppressMessage("StyleCop", "SA1513", Justification = "Reviewed.", Scope = "module")]
 [assembly: SuppressMessage("StyleCop", "SA1633", Justification = "Reviewed.", Scope = "module")]
 [assembly:

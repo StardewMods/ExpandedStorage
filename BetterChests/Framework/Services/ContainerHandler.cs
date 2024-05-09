@@ -93,7 +93,7 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
     /// <param name="item">The item to add.</param>
     /// <param name="allowByDefault">Indicates whether it should be allowed by default.</param>
     /// <param name="force">Indicates whether it should be a forced attempt.</param>
-    /// <returns>true if the item can be added; otherwise, false.</returns>
+    /// <returns><c>true</c> if the item can be added; otherwise, <c>false</c>.</returns>
     public bool CanAddItem(IStorageContainer to, Item item, bool allowByDefault = false, bool force = false)
     {
         var hasItem = to.Items.ContainsId(item.QualifiedItemId);
@@ -244,7 +244,7 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
     /// <param name="amounts">Output parameter that contains the transferred item amounts.</param>
     /// <param name="force">Indicates whether to attempt to force the transfer.</param>
     /// <param name="existingOnly">Indicates whether to only transfer to existing stacks.</param>
-    /// <returns>true if the transfer was successful; otherwise, false.</returns>
+    /// <returns><c>true</c> if the transfer was successful; otherwise, <c>false</c>.</returns>
     public bool Transfer(
         IStorageContainer from,
         IStorageContainer to,

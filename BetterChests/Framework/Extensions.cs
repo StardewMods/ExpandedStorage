@@ -273,7 +273,7 @@ internal static class Extensions
     /// <param name="options">The storage options.</param>
     /// <param name="name">The name of the option.</param>
     /// <param name="value">The value of the specified option or null.</param>
-    /// <returns>true if the options exists; otherwise, false.</returns>
+    /// <returns><c>true</c> if the options exists; otherwise, <c>false</c>.</returns>
     public static bool TryGetOption(this IStorageOptions options, string name, out FeatureOption value)
     {
         value = name switch
@@ -304,7 +304,7 @@ internal static class Extensions
     /// <param name="options">The storage options.</param>
     /// <param name="name">The name of the option.</param>
     /// <param name="value">The value of the specified option or null.</param>
-    /// <returns>true if the options exists; otherwise, false.</returns>
+    /// <returns><c>true</c> if the options exists; otherwise, <c>false</c>.</returns>
     public static bool TryGetOption(this IStorageOptions options, string name, out RangeOption value)
     {
         value = name switch
@@ -323,7 +323,7 @@ internal static class Extensions
     /// <param name="options">The storage options.</param>
     /// <param name="name">The name of the option.</param>
     /// <param name="value">The value of the specified option or null.</param>
-    /// <returns>true if the options exists; otherwise, false.</returns>
+    /// <returns><c>true</c> if the options exists; otherwise, <c>false</c>.</returns>
     public static bool TryGetOption(this IStorageOptions options, string name, out ChestMenuOption value)
     {
         value = name switch
@@ -338,7 +338,7 @@ internal static class Extensions
     /// <param name="options">The storage options.</param>
     /// <param name="name">The name of the option.</param>
     /// <param name="value">The value of the specified option or null.</param>
-    /// <returns>true if the options exists; otherwise, false.</returns>
+    /// <returns><c>true</c> if the options exists; otherwise, <c>false</c>.</returns>
     public static bool TryGetOption(this IStorageOptions options, string name, out StashPriority value)
     {
         value = name switch
@@ -354,7 +354,7 @@ internal static class Extensions
     /// <param name="options">The storage options.</param>
     /// <param name="name">The name of the option.</param>
     /// <param name="value">The value of the specified option or null.</param>
-    /// <returns>true if the options exists; otherwise, false.</returns>
+    /// <returns><c>true</c> if the options exists; otherwise, <c>false</c>.</returns>
     public static bool TryGetOption(this IStorageOptions options, string name, out string value)
     {
         value = name switch
@@ -373,7 +373,7 @@ internal static class Extensions
     /// <param name="options">The storage options.</param>
     /// <param name="name">The name of the option.</param>
     /// <param name="value">The value of the specified option or null.</param>
-    /// <returns>true if the options exists; otherwise, false.</returns>
+    /// <returns><c>true</c> if the options exists; otherwise, <c>false</c>.</returns>
     public static bool TryGetOption(this IStorageOptions options, string name, out int value)
     {
         value = name switch
@@ -393,7 +393,7 @@ internal static class Extensions
     /// <param name="distance">The distance in tiles to the player.</param>
     /// <param name="parent">The context where the source object is contained.</param>
     /// <param name="position">The coordinates.</param>
-    /// <returns>true if the location is within range; otherwise, false.</returns>
+    /// <returns><c>true</c> if the location is within range; otherwise, <c>false</c>.</returns>
     public static bool WithinRange(this RangeOption range, int distance, object parent, Vector2 position) =>
         range switch
         {

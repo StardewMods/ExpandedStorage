@@ -246,7 +246,7 @@ internal abstract class DictionaryStorageOptions : IStorageOptions
     /// <summary>Tries to get the data associated with the specified key.</summary>
     /// <param name="key">The key to search for.</param>
     /// <param name="value">When this method returns, contains the value associated with the specified key; otherwise, null.</param>
-    /// <returns>true if the key was found; otherwise, false.</returns>
+    /// <returns><c>true</c> if the key was found; otherwise, <c>false</c>.</returns>
     protected abstract bool TryGetValue(string key, [NotNullWhen(true)] out string? value);
 
     private FeatureOption Get(OptionKey optionKey)

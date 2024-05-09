@@ -316,7 +316,7 @@ internal sealed class IntegrationManager : BaseService
     /// <summary>Tries to get the instance of a mod based on the mod id.</summary>
     /// <param name="modId">The unique id of the mod.</param>
     /// <param name="mod">The mod instance.</param>
-    /// <returns>true if the mod instance could be obtained; otherwise, false.</returns>
+    /// <returns><c>true</c> if the mod instance could be obtained; otherwise, <c>false</c>.</returns>
     private bool TryGetMod(string modId, [NotNullWhen(true)] out IMod? mod)
     {
         if (!this.modRegistry.IsLoaded(modId))

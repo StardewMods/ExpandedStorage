@@ -191,7 +191,7 @@ internal sealed class ContainerFactory : BaseService
     /// <summary>Tries to retrieve a container from the active menu.</summary>
     /// <param name="menu">The menu to retrieve a container from.</param>
     /// <param name="container">When this method returns, contains the container if found; otherwise, null.</param>
-    /// <returns>true if a container is found; otherwise, false.</returns>
+    /// <returns><c>true</c> if a container is found; otherwise, <c>false</c>.</returns>
     public bool TryGetOne(IClickableMenu? menu, [NotNullWhen(true)] out IStorageContainer? container)
     {
         // Get the actual menu
@@ -308,7 +308,7 @@ internal sealed class ContainerFactory : BaseService
     /// <param name="farmer">The player whose container will be retrieved.</param>
     /// <param name="index">The index of the player's inventory. Defaults to the active item.</param>
     /// <param name="container">When this method returns, contains the container if found; otherwise, null.</param>
-    /// <returns>true if a container is found; otherwise, false.</returns>
+    /// <returns><c>true</c> if a container is found; otherwise, <c>false</c>.</returns>
     public bool TryGetOne(Farmer farmer, int index, [NotNullWhen(true)] out IStorageContainer? container)
     {
         var item = farmer.Items.ElementAtOrDefault(index);
@@ -339,7 +339,7 @@ internal sealed class ContainerFactory : BaseService
     /// <summary>Tries to get a container from the specified farmer.</summary>
     /// <param name="farmer">The farmer to get a container from.</param>
     /// <param name="farmerContainer">When this method returns, contains the container if found; otherwise, null.</param>
-    /// <returns>true if a container is found; otherwise, false.</returns>
+    /// <returns><c>true</c> if a container is found; otherwise, <c>false</c>.</returns>
     public bool TryGetOne(Farmer farmer, [NotNullWhen(true)] out IStorageContainer? farmerContainer)
     {
         if (this.cachedContainers.TryGetValue(farmer, out farmerContainer))
@@ -364,7 +364,7 @@ internal sealed class ContainerFactory : BaseService
     /// <summary>Tries to get a container from the specified building.</summary>
     /// <param name="building">The building to get a container from.</param>
     /// <param name="buildingContainer">When this method returns, contains the container if found; otherwise, null.</param>
-    /// <returns>true if a container is found; otherwise, false.</returns>
+    /// <returns><c>true</c> if a container is found; otherwise, <c>false</c>.</returns>
     public bool TryGetOne(Building building, [NotNullWhen(true)] out IStorageContainer? buildingContainer)
     {
         if (this.cachedContainers.TryGetValue(building, out buildingContainer))
@@ -417,7 +417,7 @@ internal sealed class ContainerFactory : BaseService
     /// <summary>Tries to get a container from the specified NPC.</summary>
     /// <param name="npc">The NPC to get a container from.</param>
     /// <param name="npcContainer">When this method returns, contains the container if found; otherwise, null.</param>
-    /// <returns>true if a container is found; otherwise, false.</returns>
+    /// <returns><c>true</c> if a container is found; otherwise, <c>false</c>.</returns>
     public bool TryGetOne(NPC npc, [NotNullWhen(true)] out IStorageContainer? npcContainer)
     {
         if (this.cachedContainers.TryGetValue(npc, out npcContainer))
@@ -474,7 +474,7 @@ internal sealed class ContainerFactory : BaseService
     /// <param name="location">The location to get a container from.</param>
     /// <param name="pos">The position to get a the container from.</param>
     /// <param name="container">When this method returns, contains the container if found; otherwise, null.</param>
-    /// <returns>true if a container is found; otherwise, false.</returns>
+    /// <returns><c>true</c> if a container is found; otherwise, <c>false</c>.</returns>
     public bool TryGetOne(GameLocation location, Vector2 pos, [NotNullWhen(true)] out IStorageContainer? container)
     {
         // Try getting fridge container
@@ -533,7 +533,7 @@ internal sealed class ContainerFactory : BaseService
     /// <summary>Tries to get a container from the specified location.</summary>
     /// <param name="location">The location to get a container from.</param>
     /// <param name="locationContainer">When this method returns, contains the container if found; otherwise, null.</param>
-    /// <returns>true if a container is found; otherwise, false.</returns>
+    /// <returns><c>true</c> if a container is found; otherwise, <c>false</c>.</returns>
     public bool TryGetOne(GameLocation location, [NotNullWhen(true)] out IStorageContainer? locationContainer)
     {
         if (this.cachedContainers.TryGetValue(location, out locationContainer))
@@ -578,7 +578,7 @@ internal sealed class ContainerFactory : BaseService
     /// <summary>Tries to get a container from the specified object.</summary>
     /// <param name="item">The item to get a container from.</param>
     /// <param name="itemContainer">When this method returns, contains the container if found; otherwise, null.</param>
-    /// <returns>true if a container is found; otherwise, false.</returns>
+    /// <returns><c>true</c> if a container is found; otherwise, <c>false</c>.</returns>
     public bool TryGetOne(Item item, [NotNullWhen(true)] out IStorageContainer? itemContainer)
     {
         if (this.cachedContainers.TryGetValue(item, out itemContainer))

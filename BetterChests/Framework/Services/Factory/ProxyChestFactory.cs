@@ -68,7 +68,7 @@ internal sealed class ProxyChestFactory : GenericBaseService<ProxyChestFactory>
 
     /// <summary>Determines if the given item represents a proxy chest.</summary>
     /// <param name="salable">The item to check.</param>
-    /// <returns>True if the item is a proxy; otherwise, false.</returns>
+    /// <returns><c>true</c> if the item is a proxy; otherwise, <c>false</c>.</returns>
     public bool IsProxy(ISalable salable) =>
         salable is Item item
         && item.modData.TryGetValue(this.Prefix + ProxyChestFactory.GlobalInventoryIdKey, out var id)
@@ -84,7 +84,7 @@ internal sealed class ProxyChestFactory : GenericBaseService<ProxyChestFactory>
     /// When this method returns, contains the created ProxyChestRequest object if the creation was
     /// successful; otherwise, null.
     /// </param>
-    /// <returns>true if the creation of the request was successful; otherwise, false.</returns>
+    /// <returns><c>true</c> if the creation of the request was successful; otherwise, <c>false</c>.</returns>
     public bool TryCreateRequest(Chest chest, [NotNullWhen(true)] out ProxyChestRequest? request)
     {
         if (chest.GlobalInventoryId != null
@@ -152,7 +152,7 @@ internal sealed class ProxyChestFactory : GenericBaseService<ProxyChestFactory>
     /// <summary>Tries to get the proxy chest from the specified source object.</summary>
     /// <param name="item">The item representing a proxy chest.</param>
     /// <param name="chest">When this method returns, the chest, if it exists; otherwise, null.</param>
-    /// <returns>True if the proxy chest exists; otherwise, false.</returns>
+    /// <returns><c>true</c> if the proxy chest exists; otherwise, <c>false</c>.</returns>
     public bool TryGetProxy(Item item, [NotNullWhen(true)] out Chest? chest)
     {
         if (!item.modData.TryGetValue(this.Prefix + ProxyChestFactory.GlobalInventoryIdKey, out var id)
@@ -197,7 +197,7 @@ internal sealed class ProxyChestFactory : GenericBaseService<ProxyChestFactory>
 
     /// <summary>Tries to restore the proxy chest with the specified <paramref name="chest" />.</summary>
     /// <param name="chest">The proxy chest to restore.</param>
-    /// <returns>True if the proxy chest was successfully restored, false otherwise.</returns>
+    /// <returns><c>true</c> if the proxy chest was successfully restored, false otherwise.</returns>
     public bool TryRestoreProxy(Chest chest)
     {
         if (chest.GlobalInventoryId == null

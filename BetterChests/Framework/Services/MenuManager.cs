@@ -112,7 +112,7 @@ internal sealed class MenuManager : BaseService
 
     /// <summary>Highlights an item using the provided highlight methods.</summary>
     /// <param name="item">The item to highlight.</param>
-    /// <returns>true if the item is successfully highlighted; otherwise, false.</returns>
+    /// <returns><c>true</c> if the item is successfully highlighted; otherwise, <c>false</c>.</returns>
     public bool HighlightMethod(Item item)
     {
         var original = this.OriginalHighlightMethod is null || this.OriginalHighlightMethod(item);

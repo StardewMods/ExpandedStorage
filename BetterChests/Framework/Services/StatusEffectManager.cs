@@ -35,7 +35,7 @@ internal sealed class StatusEffectManager : GenericBaseService<StatusEffectManag
 
     /// <summary>Checks if the specified status effect is currently active on the player.</summary>
     /// <param name="statusEffect">The status effect to check.</param>
-    /// <returns>true if the status effect is active on the player; otherwise, false.</returns>
+    /// <returns><c>true</c> if the status effect is active on the player; otherwise, <c>false</c>.</returns>
     public bool HasEffect(StatusEffect statusEffect)
     {
         var id = this.GetId(statusEffect);

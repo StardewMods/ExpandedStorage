@@ -23,11 +23,6 @@ internal sealed class ModPatches
     }
 
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
-    [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
-    private static void NPC_tryToReceiveActiveObject_Prefix(Farmer who, out Item? __state) =>
-        __state = who.ActiveObject.getOne();
-
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static void NPC_tryToReceiveActiveObject_Postfix(NPC __instance, bool __result, Item? __state)
@@ -40,4 +35,9 @@ internal sealed class ModPatches
         var inventory = Game1.player.team.GetOrCreateGlobalInventory($"{ModPatches.modId}-{__instance.Name}");
         inventory.Add(__state);
     }
+
+    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
+    [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
+    private static void NPC_tryToReceiveActiveObject_Prefix(Farmer who, out Item? __state) =>
+        __state = who.ActiveObject.getOne();
 }

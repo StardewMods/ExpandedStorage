@@ -132,7 +132,7 @@ internal sealed class TabIcon : ClickableComponent
     /// <summary>Performs a left-click action based on the given mouse coordinates.</summary>
     /// <param name="mouseX">The x-coordinate of the mouse.</param>
     /// <param name="mouseY">The y-coordinate of the mouse.</param>
-    /// <returns>true if the left-click action was successfully performed; otherwise, false.</returns>
+    /// <returns><c>true</c> if the left-click action was successfully performed; otherwise, <c>false</c>.</returns>
     public bool LeftClick(int mouseX, int mouseY)
     {
         if (!this.bounds.Contains(mouseX, mouseY))
@@ -147,7 +147,7 @@ internal sealed class TabIcon : ClickableComponent
     /// <summary>Performs a right-click action based on the given mouse coordinates.</summary>
     /// <param name="mouseX">The x-coordinate of the mouse.</param>
     /// <param name="mouseY">The y-coordinate of the mouse.</param>
-    /// <returns>true if the right-click action was successfully performed; otherwise, false.</returns>
+    /// <returns><c>true</c> if the right-click action was successfully performed; otherwise, <c>false</c>.</returns>
     public bool RightClick(int mouseX, int mouseY)
     {
         if (!this.bounds.Contains(mouseX, mouseY))

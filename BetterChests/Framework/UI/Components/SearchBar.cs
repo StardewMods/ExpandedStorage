@@ -69,7 +69,7 @@ internal sealed class SearchBar : ClickableComponent
     /// <summary>Performs a left click at the specified coordinates on the screen.</summary>
     /// <param name="mouseX">The X-coordinate of the mouse click.</param>
     /// <param name="mouseY">The Y-coordinate of the mouse click.</param>
-    /// <returns>true if the search bar was clicked; otherwise, false.</returns>
+    /// <returns><c>true</c> if the search bar was clicked; otherwise, <c>false</c>.</returns>
     public bool LeftClick(int mouseX, int mouseY)
     {
         this.Selected = this.bounds.Contains(mouseX, mouseY);
@@ -82,7 +82,7 @@ internal sealed class SearchBar : ClickableComponent
     /// <summary>Performs a right click at the specified coordinates on the screen.</summary>
     /// <param name="mouseX">The X-coordinate of the mouse click.</param>
     /// <param name="mouseY">The Y-coordinate of the mouse click.</param>
-    /// <returns>true if the search bar was clicked; otherwise, false.</returns>
+    /// <returns><c>true</c> if the search bar was clicked; otherwise, <c>false</c>.</returns>
     public bool RightClick(int mouseX, int mouseY)
     {
         if (!this.bounds.Contains(mouseX, mouseY))

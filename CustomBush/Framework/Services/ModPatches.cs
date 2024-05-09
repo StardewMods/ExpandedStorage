@@ -78,7 +78,7 @@ internal sealed class ModPatches : BaseService
 
     /// <summary>Determines if the given Bush instance is a custom bush.</summary>
     /// <param name="bush">The bush instance to check.</param>
-    /// <returns>true if the bush is a custom bush; otherwise, false.</returns>
+    /// <returns><c>true</c> if the bush is a custom bush; otherwise, <c>false</c>.</returns>
     public bool IsCustomBush(Bush bush) =>
         bush.modData.TryGetValue(this.modDataId, out var id) && this.assetHandler.Data.ContainsKey(id);
 
@@ -88,7 +88,7 @@ internal sealed class ModPatches : BaseService
     /// When this method returns, contains the custom bush associated with the given bush; otherwise,
     /// null.
     /// </param>
-    /// <returns>true if the custom bush associated with the given bush is found; otherwise, false.</returns>
+    /// <returns><c>true</c> if the custom bush associated with the given bush is found; otherwise, <c>false</c>.</returns>
     public bool TryGetCustomBush(Bush bush, [NotNullWhen(true)] out CustomBush? customBush)
     {
         customBush = null;

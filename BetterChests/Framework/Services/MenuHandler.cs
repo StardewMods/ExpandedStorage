@@ -141,7 +141,7 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
 
     /// <summary>Determines if the specified source object can receive focus.</summary>
     /// <param name="source">The object to check if it can receive focus.</param>
-    /// <returns>true if the source object can receive focus; otherwise, false.</returns>
+    /// <returns><c>true</c> if the source object can receive focus; otherwise, <c>false</c>.</returns>
     public bool CanFocus(object source) => this.focus.Value is null || this.focus.Value.Source == source;
 
     /// <summary>Tries to request focus for a specific object.</summary>
@@ -150,7 +150,7 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
     /// An optional output parameter representing the acquired service lock, or null if failed to
     /// acquire.
     /// </param>
-    /// <returns>true if focus was successfully acquired; otherwise, false.</returns>
+    /// <returns><c>true</c> if focus was successfully acquired; otherwise, <c>false</c>.</returns>
     public bool TryGetFocus(object source, [NotNullWhen(true)] out IServiceLock? serviceLock)
     {
         serviceLock = null;

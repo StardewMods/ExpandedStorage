@@ -35,7 +35,7 @@ internal sealed class AssetHandler : BaseService
     /// When this method returns, contains the data associated with the specified item; otherwise,
     /// null.
     /// </param>
-    /// <returns>true if the data was successfully retrieved; otherwise, false.</returns>
+    /// <returns><c>true</c> if the data was successfully retrieved; otherwise, <c>false</c>.</returns>
     public bool TryGetData(Item item, [NotNullWhen(true)] out IStorageData? storageData)
     {
         // Return from cache

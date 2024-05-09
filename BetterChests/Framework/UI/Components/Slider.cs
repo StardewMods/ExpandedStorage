@@ -114,7 +114,7 @@ internal sealed class Slider
     /// <summary>Performs a left click at the specified coordinates on the screen.</summary>
     /// <param name="mouseX">The X-coordinate of the mouse click.</param>
     /// <param name="mouseY">The Y-coordinate of the mouse click.</param>
-    /// <returns>true if the area was clicked; otherwise, false.</returns>
+    /// <returns><c>true</c> if the area was clicked; otherwise, <c>false</c>.</returns>
     public bool LeftClick(int mouseX, int mouseY)
     {
         this.Holding = this.area.Contains(mouseX, mouseY);
