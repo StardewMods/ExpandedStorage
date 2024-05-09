@@ -2,30 +2,57 @@ namespace StardewMods.BetterChests.Framework.Services;
 
 using System.Text;
 using Pidgin;
+using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
-using StardewMods.BetterChests.Framework.Models.Terms;
+using StardewMods.BetterChests.Framework.Models.Expressions;
+using StardewMods.Common.Models.Cache;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
-/// <summary>Responsible for handling search.</summary>
-internal sealed class SearchHandler : GenericBaseService<SearchHandler>
+/// <summary>Responsible for handling parsed expressions.</summary>
+internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>
 {
-    /// <summary>Initializes a new instance of the <see cref="SearchHandler" /> class.</summary>
+    private readonly CacheTable<IExpression?> cachedSearches;
+    private readonly PerScreen<IExpression?> searchExpression = new();
+    private readonly PerScreen<string> searchText = new(() => string.Empty);
+
+    /// <summary>Initializes a new instance of the <see cref="ExpressionHandler" /> class.</summary>
+    /// <param name="cacheManager">Dependency used for managing cache tables.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public SearchHandler(ILog log, IManifest manifest)
-        : base(log, manifest) { }
+    public ExpressionHandler(CacheManager cacheManager, ILog log, IManifest manifest)
+        : base(log, manifest) =>
+        this.cachedSearches = cacheManager.GetCacheTable<IExpression?>();
 
-    /// <summary>Attempts to parse the given search expression.</summary>
-    /// <param name="expression">The search expression to be parsed.</param>
-    /// <param name="searchExpression">The parsed search expression.</param>
-    /// <returns>true if the search expression could be parsed; otherwise, false.</returns>
-    public bool TryParseExpression(string expression, [NotNullWhen(true)] out ISearchExpression? searchExpression)
+    /// <summary>Gets or sets the current search expression.</summary>
+    public IExpression? SearchExpression
+    {
+        get => this.searchExpression.Value;
+        set => this.searchExpression.Value = value;
+    }
+
+    /// <summary>Gets or sets the current search text.</summary>
+    public string SearchText
+    {
+        get => this.searchText.Value;
+        set => this.searchText.Value = value;
+    }
+
+    /// <summary>Attempts to parse the given expression.</summary>
+    /// <param name="expression">The expression to be parsed.</param>
+    /// <param name="parsedExpression">The parsed expression.</param>
+    /// <returns><c>true</c> if the expression could be parsed; otherwise, <c>false</c>.</returns>
+    public bool TryParseExpression(string expression, [NotNullWhen(true)] out IExpression? parsedExpression)
     {
         if (string.IsNullOrWhiteSpace(expression))
         {
-            searchExpression = null;
+            parsedExpression = null;
             return false;
+        }
+
+        if (this.cachedSearches.TryGetValue(expression, out parsedExpression))
+        {
+            return parsedExpression is not null;
         }
 
         // Determine if self-repair may be needed
@@ -84,14 +111,15 @@ internal sealed class SearchHandler : GenericBaseService<SearchHandler>
 
         try
         {
-            searchExpression = AnyExpression.ExpressionParser.ParseOrThrow($"[{expression}]");
-            return true;
+            parsedExpression = AnyExpression.PartialParser.ParseOrThrow($"[{expression}]");
         }
         catch (ParseException ex)
         {
             this.Log.Trace("Failed to parse search expression {0}.\n{1}", expression, ex);
-            searchExpression = null;
-            return false;
+            parsedExpression = null;
         }
+
+        this.cachedSearches.AddOrUpdate(expression, parsedExpression);
+        return parsedExpression is not null;
     }
 }

@@ -16,46 +16,38 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
 {
     private readonly AssetHandler assetHandler;
     private readonly PerScreen<ClickableTextureComponent?> existingStacksButton = new();
+    private readonly ExpressionHandler expressionHandler;
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<bool> isActive = new(() => true);
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<ClickableTextureComponent?> rejectButton = new();
     private readonly PerScreen<ClickableTextureComponent?> saveButton = new();
     private readonly PerScreen<SearchBar?> searchBar = new();
-    private readonly PerScreen<ISearchExpression?> searchExpression;
-    private readonly SearchHandler searchHandler;
-    private readonly PerScreen<string> searchText;
 
     /// <summary>Initializes a new instance of the <see cref="SearchItems" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
-    /// <param name="searchExpression">Dependency for retrieving a parsed search expression.</param>
-    /// <param name="searchHandler">Dependency used for handling search.</param>
-    /// <param name="searchText">Dependency for retrieving the unified search text.</param>
     public SearchItems(
         AssetHandler assetHandler,
         IEventManager eventManager,
+        ExpressionHandler expressionHandler,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
         MenuHandler menuHandler,
-        IModConfig modConfig,
-        PerScreen<ISearchExpression?> searchExpression,
-        SearchHandler searchHandler,
-        PerScreen<string> searchText)
+        IModConfig modConfig)
         : base(eventManager, log, manifest, modConfig)
     {
         this.assetHandler = assetHandler;
+        this.expressionHandler = expressionHandler;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
-        this.searchExpression = searchExpression;
-        this.searchHandler = searchHandler;
-        this.searchText = searchText;
     }
 
     /// <inheritdoc />
@@ -129,7 +121,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
                 if (this.saveButton.Value?.containsPoint(mouseX, mouseY) == true)
                 {
                     this.inputHelper.Suppress(e.Button);
-                    container.CategorizeChestSearchTerm = this.searchText.Value;
+                    container.CategorizeChestSearchTerm = this.expressionHandler.SearchText;
                     return;
                 }
 
@@ -200,7 +192,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         if (this.searchBar.Value?.Selected == true && this.Config.Controls.Copy.JustPressed())
         {
             this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.Copy);
-            DesktopClipboard.SetText(this.searchText.Value);
+            DesktopClipboard.SetText(this.expressionHandler.SearchText);
             return;
         }
 
@@ -210,7 +202,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.Paste);
             var pasteText = string.Empty;
             DesktopClipboard.GetText(ref pasteText);
-            this.searchText.Value = pasteText;
+            this.expressionHandler.SearchText = pasteText;
             this.searchBar.Value.Reset();
             return;
         }
@@ -218,9 +210,9 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         // Clear Search
         if (this.isActive.Value && this.Config.Controls.ClearSearch.JustPressed())
         {
-            this.searchText.Value = string.Empty;
-            this.searchExpression.Value = null;
-            this.Events.Publish(new SearchChangedEventArgs(this.searchExpression.Value));
+            this.expressionHandler.SearchText = string.Empty;
+            this.expressionHandler.SearchExpression = null;
+            this.Events.Publish(new SearchChangedEventArgs(this.expressionHandler.SearchExpression));
         }
     }
 
@@ -253,7 +245,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             x,
             y,
             width,
-            () => this.searchText.Value,
+            () => this.expressionHandler.SearchText,
             value =>
             {
                 if (!string.IsNullOrWhiteSpace(value))
@@ -261,17 +253,16 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
                     this.Log.Trace("{0}: Searching for {1}", this.Id, value);
                 }
 
-                if (this.searchText.Value == value)
+                if (this.expressionHandler.SearchText == value)
                 {
                     return;
                 }
 
-                this.searchText.Value = value;
-                this.searchExpression.Value = this.searchHandler.TryParseExpression(value, out var expression)
-                    ? expression
-                    : null;
+                this.expressionHandler.SearchText = value;
+                this.expressionHandler.SearchExpression =
+                    this.expressionHandler.TryParseExpression(value, out var expression) ? expression : null;
 
-                this.Events.Publish(new SearchChangedEventArgs(this.searchExpression.Value));
+                this.Events.Publish(new SearchChangedEventArgs(this.expressionHandler.SearchExpression));
             });
 
         if (container.CategorizeChest != FeatureOption.Enabled)
@@ -327,7 +318,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
     private void OnItemHighlighting(ItemHighlightingEventArgs e)
     {
         if (e.Container.SearchItems is FeatureOption.Enabled
-            && this.searchExpression.Value?.PartialMatch(e.Item) == false)
+            && this.expressionHandler.SearchExpression?.Matches(e.Item) == false)
         {
             e.UnHighlight();
         }
@@ -335,7 +326,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
 
     private void OnItemsDisplaying(ItemsDisplayingEventArgs e)
     {
-        if (this.searchExpression.Value is null
+        if (this.expressionHandler.SearchExpression is null
             || this.Config.SearchItemsMethod is not (FilterMethod.Sorted
                 or FilterMethod.GrayedOut
                 or FilterMethod.Hidden))
@@ -347,8 +338,8 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             items => this.Config.SearchItemsMethod switch
             {
                 FilterMethod.Sorted or FilterMethod.GrayedOut => items.OrderByDescending(
-                    this.searchExpression.Value.PartialMatch),
-                FilterMethod.Hidden => items.Where(this.searchExpression.Value.PartialMatch),
+                    this.expressionHandler.SearchExpression.Matches),
+                FilterMethod.Hidden => items.Where(this.expressionHandler.SearchExpression.Matches),
                 _ => items,
             });
     }

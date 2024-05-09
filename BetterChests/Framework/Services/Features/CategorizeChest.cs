@@ -6,7 +6,6 @@ using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -15,31 +14,27 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
 {
     private readonly PerScreen<List<Item>> cachedItems = new(() => []);
-    private readonly GenericCacheTable<ISearchExpression?> cachedSearches;
+    private readonly ExpressionHandler expressionHandler;
     private readonly MenuHandler menuHandler;
-    private readonly SearchHandler searchHandler;
 
     /// <summary>Initializes a new instance of the <see cref="CategorizeChest" /> class.</summary>
-    /// <param name="cacheManager">Dependency used for managing cache tables.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
-    /// <param name="searchHandler">Dependency used for handling search.</param>
     public CategorizeChest(
-        CacheManager cacheManager,
         IEventManager eventManager,
+        ExpressionHandler expressionHandler,
         MenuHandler menuHandler,
         ILog log,
         IManifest manifest,
-        IModConfig modConfig,
-        SearchHandler searchHandler)
+        IModConfig modConfig)
         : base(eventManager, log, manifest, modConfig)
     {
-        this.cachedSearches = cacheManager.GetCacheTable<ISearchExpression?>();
+        this.expressionHandler = expressionHandler;
         this.menuHandler = menuHandler;
-        this.searchHandler = searchHandler;
     }
 
     /// <inheritdoc />
@@ -82,24 +77,14 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
             return false;
         }
 
-        // Retrieve search expression from cache or generate a new one
-        if (!this.cachedSearches.TryGetValue(container.CategorizeChestSearchTerm, out var searchExpression))
-        {
-            this.cachedSearches.AddOrUpdate(
-                container.CategorizeChestSearchTerm,
-                this.searchHandler.TryParseExpression(container.CategorizeChestSearchTerm, out searchExpression)
-                    ? searchExpression
-                    : null);
-        }
-
         // Cannot handle if search term is invalid
-        if (searchExpression is null)
+        if (!this.expressionHandler.TryParseExpression(container.CategorizeChestSearchTerm, out var searchExpression))
         {
             return false;
         }
 
         // Check if item matches search expressions
-        accepted = searchExpression.PartialMatch(item);
+        accepted = searchExpression.Matches(item);
         return true;
     }
 
@@ -167,6 +152,6 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
             return;
         }
 
-        this.cachedItems.Value = [..ItemRepository.GetItems(e.SearchExpression.PartialMatch)];
+        this.cachedItems.Value = [..ItemRepository.GetItems(e.SearchExpression.Matches)];
     }
 }

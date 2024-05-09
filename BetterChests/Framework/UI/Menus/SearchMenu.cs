@@ -4,7 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using StardewMods.BetterChests.Framework.Interfaces;
-using StardewMods.BetterChests.Framework.Models.Terms;
+using StardewMods.BetterChests.Framework.Models.Expressions;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Helpers;
@@ -18,27 +18,27 @@ internal sealed class SearchMenu : BaseMenu
     private readonly ClickableTextureComponent arrowDownRight;
     private readonly ClickableTextureComponent arrowUpLeft;
     private readonly ClickableTextureComponent arrowUpRight;
+    private readonly ExpressionHandler expressionHandler;
     private readonly InventoryMenu inventory;
     private readonly ClickableTextureComponent scrollBar;
     private readonly Rectangle scrollBarRunner;
     private readonly SearchBar searchBar;
-    private readonly SearchHandler searchHandler;
 
     private List<Item> allItems = [];
     private int rowOffset;
     private int scrollAmount;
     private int scrollArea;
     private bool scrolling;
-    private ISearchExpression? searchExpression;
+    private IExpression? searchExpression;
     private string searchText;
     private int totalRows;
 
     /// <summary>Initializes a new instance of the <see cref="SearchMenu" /> class.</summary>
-    /// <param name="searchHandler">Dependency used for handling search.</param>
-    public SearchMenu(SearchHandler searchHandler)
+    /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
+    public SearchMenu(ExpressionHandler expressionHandler)
     {
         var myId = 55378008;
-        this.searchHandler = searchHandler;
+        this.expressionHandler = expressionHandler;
         this.searchText = string.Empty;
 
         this.inventory = new InventoryMenu(
@@ -146,7 +146,7 @@ internal sealed class SearchMenu : BaseMenu
         set
         {
             this.searchText = value;
-            this.searchExpression = this.searchHandler.TryParseExpression(value, out var expression)
+            this.searchExpression = this.expressionHandler.TryParseExpression(value, out var expression)
                 ? expression
                 : null;
 
@@ -158,7 +158,7 @@ internal sealed class SearchMenu : BaseMenu
                 return;
             }
 
-            this.allItems = ItemRepository.GetItems(this.searchExpression.PartialMatch).ToList();
+            this.allItems = ItemRepository.GetItems(this.searchExpression.Matches).ToList();
             this.inventory.actualInventory = this.allItems.Take(this.inventory.capacity).ToList();
             this.totalRows = (int)Math.Ceiling(
                 (float)this.allItems.Count / (this.inventory.capacity / this.inventory.rows));
@@ -231,7 +231,7 @@ internal sealed class SearchMenu : BaseMenu
         this.drawMouse(b);
         return;
 
-        void Enqueue(ISearchExpression currentExpression)
+        void Enqueue(IExpression currentExpression)
         {
             switch (currentExpression)
             {
@@ -243,7 +243,10 @@ internal sealed class SearchMenu : BaseMenu
                     }
 
                     currentX += indent;
-                    foreach (var expression in any.Expressions) { Enqueue(expression); }
+                    foreach (var expression in any.Expressions)
+                    {
+                        Enqueue(expression);
+                    }
 
                     currentX -= indent;
                     break;
@@ -256,7 +259,10 @@ internal sealed class SearchMenu : BaseMenu
                     }
 
                     currentX += indent;
-                    foreach (var expression in all.Expressions) { Enqueue(expression); }
+                    foreach (var expression in all.Expressions)
+                    {
+                        Enqueue(expression);
+                    }
 
                     currentX -= indent;
                     break;
@@ -269,8 +275,8 @@ internal sealed class SearchMenu : BaseMenu
                     currentX -= indent;
                     break;
 
-                case MatchExpression:
-                case StringTerm:
+                case ComparableExpression:
+                case StaticTerm:
                     b.DrawString(
                         Game1.smallFont,
                         currentExpression.ToString(),

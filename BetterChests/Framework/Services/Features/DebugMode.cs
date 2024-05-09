@@ -15,7 +15,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     private readonly AssetHandler assetHandler;
     private readonly ContainerFactory containerFactory;
     private readonly ContainerHandler containerHandler;
-    private readonly SearchHandler searchHandler;
+    private readonly ExpressionHandler expressionHandler;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="DebugMode" /> class.</summary>
@@ -24,10 +24,10 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
-    /// <param name="searchHandler">Dependency used for handling search.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public DebugMode(
         AssetHandler assetHandler,
@@ -35,10 +35,10 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         ContainerFactory containerFactory,
         ContainerHandler containerHandler,
         IEventManager eventManager,
+        ExpressionHandler expressionHandler,
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
-        SearchHandler searchHandler,
         ToolbarIconsIntegration toolbarIconsIntegration)
         : base(eventManager, log, manifest, modConfig)
     {
@@ -46,7 +46,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         this.assetHandler = assetHandler;
         this.containerFactory = containerFactory;
         this.containerHandler = containerHandler;
-        this.searchHandler = searchHandler;
+        this.expressionHandler = expressionHandler;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
 
         // Commands
@@ -162,7 +162,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
                 Game1.activeClickableMenu = new LayoutMenu();
                 return;
             case "search":
-                Game1.activeClickableMenu = new SearchMenu(this.searchHandler);
+                Game1.activeClickableMenu = new SearchMenu(this.expressionHandler);
                 return;
             case "sort":
                 Game1.activeClickableMenu = new SortMenu();

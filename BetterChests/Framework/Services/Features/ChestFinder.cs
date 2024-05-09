@@ -19,12 +19,10 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     private readonly AssetHandler assetHandler;
     private readonly ContainerFactory containerFactory;
     private readonly PerScreen<int> currentIndex = new();
+    private readonly ExpressionHandler expressionHandler;
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<List<Pointer>> pointers = new(() => []);
-    private readonly PerScreen<ISearchExpression?> searchExpression;
-    private readonly SearchHandler searchHandler;
-    private readonly PerScreen<string> searchText;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="ChestFinder" /> class.</summary>
@@ -36,32 +34,26 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
-    /// <param name="searchExpression">Dependency for retrieving a parsed search expression.</param>
-    /// <param name="searchHandler">Dependency used for handling search.</param>
-    /// <param name="searchText">Dependency for retrieving the unified search text.</param>
+    /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public ChestFinder(
         AssetHandler assetHandler,
         ContainerFactory containerFactory,
         IEventManager eventManager,
+        ExpressionHandler expressionHandler,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig,
-        PerScreen<ISearchExpression?> searchExpression,
-        SearchHandler searchHandler,
-        PerScreen<string> searchText,
         ToolbarIconsIntegration toolbarIconsIntegration)
         : base(eventManager, log, manifest, modConfig)
     {
         this.assetHandler = assetHandler;
         this.containerFactory = containerFactory;
+        this.expressionHandler = expressionHandler;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
-        this.searchExpression = searchExpression;
-        this.searchHandler = searchHandler;
-        this.searchText = searchText;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
     }
 
@@ -145,9 +137,9 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         // Clear Search
         if (this.Config.Controls.ClearSearch.JustPressed())
         {
-            this.searchText.Value = string.Empty;
-            this.searchExpression.Value = null;
-            this.Events.Publish(new SearchChangedEventArgs(this.searchExpression.Value));
+            this.expressionHandler.SearchText = string.Empty;
+            this.expressionHandler.SearchExpression = null;
+            this.Events.Publish(new SearchChangedEventArgs(this.expressionHandler.SearchExpression));
         }
     }
 
@@ -180,7 +172,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
 
     private void OpenSearchBar() =>
         Game1.activeClickableMenu = new SearchOverlay(
-            () => this.searchText.Value,
+            () => this.expressionHandler.SearchText,
             value =>
             {
                 if (!string.IsNullOrWhiteSpace(value))
@@ -188,28 +180,28 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
                     this.Log.Trace("{0}: Searching for {1}", this.Id, value);
                 }
 
-                if (this.searchText.Value == value)
+                if (this.expressionHandler.SearchText == value)
                 {
                     return;
                 }
 
-                this.searchText.Value = value;
-                this.searchExpression.Value = this.searchHandler.TryParseExpression(value, out var expression)
-                    ? expression
-                    : null;
+                this.expressionHandler.SearchText = value;
+                this.expressionHandler.SearchExpression =
+                    this.expressionHandler.TryParseExpression(value, out var expression) ? expression : null;
 
-                this.Events.Publish(new SearchChangedEventArgs(this.searchExpression.Value));
+                this.Events.Publish(new SearchChangedEventArgs(this.expressionHandler.SearchExpression));
             });
 
     private bool Predicate(IStorageContainer container) =>
         container is not FarmerContainer
         && container.ChestFinder is FeatureOption.Enabled
-        && (this.searchExpression.Value is null || this.searchExpression.Value.PartialMatch(container));
+        && (this.expressionHandler.SearchExpression is null
+            || this.expressionHandler.SearchExpression.Matches(container));
 
     private void ReinitializePointers()
     {
         this.pointers.Value.Clear();
-        if (this.searchExpression.Value is null)
+        if (this.expressionHandler.SearchExpression is null)
         {
             return;
         }

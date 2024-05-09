@@ -3,7 +3,6 @@ namespace StardewMods.BetterChests;
 using HarmonyLib;
 using SimpleInjector;
 using StardewModdingAPI.Events;
-using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.Services.Factory;
@@ -51,6 +50,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<ContainerFactory>();
         this.container.RegisterSingleton<ContainerHandler>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
+        this.container.RegisterSingleton<ExpressionHandler>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.container.RegisterSingleton<MenuHandler>();
@@ -58,14 +58,11 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<ILog, Logger>();
         this.container.RegisterSingleton<IPatchManager, Patcher>();
         this.container.RegisterSingleton<ProxyChestFactory>();
-        this.container.RegisterSingleton<SearchHandler>();
         this.container.RegisterSingleton<StatusEffectManager>();
         this.container.RegisterSingleton<IThemeHelper, Themer>();
         this.container.RegisterSingleton<ToolbarIconsIntegration>();
 
         this.container.RegisterInstance<Func<IModConfig>>(this.container.GetInstance<IModConfig>);
-        this.container.RegisterInstance(new PerScreen<string>(() => string.Empty));
-        this.container.RegisterInstance(new PerScreen<ISearchExpression?>());
 
         this.container.Collection.Register<IFeature>(
             new[]

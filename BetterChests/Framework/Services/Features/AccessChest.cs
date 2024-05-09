@@ -26,6 +26,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
     private readonly ContainerFactory containerFactory;
     private readonly PerScreen<List<IStorageContainer>> currentContainers = new(() => []);
     private readonly PerScreen<ClickableComponent?> dropDown = new();
+    private readonly ExpressionHandler expressionHandler;
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<bool> isActive = new();
     private readonly PerScreen<List<ClickableComponent>> items = new(() => []);
@@ -33,35 +34,34 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<int> offset = new();
     private readonly PerScreen<ClickableTextureComponent> rightArrow;
-    private readonly PerScreen<ISearchExpression?> searchExpression;
 
     /// <summary>Initializes a new instance of the <see cref="AccessChest" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
-    /// <param name="searchExpression">Dependency for retrieving a parsed search expression.</param>
     public AccessChest(
         AssetHandler assetHandler,
         ContainerFactory containerFactory,
         IEventManager eventManager,
+        ExpressionHandler expressionHandler,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
         ILog log,
         IManifest manifest,
-        IModConfig modConfig,
-        PerScreen<ISearchExpression?> searchExpression)
+        IModConfig modConfig)
         : base(eventManager, log, manifest, modConfig)
     {
         this.assetHandler = assetHandler;
         this.containerFactory = containerFactory;
+        this.expressionHandler = expressionHandler;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
-        this.searchExpression = searchExpression;
 
         this.leftArrow = new PerScreen<ClickableTextureComponent>(
             () => new ClickableTextureComponent(
@@ -484,7 +484,8 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
     private bool Predicate(IStorageContainer container) =>
         container is not FarmerContainer
         && container.AccessChest is not RangeOption.Disabled
-        && (this.searchExpression.Value is null || this.searchExpression.Value.PartialMatch(container))
+        && (this.expressionHandler.SearchExpression is null
+            || this.expressionHandler.SearchExpression.Matches(container))
         && container.AccessChest.WithinRange(-1, container.Location, container.TileLocation);
 
     private void ReinitializeContainers()

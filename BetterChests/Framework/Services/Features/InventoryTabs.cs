@@ -14,43 +14,35 @@ using StardewValley.Menus;
 internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
 {
     private readonly AssetHandler assetHandler;
+    private readonly ExpressionHandler expressionHandler;
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
-    private readonly PerScreen<ISearchExpression?> searchExpression;
-    private readonly SearchHandler searchHandler;
-    private readonly PerScreen<string> searchText;
     private readonly PerScreen<List<TabIcon>> tabs = new(() => []);
 
     /// <summary>Initializes a new instance of the <see cref="InventoryTabs" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
-    /// <param name="searchExpression">Dependency for retrieving a parsed search expression.</param>
-    /// <param name="searchHandler">Dependency used for handling search.</param>
-    /// <param name="searchText">Dependency for retrieving the unified search text.</param>
     public InventoryTabs(
         AssetHandler assetHandler,
         IEventManager eventManager,
+        ExpressionHandler expressionHandler,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
         MenuHandler menuHandler,
-        IModConfig modConfig,
-        PerScreen<ISearchExpression?> searchExpression,
-        SearchHandler searchHandler,
-        PerScreen<string> searchText)
+        IModConfig modConfig)
         : base(eventManager, log, manifest, modConfig)
     {
         this.assetHandler = assetHandler;
+        this.expressionHandler = expressionHandler;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
-        this.searchExpression = searchExpression;
-        this.searchHandler = searchHandler;
-        this.searchText = searchText;
     }
 
     /// <inheritdoc />
@@ -129,6 +121,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
             return;
         }
 
+        // TODO: Adjust position relative to the leftmost inventory menu
         var x = itemGrabMenu.xPositionOnScreen - Game1.tileSize - (IClickableMenu.borderWidth / 2);
         var y = top.InventoryMenu.inventory[0].bounds.Y;
 
@@ -148,13 +141,13 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
                     () =>
                     {
                         this.Log.Trace("{0}: Switching tab to {1}.", this.Id, inventoryTab.Label);
-                        this.searchText.Value = inventoryTab.SearchTerm;
-                        this.searchExpression.Value =
-                            this.searchHandler.TryParseExpression(inventoryTab.SearchTerm, out var expression)
+                        this.expressionHandler.SearchText = inventoryTab.SearchTerm;
+                        this.expressionHandler.SearchExpression =
+                            this.expressionHandler.TryParseExpression(inventoryTab.SearchTerm, out var expression)
                                 ? expression
                                 : null;
 
-                        this.Events.Publish(new SearchChangedEventArgs(this.searchExpression.Value));
+                        this.Events.Publish(new SearchChangedEventArgs(this.expressionHandler.SearchExpression));
                     }));
 
             y += Game1.tileSize;

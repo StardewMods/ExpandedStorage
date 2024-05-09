@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
-using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services.Integrations.BetterChests.Enums;
@@ -15,6 +14,7 @@ using StardewValley.Menus;
 internal sealed class SortInventory : BaseFeature<SortInventory>
 {
     private readonly ContainerHandler containerHandler;
+    private readonly ExpressionHandler expressionHandler;
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<ClickableTextureComponent?> organizeButton = new();
@@ -22,6 +22,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
     /// <summary>Initializes a new instance of the <see cref="SortInventory" /> class.</summary>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
@@ -30,6 +31,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
     public SortInventory(
         ContainerHandler containerHandler,
         IEventManager eventManager,
+        ExpressionHandler expressionHandler,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
@@ -38,6 +40,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
         : base(eventManager, log, manifest, modConfig)
     {
         this.containerHandler = containerHandler;
+        this.expressionHandler = expressionHandler;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
     }
@@ -50,7 +53,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
     {
         // Events
         this.Events.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
-        this.Events.Subscribe<ContainerSortingEventArgs>(SortInventory.OnContainerSorting);
+        this.Events.Subscribe<ContainerSortingEventArgs>(this.OnContainerSorting);
         this.Events.Subscribe<InventoryMenuChangedEventArgs>(this.OnInventoryMenuChanged);
         this.Events.Subscribe<RenderedActiveMenuEventArgs>(this.OnRenderedActiveMenu);
     }
@@ -60,23 +63,9 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
     {
         // Events
         this.Events.Unsubscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
+        this.Events.Unsubscribe<ContainerSortingEventArgs>(this.OnContainerSorting);
         this.Events.Unsubscribe<InventoryMenuChangedEventArgs>(this.OnInventoryMenuChanged);
-        this.Events.Unsubscribe<ContainerSortingEventArgs>(SortInventory.OnContainerSorting);
         this.Events.Unsubscribe<RenderedActiveMenuEventArgs>(this.OnRenderedActiveMenu);
-    }
-
-    private static void OnContainerSorting(ContainerSortingEventArgs e)
-    {
-        if (e.Container.SortInventory is not FeatureOption.Enabled
-            || string.IsNullOrWhiteSpace(e.Container.SortInventoryBy))
-        {
-            return;
-        }
-
-        var itemSorter = new ItemSorter(e.Container.SortInventoryBy);
-        var copy = e.Container.Items.ToList();
-        copy.Sort(itemSorter);
-        e.Container.Items.OverwriteWith(copy);
     }
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
@@ -98,7 +87,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
             _ => null,
         };
 
-        if (container is null)
+        if (container?.SortInventory is not FeatureOption.Enabled)
         {
             return;
         }
@@ -106,27 +95,31 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
         switch (e.Button)
         {
             case SButton.MouseLeft or SButton.ControllerA:
-                if (container.SortInventory is not FeatureOption.Enabled)
-                {
-                    return;
-                }
-
-                this.inputHelper.Suppress(e.Button);
-                Game1.playSound("Ship");
                 this.containerHandler.Sort(container);
-                return;
+                break;
 
             case SButton.MouseRight or SButton.ControllerB:
-                if (container.SortInventory is not FeatureOption.Enabled)
-                {
-                    return;
-                }
-
-                this.inputHelper.Suppress(e.Button);
-                Game1.playSound("Ship");
                 this.containerHandler.Sort(container, true);
-                return;
+                break;
+
+            default: return;
         }
+
+        this.inputHelper.Suppress(e.Button);
+        Game1.playSound("Ship");
+    }
+
+    private void OnContainerSorting(ContainerSortingEventArgs e)
+    {
+        if (e.Container.SortInventory is not FeatureOption.Enabled
+            || !this.expressionHandler.TryParseExpression(e.Container.SortInventoryBy, out var expression))
+        {
+            return;
+        }
+
+        var copy = e.Container.Items.ToList();
+        copy.Sort(expression);
+        e.Container.Items.OverwriteWith(copy);
     }
 
     private void OnInventoryMenuChanged(InventoryMenuChangedEventArgs e)
