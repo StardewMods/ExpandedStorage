@@ -121,8 +121,12 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
             return;
         }
 
-        // TODO: Adjust position relative to the leftmost inventory menu
-        var x = itemGrabMenu.xPositionOnScreen - Game1.tileSize - (IClickableMenu.borderWidth / 2);
+        var x = Math.Min(
+                top.InventoryMenu.xPositionOnScreen,
+                this.menuHandler.Bottom.InventoryMenu?.xPositionOnScreen ?? int.MaxValue)
+            - Game1.tileSize
+            - IClickableMenu.borderWidth;
+
         var y = top.InventoryMenu.inventory[0].bounds.Y;
 
         foreach (var inventoryTab in this.Config.InventoryTabList)
