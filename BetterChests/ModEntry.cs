@@ -10,6 +10,7 @@ using StardewMods.BetterChests.Framework.Services.Features;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterCrafting;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
@@ -49,6 +50,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<ConfigManager, ConfigManager>();
         this.container.RegisterSingleton<ContainerFactory>();
         this.container.RegisterSingleton<ContainerHandler>();
+        this.container.RegisterSingleton<ContentPatcherIntegration>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
         this.container.RegisterSingleton<ExpressionHandler>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
@@ -92,13 +94,21 @@ public sealed class ModEntry : Mod
         // Verify
         this.container.Verify();
 
-        // Events
-        this.Helper.Events.GameLoop.GameLaunched += this.OnGameLaunched;
+        this.Init();
     }
 
-    private void OnGameLaunched(object? sender, GameLaunchedEventArgs e)
+    private void Init()
     {
+        var eventManager = this.container.GetInstance<IEventManager>();
         var configManager = this.container.GetInstance<ConfigManager>();
-        configManager.Init();
+        var contentPatcherIntegration = this.container.GetInstance<ContentPatcherIntegration>();
+
+        if (contentPatcherIntegration.IsLoaded)
+        {
+            eventManager.Subscribe<ConditionsApiReadyEventArgs>(_ => configManager.Init());
+            return;
+        }
+
+        eventManager.Subscribe<GameLaunchedEventArgs>(_ => configManager.Init());
     }
 }
