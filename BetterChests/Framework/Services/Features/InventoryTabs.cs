@@ -110,7 +110,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
         var top = this.menuHandler.Top;
         this.tabs.Value.Clear();
 
-        if (this.menuHandler.CurrentMenu is not ItemGrabMenu itemGrabMenu
+        if (this.menuHandler.CurrentMenu is not ItemGrabMenu
             || top.InventoryMenu is null
             || container is not
             {
@@ -121,8 +121,12 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
             return;
         }
 
-        // TODO: Adjust position relative to the leftmost inventory menu
-        var x = itemGrabMenu.xPositionOnScreen - Game1.tileSize - (IClickableMenu.borderWidth / 2);
+        var x = Math.Min(
+                top.InventoryMenu.xPositionOnScreen,
+                this.menuHandler.Bottom.InventoryMenu?.xPositionOnScreen ?? int.MaxValue)
+            - Game1.tileSize
+            - IClickableMenu.borderWidth;
+
         var y = top.InventoryMenu.inventory[0].bounds.Y;
 
         foreach (var inventoryTab in this.Config.InventoryTabList)

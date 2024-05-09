@@ -11,6 +11,7 @@
 
 * If config file is missing, it will attempt to restore from global data.
 * Combine sort and search parsing into a single expression handler.
+* Position tabs so they don't overlap with the backpack icon in large chests.
 
 ### Fixed
 
