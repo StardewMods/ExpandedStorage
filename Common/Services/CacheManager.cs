@@ -2,12 +2,12 @@ namespace StardewMods.Common.Services;
 
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Models;
+using StardewMods.Common.Models.Cache;
 
 /// <summary>Service for managing cache tables.</summary>
 internal sealed class CacheManager
 {
-    private readonly List<CacheTable> cacheTables = [];
+    private readonly List<BaseCacheTable> cacheTables = [];
 
     private int lastTicks;
 
@@ -18,9 +18,9 @@ internal sealed class CacheManager
     /// <summary>Retrieves a cache table of type T.</summary>
     /// <typeparam name="T">The type of objects stored in the cache table.</typeparam>
     /// <returns>The cache table of type T.</returns>
-    public GenericCacheTable<T> GetCacheTable<T>()
+    public CacheTable<T> GetCacheTable<T>()
     {
-        var cacheTable = new GenericCacheTable<T>();
+        var cacheTable = new CacheTable<T>();
         this.cacheTables.Add(cacheTable);
         return cacheTable;
     }

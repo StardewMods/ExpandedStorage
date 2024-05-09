@@ -9,7 +9,7 @@ public interface IExpandedStorageApi
     /// When this method returns, contains the data associated with the specified item, if the
     /// retrieval succeeds; otherwise, null. This parameter is passed uninitialized.
     /// </param>
-    /// <returns>true if the data was successfully retrieved; otherwise, false.</returns>
+    /// <returns><c>true</c> if the data was successfully retrieved; otherwise, <c>false</c>.</returns>
     public bool TryGetData(Item item, [NotNullWhen(true)] out IStorageData? storageData);
 
     /// <summary>Subscribes to an event handler.</summary>

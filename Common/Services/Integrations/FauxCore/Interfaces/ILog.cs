@@ -43,6 +43,7 @@ public interface ILog
     /// <param name="message">The message to send.</param>
     /// <param name="args">The arguments to parse in a formatted string.</param>
     [StringFormatMethod("message")]
+    [SuppressMessage("Naming", "CA1716", Justification="Reviewed")]
     public void Error(string message, params object?[]? args);
 
     /// <summary>Logs an alert message to the console.</summary>

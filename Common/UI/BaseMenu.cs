@@ -8,7 +8,7 @@ using StardewValley.Menus;
 internal abstract class BaseMenu : IClickableMenu
 {
     /// <summary>Initializes a new instance of the <see cref="BaseMenu" /> class.</summary>
-    public BaseMenu()
+    protected BaseMenu()
         : base(
             (Game1.uiViewport.Width / 2) - ((800 + (IClickableMenu.borderWidth * 2)) / 2),
             (Game1.uiViewport.Height / 2) - ((600 + (IClickableMenu.borderWidth * 2)) / 2),

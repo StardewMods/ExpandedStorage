@@ -55,13 +55,13 @@ public interface IStorageContainer : IStorageOptions
 
     /// <summary>Tries to remove an item from the container.</summary>
     /// <param name="item">The item to remove.</param>
-    /// <returns>True if the item was successfully taken; otherwise, false.</returns>
+    /// <returns><c>true</c> if the item was successfully taken; otherwise, <c>false</c>.</returns>
     public bool TryRemove(Item item);
 
     /// <summary>Tries to add an item to the container.</summary>
     /// <param name="item">The item to add.</param>
     /// <param name="remaining">When this method returns, contains the remaining item after addition, if any.</param>
-    /// <returns>True if the item was successfully given; otherwise, false.</returns>
+    /// <returns><c>true</c> if the item was successfully given; otherwise, <c>false</c>.</returns>
     public bool TryAdd(Item item, out Item? remaining);
 
     /// <summary>Grabs an item from the inventory.</summary>

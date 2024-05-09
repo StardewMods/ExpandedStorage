@@ -1,17 +1,17 @@
-namespace StardewMods.Common.Models;
+namespace StardewMods.Common.Models.Cache;
 
 using StardewValley.Extensions;
 
 /// <summary>Represents a table of cached values.</summary>
-/// <typeparam name="T">The cached object type.</typeparam>
-internal sealed class GenericCacheTable<T> : CacheTable
+/// <typeparam name="TValue">The cached object type.</typeparam>
+internal sealed class CacheTable<TValue> : BaseCacheTable
 {
-    private readonly Dictionary<string, GenericCachedObject<T>> cachedObjects = [];
+    private readonly Dictionary<string, CachedObject<TValue>> cachedObjects = [];
 
     /// <summary>Add or update a value in the collection with the specified key.</summary>
     /// <param name="key">The key of the value to add or update.</param>
     /// <param name="value">The value to add or update.</param>
-    public void AddOrUpdate(string key, T value)
+    public void AddOrUpdate(string key, TValue value)
     {
         if (this.cachedObjects.TryGetValue(key, out var cachedObject))
         {
@@ -19,7 +19,7 @@ internal sealed class GenericCacheTable<T> : CacheTable
         }
         else
         {
-            this.cachedObjects.Add(key, new GenericCachedObject<T>(value));
+            this.cachedObjects.Add(key, new CachedObject<TValue>(value));
         }
     }
 
@@ -32,8 +32,8 @@ internal sealed class GenericCacheTable<T> : CacheTable
     /// When this method returns, contains the value associated with the specified key; otherwise, the
     /// default value for the type of the value parameter.
     /// </param>
-    /// <returns>true if the key was found; otherwise, false.</returns>
-    public bool TryGetValue(string key, out T? value)
+    /// <returns><c>true</c> if the key was found; otherwise, <c>false</c>.</returns>
+    public bool TryGetValue(string key, out TValue? value)
     {
         if (this.cachedObjects.TryGetValue(key, out var cachedObject))
         {
@@ -41,7 +41,7 @@ internal sealed class GenericCacheTable<T> : CacheTable
             return true;
         }
 
-        value = default(T);
+        value = default(TValue);
         return false;
     }
 }

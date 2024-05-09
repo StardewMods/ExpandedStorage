@@ -1,7 +1,7 @@
-namespace StardewMods.Common.Models;
+namespace StardewMods.Common.Models.Cache;
 
 /// <summary>Represents a table of cached values.</summary>
-internal abstract class CacheTable
+public abstract class BaseCacheTable
 {
     /// <summary>Removes all cached values that have not been accessed since before the specified tick count.</summary>
     /// <param name="ticks">The number of ticks.</param>

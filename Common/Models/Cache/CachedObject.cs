@@ -1,14 +1,14 @@
-namespace StardewMods.Common.Models;
+namespace StardewMods.Common.Models.Cache;
 
 /// <summary>Represents a cached object.</summary>
 /// <typeparam name="T">The cached object type.</typeparam>
-internal sealed class GenericCachedObject<T> : CachedObject
+internal sealed class CachedObject<T> : BaseCachedObject
 {
     private T value;
 
-    /// <summary>Initializes a new instance of the <see cref="GenericCachedObject{T}" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="CachedObject{T}" /> class.</summary>
     /// <param name="value">The initial value.</param>
-    public GenericCachedObject(T value) => this.value = value;
+    public CachedObject(T value) => this.value = value;
 
     /// <summary>Gets or sets the value of the cached object.</summary>
     public T Value
