@@ -24,7 +24,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <SMAPIDependency Include="furyx639.FauxCore" Version="1.1.1" required="true"/>
+    <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.0" required="true"/>
     <SMAPIDependency Include="furyx639.ToolbarIcons" required="false"/>
     <SMAPIDependency Include="spacechase0.GenericModConfigMenu" Version="1.8.2" required="false"/>
   </ItemGroup>

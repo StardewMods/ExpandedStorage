@@ -1,5 +1,11 @@
 # Custom Bush Change Log
 
+## 1.2.2 (Unreleased)
+
+### Changed
+
+* Updated for FauxCore 1.2.0.
+
 ## 1.2.1 (May 1, 2024)
 
 ### Added

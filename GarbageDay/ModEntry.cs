@@ -39,7 +39,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<IEventManager, EventManager>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<GarbageCanManager>();
-        this.container.RegisterSingleton<ILog, Logger>();
+        this.container.RegisterSingleton<ILog, FauxCoreIntegration>();
         this.container.RegisterSingleton<ToolbarIconsIntegration>();
 
         // Verify

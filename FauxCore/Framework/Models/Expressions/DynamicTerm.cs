@@ -1,11 +1,9 @@
-namespace StardewMods.BetterChests.Framework.Models.Expressions;
+namespace StardewMods.FauxCore.Framework.Models.Expressions;
 
 using System.ComponentModel;
-using Pidgin;
-using StardewMods.BetterChests.Framework.Enums;
-using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.Common.Enums;
-using StardewMods.Common.Services.Integrations.BetterChests;
+using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewValley.Inventories;
 
 /// <summary>Represents an item attribute term.</summary>
 internal sealed class DynamicTerm : IExpression
@@ -16,20 +14,6 @@ internal sealed class DynamicTerm : IExpression
     /// <summary>The end attribute character.</summary>
     public const char EndChar = '}';
 
-    /// <summary>An exact expression parser.</summary>
-    public static readonly Parser<char, IExpression> ExactParser = StaticTerm
-        .StringParser.Between(Parser.Char(DynamicTerm.BeginChar), Parser.Char(DynamicTerm.EndChar))
-        .Between(Parser.SkipWhitespaces)
-        .Select(expressions => new DynamicTerm(expressions))
-        .OfType<IExpression>();
-
-    /// <summary>A partial expression parser.</summary>
-    public static readonly Parser<char, IExpression> PartialParser = StaticTerm
-        .StringParser.Between(Parser.Char(DynamicTerm.BeginChar), Parser.Char(DynamicTerm.EndChar))
-        .Between(Parser.SkipWhitespaces)
-        .Select(expressions => new DynamicTerm(expressions))
-        .OfType<IExpression>();
-
     private static readonly Dictionary<ItemAttribute, Func<Item, object>> Accessors = new()
     {
         { ItemAttribute.Category, item => item.getCategoryName() },
@@ -39,15 +23,23 @@ internal sealed class DynamicTerm : IExpression
         { ItemAttribute.Tags, item => item.GetContextTags() },
     };
 
+    private readonly ItemAttribute attribute;
+
     /// <summary>Initializes a new instance of the <see cref="DynamicTerm" /> class.</summary>
     /// <param name="expression">The expression.</param>
-    private DynamicTerm(string expression) =>
-        this.Attribute = ItemAttributeExtensions.TryParse(expression, out var itemAttribute, true)
+    public DynamicTerm(string expression) =>
+        this.attribute = ItemAttributeExtensions.TryParse(expression, out var itemAttribute, true)
             ? itemAttribute
             : throw new InvalidEnumArgumentException($"Invalid item attribute: {expression}");
 
-    /// <summary>Gets the attribute sub-expression.</summary>
-    public ItemAttribute Attribute { get; }
+    /// <inheritdoc />
+    public IEnumerable<IExpression> Expressions => Array.Empty<IExpression>();
+
+    /// <inheritdoc />
+    public ExpressionType ExpressionType => ExpressionType.Dynamic;
+
+    /// <inheritdoc />
+    public string Term => this.attribute.ToStringFast();
 
     /// <inheritdoc />
     public int Compare(Item? x, Item? y)
@@ -81,13 +73,16 @@ internal sealed class DynamicTerm : IExpression
     }
 
     /// <inheritdoc />
-    public bool Matches(Item item) => true;
+    public bool Equals(Item? item) => true;
 
     /// <inheritdoc />
-    public bool Matches(IStorageContainer container) => true;
+    public bool Equals(IInventory? other) => true;
 
     /// <inheritdoc />
-    public override string ToString() => $"{DynamicTerm.BeginChar}{this.Attribute.ToStringFast()}{DynamicTerm.EndChar}";
+    public bool Equals(string? other) => true;
+
+    /// <inheritdoc />
+    public override string ToString() => $"{DynamicTerm.BeginChar}{this.attribute.ToStringFast()}{DynamicTerm.EndChar}";
 
     /// <summary>Tries to retrieve the attribute value.</summary>
     /// <param name="item">The item from which to retrieve the value.</param>
@@ -95,7 +90,7 @@ internal sealed class DynamicTerm : IExpression
     /// <returns><c>true</c> if the value was successfully retrieved; otherwise, <c>false</c>.</returns>
     public bool TryGetValue(Item? item, [NotNullWhen(true)] out object? value)
     {
-        if (item is null || !DynamicTerm.Accessors.TryGetValue(this.Attribute, out var accessor))
+        if (item is null || !DynamicTerm.Accessors.TryGetValue(this.attribute, out var accessor))
         {
             value = null;
             return false;
@@ -111,13 +106,20 @@ internal sealed class DynamicTerm : IExpression
     /// <returns><c>true</c> if the value was successfully parsed; otherwise, <c>false</c>.</returns>
     public bool TryParse(string value, [NotNullWhen(true)] out int? result)
     {
-        switch (this.Attribute)
+        switch (this.attribute)
         {
             case ItemAttribute.Quantity when int.TryParse(value, out var intValue):
                 result = intValue;
                 return true;
-            case ItemAttribute.Quality when ItemQualityExtensions.TryParse(value, out var itemQuality):
+            case ItemAttribute.Quality when ItemQualityExtensions.TryParse(value, out var itemQuality, true):
                 result = (int)itemQuality;
+                return true;
+            case ItemAttribute.Quality:
+                result = (int)ItemQualityExtensions
+                    .GetValues()
+                    .FirstOrDefault(
+                        itemQuality => itemQuality.ToStringFast().Contains(value, StringComparison.OrdinalIgnoreCase));
+
                 return true;
             default:
                 result = null;

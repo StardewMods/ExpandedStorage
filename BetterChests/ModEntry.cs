@@ -52,16 +52,16 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<ContainerHandler>();
         this.container.RegisterSingleton<ContentPatcherIntegration>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
-        this.container.RegisterSingleton<ExpressionHandler>();
+        this.container.RegisterSingleton<IExpressionHandler, FauxCoreIntegration>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.container.RegisterSingleton<MenuHandler>();
         this.container.RegisterSingleton<LocalizedTextManager>();
-        this.container.RegisterSingleton<ILog, Logger>();
-        this.container.RegisterSingleton<IPatchManager, Patcher>();
+        this.container.RegisterSingleton<ILog, FauxCoreIntegration>();
+        this.container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
         this.container.RegisterSingleton<ProxyChestFactory>();
         this.container.RegisterSingleton<StatusEffectManager>();
-        this.container.RegisterSingleton<IThemeHelper, Themer>();
+        this.container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
         this.container.RegisterSingleton<ToolbarIconsIntegration>();
 
         this.container.RegisterInstance<Func<IModConfig>>(this.container.GetInstance<IModConfig>);

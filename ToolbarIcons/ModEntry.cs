@@ -48,8 +48,8 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<IModConfig, ConfigManager>();
         this.container.RegisterSingleton<ConfigManager, ConfigManager>();
         this.container.RegisterSingleton<IntegrationManager>();
-        this.container.RegisterSingleton<ILog, Logger>();
-        this.container.RegisterSingleton<IThemeHelper, Themer>();
+        this.container.RegisterSingleton<ILog, FauxCoreIntegration>();
+        this.container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
         this.container.RegisterSingleton<ToolbarManager>();
 
         this.container.RegisterInstance(new Dictionary<string, ClickableTextureComponent>());

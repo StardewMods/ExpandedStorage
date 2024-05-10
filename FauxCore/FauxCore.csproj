@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Name>FauxCore</Name>
     <Description>Framework that provides shared functionality for all of my mods.</Description>
-    <Version>1.1.2</Version>
+    <Version>1.2.0</Version>
     <EnableHarmony>true</EnableHarmony>
     <RootNamespace>StardewMods.FauxCore</RootNamespace>
     <UniqueId>furyx639.FauxCore</UniqueId>
@@ -15,6 +15,7 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.0.1"/>
+    <PackageReference Include="Pidgin" Version="3.2.3" />
     <PackageReference Include="SimpleInjector" Version="5.4.2"/>
     <Reference Include="HarmonyLib">
       <HintPath>$(GamePath)\smapi-internal\0Harmony.dll</HintPath>

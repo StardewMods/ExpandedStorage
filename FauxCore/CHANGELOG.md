@@ -1,9 +1,15 @@
 # FauxCore Change Log
 
-## 1.1.2 (Unreleased)
+## 1.2.0 (Unreleased)
+
+### Added
+
+* Added ExpressionHandler service for parsing expressions.
 
 ### Changed
 
+* Redesigned FauxCoreApi services into property getters.
+* Updated FauxCoreIntegration as a proxy to FauxCoreApi services.
 * If config file is missing, it will attempt to restore from global data.
 
 ### 1.1.1 (April 12, 2024)

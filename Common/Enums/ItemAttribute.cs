@@ -1,4 +1,4 @@
-namespace StardewMods.BetterChests.Framework.Enums;
+namespace StardewMods.Common.Enums;
 
 using NetEscapades.EnumGenerators;
 

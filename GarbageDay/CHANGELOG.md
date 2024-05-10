@@ -4,6 +4,7 @@
 
 ### Changed
 
+* Updated for FauxCore 1.2.0.
 * Load Garbage Can texture from internal asset.
 * If config file is missing, it will attempt to restore from global data.
 

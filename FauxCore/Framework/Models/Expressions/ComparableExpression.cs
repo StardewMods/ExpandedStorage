@@ -1,8 +1,7 @@
-namespace StardewMods.BetterChests.Framework.Models.Expressions;
+namespace StardewMods.FauxCore.Framework.Models.Expressions;
 
-using Pidgin;
-using StardewMods.BetterChests.Framework.Interfaces;
-using StardewMods.Common.Services.Integrations.BetterChests;
+using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewValley.Inventories;
 
 /// <summary>Represents an individual expression where the left and rights terms must match.</summary>
 internal sealed class ComparableExpression : IExpression
@@ -10,49 +9,35 @@ internal sealed class ComparableExpression : IExpression
     /// <summary>The match character.</summary>
     public const char Char = '~';
 
-    /// <summary>An exact expression parser.</summary>
-    public static readonly Parser<char, IExpression> ExactParser = Parser.Try(
-        Parser
-            .Map(
-                (left, _, right) => new ComparableExpression((DynamicTerm)left, (StaticTerm)right, true),
-                DynamicTerm.ExactParser,
-                Parser.Char(ComparableExpression.Char),
-                StaticTerm.ExactParser)
-            .OfType<IExpression>());
-
-    /// <summary>A partial expression parser.</summary>
-    public static readonly Parser<char, IExpression> PartialParser = Parser.Try(
-        Parser
-            .Map(
-                (left, _, right) => new ComparableExpression((DynamicTerm)left, (StaticTerm)right, false),
-                DynamicTerm.PartialParser,
-                Parser.Char(ComparableExpression.Char),
-                StaticTerm.PartialParser)
-            .OfType<IExpression>());
-
     private readonly int? comparableInt;
     private readonly bool exact;
+    private readonly DynamicTerm leftTerm;
+    private readonly StaticTerm rightTerm;
 
     /// <summary>Initializes a new instance of the <see cref="ComparableExpression" /> class.</summary>
     /// <param name="leftTerm">The attribute to match.</param>
     /// <param name="rightTerm">The matched term.</param>
     /// <param name="exact">Indicates whether exact matching should be used.</param>
-    private ComparableExpression(DynamicTerm leftTerm, StaticTerm rightTerm, bool exact)
+    public ComparableExpression(DynamicTerm leftTerm, StaticTerm rightTerm, bool exact)
     {
         this.exact = exact;
-        this.LeftTerm = leftTerm;
-        this.RightTerm = rightTerm;
+        this.leftTerm = leftTerm;
+        this.rightTerm = rightTerm;
+        this.Expressions = [leftTerm, rightTerm];
         if (leftTerm.TryParse(rightTerm.Term, out var parsedInt))
         {
             this.comparableInt = parsedInt;
         }
     }
 
-    /// <summary>Gets the attribute sub-expression.</summary>
-    public DynamicTerm LeftTerm { get; }
+    /// <inheritdoc />
+    public IEnumerable<IExpression> Expressions { get; }
 
-    /// <summary>Gets the matched sub-expression.</summary>
-    public StaticTerm RightTerm { get; }
+    /// <inheritdoc />
+    public ExpressionType ExpressionType => ExpressionType.Comparable;
+
+    /// <inheritdoc />
+    public string? Term => null;
 
     /// <inheritdoc />
     public int Compare(Item? x, Item? y)
@@ -62,12 +47,12 @@ internal sealed class ComparableExpression : IExpression
             return 0;
         }
 
-        if (x is null || !this.LeftTerm.TryGetValue(x, out var xValue))
+        if (x is null || !this.leftTerm.TryGetValue(x, out var xValue))
         {
             return -1;
         }
 
-        if (y is null || !this.LeftTerm.TryGetValue(y, out var yValue))
+        if (y is null || !this.leftTerm.TryGetValue(y, out var yValue))
         {
             return 1;
         }
@@ -113,8 +98,8 @@ internal sealed class ComparableExpression : IExpression
     }
 
     /// <inheritdoc />
-    public bool Matches(Item? item) =>
-        this.LeftTerm.TryGetValue(item, out var itemValue)
+    public bool Equals(Item? item) =>
+        this.leftTerm.TryGetValue(item, out var itemValue)
         && itemValue switch
         {
             string value => this.Equals(value),
@@ -124,13 +109,15 @@ internal sealed class ComparableExpression : IExpression
         };
 
     /// <inheritdoc />
-    public bool Matches(IStorageContainer container) => container.Items.Any(this.Matches);
+    public bool Equals(IInventory? other) => other is not null && other.Any(this.Equals);
 
     /// <inheritdoc />
-    public override string ToString() => $"{this.LeftTerm}{ComparableExpression.Char}{this.RightTerm}";
+    public bool Equals(string? other) =>
+        !string.IsNullOrWhiteSpace(other)
+        && (this.exact
+            ? string.Equals(other, this.rightTerm.Term, StringComparison.OrdinalIgnoreCase)
+            : other.Contains(this.rightTerm.Term, StringComparison.OrdinalIgnoreCase));
 
-    private bool Equals(string value) =>
-        this.exact
-            ? string.Equals(value, this.RightTerm.Term, StringComparison.OrdinalIgnoreCase)
-            : value.Contains(this.RightTerm.Term, StringComparison.OrdinalIgnoreCase);
+    /// <inheritdoc />
+    public override string ToString() => $"{this.leftTerm}{ComparableExpression.Char}{this.rightTerm}";
 }
