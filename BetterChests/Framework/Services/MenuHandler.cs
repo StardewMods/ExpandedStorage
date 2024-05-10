@@ -27,29 +27,31 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
     private readonly PerScreen<MenuManager> bottomMenu;
 
     private readonly Type? chestsAnywhereType;
+    private readonly PerScreen<List<IComponent>> components = new(() => []);
     private readonly ContainerFactory containerFactory;
     private readonly PerScreen<IClickableMenu?> currentMenu = new();
     private readonly IEventManager eventManager;
     private readonly PerScreen<ServiceLock?> focus = new();
+    private readonly IInputHelper inputHelper;
     private readonly PerScreen<MenuManager> topMenu;
 
     /// <summary>Initializes a new instance of the <see cref="MenuHandler" /> class.</summary>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="modEvents">Dependency used for managing access to SMAPI events.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     public MenuHandler(
         ContainerFactory containerFactory,
         IEventManager eventManager,
+        IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
         IModEvents modEvents,
-        IInputHelper inputHelper,
         IPatchManager patchManager)
         : base(log, manifest)
     {
@@ -57,6 +59,7 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
         MenuHandler.instance = this;
         this.containerFactory = containerFactory;
         this.eventManager = eventManager;
+        this.inputHelper = inputHelper;
 
         this.topMenu = new PerScreen<MenuManager>(
             () => new MenuManager(eventManager, inputHelper, log, manifest, modConfig));
@@ -65,6 +68,7 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
             () => new MenuManager(eventManager, inputHelper, log, manifest, modConfig));
 
         // Events
+        eventManager.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         eventManager.Subscribe<InventoryMenuChangedEventArgs>(this.OnInventoryMenuChanged);
         eventManager.Subscribe<RenderedActiveMenuEventArgs>(this.OnRenderedActiveMenu);
         eventManager.Subscribe<UpdateTickingEventArgs>(this.OnUpdateTicking);
@@ -325,6 +329,16 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
                     AccessTools.DeclaredMethod(typeof(MenuHandler), nameof(MenuHandler.GetMenuCapacity))))
             .InstructionEnumeration();
 
+    private void OnButtonPressed(ButtonPressedEventArgs e)
+    {
+        if (this
+            .components.Value.Where(c => c.Contains(e.Cursor.GetScaledScreenPixels()))
+            .Any(component => component.TryHandleInput(e)))
+        {
+            this.inputHelper.Suppress(e.Button);
+        }
+    }
+
     [Priority(int.MaxValue)]
     private void OnInventoryMenuChanged(InventoryMenuChangedEventArgs e)
     {
@@ -341,6 +355,12 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
                 // Draw overlay
                 this.Top.Draw(e.SpriteBatch);
                 this.Bottom.Draw(e.SpriteBatch);
+
+                // Draw components
+                foreach (var component in this.components.Value)
+                {
+                    component.Draw(e.SpriteBatch);
+                }
 
                 // Redraw foreground
                 if (this.focus.Value is null)
@@ -507,6 +527,12 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
             default: return;
         }
 
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        foreach (var component in this.components.Value)
+        {
+            component.Update(mouseX, mouseY);
+        }
+
         Game1.mouseCursorTransparency = 0f;
     }
 
@@ -586,7 +612,8 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
             {
                 this.Top.Container = null;
                 this.Bottom.Container = null;
-                this.eventManager.Publish(new InventoryMenuChangedEventArgs(parent, top, bottom));
+                this.components.Value.Clear();
+                this.eventManager.Publish(new InventoryMenuChangedEventArgs(null, parent, top, bottom));
                 return;
             }
 
@@ -614,7 +641,16 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
 
             // Reset filters
             this.UpdateHighlightMethods();
-            this.eventManager.Publish(new InventoryMenuChangedEventArgs(parent, top, bottom));
+            this.components.Value.Clear();
+            this.eventManager.Publish(new InventoryMenuChangedEventArgs(this.components.Value, parent, top, bottom));
+
+            // Add components to the menu
+            this.CurrentMenu.allClickableComponents ??= [];
+            foreach (var component in this.components.Value)
+            {
+                this.CurrentMenu.allClickableComponents.Add(component.Component);
+            }
+
             break;
         }
     }
