@@ -17,6 +17,7 @@
 
 * Fixed AutoOrganize not grabbing items from chests after they fail too insert
   into the first chest.
+* Added back the ability to see locked items from the main inventory menu.
 
 ## 2.18.3 (May 7, 2024)
 

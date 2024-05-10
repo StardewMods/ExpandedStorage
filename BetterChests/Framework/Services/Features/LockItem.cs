@@ -159,7 +159,7 @@ internal sealed class LockItem : BaseFeature<LockItem>
 
     private void OnItemHighlighting(ItemHighlightingEventArgs e)
     {
-        if (!this.IsUnlocked(e.Item))
+        if (this.menuHandler.CurrentMenu is not InventoryPage && !this.IsUnlocked(e.Item))
         {
             e.UnHighlight();
         }

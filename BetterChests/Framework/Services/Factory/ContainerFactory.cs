@@ -234,7 +234,10 @@ internal sealed class ContainerFactory : BaseService
         // Get the context for the menu
         var context = Game1.activeClickableMenu switch
         {
-            ItemGrabMenu itemGrabMenu => itemGrabMenu.context, ShopMenu shopMenu => shopMenu.source, _ => null,
+            ItemGrabMenu itemGrabMenu => itemGrabMenu.context,
+            ShopMenu shopMenu => shopMenu.source,
+            GameMenu => Game1.player,
+            _ => null,
         };
 
         // Find container based on the context
