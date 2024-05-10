@@ -3,11 +3,10 @@ namespace StardewMods.BetterChests.Framework.UI.Menus;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using StardewMods.BetterChests.Framework.Interfaces;
-using StardewMods.BetterChests.Framework.Models.Expressions;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Helpers;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.GarbageDay.Common.UI;
 using StardewValley.Menus;
 
@@ -18,7 +17,8 @@ internal sealed class SearchMenu : BaseMenu
     private readonly ClickableTextureComponent arrowDownRight;
     private readonly ClickableTextureComponent arrowUpLeft;
     private readonly ClickableTextureComponent arrowUpRight;
-    private readonly ExpressionHandler expressionHandler;
+    private readonly ExpressionEditor expressionEditor;
+    private readonly IExpressionHandler expressionHandler;
     private readonly InventoryMenu inventory;
     private readonly ClickableTextureComponent scrollBar;
     private readonly Rectangle scrollBarRunner;
@@ -34,12 +34,24 @@ internal sealed class SearchMenu : BaseMenu
     private int totalRows;
 
     /// <summary>Initializes a new instance of the <see cref="SearchMenu" /> class.</summary>
+    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
-    public SearchMenu(ExpressionHandler expressionHandler)
+    /// <param name="searchText">The initial search text.</param>
+    public SearchMenu(AssetHandler assetHandler, IExpressionHandler expressionHandler, string? searchText = null)
     {
         var myId = 55378008;
         this.expressionHandler = expressionHandler;
         this.searchText = string.Empty;
+        this.expressionEditor = new ExpressionEditor(
+            assetHandler.UiTexture,
+            this.xPositionOnScreen + IClickableMenu.borderWidth,
+            this.yPositionOnScreen
+            + IClickableMenu.spaceToClearSideBorder
+            + (IClickableMenu.borderWidth / 2)
+            + (Game1.tileSize * 2)
+            + 12,
+            340,
+            600);
 
         this.inventory = new InventoryMenu(
             this.xPositionOnScreen
@@ -61,7 +73,7 @@ internal sealed class SearchMenu : BaseMenu
 
         this.inventory.populateClickableComponentList();
 
-        this.SearchText = string.Empty;
+        this.SearchText = searchText ?? string.Empty;
         this.searchBar = new SearchBar(
             this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2),
             this.yPositionOnScreen
@@ -150,6 +162,7 @@ internal sealed class SearchMenu : BaseMenu
                 ? expression
                 : null;
 
+            this.expressionEditor.ReInitializeComponents(this.searchExpression);
             if (this.searchExpression is null)
             {
                 this.allItems = [];
@@ -158,7 +171,7 @@ internal sealed class SearchMenu : BaseMenu
                 return;
             }
 
-            this.allItems = ItemRepository.GetItems(this.searchExpression.Matches).ToList();
+            this.allItems = ItemRepository.GetItems(this.searchExpression.Equals).ToList();
             this.inventory.actualInventory = this.allItems.Take(this.inventory.capacity).ToList();
             this.totalRows = (int)Math.Ceiling(
                 (float)this.allItems.Count / (this.inventory.capacity / this.inventory.rows));
@@ -180,6 +193,7 @@ internal sealed class SearchMenu : BaseMenu
             this.yPositionOnScreen + (IClickableMenu.borderWidth / 2) + Game1.tileSize + 40);
 
         this.searchBar.Draw(b);
+        this.expressionEditor.draw(b);
         this.inventory.draw(b);
 
         // Scrollbar
@@ -205,88 +219,8 @@ internal sealed class SearchMenu : BaseMenu
             this.rowOffset < this.totalRows - this.inventory.rows - 1 ? Color.White : Color.Black * 0.35f,
             1f);
 
-        if (this.searchExpression is null)
-        {
-            Game1.mouseCursorTransparency = 1f;
-            this.drawMouse(b);
-            return;
-        }
-
-        var baseX = this.xPositionOnScreen
-            + IClickableMenu.spaceToClearSideBorder
-            + (IClickableMenu.borderWidth / 2)
-            + 16;
-
-        var currentX = baseX;
-
-        var currentY = this.yPositionOnScreen
-            + IClickableMenu.spaceToClearSideBorder
-            + (IClickableMenu.borderWidth / 2)
-            + (Game1.tileSize * 2)
-            + 12;
-
-        const int indent = 12;
-        Enqueue(this.searchExpression);
         Game1.mouseCursorTransparency = 1f;
         this.drawMouse(b);
-        return;
-
-        void Enqueue(IExpression currentExpression)
-        {
-            switch (currentExpression)
-            {
-                case AnyExpression any:
-                    if (any.Expressions.Length > 1)
-                    {
-                        b.DrawString(Game1.smallFont, "- [ANY]", new Vector2(currentX - 10, currentY), Game1.textColor);
-                        currentY += Game1.smallFont.MeasureString("- [ANY]").ToPoint().Y;
-                    }
-
-                    currentX += indent;
-                    foreach (var expression in any.Expressions)
-                    {
-                        Enqueue(expression);
-                    }
-
-                    currentX -= indent;
-                    break;
-
-                case AllExpression all:
-                    if (all.Expressions.Length > 1)
-                    {
-                        b.DrawString(Game1.smallFont, "- [ALL]", new Vector2(currentX - 10, currentY), Game1.textColor);
-                        currentY += Game1.smallFont.MeasureString("- [ALL]").ToPoint().Y;
-                    }
-
-                    currentX += indent;
-                    foreach (var expression in all.Expressions)
-                    {
-                        Enqueue(expression);
-                    }
-
-                    currentX -= indent;
-                    break;
-
-                case NotExpression not:
-                    b.DrawString(Game1.smallFont, "- [NOT]", new Vector2(currentX - 10, currentY), Game1.textColor);
-                    currentY += Game1.smallFont.MeasureString("- [NOT]").ToPoint().Y;
-                    currentX += indent;
-                    Enqueue(not.Expression);
-                    currentX -= indent;
-                    break;
-
-                case ComparableExpression:
-                case StaticTerm:
-                    b.DrawString(
-                        Game1.smallFont,
-                        currentExpression.ToString(),
-                        new Vector2(currentX, currentY),
-                        Game1.textColor);
-
-                    currentY += Game1.smallFont.MeasureString(currentExpression.ToString()).ToPoint().Y;
-                    break;
-            }
-        }
     }
 
     /// <inheritdoc />

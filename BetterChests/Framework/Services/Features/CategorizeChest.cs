@@ -14,7 +14,7 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
 {
     private readonly PerScreen<List<Item>> cachedItems = new(() => []);
-    private readonly ExpressionHandler expressionHandler;
+    private readonly IExpressionHandler expressionHandler;
     private readonly MenuHandler menuHandler;
 
     /// <summary>Initializes a new instance of the <see cref="CategorizeChest" /> class.</summary>
@@ -26,7 +26,7 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     public CategorizeChest(
         IEventManager eventManager,
-        ExpressionHandler expressionHandler,
+        IExpressionHandler expressionHandler,
         MenuHandler menuHandler,
         ILog log,
         IManifest manifest,
@@ -84,7 +84,7 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
         }
 
         // Check if item matches search expressions
-        accepted = searchExpression.Matches(item);
+        accepted = searchExpression.Equals(item);
         return true;
     }
 
@@ -152,6 +152,6 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
             return;
         }
 
-        this.cachedItems.Value = [..ItemRepository.GetItems(e.SearchExpression.Matches)];
+        this.cachedItems.Value = [..ItemRepository.GetItems(e.SearchExpression.Equals)];
     }
 }

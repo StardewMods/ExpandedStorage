@@ -19,10 +19,12 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     private readonly AssetHandler assetHandler;
     private readonly ContainerFactory containerFactory;
     private readonly PerScreen<int> currentIndex = new();
-    private readonly ExpressionHandler expressionHandler;
+    private readonly IExpressionHandler expressionHandler;
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<List<Pointer>> pointers = new(() => []);
+    private readonly PerScreen<IExpression?> searchExpression = new();
+    private readonly PerScreen<string> searchText = new(() => string.Empty);
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="ChestFinder" /> class.</summary>
@@ -40,7 +42,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         AssetHandler assetHandler,
         ContainerFactory containerFactory,
         IEventManager eventManager,
-        ExpressionHandler expressionHandler,
+        IExpressionHandler expressionHandler,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
@@ -137,9 +139,9 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         // Clear Search
         if (this.Config.Controls.ClearSearch.JustPressed())
         {
-            this.expressionHandler.SearchText = string.Empty;
-            this.expressionHandler.SearchExpression = null;
-            this.Events.Publish(new SearchChangedEventArgs(this.expressionHandler.SearchExpression));
+            this.searchText.Value = string.Empty;
+            this.searchExpression.Value = null;
+            this.Events.Publish(new SearchChangedEventArgs(string.Empty, null));
         }
     }
 
@@ -172,7 +174,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
 
     private void OpenSearchBar() =>
         Game1.activeClickableMenu = new SearchOverlay(
-            () => this.expressionHandler.SearchText,
+            () => this.searchText.Value,
             value =>
             {
                 if (!string.IsNullOrWhiteSpace(value))
@@ -180,28 +182,30 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
                     this.Log.Trace("{0}: Searching for {1}", this.Id, value);
                 }
 
-                if (this.expressionHandler.SearchText == value)
+                if (this.searchText.Value == value)
                 {
                     return;
                 }
 
-                this.expressionHandler.SearchText = value;
-                this.expressionHandler.SearchExpression =
-                    this.expressionHandler.TryParseExpression(value, out var expression) ? expression : null;
+                this.searchText.Value = value;
+                this.searchExpression.Value = this.expressionHandler.TryParseExpression(value, out var expression)
+                    ? expression
+                    : null;
 
-                this.Events.Publish(new SearchChangedEventArgs(this.expressionHandler.SearchExpression));
+                this.Events.Publish(new SearchChangedEventArgs(value, expression));
             });
 
     private bool Predicate(IStorageContainer container) =>
         container is not FarmerContainer
         && container.ChestFinder is FeatureOption.Enabled
-        && (this.expressionHandler.SearchExpression is null
-            || this.expressionHandler.SearchExpression.Matches(container));
+        && (this.searchExpression.Value is null
+            || this.searchExpression.Value.Equals(container.ToString())
+            || this.searchExpression.Value.Equals(container.Items));
 
     private void ReinitializePointers()
     {
         this.pointers.Value.Clear();
-        if (this.expressionHandler.SearchExpression is null)
+        if (this.searchExpression.Value is null)
         {
             return;
         }

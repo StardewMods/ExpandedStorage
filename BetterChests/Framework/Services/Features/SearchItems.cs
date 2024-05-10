@@ -16,13 +16,15 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
 {
     private readonly AssetHandler assetHandler;
     private readonly PerScreen<ClickableTextureComponent?> existingStacksButton = new();
-    private readonly ExpressionHandler expressionHandler;
+    private readonly IExpressionHandler expressionHandler;
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<bool> isActive = new(() => true);
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<ClickableTextureComponent?> rejectButton = new();
     private readonly PerScreen<ClickableTextureComponent?> saveButton = new();
     private readonly PerScreen<SearchBar?> searchBar = new();
+    private readonly PerScreen<IExpression?> searchExpression = new();
+    private readonly PerScreen<string> searchText = new(() => string.Empty);
 
     /// <summary>Initializes a new instance of the <see cref="SearchItems" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
@@ -36,7 +38,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
     public SearchItems(
         AssetHandler assetHandler,
         IEventManager eventManager,
-        ExpressionHandler expressionHandler,
+        IExpressionHandler expressionHandler,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
@@ -121,7 +123,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
                 if (this.saveButton.Value?.containsPoint(mouseX, mouseY) == true)
                 {
                     this.inputHelper.Suppress(e.Button);
-                    container.CategorizeChestSearchTerm = this.expressionHandler.SearchText;
+                    container.CategorizeChestSearchTerm = this.searchText.Value;
                     return;
                 }
 
@@ -192,7 +194,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         if (this.searchBar.Value?.Selected == true && this.Config.Controls.Copy.JustPressed())
         {
             this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.Copy);
-            DesktopClipboard.SetText(this.expressionHandler.SearchText);
+            DesktopClipboard.SetText(this.searchText.Value);
             return;
         }
 
@@ -202,7 +204,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.Paste);
             var pasteText = string.Empty;
             DesktopClipboard.GetText(ref pasteText);
-            this.expressionHandler.SearchText = pasteText;
+            this.searchText.Value = pasteText;
             this.searchBar.Value.Reset();
             return;
         }
@@ -210,9 +212,9 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         // Clear Search
         if (this.isActive.Value && this.Config.Controls.ClearSearch.JustPressed())
         {
-            this.expressionHandler.SearchText = string.Empty;
-            this.expressionHandler.SearchExpression = null;
-            this.Events.Publish(new SearchChangedEventArgs(this.expressionHandler.SearchExpression));
+            this.searchText.Value = string.Empty;
+            this.searchExpression.Value = null;
+            this.Events.Publish(new SearchChangedEventArgs(string.Empty, null));
         }
     }
 
@@ -245,7 +247,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             x,
             y,
             width,
-            () => this.expressionHandler.SearchText,
+            () => this.searchText.Value,
             value =>
             {
                 if (!string.IsNullOrWhiteSpace(value))
@@ -253,16 +255,17 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
                     this.Log.Trace("{0}: Searching for {1}", this.Id, value);
                 }
 
-                if (this.expressionHandler.SearchText == value)
+                if (this.searchText.Value == value)
                 {
                     return;
                 }
 
-                this.expressionHandler.SearchText = value;
-                this.expressionHandler.SearchExpression =
-                    this.expressionHandler.TryParseExpression(value, out var expression) ? expression : null;
+                this.searchText.Value = value;
+                this.searchExpression.Value = this.expressionHandler.TryParseExpression(value, out var expression)
+                    ? expression
+                    : null;
 
-                this.Events.Publish(new SearchChangedEventArgs(this.expressionHandler.SearchExpression));
+                this.Events.Publish(new SearchChangedEventArgs(value, expression));
             });
 
         if (container.CategorizeChest != FeatureOption.Enabled)
@@ -317,8 +320,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
 
     private void OnItemHighlighting(ItemHighlightingEventArgs e)
     {
-        if (e.Container.SearchItems is FeatureOption.Enabled
-            && this.expressionHandler.SearchExpression?.Matches(e.Item) == false)
+        if (e.Container.SearchItems is FeatureOption.Enabled && this.searchExpression.Value?.Equals(e.Item) == false)
         {
             e.UnHighlight();
         }
@@ -326,7 +328,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
 
     private void OnItemsDisplaying(ItemsDisplayingEventArgs e)
     {
-        if (this.expressionHandler.SearchExpression is null
+        if (this.searchExpression.Value is null
             || this.Config.SearchItemsMethod is not (FilterMethod.Sorted
                 or FilterMethod.GrayedOut
                 or FilterMethod.Hidden))
@@ -338,8 +340,8 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             items => this.Config.SearchItemsMethod switch
             {
                 FilterMethod.Sorted or FilterMethod.GrayedOut => items.OrderByDescending(
-                    this.expressionHandler.SearchExpression.Matches),
-                FilterMethod.Hidden => items.Where(this.expressionHandler.SearchExpression.Matches),
+                    this.searchExpression.Value.Equals),
+                FilterMethod.Hidden => items.Where(this.searchExpression.Value.Equals),
                 _ => items,
             });
     }

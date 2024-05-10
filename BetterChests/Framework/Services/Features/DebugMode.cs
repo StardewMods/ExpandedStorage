@@ -15,7 +15,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     private readonly AssetHandler assetHandler;
     private readonly ContainerFactory containerFactory;
     private readonly ContainerHandler containerHandler;
-    private readonly ExpressionHandler expressionHandler;
+    private readonly IExpressionHandler expressionHandler;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="DebugMode" /> class.</summary>
@@ -35,7 +35,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         ContainerFactory containerFactory,
         ContainerHandler containerHandler,
         IEventManager eventManager,
-        ExpressionHandler expressionHandler,
+        IExpressionHandler expressionHandler,
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
@@ -162,7 +162,11 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
                 Game1.activeClickableMenu = new LayoutMenu();
                 return;
             case "search":
-                Game1.activeClickableMenu = new SearchMenu(this.expressionHandler);
+                Game1.activeClickableMenu = new SearchMenu(
+                    this.assetHandler,
+                    this.expressionHandler,
+                    "({category}~fish !{tags}~ocean [{quality}~iridium {quality}~gold])");
+
                 return;
             case "sort":
                 Game1.activeClickableMenu = new SortMenu();

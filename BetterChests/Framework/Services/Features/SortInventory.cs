@@ -14,7 +14,7 @@ using StardewValley.Menus;
 internal sealed class SortInventory : BaseFeature<SortInventory>
 {
     private readonly ContainerHandler containerHandler;
-    private readonly ExpressionHandler expressionHandler;
+    private readonly IExpressionHandler expressionHandler;
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<ClickableTextureComponent?> organizeButton = new();
@@ -31,7 +31,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
     public SortInventory(
         ContainerHandler containerHandler,
         IEventManager eventManager,
-        ExpressionHandler expressionHandler,
+        IExpressionHandler expressionHandler,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
