@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\Cache\BaseCacheTable.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Cache\CachedObject.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Cache\CacheTable.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Models\DefaultStorageOptions.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\SavedPatch.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\PriorityAttribute.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Events\ConfigChangedEventArgs.cs"/>
@@ -87,6 +88,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ToolbarIcons\IToolbarIconsApi.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ToolbarIcons\ToolbarIconsIntegration.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\EventManager.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\UiManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\BaseMenu.cs"/>
   </ItemGroup>
 </Project>

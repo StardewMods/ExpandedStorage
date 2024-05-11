@@ -11,23 +11,24 @@ internal sealed class ExpressionEditor : IClickableMenu
 {
     private static readonly Color[] Colors =
     [
-        ExpressionEditor.Muted(Color.Red),
-        ExpressionEditor.Muted(Color.Yellow),
-        ExpressionEditor.Muted(Color.Green),
-        ExpressionEditor.Muted(Color.Cyan),
-        ExpressionEditor.Muted(Color.Blue),
-        ExpressionEditor.Muted(Color.Violet),
-        ExpressionEditor.Muted(Color.Pink),
+        Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Violet, Color.Pink,
     ];
 
     private readonly List<Color> colors = [];
     private readonly List<ClickableComponent> components = [];
     private readonly List<IExpression?> expressions = [];
-    private readonly Texture2D uiTexture;
 
-    public ExpressionEditor(Texture2D uiTexture, int xPosition, int yPosition, int width, int height)
-        : base(xPosition, yPosition, width, height) =>
-        this.uiTexture = uiTexture;
+    private int offsetY;
+
+    public ExpressionEditor(int xPosition, int yPosition, int width, int height)
+        : base(xPosition, yPosition, width, height) { }
+
+    /// <summary>Gets or sets the y-offset.</summary>
+    public int OffsetY
+    {
+        get => this.offsetY;
+        set => this.offsetY = Math.Min(0, value);
+    }
 
     /// <inheritdoc />
     public override void draw(SpriteBatch b) => this.draw(b, -1);
@@ -35,177 +36,107 @@ internal sealed class ExpressionEditor : IClickableMenu
     /// <inheritdoc />
     public override void draw(SpriteBatch b, int red = -1, int green = -1, int blue = -1)
     {
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        for (var index = 0; index < this.components.Count; index++)
+        {
+            var component = this.components[index];
+            var expression = this.expressions[index];
+            var color = component.containsPoint(mouseX, mouseY - this.OffsetY)
+                ? ExpressionEditor.Highlighted(this.colors[index])
+                : ExpressionEditor.Muted(this.colors[index]);
+
+            if (expression?.ExpressionType is ExpressionType.All or ExpressionType.Any or ExpressionType.Not)
+            {
+                IClickableMenu.drawTextureBox(
+                    b,
+                    Game1.mouseCursors,
+                    new Rectangle(403, 373, 9, 9),
+                    component.bounds.X,
+                    this.OffsetY + component.bounds.Y,
+                    component.bounds.Width,
+                    component.bounds.Height,
+                    color,
+                    Game1.pixelZoom,
+                    false);
+            }
+
+            if (expression?.ExpressionType is ExpressionType.All
+                or ExpressionType.Any
+                or ExpressionType.Not
+                or ExpressionType.Comparable)
+            {
+                continue;
+            }
+
+            if (component is ClickableTextureComponent clickableTextureComponent)
+            {
+                clickableTextureComponent.draw(b, Color.White, 1f, yOffset: this.OffsetY);
+                continue;
+            }
+
+            if (string.IsNullOrWhiteSpace(component.label))
+            {
+                continue;
+            }
+
+            IClickableMenu.drawTextureBox(
+                b,
+                Game1.mouseCursors,
+                new Rectangle(432, 439, 9, 9),
+                component.bounds.X,
+                this.OffsetY + component.bounds.Y,
+                component.bounds.Width,
+                component.bounds.Height,
+                color,
+                Game1.pixelZoom,
+                false);
+
+            b.DrawString(
+                Game1.smallFont,
+                component.label,
+                new Vector2(component.bounds.X + 8, this.OffsetY + component.bounds.Y + 2),
+                Game1.textColor,
+                0f,
+                Vector2.Zero,
+                1f,
+                SpriteEffects.None,
+                0.55f);
+        }
+    }
+
+    /// <inheritdoc />
+    public override void performHoverAction(int x, int y)
+    {
+        base.performHoverAction(x, y - this.OffsetY);
         for (var index = 0; index < this.components.Count; index++)
         {
             var component = this.components[index];
             var expression = this.expressions[index];
             var color = this.colors[index];
 
-            if (expression?.ExpressionType is ExpressionType.All
-                or ExpressionType.Any
-                or ExpressionType.Not
-                or ExpressionType.Dynamic
-                or ExpressionType.Static)
+            if (component is ClickableTextureComponent clickableTextureComponent)
             {
-                // Draw Top-Left
-                b.Draw(
-                    Game1.uncoloredMenuTexture,
-                    new Rectangle(component.bounds.X, component.bounds.Y, 4, 4),
-                    new Rectangle(128, 128, 4, 4),
-                    color);
-
-                // Draw Top-Center
-                b.Draw(
-                    Game1.uncoloredMenuTexture,
-                    new Rectangle(component.bounds.X + 4, component.bounds.Y, component.bounds.Width - 8, 4),
-                    new Rectangle(132, 128, 56, 4),
-                    color);
-
-                // Draw Top-Right
-                b.Draw(
-                    Game1.uncoloredMenuTexture,
-                    new Rectangle(component.bounds.Right - 4, component.bounds.Y, 4, 4),
-                    new Rectangle(188, 128, 4, 4),
-                    color);
-
-                // Draw Middle-Left
-                b.Draw(
-                    Game1.uncoloredMenuTexture,
-                    new Rectangle(component.bounds.X, component.bounds.Y + 4, 4, component.bounds.Height - 8),
-                    new Rectangle(128, 132, 4, 56),
-                    color);
-
-                // Draw Middle-Center
-                b.Draw(
-                    Game1.uncoloredMenuTexture,
-                    new Rectangle(
-                        component.bounds.X + 4,
-                        component.bounds.Y + 4,
-                        component.bounds.Width - 8,
-                        component.bounds.Height - 8),
-                    new Rectangle(64, 128, 64, 64),
-                    color);
-
-                // Draw Middle-Right
-                b.Draw(
-                    Game1.uncoloredMenuTexture,
-                    new Rectangle(component.bounds.Right - 4, component.bounds.Y + 4, 4, component.bounds.Height - 8),
-                    new Rectangle(188, 132, 4, 56),
-                    color);
-
-                // Draw Bottom-Left
-                b.Draw(
-                    Game1.uncoloredMenuTexture,
-                    new Rectangle(component.bounds.X, component.bounds.Bottom - 4, 4, 4),
-                    new Rectangle(128, 188, 4, 4),
-                    color);
-
-                // Draw Bottom-Center
-                b.Draw(
-                    Game1.uncoloredMenuTexture,
-                    new Rectangle(component.bounds.X + 4, component.bounds.Bottom - 4, component.bounds.Width - 8, 4),
-                    new Rectangle(132, 188, 56, 4),
-                    color);
-
-                // Draw Bottom-Right
-                b.Draw(
-                    Game1.uncoloredMenuTexture,
-                    new Rectangle(component.bounds.Right - 4, component.bounds.Bottom - 4, 4, 4),
-                    new Rectangle(188, 188, 4, 4),
-                    color);
+                clickableTextureComponent.tryHover(x, y - this.OffsetY);
             }
+        }
+    }
 
-            switch (expression?.ExpressionType)
-            {
-                case ExpressionType.All or ExpressionType.Any:
-                    b.Draw(
-                        this.uiTexture,
-                        new Rectangle(component.bounds.X + 8, component.bounds.Y + 8, 64, 32),
-                        new Rectangle(64, 48, 16, 8),
-                        Color.White);
+    /// <inheritdoc />
+    public override void receiveScrollWheelAction(int direction)
+    {
+        const int scrollAmount = 40;
 
-                    b.DrawString(
-                        Game1.tinyFont,
-                        component.label,
-                        new Vector2(component.bounds.X + 16, component.bounds.Y + 16),
-                        Game1.textColor,
-                        0f,
-                        Vector2.Zero,
-                        0.65f,
-                        SpriteEffects.None,
-                        0.55f);
+        // Scroll down
+        if (direction < 0)
+        {
+            this.OffsetY -= scrollAmount;
+            return;
+        }
 
-                    break;
-
-                case ExpressionType.Not:
-                    b.DrawString(
-                        Game1.smallFont,
-                        "NOT",
-                        new Vector2(component.bounds.X + 8, component.bounds.Y + 4),
-                        Game1.textColor,
-                        0f,
-                        Vector2.Zero,
-                        1f,
-                        SpriteEffects.None,
-                        0.55f);
-
-                    break;
-
-                case ExpressionType.Comparable: break;
-
-                case ExpressionType.Dynamic or ExpressionType.Static:
-                    b.DrawString(
-                        Game1.smallFont,
-                        expression.Term,
-                        new Vector2(component.bounds.X + 8, component.bounds.Y + 4),
-                        Game1.textColor);
-
-                    break;
-
-                default:
-                    if (component is ClickableTextureComponent clickableTextureComponent)
-                    {
-                        clickableTextureComponent.draw(b);
-                        break;
-                    }
-
-                    if (!string.IsNullOrWhiteSpace(component.label))
-                    {
-                        // Left
-                        b.Draw(
-                            this.uiTexture,
-                            new Rectangle(component.bounds.X, component.bounds.Y, 8, 32),
-                            new Rectangle(64, 48, 2, 8),
-                            Color.White);
-
-                        // Center
-                        b.Draw(
-                            this.uiTexture,
-                            new Rectangle(component.bounds.X + 8, component.bounds.Y, component.bounds.Width - 16, 32),
-                            new Rectangle(66, 48, 12, 8),
-                            Color.White);
-
-                        // Right
-                        b.Draw(
-                            this.uiTexture,
-                            new Rectangle(component.bounds.Right - 8, component.bounds.Y, 8, 32),
-                            new Rectangle(78, 48, 2, 8),
-                            Color.White);
-
-                        b.DrawString(
-                            Game1.tinyFont,
-                            component.label,
-                            new Vector2(component.bounds.X + 10, component.bounds.Y + 10),
-                            Game1.textColor,
-                            0f,
-                            Vector2.Zero,
-                            0.65f,
-                            SpriteEffects.None,
-                            0.55f);
-                    }
-
-                    break;
-            }
+        // Scroll up
+        if (direction > 0)
+        {
+            this.OffsetY += scrollAmount;
         }
     }
 
@@ -213,7 +144,7 @@ internal sealed class ExpressionEditor : IClickableMenu
     /// <param name="initExpression">The initial expression, or null to clear.</param>
     public void ReInitializeComponents(IExpression? initExpression)
     {
-        const int lineHeight = 32;
+        const int lineHeight = 40;
         const int tabWidth = 12;
         var currentX = this.xPositionOnScreen;
         var currentY = this.yPositionOnScreen;
@@ -248,12 +179,20 @@ internal sealed class ExpressionEditor : IClickableMenu
             var initialY = currentY;
             var component = new ClickableComponent(
                 new Rectangle(currentX + offsetX, currentY, this.width - (offsetX * 2), lineHeight),
-                this.components.Count.ToString(CultureInfo.InvariantCulture),
-                expression.ExpressionType is ExpressionType.All ? "ALL" : "ANY");
+                this.components.Count.ToString(CultureInfo.InvariantCulture));
 
             this.expressions.Add(expression);
             this.components.Add(component);
             this.colors.Add(ExpressionEditor.Colors[offsetX / tabWidth % ExpressionEditor.Colors.Length]);
+
+            var subComponent = new ClickableComponent(
+                new Rectangle(component.bounds.X + 8, component.bounds.Y + 8, 64, 32),
+                this.components.Count.ToString(CultureInfo.InvariantCulture),
+                expression.ExpressionType is ExpressionType.All ? "all" : "any");
+
+            this.expressions.Add(null);
+            this.components.Add(subComponent);
+            this.colors.Add(Color.Gray);
 
             currentY += lineHeight + tabWidth;
             offsetX += tabWidth;
@@ -278,28 +217,28 @@ internal sealed class ExpressionEditor : IClickableMenu
 
         void AddInsert()
         {
-            var subWidth = (int)(Game1.tinyFont.MeasureString("+TERM").X * 0.65f) + 20;
+            var subWidth = (int)Game1.smallFont.MeasureString("+term").X + 20;
             var subComponent = new ClickableComponent(
-                new Rectangle(currentX + offsetX, currentY, subWidth, lineHeight),
+                new Rectangle(currentX + offsetX, currentY, subWidth, 32),
                 this.components.Count.ToString(CultureInfo.InvariantCulture),
-                "+TERM");
+                "+term");
 
             this.expressions.Add(null);
             this.components.Add(subComponent);
-            this.colors.Add(Color.White);
+            this.colors.Add(Color.Gray);
 
             subComponent = new ClickableComponent(
                 new Rectangle(
                     currentX + offsetX + subWidth + tabWidth,
                     currentY,
-                    (int)(Game1.tinyFont.MeasureString("+GROUP").X * 0.65f) + 20,
-                    lineHeight),
+                    (int)Game1.smallFont.MeasureString("+group").X + 20,
+                    32),
                 this.components.Count.ToString(CultureInfo.InvariantCulture),
-                "+GROUP");
+                "+group");
 
             this.expressions.Add(null);
             this.components.Add(subComponent);
-            this.colors.Add(Color.White);
+            this.colors.Add(Color.Gray);
 
             currentY += lineHeight + tabWidth;
         }
@@ -314,6 +253,15 @@ internal sealed class ExpressionEditor : IClickableMenu
             this.expressions.Add(expression);
             this.components.Add(component);
             this.colors.Add(ExpressionEditor.Colors[offsetX / tabWidth % ExpressionEditor.Colors.Length]);
+
+            var subComponent = new ClickableComponent(
+                new Rectangle(component.bounds.X + 8, component.bounds.Y + 8, 64, 32),
+                this.components.Count.ToString(CultureInfo.InvariantCulture),
+                "not");
+
+            this.expressions.Add(null);
+            this.components.Add(subComponent);
+            this.colors.Add(Color.Gray);
 
             currentY += lineHeight + tabWidth;
             offsetX += tabWidth;
@@ -344,7 +292,7 @@ internal sealed class ExpressionEditor : IClickableMenu
             var leftTerm = expression.Expressions.First();
             var rightTerm = expression.Expressions.Last();
 
-            var subWidth = ((this.width - tabWidth) / 2) - offsetX - 12;
+            var subWidth = ((this.width - tabWidth) / 2) - offsetX - 19;
             var subComponent = new ClickableComponent(
                 new Rectangle(currentX + offsetX, currentY, subWidth, lineHeight),
                 this.components.Count.ToString(CultureInfo.InvariantCulture),
@@ -365,12 +313,12 @@ internal sealed class ExpressionEditor : IClickableMenu
 
             subComponent = new ClickableTextureComponent(
                 this.components.Count.ToString(CultureInfo.InvariantCulture),
-                new Rectangle(component.bounds.Right - 22, component.bounds.Y + 4, 24, 24),
+                new Rectangle(component.bounds.Right - 36, component.bounds.Y + 4, 36, 36),
                 string.Empty,
                 "Remove",
                 Game1.mouseCursors,
                 new Rectangle(337, 494, 12, 12),
-                2f);
+                3f);
 
             this.expressions.Add(null);
             this.components.Add(subComponent);
@@ -387,7 +335,40 @@ internal sealed class ExpressionEditor : IClickableMenu
 
             this.expressions.Add(expression);
             this.components.Add(component);
+            this.colors.Add(Color.White);
+
+            var subWidth = ((this.width - tabWidth) / 2) - offsetX - 19;
+            var subComponent = new ClickableComponent(
+                new Rectangle(currentX + offsetX, currentY, subWidth, lineHeight),
+                this.components.Count.ToString(CultureInfo.InvariantCulture),
+                "Something");
+
+            this.expressions.Add(null);
+            this.components.Add(subComponent);
             this.colors.Add(ExpressionEditor.Colors[offsetX / tabWidth % ExpressionEditor.Colors.Length]);
+
+            subComponent = new ClickableComponent(
+                new Rectangle(currentX + offsetX + subWidth + tabWidth, currentY, subWidth, lineHeight),
+                this.components.Count.ToString(CultureInfo.InvariantCulture),
+                expression.Term);
+
+            this.expressions.Add(null);
+            this.components.Add(subComponent);
+            this.colors.Add(ExpressionEditor.Colors[offsetX / tabWidth % ExpressionEditor.Colors.Length]);
+
+            subComponent = new ClickableTextureComponent(
+                this.components.Count.ToString(CultureInfo.InvariantCulture),
+                new Rectangle(component.bounds.Right - 36, component.bounds.Y + 4, 36, 36),
+                string.Empty,
+                "Remove",
+                Game1.mouseCursors,
+                new Rectangle(337, 494, 12, 12),
+                3f);
+
+            this.expressions.Add(null);
+            this.components.Add(subComponent);
+            this.colors.Add(Color.White);
+
             currentY += lineHeight + tabWidth;
         }
 
@@ -413,6 +394,8 @@ internal sealed class ExpressionEditor : IClickableMenu
             }
         }
     }
+
+    private static Color Highlighted(Color color) => Color.Lerp(color, Color.White, 0.5f);
 
     private static Color Muted(Color color)
     {

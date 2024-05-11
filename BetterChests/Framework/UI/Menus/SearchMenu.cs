@@ -3,9 +3,9 @@ namespace StardewMods.BetterChests.Framework.UI.Menus;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Helpers;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.GarbageDay.Common.UI;
 using StardewValley.Menus;
@@ -23,6 +23,7 @@ internal sealed class SearchMenu : BaseMenu
     private readonly ClickableTextureComponent scrollBar;
     private readonly Rectangle scrollBarRunner;
     private readonly SearchBar searchBar;
+    private readonly UiManager uiManager;
 
     private List<Item> allItems = [];
     private int rowOffset;
@@ -34,16 +35,16 @@ internal sealed class SearchMenu : BaseMenu
     private int totalRows;
 
     /// <summary>Initializes a new instance of the <see cref="SearchMenu" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="searchText">The initial search text.</param>
-    public SearchMenu(AssetHandler assetHandler, IExpressionHandler expressionHandler, string? searchText = null)
+    /// <param name="uiManager">Dependency used for managing ui.</param>
+    public SearchMenu(IExpressionHandler expressionHandler, string searchText, UiManager uiManager)
     {
         var myId = 55378008;
         this.expressionHandler = expressionHandler;
+        this.uiManager = uiManager;
         this.searchText = string.Empty;
         this.expressionEditor = new ExpressionEditor(
-            assetHandler.UiTexture,
             this.xPositionOnScreen + IClickableMenu.borderWidth,
             this.yPositionOnScreen
             + IClickableMenu.spaceToClearSideBorder
@@ -51,15 +52,10 @@ internal sealed class SearchMenu : BaseMenu
             + (Game1.tileSize * 2)
             + 12,
             340,
-            600);
+            448);
 
         this.inventory = new InventoryMenu(
-            this.xPositionOnScreen
-            + IClickableMenu.spaceToClearSideBorder
-            + (IClickableMenu.borderWidth / 2)
-
-            //+ Game1.tileSize
-            + 428,
+            this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2) + 428,
             this.yPositionOnScreen
             + IClickableMenu.spaceToClearSideBorder
             + (IClickableMenu.borderWidth / 2)
@@ -73,7 +69,7 @@ internal sealed class SearchMenu : BaseMenu
 
         this.inventory.populateClickableComponentList();
 
-        this.SearchText = searchText ?? string.Empty;
+        this.SearchText = searchText;
         this.searchBar = new SearchBar(
             this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2),
             this.yPositionOnScreen
@@ -87,13 +83,7 @@ internal sealed class SearchMenu : BaseMenu
         var x1 =
             this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2) + 348;
 
-        var x2 = this.xPositionOnScreen
-            + this.width
-            - IClickableMenu.spaceToClearSideBorder
-
-            //- (IClickableMenu.borderWidth / 2)
-            //- Game1.tileSize
-            + 12;
+        var x2 = this.xPositionOnScreen + this.width - IClickableMenu.spaceToClearSideBorder + 12;
 
         var y1 = this.yPositionOnScreen
             + IClickableMenu.spaceToClearSideBorder
@@ -192,8 +182,20 @@ internal sealed class SearchMenu : BaseMenu
             this.xPositionOnScreen + (IClickableMenu.borderWidth / 2) + 400,
             this.yPositionOnScreen + (IClickableMenu.borderWidth / 2) + Game1.tileSize + 40);
 
+        this.uiManager.DrawInFrame(
+            b,
+            SpriteSortMode.Deferred,
+            new Rectangle(
+                this.expressionEditor.xPositionOnScreen,
+                this.expressionEditor.yPositionOnScreen,
+                this.expressionEditor.width,
+                this.expressionEditor.height),
+            () =>
+            {
+                this.expressionEditor.draw(b);
+            });
+
         this.searchBar.Draw(b);
-        this.expressionEditor.draw(b);
         this.inventory.draw(b);
 
         // Scrollbar
@@ -206,13 +208,14 @@ internal sealed class SearchMenu : BaseMenu
             this.scrollBarRunner.Width,
             this.scrollBarRunner.Height,
             Color.White,
-            4f);
+            Game1.pixelZoom);
 
         this.scrollBar.draw(b);
 
         // Arrows
         this.arrowUpLeft.draw(b, this.scrollAmount > 0 ? Color.White : Color.Black * 0.35f, 1f);
         this.arrowDownLeft.draw(b, this.scrollAmount < this.totalRows - 1 ? Color.White : Color.Black * 0.35f, 1f);
+
         this.arrowUpRight.draw(b, this.rowOffset > 0 ? Color.White : Color.Black * 0.35f, 1f);
         this.arrowDownRight.draw(
             b,
@@ -234,8 +237,9 @@ internal sealed class SearchMenu : BaseMenu
     public override void performHoverAction(int x, int y)
     {
         base.performHoverAction(x, y);
-
         this.searchBar.Update(x, y);
+        this.inventory.performHoverAction(x, y);
+        this.expressionEditor.performHoverAction(x, y);
 
         if (this.scrollAmount > 0)
         {
@@ -335,7 +339,13 @@ internal sealed class SearchMenu : BaseMenu
     public override void receiveScrollWheelAction(int direction)
     {
         var (mouseX, mouseY) = Game1.getMousePosition(true);
-        base.receiveScrollWheelAction(direction);
+        if (this.expressionEditor.isWithinBounds(mouseX, mouseY))
+        {
+            this.expressionEditor.receiveScrollWheelAction(direction);
+            return;
+        }
+
+        // Scroll down
         if (direction < 0
             && this.inventory.isWithinBounds(mouseX, mouseY)
             && this.rowOffset < this.totalRows - this.inventory.rows - 1)
@@ -350,6 +360,7 @@ internal sealed class SearchMenu : BaseMenu
             return;
         }
 
+        // Scroll up
         if (direction > 0 && this.inventory.isWithinBounds(mouseX, mouseY) && this.rowOffset > 0)
         {
             this.rowOffset--;
