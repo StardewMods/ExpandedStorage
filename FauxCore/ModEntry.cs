@@ -34,6 +34,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterInstance(this.Helper.Reflection);
         this.container.RegisterInstance(this.Helper.Translation);
         this.container.RegisterInstance<Func<IModConfig>>(this.GetConfig);
+        this.container.RegisterSingleton<CacheManager>();
         this.container.RegisterSingleton<IModConfig, ConfigManager>();
         this.container.RegisterSingleton<ConfigManager, ConfigManager>();
         this.container.RegisterSingleton<IEventManager, EventManager>();

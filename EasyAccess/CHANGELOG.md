@@ -1,6 +1,10 @@
 # Easy Access Change Log
 
-## 2.1.5 (Unreleased)
+## 2.2.0 (Unreleased)
+
+### Added
+
+* Added support for moss.
 
 ### Changed
 

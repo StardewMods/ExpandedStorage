@@ -39,7 +39,7 @@ internal sealed class ToolbarManager : BaseService
     /// <summary>Initializes a new instance of the <see cref="ToolbarManager" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="components">Dependency used for the toolbar icon components.</param>
-    /// <param name="configManager">Dependency used for accessing config data.</param>
+    /// <param name="configManager">Dependency used for managing config data.</param>
     /// <param name="contentPatcherIntegration">Dependency used for integration with Content Patcher.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>

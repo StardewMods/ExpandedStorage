@@ -24,7 +24,7 @@ internal sealed class ToolbarIconOption : BaseComplexOption
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="components">Dependency used for the toolbar icon components.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     public ToolbarIconOption(
         AssetHandler assetHandler,
         Dictionary<string, ClickableTextureComponent> components,

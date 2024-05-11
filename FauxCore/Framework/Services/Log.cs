@@ -14,7 +14,7 @@ internal sealed class Log : ILog
     private string lastMessage = string.Empty;
 
     /// <summary>Initializes a new instance of the <see cref="Log" /> class.</summary>
-    /// <param name="getConfig">Dependency used for accessing config data.</param>
+    /// <param name="getConfig">Dependency used for managing config data.</param>
     /// <param name="monitor">Dependency used for monitoring and logging.</param>
     public Log(Func<IModConfig> getConfig, IMonitor monitor)
     {

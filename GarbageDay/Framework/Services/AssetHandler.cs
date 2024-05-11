@@ -31,7 +31,7 @@ internal sealed class AssetHandler : BaseService
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     public AssetHandler(
         IEventManager eventManager,
