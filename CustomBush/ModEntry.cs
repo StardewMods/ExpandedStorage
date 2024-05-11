@@ -18,6 +18,7 @@ public sealed class ModEntry : Mod
     public override void Entry(IModHelper helper)
     {
         // Init
+        I18n.Init(this.Helper.Translation);
         this.container = new Container();
 
         // Configuration

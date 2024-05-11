@@ -5,6 +5,7 @@
 ### Changed
 
 * Updated for FauxCore 1.2.0.
+* Generate a default name/description if one is not provided.
 
 ## 1.2.1 (May 1, 2024)
 

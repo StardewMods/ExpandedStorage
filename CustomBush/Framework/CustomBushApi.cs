@@ -42,6 +42,18 @@ public sealed class CustomBushApi : ICustomBushApi
     {
         if (this.modPatches.TryGetCustomBush(bush, out var customBushInstance))
         {
+            // Replace blank name with default
+            if (string.IsNullOrWhiteSpace(customBushInstance.DisplayName))
+            {
+                customBushInstance.DisplayName = I18n.Default_Name();
+            }
+
+            // Replace blank description with default
+            if (string.IsNullOrWhiteSpace(customBushInstance.Description))
+            {
+                customBushInstance.Description = I18n.Default_Description();
+            }
+
             customBush = customBushInstance;
             id = customBushInstance.Id;
             return true;
