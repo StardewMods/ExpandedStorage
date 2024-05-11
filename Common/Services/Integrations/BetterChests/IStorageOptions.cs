@@ -1,7 +1,5 @@
 namespace StardewMods.Common.Services.Integrations.BetterChests;
 
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
-
 /// <summary>Configurable options for a storage container.</summary>
 public interface IStorageOptions
 {

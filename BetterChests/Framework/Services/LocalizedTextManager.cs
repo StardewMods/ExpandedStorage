@@ -3,7 +3,7 @@ namespace StardewMods.BetterChests.Framework.Services;
 using System.Globalization;
 using System.Text;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 

@@ -1,18 +1,18 @@
-namespace StardewMods.BetterChests.Framework.Models.StorageOptions;
+namespace StardewMods.Common.Models;
 
 using System.Globalization;
 using System.Text;
+using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.BetterChests;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 
 /// <inheritdoc />
 internal class DefaultStorageOptions : IStorageOptions
 {
     /// <inheritdoc />
-    public string Description => I18n.Storage_Other_Name();
+    public string Description => string.Empty;
 
     /// <inheritdoc />
-    public string DisplayName => I18n.Storage_Other_Tooltip();
+    public string DisplayName => string.Empty;
 
     /// <inheritdoc />
     public RangeOption AccessChest { get; set; } = RangeOption.Default;
@@ -108,8 +108,6 @@ internal class DefaultStorageOptions : IStorageOptions
     public override string ToString()
     {
         StringBuilder sb = new();
-
-        sb.AppendLine(CultureInfo.InvariantCulture, $"Display Name: {this.DisplayName}");
 
         this.ForEachOption(
             (name, option) =>

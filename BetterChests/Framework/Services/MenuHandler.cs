@@ -14,7 +14,7 @@ using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Buildings;
 using StardewValley.Menus;
@@ -41,7 +41,7 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="modEvents">Dependency used for managing access to SMAPI events.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     public MenuHandler(

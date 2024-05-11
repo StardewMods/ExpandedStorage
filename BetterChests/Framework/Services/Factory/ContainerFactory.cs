@@ -7,7 +7,6 @@ using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Models.StorageOptions;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Buildings;
 using StardewValley.Characters;
@@ -25,7 +24,7 @@ internal sealed class ContainerFactory : BaseService
     /// <summary>Initializes a new instance of the <see cref="ContainerFactory" /> class.</summary>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="proxyChestFactory">Dependency used for creating virtualized chests.</param>
     public ContainerFactory(ILog log, IManifest manifest, IModConfig modConfig, ProxyChestFactory proxyChestFactory)
         : base(log, manifest)

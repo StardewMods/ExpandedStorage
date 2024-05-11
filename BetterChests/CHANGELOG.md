@@ -4,6 +4,7 @@
 
 ### Added
 
+* Updated for FauxCore 1.2.0.
 * Added visual editors for configuring storage options.
 * Added support for searching by item attributes.
 

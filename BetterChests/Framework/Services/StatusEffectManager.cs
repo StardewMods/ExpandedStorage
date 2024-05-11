@@ -14,7 +14,7 @@ internal sealed class StatusEffectManager : GenericBaseService<StatusEffectManag
     /// <summary>Initializes a new instance of the <see cref="StatusEffectManager" /> class.</summary>
     /// <param name="log">Dependency used for monitoring and logging.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     public StatusEffectManager(ILog log, IManifest manifest, IModConfig modConfig)
         : base(log, manifest) =>
         this.modConfig = modConfig;

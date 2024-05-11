@@ -1,6 +1,10 @@
 # Expanded Storage Change Log
 
-## 3.0.6 (Unreleased)
+## 3.1.0 (Unreleased)
+
+### Added
+
+* Added config options for each storage type.
 
 ### Changed
 

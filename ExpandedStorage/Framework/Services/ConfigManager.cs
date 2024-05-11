@@ -2,6 +2,8 @@ namespace StardewMods.ExpandedStorage.Framework.Services;
 
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models;
+using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.ExpandedStorage.Framework.Interfaces;
@@ -33,7 +35,13 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         this.modHelper = modHelper;
 
         eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
+        eventManager.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
     }
+
+    /// <inheritdoc />
+    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions => this.Config.StorageOptions;
+
+    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) { }
 
     private void OnGameLaunched(GameLaunchedEventArgs e)
     {

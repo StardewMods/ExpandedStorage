@@ -4,7 +4,6 @@ using System.Globalization;
 using NetEscapades.EnumGenerators;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.BetterChests;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 
 /// <inheritdoc />
 internal abstract class DictionaryStorageOptions : IStorageOptions

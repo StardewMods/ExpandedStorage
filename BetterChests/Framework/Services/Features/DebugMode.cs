@@ -2,10 +2,12 @@ namespace StardewMods.BetterChests.Framework.Services.Features;
 
 using System.Globalization;
 using StardewMods.BetterChests.Framework.Interfaces;
-using StardewMods.BetterChests.Framework.Models.StorageOptions;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.BetterChests.Framework.UI.Menus;
+using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 
@@ -17,6 +19,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     private readonly ContainerHandler containerHandler;
     private readonly IExpressionHandler expressionHandler;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
+    private readonly UiManager uiManager;
 
     /// <summary>Initializes a new instance of the <see cref="DebugMode" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
@@ -27,8 +30,9 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
+    /// <param name="uiManager">Dependency used for managing ui.</param>
     public DebugMode(
         AssetHandler assetHandler,
         ICommandHelper commandHelper,
@@ -39,7 +43,8 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
-        ToolbarIconsIntegration toolbarIconsIntegration)
+        ToolbarIconsIntegration toolbarIconsIntegration,
+        UiManager uiManager)
         : base(eventManager, log, manifest, modConfig)
     {
         // Init
@@ -48,6 +53,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         this.containerHandler = containerHandler;
         this.expressionHandler = expressionHandler;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
+        this.uiManager = uiManager;
 
         // Commands
         commandHelper.Add("bc_config", I18n.Command_PlayerConfig(), this.Command);
@@ -163,9 +169,9 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
                 return;
             case "search":
                 Game1.activeClickableMenu = new SearchMenu(
-                    this.assetHandler,
                     this.expressionHandler,
-                    "({category}~fish !{tags}~ocean [{quality}~iridium {quality}~gold])");
+                    "({category}~fish !{tags}~ocean [{quality}~iridium {quality}~gold])",
+                    this.uiManager);
 
                 return;
             case "sort":

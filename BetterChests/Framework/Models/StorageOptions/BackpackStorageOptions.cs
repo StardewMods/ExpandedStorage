@@ -1,7 +1,6 @@
 namespace StardewMods.BetterChests.Framework.Models.StorageOptions;
 
 using StardewMods.Common.Services.Integrations.BetterChests;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 
 /// <inheritdoc />
 internal sealed class BackpackStorageOptions : IStorageOptions

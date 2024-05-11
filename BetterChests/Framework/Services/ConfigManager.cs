@@ -4,12 +4,12 @@ using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models;
-using StardewMods.BetterChests.Framework.Models.StorageOptions;
+using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewValley.Menus;
@@ -115,14 +115,16 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions => this.Config.StorageOptions;
 
     /// <summary>Adds the main options to the config menu.</summary>
+    /// <param name="modManifest">The manifest.</param>
     /// <param name="id">The page id.</param>
     /// <param name="getTitle">Gets the title for the page.</param>
     /// <param name="options">The storage options to add.</param>
     /// <param name="isDefault">Indicates if these are the default options being set.</param>
     /// <param name="parentOptions">The options that this inherits from.</param>
     public void AddMainOption(
-        string id,
-        Func<string> getTitle,
+        IManifest modManifest,
+        string? id,
+        Func<string>? getTitle,
         IStorageOptions options,
         bool isDefault = false,
         IStorageOptions? parentOptions = null)
@@ -133,12 +135,15 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         var gmcm = this.genericModConfigMenuIntegration.Api;
-        gmcm.AddPage(this.manifest, id, getTitle);
+        if (!string.IsNullOrWhiteSpace(id) && getTitle is not null)
+        {
+            gmcm.AddPage(modManifest, id, getTitle);
+        }
 
         if (parentOptions is not null)
         {
             gmcm.AddParagraph(
-                this.manifest,
+                modManifest,
                 () => $"{I18n.Config_DefaultOption_Description(I18n.Config_DefaultOption_Indicator())}");
         }
 
@@ -154,7 +159,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.AccessChest != RangeOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.AccessChest.ToStringFast(),
                 value => options.AccessChest = RangeOptionExtensions.TryParse(value, out var range)
                     ? range
@@ -169,7 +174,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.AutoOrganize != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.AutoOrganize.ToStringFast(),
                 value => options.AutoOrganize = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -184,7 +189,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.CarryChest != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.CarryChest.ToStringFast(),
                 value => options.CarryChest = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -199,7 +204,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.CategorizeChest != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.CategorizeChest.ToStringFast(),
                 value => options.CategorizeChest = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -214,7 +219,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.ChestFinder != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.ChestFinder.ToStringFast(),
                 value => options.ChestFinder = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -229,7 +234,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.CollectItems != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.CollectItems.ToStringFast(),
                 value => options.CollectItems = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -244,7 +249,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.ConfigureChest != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.ConfigureChest.ToStringFast(),
                 value => options.ConfigureChest = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -259,7 +264,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.CookFromChest != RangeOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.CookFromChest.ToStringFast(),
                 value => options.CookFromChest = RangeOptionExtensions.TryParse(value, out var range)
                     ? range
@@ -274,7 +279,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.CraftFromChest != RangeOption.Disabled)
         {
             gmcm.AddNumberOption(
-                this.manifest,
+                modManifest,
                 () => options.CraftFromChestDistance switch
                 {
                     _ when options.CraftFromChest is RangeOption.Default => (int)RangeOption.Default,
@@ -324,7 +329,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.HslColorPicker != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.HslColorPicker.ToStringFast(),
                 value => options.HslColorPicker = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -339,7 +344,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.InventoryTabs != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.InventoryTabs.ToStringFast(),
                 value => options.InventoryTabs = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -354,7 +359,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.OpenHeldChest != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.OpenHeldChest.ToStringFast(),
                 value => options.OpenHeldChest = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -368,7 +373,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         // Resize Chest
         var size = (int)options.ResizeChest;
         gmcm.OnFieldChanged(
-            this.manifest,
+            modManifest,
             (fieldId, fieldValue) =>
             {
                 if (fieldId == nameof(options.ResizeChest)
@@ -380,7 +385,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             });
 
         gmcm.AddNumberOption(
-            this.manifest,
+            modManifest,
             () => options.ResizeChestCapacity switch
             {
                 -1 => 5,
@@ -406,7 +411,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.ResizeChest != ChestMenuOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.ResizeChest.ToStringFast(),
                 value => options.ResizeChest = ChestMenuOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -422,7 +427,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.SearchItems != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.SearchItems.ToStringFast(),
                 value => options.SearchItems = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -437,7 +442,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.ShopFromChest != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.ShopFromChest.ToStringFast(),
                 value => options.ShopFromChest = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -452,7 +457,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.SortInventory != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.SortInventory.ToStringFast(),
                 value => options.SortInventory = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -463,7 +468,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 this.localizedTextManager.FormatOption(parentOptions?.SortInventory));
 
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.SortInventoryBy,
                 value => options.SortInventoryBy = value,
                 I18n.Config_SortInventoryBy_Name,
@@ -474,7 +479,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.StashToChest != RangeOption.Disabled)
         {
             gmcm.AddNumberOption(
-                this.manifest,
+                modManifest,
                 () => options.StashToChestDistance switch
                 {
                     _ when options.StashToChest is RangeOption.Default => (int)RangeOption.Default,
@@ -524,7 +529,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         if (isDefault || this.DefaultOptions.StorageInfo != FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.StorageInfo.ToStringFast(),
                 value => options.StorageInfo = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -535,7 +540,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 this.localizedTextManager.FormatOption(parentOptions?.StorageInfo));
 
             gmcm.AddTextOption(
-                this.manifest,
+                modManifest,
                 () => options.StorageInfoHover.ToStringFast(),
                 value => options.StorageInfoHover = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -643,7 +648,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             pages.AddRange(subPages);
         }
 
-        this.AddMainOption("Main", I18n.Section_Main_Name, config.DefaultOptions, true);
+        this.AddMainOption(this.manifest, "Main", I18n.Section_Main_Name, config.DefaultOptions, true);
 
         gmcm.AddPage(this.manifest, "Controls", I18n.Section_Controls_Name);
         this.AddControls(config.Controls);
@@ -653,7 +658,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         foreach (var (id, title, _, options) in pages)
         {
-            this.AddMainOption(id, () => title, options, true, config.DefaultOptions);
+            this.AddMainOption(this.manifest, id, () => title, options, true, config.DefaultOptions);
         }
     }
 

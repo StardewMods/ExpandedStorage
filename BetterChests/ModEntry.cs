@@ -3,6 +3,7 @@ namespace StardewMods.BetterChests;
 using HarmonyLib;
 using SimpleInjector;
 using StardewModdingAPI.Events;
+using StardewMods.BetterChests.Framework;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.Services.Factory;
@@ -45,7 +46,6 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<AssetHandler>();
         this.container.RegisterSingleton<BetterCraftingIntegration>();
         this.container.RegisterSingleton<BetterCraftingInventoryProvider>();
-        this.container.RegisterSingleton<CacheManager>();
         this.container.RegisterSingleton<IModConfig, ConfigManager>();
         this.container.RegisterSingleton<ConfigManager, ConfigManager>();
         this.container.RegisterSingleton<ContainerFactory>();
@@ -63,6 +63,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<StatusEffectManager>();
         this.container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
         this.container.RegisterSingleton<ToolbarIconsIntegration>();
+        this.container.RegisterSingleton<UiManager>();
 
         this.container.RegisterInstance<Func<IModConfig>>(this.container.GetInstance<IModConfig>);
 
@@ -96,6 +97,14 @@ public sealed class ModEntry : Mod
 
         this.Init();
     }
+
+    /// <inheritdoc />
+    public override object GetApi(IModInfo mod) =>
+        new BetterChestsApi(
+            mod,
+            this.container.GetInstance<ConfigManager>(),
+            this.container.GetInstance<ContainerHandler>(),
+            this.container.GetInstance<ContainerFactory>());
 
     private void Init()
     {

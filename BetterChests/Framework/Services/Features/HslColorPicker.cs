@@ -11,7 +11,7 @@ using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 using StardewValley.Objects;
@@ -35,7 +35,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
     public HslColorPicker(

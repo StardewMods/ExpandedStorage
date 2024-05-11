@@ -9,7 +9,7 @@ using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 using StardewValley.Objects;
@@ -25,7 +25,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
 
     /// <summary>Initializes a new instance of the <see cref="OpenHeldChest" /> class.</summary>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>

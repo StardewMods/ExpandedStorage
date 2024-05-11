@@ -2,8 +2,8 @@ namespace StardewMods.BetterChests.Framework.Interfaces;
 
 using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Models;
-using StardewMods.BetterChests.Framework.Models.StorageOptions;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
+using StardewMods.Common.Models;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewValley.Menus;
 
 /// <summary>Mod config data for Better Chests.</summary>

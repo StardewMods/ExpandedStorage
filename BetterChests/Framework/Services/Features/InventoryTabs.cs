@@ -6,7 +6,7 @@ using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
@@ -25,7 +25,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     public InventoryTabs(
         AssetHandler assetHandler,
         IEventManager eventManager,

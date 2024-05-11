@@ -9,7 +9,7 @@ using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
+using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Locations;
 using StardewValley.Objects;
@@ -31,7 +31,7 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="proxyChestFactory">Dependency used for creating virtualized chests.</param>
     /// <param name="statusEffectManager">Dependency used for adding and removing custom buffs.</param>

@@ -3,14 +3,13 @@ namespace StardewMods.BetterChests.Framework.Services;
 using HarmonyLib;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Models.Events;
-using StardewMods.BetterChests.Framework.Models.StorageOptions;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
+using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewValley.Menus;
@@ -30,7 +29,7 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
     private readonly IReflectionHelper reflectionHelper;
 
     /// <summary>Initializes a new instance of the <see cref="ContainerHandler" /> class.</summary>
-    /// <param name="configManager">Dependency used for accessing config data.</param>
+    /// <param name="configManager">Dependency used for managing config data.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
@@ -204,7 +203,13 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
         }
 
         gmcm.AddPageLink(this.manifest, "Main", I18n.Section_Main_Name, I18n.Section_Main_Description);
-        this.configManager.AddMainOption("Main", I18n.Section_Main_Name, options, parentOptions: parentOptions);
+        this.configManager.AddMainOption(
+            this.manifest,
+            "Main",
+            I18n.Section_Main_Name,
+            options,
+            parentOptions: parentOptions);
+
         gmcm.OpenModMenu(this.manifest);
         return;
 

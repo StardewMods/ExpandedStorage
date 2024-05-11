@@ -12,7 +12,6 @@ using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.BetterChests;
-using StardewMods.Common.Services.Integrations.BetterChests.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewValley.Menus;
@@ -35,7 +34,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
     /// <summary>Initializes a new instance of the <see cref="ConfigureChest" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
-    /// <param name="configManager">Dependency used for accessing config data.</param>
+    /// <param name="configManager">Dependency used for managing config data.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
