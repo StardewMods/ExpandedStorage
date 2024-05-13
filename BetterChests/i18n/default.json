@@ -250,8 +250,9 @@
   "ui.any.name": "any",
   "ui.any.tooltip": "Any must match",
   "ui.not.name": "not",
-  "ui.not.tooltip": "None must match",
+  "ui.not.tooltip": "Must not match",
   "ui.remove.tooltip": "Remove",
+  "ui.invalid.tooltip": "Missing or invalid value",
   // Attributes
   "attribute.category.name": "Category",
   "attribute.name.name": "Name",

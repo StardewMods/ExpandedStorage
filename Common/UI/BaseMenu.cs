@@ -1,4 +1,4 @@
-namespace StardewMods.GarbageDay.Common.UI;
+namespace StardewMods.Common.UI;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -8,13 +8,23 @@ using StardewValley.Menus;
 internal abstract class BaseMenu : IClickableMenu
 {
     /// <summary>Initializes a new instance of the <see cref="BaseMenu" /> class.</summary>
-    protected BaseMenu()
+    /// <param name="x">The x-position of the menu.</param>
+    /// <param name="y">The y-position of the menu.</param>
+    /// <param name="width">The width of the menu.</param>
+    /// <param name="height">The height of the menu.</param>
+    /// <param name="showUpperRightCloseButton">A value indicating whether to show the right close button.</param>
+    protected BaseMenu(
+        int? x = null,
+        int? y = null,
+        int? width = null,
+        int? height = null,
+        bool showUpperRightCloseButton = true)
         : base(
-            (Game1.uiViewport.Width / 2) - ((800 + (IClickableMenu.borderWidth * 2)) / 2),
-            (Game1.uiViewport.Height / 2) - ((600 + (IClickableMenu.borderWidth * 2)) / 2),
-            800 + (IClickableMenu.borderWidth * 2),
-            600 + (IClickableMenu.borderWidth * 2),
-            true) { }
+            x ?? (Game1.uiViewport.Width / 2) - ((800 + (IClickableMenu.borderWidth * 2)) / 2),
+            y ?? (Game1.uiViewport.Height / 2) - ((600 + (IClickableMenu.borderWidth * 2)) / 2),
+            width ?? 800 + (IClickableMenu.borderWidth * 2),
+            height ?? 600 + (IClickableMenu.borderWidth * 2),
+            showUpperRightCloseButton) { }
 
     /// <inheritdoc />
     public override void draw(SpriteBatch b) => this.draw(b, -1);
@@ -45,5 +55,7 @@ internal abstract class BaseMenu : IClickableMenu
             red,
             green,
             blue);
+
+        this.upperRightCloseButton?.draw(b);
     }
 }

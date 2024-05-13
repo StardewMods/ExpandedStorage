@@ -21,6 +21,7 @@ internal sealed class DynamicTerm : IExpression
         { ItemAttribute.Quantity, item => item.Stack },
         { ItemAttribute.Quality, item => item.Quality },
         { ItemAttribute.Tags, item => item.GetContextTags() },
+        { ItemAttribute.Any, DynamicTerm.AllAttributes },
     };
 
     private ItemAttribute attribute;
@@ -31,6 +32,9 @@ internal sealed class DynamicTerm : IExpression
 
     /// <inheritdoc />
     public ExpressionType ExpressionType => ExpressionType.Dynamic;
+
+    /// <inheritdoc />
+    public bool IsValid => true;
 
     /// <inheritdoc />
     public string Text => $"{DynamicTerm.BeginChar}{this.attribute.ToStringFast()}{DynamicTerm.EndChar}";
@@ -142,6 +146,18 @@ internal sealed class DynamicTerm : IExpression
             default:
                 result = null;
                 return false;
+        }
+    }
+
+    private static IEnumerable<string> AllAttributes(Item item)
+    {
+        yield return item.DisplayName;
+        yield return item.getCategoryName();
+        yield return ((ItemQuality)item.Quality).ToStringFast();
+
+        foreach (var tag in item.GetContextTags())
+        {
+            yield return tag;
         }
     }
 }

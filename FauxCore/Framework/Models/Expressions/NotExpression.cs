@@ -20,6 +20,9 @@ internal sealed class NotExpression : IExpression
     public ExpressionType ExpressionType => ExpressionType.Not;
 
     /// <inheritdoc />
+    public bool IsValid => this.Expression is not null;
+
+    /// <inheritdoc />
     public string Text => $"{NotExpression.Char}{this.Expression?.Text}";
 
     /// <inheritdoc />

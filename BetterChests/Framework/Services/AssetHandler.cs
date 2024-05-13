@@ -250,6 +250,13 @@ internal sealed class AssetHandler : BaseService
                             Area = new Rectangle(48, 48, 16, 16),
                         }
                     },
+                    {
+                        this.ModId + "/NoStack", new Icon
+                        {
+                            Path = this.uiTextures.Value.Name.Name,
+                            Area = new Rectangle(0, 64, 16, 16),
+                        }
+                    },
                 },
                 AssetLoadPriority.Exclusive);
 

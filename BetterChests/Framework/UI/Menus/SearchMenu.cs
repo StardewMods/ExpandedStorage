@@ -3,46 +3,44 @@ namespace StardewMods.BetterChests.Framework.UI.Menus;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
-using StardewMods.GarbageDay.Common.UI;
+using StardewMods.Common.UI;
 using StardewValley.Menus;
 
-/// <summary>Visual menu for search bar.</summary>
+/// <summary>A menu for editing search.</summary>
 internal sealed class SearchMenu : BaseMenu
 {
-    private readonly ClickableTextureComponent arrowDownLeft;
-    private readonly ClickableTextureComponent arrowDownRight;
-    private readonly ClickableTextureComponent arrowUpLeft;
-    private readonly ClickableTextureComponent arrowUpRight;
     private readonly ExpressionEditor expressionEditor;
     private readonly IExpressionHandler expressionHandler;
     private readonly InventoryMenu inventory;
-    private readonly ClickableTextureComponent scrollBar;
-    private readonly Rectangle scrollBarRunner;
-    private readonly SearchBar searchBar;
+    private readonly VerticalScrollBar scrollExpressions;
+    private readonly VerticalScrollBar scrollInventory;
+    private readonly TextField textField;
     private readonly UiManager uiManager;
 
     private List<Item> allItems = [];
-    private DropDownList? dropDown;
     private int rowOffset;
-    private bool scrolling;
     private IExpression? searchExpression;
     private string searchText;
     private int totalRows;
 
     /// <summary>Initializes a new instance of the <see cref="SearchMenu" /> class.</summary>
+    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="searchText">The initial search text.</param>
     /// <param name="uiManager">Dependency used for managing ui.</param>
-    public SearchMenu(IExpressionHandler expressionHandler, string searchText, UiManager uiManager)
+    public SearchMenu(
+        AssetHandler assetHandler,
+        IExpressionHandler expressionHandler,
+        string searchText,
+        UiManager uiManager)
     {
-        var myId = 55378008;
         this.expressionHandler = expressionHandler;
         this.uiManager = uiManager;
-        this.searchText = string.Empty;
         this.expressionEditor = new ExpressionEditor(
             this,
             this.expressionHandler,
@@ -65,12 +63,16 @@ internal sealed class SearchMenu : BaseMenu
             false,
             new List<Item>(),
             this.HighlightMethod,
-            42,
+            35,
             7);
 
         this.inventory.populateClickableComponentList();
 
-        this.searchBar = new SearchBar(
+        this.searchText = searchText;
+        this.ParseSearch();
+        this.RefreshItems();
+
+        this.textField = new TextField(
             this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2),
             this.yPositionOnScreen
             + IClickableMenu.spaceToClearSideBorder
@@ -81,92 +83,59 @@ internal sealed class SearchMenu : BaseMenu
             value =>
             {
                 this.searchText = value;
-                this.UpdateSearch();
+                this.ParseSearch();
+                this.RefreshItems();
             });
 
-        this.SearchText = searchText;
-        this.UpdateSearch();
-
-        var x1 =
-            this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2) + 348;
-
-        var x2 = this.xPositionOnScreen + this.width - IClickableMenu.spaceToClearSideBorder + 12;
-
-        var y1 = this.yPositionOnScreen
+        this.scrollExpressions = new VerticalScrollBar(
+            this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2) + 348,
+            this.yPositionOnScreen
             + IClickableMenu.spaceToClearSideBorder
             + (IClickableMenu.borderWidth / 2)
             + (Game1.tileSize * 2)
-            + 16;
+            + 16,
+            448,
+            () => this.expressionEditor.OffsetY,
+            value =>
+            {
+                this.expressionEditor.OffsetY = value;
+            },
+            () => 0,
+            () => this.expressionEditor.MaxOffset,
+            40);
 
-        var y2 = this.yPositionOnScreen
-            + this.height
-            - IClickableMenu.spaceToClearSideBorder
-            - (IClickableMenu.borderWidth / 2)
-            - Game1.tileSize;
-
-        this.arrowUpLeft = new ClickableTextureComponent(
-            new Rectangle(x1, y1, 11 * Game1.pixelZoom, 12 * Game1.pixelZoom),
-            Game1.mouseCursors,
-            new Rectangle(421, 459, 11, 12),
-            Game1.pixelZoom) { myID = ++myId };
-
-        this.arrowDownLeft = new ClickableTextureComponent(
-            new Rectangle(x1, y2, 11 * Game1.pixelZoom, 12 * Game1.pixelZoom),
-            Game1.mouseCursors,
-            new Rectangle(421, 472, 11, 12),
-            Game1.pixelZoom) { myID = ++myId };
-
-        this.arrowUpRight = new ClickableTextureComponent(
-            new Rectangle(x2, y1, 11 * Game1.pixelZoom, 12 * Game1.pixelZoom),
-            Game1.mouseCursors,
-            new Rectangle(421, 459, 11, 12),
-            Game1.pixelZoom) { myID = ++myId };
-
-        this.arrowDownRight = new ClickableTextureComponent(
-            new Rectangle(x2, y2, 11 * Game1.pixelZoom, 12 * Game1.pixelZoom),
-            Game1.mouseCursors,
-            new Rectangle(421, 472, 11, 12),
-            Game1.pixelZoom) { myID = ++myId };
-
-        this.scrollBar = new ClickableTextureComponent(
-            new Rectangle(
-                this.arrowUpLeft.bounds.X + 12,
-                this.arrowUpLeft.bounds.Y + this.arrowUpLeft.bounds.Height + 4,
-                24,
-                40),
-            Game1.mouseCursors,
-            new Rectangle(435, 463, 6, 10),
-            Game1.pixelZoom);
-
-        var scrollBarRunnerHeight = y2 - y1 - this.arrowUpLeft.bounds.Height - 12;
-
-        this.scrollBarRunner = new Rectangle(
-            this.scrollBar.bounds.X,
-            this.arrowUpLeft.bounds.Y + this.arrowUpLeft.bounds.Height + 4,
-            this.scrollBar.bounds.Width,
-            scrollBarRunnerHeight);
+        this.scrollInventory = new VerticalScrollBar(
+            this.xPositionOnScreen + this.width - IClickableMenu.spaceToClearSideBorder - Game1.tileSize - 12,
+            this.yPositionOnScreen
+            + IClickableMenu.spaceToClearSideBorder
+            + (IClickableMenu.borderWidth / 2)
+            + (Game1.tileSize * 2)
+            + 16,
+            448,
+            () => this.rowOffset,
+            value =>
+            {
+                this.rowOffset = value;
+                this.inventory.actualInventory = this
+                    .allItems.Skip(this.rowOffset * (this.inventory.capacity / this.inventory.rows))
+                    .Take(this.inventory.capacity)
+                    .ToList();
+            },
+            () => 0,
+            () => this.totalRows - this.inventory.rows - 1);
 
         this.populateClickableComponentList();
     }
 
+    /// <summary>Gets or sets the dropdown.</summary>
+    public BaseDropdown? DropDown { get; set; }
+
     /// <summary>Gets or sets the hover text.</summary>
     public string? HoverText { get; set; }
-
-    /// <summary>Gets or sets the search text.</summary>
-    public string SearchText
-    {
-        get => this.searchText;
-        set
-        {
-            this.searchText = value;
-            this.searchBar?.Reset();
-        }
-    }
 
     /// <inheritdoc />
     public override void draw(SpriteBatch b, int red = -1, int green = -1, int blue = -1)
     {
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
         base.draw(b, -1);
         this.HoverText = null;
 
@@ -183,48 +152,28 @@ internal sealed class SearchMenu : BaseMenu
             b,
             SpriteSortMode.Deferred,
             new Rectangle(
-                this.expressionEditor.xPositionOnScreen,
-                this.expressionEditor.yPositionOnScreen,
-                this.expressionEditor.width,
-                this.expressionEditor.height),
+                this.expressionEditor.xPositionOnScreen - 4,
+                this.expressionEditor.yPositionOnScreen - 8,
+                this.expressionEditor.width + 8,
+                this.expressionEditor.height + 16),
             () =>
             {
                 this.expressionEditor.draw(b);
             });
 
-        this.searchBar.Draw(b);
+        this.textField.Draw(b);
         this.inventory.draw(b);
+        this.scrollExpressions.Draw(b);
+        this.scrollInventory.Draw(b);
 
-        // Scrollbar
-        IClickableMenu.drawTextureBox(
-            b,
-            Game1.mouseCursors,
-            new Rectangle(403, 383, 6, 6),
-            this.scrollBarRunner.X,
-            this.scrollBarRunner.Y,
-            this.scrollBarRunner.Width,
-            this.scrollBarRunner.Height,
-            Color.White,
-            Game1.pixelZoom);
-
-        this.scrollBar.draw(b);
-
-        // Arrows
-        this.arrowUpLeft.draw(b, this.expressionEditor.OffsetY < 0 ? Color.White : Color.Black * 0.35f, 1f);
-        this.arrowDownLeft.draw(
-            b,
-            this.expressionEditor.OffsetY > this.expressionEditor.MaxOffset ? Color.White : Color.Black * 0.35f,
-            1f);
-
-        this.arrowUpRight.draw(b, this.rowOffset > 0 ? Color.White : Color.Black * 0.35f, 1f);
-        this.arrowDownRight.draw(
-            b,
-            this.rowOffset < this.totalRows - this.inventory.rows - 1 ? Color.White : Color.Black * 0.35f,
-            1f);
-
-        if (this.dropDown is not null)
+        if (this.GetChildMenu() is not null)
         {
-            this.dropDown.draw(b);
+            return;
+        }
+
+        if (this.DropDown is not null)
+        {
+            this.DropDown.draw(b);
         }
         else if (!string.IsNullOrWhiteSpace(this.HoverText))
         {
@@ -232,6 +181,7 @@ internal sealed class SearchMenu : BaseMenu
         }
         else
         {
+            var (mouseX, mouseY) = Game1.getMousePosition(true);
             var item = this.inventory.hover(mouseX, mouseY, null);
             if (item is not null)
             {
@@ -247,35 +197,35 @@ internal sealed class SearchMenu : BaseMenu
     public override void leftClickHeld(int x, int y)
     {
         base.leftClickHeld(x, y);
-        if (!this.scrolling) { }
+        if (this.scrollExpressions.IsActive)
+        {
+            this.scrollExpressions.Update(x, y);
+            return;
+        }
+
+        if (this.scrollInventory.IsActive)
+        {
+            this.scrollInventory.Update(x, y);
+        }
+    }
+
+    /// <summary>Updates the search text without parsing.</summary>
+    /// <param name="value">The new search text value.</param>
+    public void OverrideSearchText(string value)
+    {
+        this.searchText = value;
+        this.textField.Reset();
+        this.RefreshItems();
     }
 
     /// <inheritdoc />
     public override void performHoverAction(int x, int y)
     {
         base.performHoverAction(x, y);
-        this.searchBar.Update(x, y);
+        this.textField.Update(x, y);
+        this.scrollExpressions.Update(x, y);
+        this.scrollInventory.Update(x, y);
         this.expressionEditor.performHoverAction(x, y);
-
-        if (this.expressionEditor.OffsetY < 0)
-        {
-            this.arrowUpLeft.tryHover(x, y);
-        }
-
-        if (this.expressionEditor.OffsetY > this.expressionEditor.MaxOffset)
-        {
-            this.arrowDownLeft.tryHover(x, y);
-        }
-
-        if (this.rowOffset > 0)
-        {
-            this.arrowUpRight.tryHover(x, y);
-        }
-
-        if (this.rowOffset < this.totalRows - 1)
-        {
-            this.arrowDownRight.tryHover(x, y);
-        }
     }
 
     /// <inheritdoc />
@@ -286,7 +236,7 @@ internal sealed class SearchMenu : BaseMenu
             this.exitThisMenuNoSound();
         }
 
-        if (key is Keys.Tab && this.searchBar.Selected)
+        if (key is Keys.Tab && this.textField.Selected)
         {
             // Auto-complete on tab
         }
@@ -295,63 +245,51 @@ internal sealed class SearchMenu : BaseMenu
     /// <inheritdoc />
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
-        this.dropDown?.receiveLeftClick(x, y);
-        this.searchBar.LeftClick(x, y);
-        if (this.searchBar.Selected)
+        base.receiveLeftClick(x, y, playSound);
+
+        if (this.DropDown is not null)
+        {
+            this.DropDown.receiveLeftClick(x, y, playSound);
+            return;
+        }
+
+        this.textField.LeftClick(x, y);
+        if (this.textField.Selected)
+        {
+            return;
+        }
+
+        if (this.scrollExpressions.Click(x, y))
+        {
+            return;
+        }
+
+        if (this.scrollInventory.Click(x, y))
         {
             return;
         }
 
         this.expressionEditor.receiveLeftClick(x, y);
-
-        if (this.arrowUpLeft.containsPoint(x, y))
-        {
-            Game1.playSound("shwip");
-            this.expressionEditor.OffsetY += 20;
-            return;
-        }
-
-        if (this.arrowDownLeft.containsPoint(x, y))
-        {
-            Game1.playSound("shwip");
-            this.expressionEditor.OffsetY -= 20;
-            return;
-        }
-
-        if (this.rowOffset > 0 && this.arrowUpRight.containsPoint(x, y))
-        {
-            Game1.playSound("shwip");
-            this.rowOffset--;
-            this.inventory.actualInventory = this.allItems.Skip(this.rowOffset).Take(this.inventory.capacity).ToList();
-
-            return;
-        }
-
-        if (this.rowOffset < this.totalRows - this.inventory.rows - 1 && this.arrowDownRight.containsPoint(x, y))
-        {
-            Game1.playSound("shwip");
-            this.rowOffset++;
-            this.inventory.actualInventory = this
-                .allItems.Skip(this.rowOffset * (this.inventory.capacity / this.inventory.rows))
-                .Take(this.inventory.capacity)
-                .ToList();
-
-            return;
-        }
-
-        if (this.scrollBar.containsPoint(x, y)) { }
     }
 
     /// <inheritdoc />
     public override void receiveRightClick(int x, int y, bool playSound = true)
     {
-        this.searchBar.RightClick(x, y);
-        if (this.searchBar.Selected)
+        base.receiveRightClick(x, y, playSound);
+
+        if (this.DropDown is not null)
+        {
+            this.DropDown.receiveRightClick(x, y, playSound);
+            return;
+        }
+
+        this.textField.RightClick(x, y);
+        if (this.textField.Selected)
         {
             return;
         }
 
-        this.searchBar.Selected = false;
+        this.textField.Selected = false;
         this.expressionEditor.receiveRightClick(x, y);
     }
 
@@ -359,37 +297,21 @@ internal sealed class SearchMenu : BaseMenu
     public override void receiveScrollWheelAction(int direction)
     {
         var (mouseX, mouseY) = Game1.getMousePosition(true);
+        if (this.DropDown is not null)
+        {
+            this.DropDown.receiveScrollWheelAction(direction);
+            return;
+        }
+
         if (this.expressionEditor.isWithinBounds(mouseX, mouseY))
         {
-            this.expressionEditor.receiveScrollWheelAction(direction);
+            this.scrollExpressions.Scroll(direction);
             return;
         }
 
-        // Scroll down
-        if (direction < 0
-            && this.inventory.isWithinBounds(mouseX, mouseY)
-            && this.rowOffset < this.totalRows - this.inventory.rows - 1)
+        if (this.inventory.isWithinBounds(mouseX, mouseY))
         {
-            this.rowOffset++;
-            this.inventory.actualInventory = this
-                .allItems.Skip(this.rowOffset * (this.inventory.capacity / this.inventory.rows))
-                .Take(this.inventory.capacity)
-                .ToList();
-
-            Game1.playSound("shiny4");
-            return;
-        }
-
-        // Scroll up
-        if (direction > 0 && this.inventory.isWithinBounds(mouseX, mouseY) && this.rowOffset > 0)
-        {
-            this.rowOffset--;
-            this.inventory.actualInventory = this
-                .allItems.Skip(this.rowOffset * (this.inventory.capacity / this.inventory.rows))
-                .Take(this.inventory.capacity)
-                .ToList();
-
-            Game1.playSound("shiny4");
+            this.scrollInventory.Scroll(direction);
         }
     }
 
@@ -397,18 +319,23 @@ internal sealed class SearchMenu : BaseMenu
     public override void releaseLeftClick(int x, int y)
     {
         base.releaseLeftClick(x, y);
-        this.scrolling = false;
+        this.scrollExpressions.UnClick(x, y);
+        this.scrollInventory.UnClick(x, y);
     }
 
     private bool HighlightMethod(Item item) => true;
 
-    private void UpdateSearch()
+    private void ParseSearch()
     {
         this.searchExpression = this.expressionHandler.TryParseExpression(this.searchText, out var expression)
             ? expression
             : null;
 
         this.expressionEditor.ReInitializeComponents(this.searchExpression);
+    }
+
+    private void RefreshItems()
+    {
         if (this.searchExpression is null)
         {
             this.allItems = [];

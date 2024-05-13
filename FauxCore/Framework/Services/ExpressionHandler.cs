@@ -3,6 +3,7 @@ namespace StardewMods.FauxCore.Framework.Services;
 using System.Text;
 using Force.DeepCloner;
 using Pidgin;
+using StardewMods.Common.Enums;
 using StardewMods.Common.Models.Cache;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -11,14 +12,7 @@ using StardewMods.FauxCore.Framework.Models.Expressions;
 /// <summary>Responsible for handling parsed expressions.</summary>
 internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>, IExpressionHandler
 {
-    private static readonly Parser<char, IExpression> AllParser;
-    private static readonly Parser<char, IExpression> AnyParser;
-    private static readonly Parser<char, IExpression> ComparableParser;
-    private static readonly Parser<char, IExpression> DynamicParser;
-    private static readonly Parser<char, IExpression> NotParser;
-    private static readonly Parser<char, IExpression> QuotedParser;
     private static readonly Parser<char, IExpression> RootParser;
-    private static readonly Parser<char, IExpression> StaticParser;
 
     private readonly CacheTable<IExpression?> cachedSearches;
 
@@ -41,63 +35,75 @@ internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>,
             .Between(Parser.SkipWhitespaces)
             .Where(term => !string.IsNullOrWhiteSpace(term));
 
-        ExpressionHandler.StaticParser = stringParser.Select(term => new StaticTerm(term)).OfType<IExpression>();
+        var staticTerm = stringParser.Select(term => new StaticTerm(term)).OfType<IExpression>();
 
-        ExpressionHandler.QuotedParser = stringParser
+        var staticParser = stringParser
+            .Select(
+                term => new ComparableExpression(
+                    new DynamicTerm(ItemAttribute.Any.ToStringFast()),
+                    new StaticTerm(term)))
+            .OfType<IExpression>();
+
+        var quotedTerm = stringParser
             .Between(Parser.Char(QuotedTerm.BeginChar), Parser.Char(QuotedTerm.EndChar))
             .Between(Parser.SkipWhitespaces)
             .Select(expressions => new QuotedTerm(expressions))
             .OfType<IExpression>();
 
-        ExpressionHandler.DynamicParser = stringParser
-            .Between(Parser.Char(DynamicTerm.BeginChar), Parser.Char(DynamicTerm.EndChar))
+        var quotedParser = stringParser
+            .Between(Parser.Char(QuotedTerm.BeginChar), Parser.Char(QuotedTerm.EndChar))
             .Between(Parser.SkipWhitespaces)
-            .Select(expressions => new DynamicTerm(expressions))
+            .Select(
+                term => new ComparableExpression(
+                    new DynamicTerm(ItemAttribute.Any.ToStringFast()),
+                    new QuotedTerm(term)))
             .OfType<IExpression>();
 
-        ExpressionHandler.ComparableParser = Parser.Try(
+        var dynamicParser = stringParser
+            .Between(Parser.Char(DynamicTerm.BeginChar), Parser.Char(DynamicTerm.EndChar))
+            .Between(Parser.SkipWhitespaces)
+            .Select(term => new DynamicTerm(term))
+            .OfType<IExpression>();
+
+        var comparableParser = Parser.Try(
             Parser
                 .Map(
                     (left, _, right) => new ComparableExpression(left, right),
-                    ExpressionHandler.DynamicParser,
+                    dynamicParser,
                     Parser.Char(ComparableExpression.Char),
-                    ExpressionHandler.QuotedParser.Or(ExpressionHandler.StaticParser))
+                    quotedTerm.Or(staticTerm))
                 .OfType<IExpression>());
 
+        Parser<char, IExpression> allParser = null!;
+        Parser<char, IExpression> anyParser = null!;
+        Parser<char, IExpression> notParser = null!;
         var parsers = Parser.Rec(
             () => Parser.OneOf(
-                ExpressionHandler.AnyParser!,
-                ExpressionHandler.AllParser!,
-                ExpressionHandler.NotParser!,
-                ExpressionHandler.ComparableParser,
-                ExpressionHandler.DynamicParser,
-                ExpressionHandler.QuotedParser,
-                ExpressionHandler.StaticParser));
+                anyParser,
+                allParser,
+                notParser,
+                comparableParser,
+                dynamicParser,
+                quotedParser,
+                staticParser));
 
-        ExpressionHandler.AllParser = parsers
+        allParser = parsers
             .Many()
             .Between(Parser.Char(AllExpression.BeginChar), Parser.Char(AllExpression.EndChar))
             .Between(Parser.SkipWhitespaces)
             .Select(expressions => new AllExpression(expressions.ToArray()))
             .OfType<IExpression>();
 
-        ExpressionHandler.AnyParser = parsers
+        anyParser = parsers
             .Many()
             .Between(Parser.Char(AnyExpression.BeginChar), Parser.Char(AnyExpression.EndChar))
             .Between(Parser.SkipWhitespaces)
             .Select(expressions => new AnyExpression(expressions.ToArray()))
             .OfType<IExpression>();
 
-        ExpressionHandler.NotParser = Parser
+        notParser = Parser
             .Char(NotExpression.Char)
-            .Then(
-                Parser.OneOf(
-                    ExpressionHandler.AnyParser,
-                    ExpressionHandler.AllParser,
-                    ExpressionHandler.ComparableParser,
-                    ExpressionHandler.DynamicParser,
-                    ExpressionHandler.QuotedParser,
-                    ExpressionHandler.StaticParser))
+            .Then(Parser.OneOf(anyParser, allParser, comparableParser, dynamicParser, quotedParser, staticParser))
             .Select(term => new NotExpression(term))
             .OfType<IExpression>();
 

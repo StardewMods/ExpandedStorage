@@ -5,10 +5,10 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Events;
-using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.Common.UI;
 using StardewValley.Menus;
 
 /// <summary>Adds a search bar to the top of the <see cref="ItemGrabMenu" />.</summary>
@@ -22,7 +22,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<ClickableTextureComponent?> rejectButton = new();
     private readonly PerScreen<ClickableTextureComponent?> saveButton = new();
-    private readonly PerScreen<SearchBar?> searchBar = new();
+    private readonly PerScreen<TextField?> searchBar = new();
     private readonly PerScreen<IExpression?> searchExpression = new();
     private readonly PerScreen<string> searchText = new(() => string.Empty);
 
@@ -243,7 +243,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             - Game1.tileSize
             - (top.Rows == 3 ? 25 : 4);
 
-        this.searchBar.Value = new SearchBar(
+        this.searchBar.Value = new TextField(
             x,
             y,
             width,

@@ -15,6 +15,9 @@ internal class StaticTerm : IExpression
     public virtual ExpressionType ExpressionType => ExpressionType.Static;
 
     /// <inheritdoc />
+    public bool IsValid => !string.IsNullOrWhiteSpace(this.Term);
+
+    /// <inheritdoc />
     public virtual string Text => this.Term;
 
     /// <inheritdoc />

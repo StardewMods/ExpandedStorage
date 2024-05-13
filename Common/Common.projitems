@@ -89,6 +89,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ToolbarIcons\ToolbarIconsIntegration.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\EventManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\UiManager.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\BaseDropdown.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\BaseMenu.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Dropdown.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\PopupList.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\VerticalScrollBar.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\TextField.cs"/>
   </ItemGroup>
 </Project>

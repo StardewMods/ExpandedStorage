@@ -3,7 +3,7 @@ namespace StardewMods.BetterChests.Framework.UI.Menus;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Services.Features;
-using StardewMods.GarbageDay.Common.UI;
+using StardewMods.Common.UI;
 using StardewValley.Menus;
 
 /// <summary>Menu for accessing debug mode.</summary>

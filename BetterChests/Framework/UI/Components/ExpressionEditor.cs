@@ -6,11 +6,14 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.UI.Menus;
+using StardewMods.Common.Enums;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.Common.UI;
 using StardewValley.Menus;
 
-internal sealed class ExpressionEditor : IClickableMenu
+/// <summary>A sub-menu for editing the expression tree.</summary>
+internal sealed class ExpressionEditor : BaseMenu
 {
     private static readonly Color[] Colors =
     [
@@ -41,7 +44,7 @@ internal sealed class ExpressionEditor : IClickableMenu
         int yPosition,
         int width,
         int height)
-        : base(xPosition, yPosition, width, height)
+        : base(xPosition, yPosition, width, height, false)
     {
         this.parent = parent;
         this.expressionHandler = expressionHandler;
@@ -54,7 +57,7 @@ internal sealed class ExpressionEditor : IClickableMenu
     public int OffsetY
     {
         get => this.offsetY;
-        set => this.offsetY = Math.Max(Math.Min(0, value), this.MaxOffset);
+        set => this.offsetY = Math.Min(this.MaxOffset, Math.Max(0, value));
     }
 
     /// <inheritdoc />
@@ -67,7 +70,9 @@ internal sealed class ExpressionEditor : IClickableMenu
         foreach (var (baseColor, component, expression, tooltip, _) in this.items)
         {
             var hover = component.containsPoint(mouseX, mouseY - this.OffsetY);
-            var color = hover ? ExpressionEditor.Highlighted(baseColor) : ExpressionEditor.Muted(baseColor);
+            var color = hover && this.parent.DropDown is null && this.parent.GetChildMenu() is null
+                ? ExpressionEditor.Highlighted(baseColor)
+                : ExpressionEditor.Muted(baseColor);
 
             switch (expression?.ExpressionType)
             {
@@ -79,7 +84,7 @@ internal sealed class ExpressionEditor : IClickableMenu
                         Game1.mouseCursors,
                         new Rectangle(403, 373, 9, 9),
                         component.bounds.X,
-                        this.OffsetY + component.bounds.Y,
+                        component.bounds.Y - this.OffsetY,
                         component.bounds.Width,
                         component.bounds.Height,
                         color,
@@ -97,7 +102,7 @@ internal sealed class ExpressionEditor : IClickableMenu
                     this.parent.HoverText ??= clickableTextureComponent.hoverText;
                 }
 
-                clickableTextureComponent.draw(b, Color.White, 1f, yOffset: this.OffsetY);
+                clickableTextureComponent.draw(b, Color.White, 1f, yOffset: -this.OffsetY);
                 continue;
             }
 
@@ -113,7 +118,7 @@ internal sealed class ExpressionEditor : IClickableMenu
                     Game1.mouseCursors,
                     new Rectangle(432, 439, 9, 9),
                     component.bounds.X,
-                    this.OffsetY + component.bounds.Y,
+                    component.bounds.Y - this.OffsetY,
                     component.bounds.Width,
                     component.bounds.Height,
                     color,
@@ -129,25 +134,25 @@ internal sealed class ExpressionEditor : IClickableMenu
             b.DrawString(
                 Game1.smallFont,
                 component.label,
-                new Vector2(component.bounds.X + 8, this.OffsetY + component.bounds.Y + 2),
+                new Vector2(component.bounds.X + 8, component.bounds.Y - this.OffsetY + 2),
                 Game1.textColor,
                 0f,
                 Vector2.Zero,
                 1f,
                 SpriteEffects.None,
-                0.55f);
+                1f);
         }
     }
 
     /// <inheritdoc />
     public override void performHoverAction(int x, int y)
     {
-        base.performHoverAction(x, y - this.OffsetY);
+        base.performHoverAction(x, y + this.OffsetY);
         foreach (var (_, component, _, _, _) in this.items)
         {
             if (component is ClickableTextureComponent clickableTextureComponent)
             {
-                clickableTextureComponent.tryHover(x, y - this.OffsetY);
+                clickableTextureComponent.tryHover(x, y + this.OffsetY);
             }
         }
     }
@@ -157,7 +162,7 @@ internal sealed class ExpressionEditor : IClickableMenu
     {
         foreach (var (_, component, _, _, action) in this.items)
         {
-            if (action is not null && component.containsPoint(x, y - this.OffsetY))
+            if (action is not null && component.containsPoint(x, y + this.OffsetY))
             {
                 action.Invoke();
                 return;
@@ -170,7 +175,7 @@ internal sealed class ExpressionEditor : IClickableMenu
     {
         foreach (var (_, component, _, _, action) in this.items)
         {
-            if (component.containsPoint(x, y - this.OffsetY))
+            if (component.containsPoint(x, y + this.OffsetY))
             {
                 action?.Invoke();
                 return;
@@ -186,7 +191,7 @@ internal sealed class ExpressionEditor : IClickableMenu
         // Scroll down
         if (direction < 0)
         {
-            this.OffsetY -= scrollAmount;
+            this.OffsetY += scrollAmount;
             Game1.playSound("shiny4");
             return;
         }
@@ -194,7 +199,7 @@ internal sealed class ExpressionEditor : IClickableMenu
         // Scroll up
         if (direction > 0)
         {
-            this.OffsetY += scrollAmount;
+            this.OffsetY -= scrollAmount;
             Game1.playSound("shiny4");
         }
     }
@@ -218,8 +223,8 @@ internal sealed class ExpressionEditor : IClickableMenu
 
         var offsetX = -1;
         Enqueue(initExpression);
-        this.MaxOffset = Math.Min(0, this.yPositionOnScreen + this.height - currentY);
-        this.offsetY = Math.Max(Math.Min(0, this.offsetY), this.MaxOffset);
+        this.MaxOffset = Math.Max(0, currentY - this.yPositionOnScreen - this.height);
+        this.offsetY = Math.Min(Math.Max(0, this.offsetY), this.MaxOffset);
         this.populateClickableComponentList();
         return;
 
@@ -261,7 +266,12 @@ internal sealed class ExpressionEditor : IClickableMenu
                 ExpressionType.Not => I18n.Ui_Not_Tooltip(),
             };
 
-            var subComponent = new ClickableComponent(
+            Action? action = expression.ExpressionType switch
+            {
+                ExpressionType.All or ExpressionType.Any => () => this.ToggleGroup(expression), _ => null,
+            };
+
+            var toggleGroup = new ClickableComponent(
                 new Rectangle(
                     component.bounds.X + 8,
                     component.bounds.Y + 8,
@@ -270,19 +280,9 @@ internal sealed class ExpressionEditor : IClickableMenu
                 this.items.Count.ToString(CultureInfo.InvariantCulture),
                 text);
 
-            this.items.Add((Color.Gray, subComponent, null, tooltip, null));
+            this.items.Add((Color.Gray, toggleGroup, null, tooltip, action));
 
-            // Remove component
-            subComponent = new ClickableTextureComponent(
-                this.items.Count.ToString(CultureInfo.InvariantCulture),
-                new Rectangle(component.bounds.Right - tabWidth - 36, component.bounds.Y + 8, 36, 36),
-                string.Empty,
-                I18n.Ui_Remove_Tooltip(),
-                Game1.mouseCursors,
-                new Rectangle(337, 494, 12, 12),
-                3f);
-
-            this.items.Add((Color.White, subComponent, null, I18n.Ui_Remove_Tooltip(), () => this.Remove(expression)));
+            AddRemove(expression, component);
 
             currentY += lineHeight + tabWidth;
             offsetX += tabWidth;
@@ -318,6 +318,11 @@ internal sealed class ExpressionEditor : IClickableMenu
 
             offsetX -= tabWidth;
 
+            if (!expression.IsValid)
+            {
+                AddWarning(component);
+            }
+
             var newHeight = currentY - initialY - tabWidth;
             if (component.bounds.Height == newHeight)
             {
@@ -333,45 +338,46 @@ internal sealed class ExpressionEditor : IClickableMenu
             // Parent component
             var index = this.items.Count;
             var component = new ClickableComponent(
-                new Rectangle(currentX + offsetX, currentY, this.width - (offsetX * 2), lineHeight),
+                new Rectangle(
+                    currentX + offsetX - tabWidth,
+                    currentY - 4,
+                    this.width - (offsetX * 2) + (tabWidth * 2),
+                    lineHeight + 8),
                 index.ToString(CultureInfo.InvariantCulture));
 
             this.items.Add((Color.White, component, expression, string.Empty, null));
 
-            var subWidth = ((this.width - tabWidth) / 2) - offsetX - 19;
+            var subWidth = ((this.width - tabWidth) / 2) - offsetX - 15;
 
             // Left component
             var leftTerm = expression.Expressions.ElementAtOrDefault(0);
             var text = leftTerm is not null ? Localized.Attribute(leftTerm.Term) : I18n.Attribute_Any_Name();
 
             var color = ExpressionEditor.Colors[offsetX / tabWidth % ExpressionEditor.Colors.Length];
-            var subComponent = new ClickableComponent(
+            var leftComponent = new ClickableComponent(
                 new Rectangle(currentX + offsetX, currentY, subWidth, lineHeight),
                 this.items.Count.ToString(CultureInfo.InvariantCulture),
                 text);
 
-            this.items.Add((color, subComponent, leftTerm, string.Empty, null));
+            this.items.Add(
+                (color, leftComponent, leftTerm, string.Empty, () => this.ShowDropdown(expression, leftComponent)));
 
             // Right component
             var rightTerm = expression.Expressions.ElementAtOrDefault(1);
-            subComponent = new ClickableComponent(
+            var rightComponent = new ClickableComponent(
                 new Rectangle(currentX + offsetX + subWidth + tabWidth, currentY, subWidth, lineHeight),
                 this.items.Count.ToString(CultureInfo.InvariantCulture),
                 rightTerm?.Term ?? expression.Term);
 
-            this.items.Add((color, subComponent, rightTerm, string.Empty, null));
+            this.items.Add(
+                (color, rightComponent, rightTerm, string.Empty, () => this.ShowPopup(expression, rightComponent)));
 
-            // Remove component
-            subComponent = new ClickableTextureComponent(
-                this.items.Count.ToString(CultureInfo.InvariantCulture),
-                new Rectangle(component.bounds.Right - 36, component.bounds.Y + 4, 36, 36),
-                string.Empty,
-                I18n.Ui_Remove_Tooltip(),
-                Game1.mouseCursors,
-                new Rectangle(337, 494, 12, 12),
-                3f);
+            AddRemove(expression, component);
 
-            this.items.Add((Color.White, subComponent, null, I18n.Ui_Remove_Tooltip(), () => this.Remove(expression)));
+            if (!expression.IsValid)
+            {
+                AddWarning(component);
+            }
 
             currentY += lineHeight + tabWidth;
         }
@@ -380,24 +386,24 @@ internal sealed class ExpressionEditor : IClickableMenu
         {
             var initialX = offsetX;
             var subWidth = (int)Game1.smallFont.MeasureString(I18n.Ui_AddTerm_Name()).X + 20;
-            var subComponent = new ClickableComponent(
+            var addTerm = new ClickableComponent(
                 new Rectangle(currentX + offsetX, currentY, subWidth, 32),
                 this.items.Count.ToString(CultureInfo.InvariantCulture),
                 I18n.Ui_AddTerm_Name());
 
             this.items.Add(
-                (Color.Gray, subComponent, null, I18n.Ui_AddTerm_Tooltip(),
+                (Color.Gray, addTerm, null, I18n.Ui_AddTerm_Tooltip(),
                     () => this.Add(expression, ExpressionType.Static)));
 
             offsetX += subWidth + tabWidth;
             subWidth = (int)Game1.smallFont.MeasureString(I18n.Ui_AddGroup_Name()).X + 20;
-            subComponent = new ClickableComponent(
+            var addGroup = new ClickableComponent(
                 new Rectangle(currentX + offsetX, currentY, subWidth, 32),
                 this.items.Count.ToString(CultureInfo.InvariantCulture),
                 I18n.Ui_AddGroup_Name());
 
             this.items.Add(
-                (Color.Gray, subComponent, null, I18n.Ui_AddGroup_Tooltip(),
+                (Color.Gray, addGroup, null, I18n.Ui_AddGroup_Tooltip(),
                     () => this.Add(expression, ExpressionType.All)));
 
             if (expression.ExpressionType is ExpressionType.Not)
@@ -409,17 +415,47 @@ internal sealed class ExpressionEditor : IClickableMenu
 
             offsetX += subWidth + tabWidth;
             subWidth = (int)Game1.smallFont.MeasureString(I18n.Ui_AddNot_Name()).X + 20;
-            subComponent = new ClickableComponent(
+            var addNot = new ClickableComponent(
                 new Rectangle(currentX + offsetX, currentY, subWidth, 32),
                 this.items.Count.ToString(CultureInfo.InvariantCulture),
                 I18n.Ui_AddNot_Name());
 
             this.items.Add(
-                (Color.Gray, subComponent, null, I18n.Ui_AddNot_Tooltip(),
-                    () => this.Add(expression, ExpressionType.Not)));
+                (Color.Gray, addNot, null, I18n.Ui_AddNot_Tooltip(), () => this.Add(expression, ExpressionType.Not)));
 
             offsetX = initialX;
             currentY += lineHeight + tabWidth;
+        }
+
+        void AddRemove(IExpression expression, ClickableComponent component)
+        {
+            var removeComponent = new ClickableTextureComponent(
+                this.items.Count.ToString(CultureInfo.InvariantCulture),
+                new Rectangle(component.bounds.Right - 36, component.bounds.Y + 12, 24, 24),
+                string.Empty,
+                I18n.Ui_Remove_Tooltip(),
+                Game1.mouseCursors,
+                new Rectangle(322, 498, 12, 12),
+
+                //new Rectangle(337, 494, 12, 12),
+                2f);
+
+            this.items.Add(
+                (Color.White, removeComponent, null, I18n.Ui_Remove_Tooltip(), () => this.Remove(expression)));
+        }
+
+        void AddWarning(ClickableComponent component)
+        {
+            var subComponent = new ClickableTextureComponent(
+                this.items.Count.ToString(CultureInfo.InvariantCulture),
+                new Rectangle(component.bounds.X - 2, component.bounds.Y - 7, 5, 14),
+                string.Empty,
+                I18n.Ui_Remove_Tooltip(),
+                Game1.mouseCursors,
+                new Rectangle(403, 496, 5, 14),
+                2f);
+
+            this.items.Add((Color.White, subComponent, null, I18n.Ui_Invalid_Tooltip(), null));
         }
 
         void Enqueue(IExpression expression)
@@ -454,16 +490,38 @@ internal sealed class ExpressionEditor : IClickableMenu
     private void Add(IExpression toAddTo, ExpressionType expressionType)
     {
         if (this.baseExpression is null
-            || !this.expressionHandler.TryCreateExpression(expressionType, out var expression))
+            || !this.expressionHandler.TryCreateExpression(expressionType, out var newChild))
         {
             return;
         }
 
-        var newChildren = toAddTo.Expressions.ToList();
-        newChildren.Add(expression);
-        toAddTo.Expressions = newChildren.ToImmutableList();
-        var searchText = this.baseExpression.Text;
-        this.parent.SearchText = searchText;
+        var newChildren = GetChildren().ToImmutableList();
+        toAddTo.Expressions = newChildren;
+        this.parent.OverrideSearchText(this.baseExpression.Text);
+        this.ReInitializeComponents(this.baseExpression);
+        return;
+
+        IEnumerable<IExpression> GetChildren()
+        {
+            foreach (var child in toAddTo.Expressions)
+            {
+                yield return child;
+            }
+
+            yield return newChild;
+        }
+    }
+
+    private void ChangeAttribute(IExpression toChange, ItemAttribute attribute)
+    {
+        var dynamicTerm = toChange.Expressions.ElementAtOrDefault(0);
+        if (this.baseExpression is null || dynamicTerm?.ExpressionType is not ExpressionType.Dynamic)
+        {
+            return;
+        }
+
+        dynamicTerm.Term = attribute.ToStringFast();
+        this.parent.OverrideSearchText(this.baseExpression.Text);
         this.ReInitializeComponents(this.baseExpression);
     }
 
@@ -474,10 +532,79 @@ internal sealed class ExpressionEditor : IClickableMenu
             return;
         }
 
-        var newChildren = toRemove.Parent.Expressions.Where(expression => expression != toRemove).ToImmutableList();
+        var newChildren = GetChildren().ToImmutableList();
         toRemove.Parent.Expressions = newChildren;
-        var searchText = this.baseExpression.Text;
-        this.parent.SearchText = searchText;
+        this.parent.OverrideSearchText(this.baseExpression.Text);
         this.ReInitializeComponents(this.baseExpression);
+        return;
+
+        IEnumerable<IExpression> GetChildren()
+        {
+            foreach (var child in toRemove.Parent.Expressions)
+            {
+                if (child != toRemove)
+                {
+                    yield return child;
+                }
+            }
+        }
+    }
+
+    private void ShowDropdown(IExpression expression, ClickableComponent component) =>
+        this.parent.DropDown = new Dropdown<ItemAttribute>(
+            ItemAttributeExtensions.GetValues().Select(i => (i, i.ToStringFast())).ToList(),
+            component.bounds.X,
+            component.bounds.Bottom - this.OffsetY,
+            value =>
+            {
+                if (value is not null)
+                {
+                    this.ChangeAttribute(expression, (ItemAttribute)value);
+                }
+
+                this.parent.DropDown = null;
+            });
+
+    private void ShowPopup(IExpression expression, ClickableComponent component) =>
+        this.parent.SetChildMenu(
+            new BasePopupList(component.label ?? string.Empty, ItemAttributeExtensions.GetNames().ToList()));
+
+    private void ToggleGroup(IExpression toToggle)
+    {
+        var expressionType = toToggle.ExpressionType switch
+        {
+            ExpressionType.All => ExpressionType.Any,
+            ExpressionType.Any => ExpressionType.All,
+            _ => ExpressionType.All,
+        };
+
+        if (this.baseExpression is null
+            || toToggle.Parent is null
+            || !this.expressionHandler.TryCreateExpression(expressionType, out var newChild))
+        {
+            return;
+        }
+
+        var newChildren = GetChildren().ToImmutableList();
+        toToggle.Parent.Expressions = newChildren;
+        this.parent.OverrideSearchText(this.baseExpression.Text);
+        this.ReInitializeComponents(this.baseExpression);
+        return;
+
+        IEnumerable<IExpression> GetChildren()
+        {
+            foreach (var child in toToggle.Parent.Expressions)
+            {
+                if (child != toToggle)
+                {
+                    yield return child;
+
+                    continue;
+                }
+
+                newChild.Expressions = child.Expressions;
+                yield return newChild;
+            }
+        }
     }
 }

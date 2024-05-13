@@ -1,6 +1,7 @@
 namespace StardewMods.FauxCore.Framework.Models.Expressions;
 
 using System.Collections.Immutable;
+using StardewMods.Common.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Inventories;
 
@@ -20,7 +21,13 @@ internal sealed class ComparableExpression : IExpression
     public ExpressionType ExpressionType => ExpressionType.Comparable;
 
     /// <inheritdoc />
-    public string Text => $"{this.LeftTerm?.Text}{ComparableExpression.Char}{this.RightTerm?.Text}";
+    public bool IsValid => this.LeftTerm is not null && !string.IsNullOrWhiteSpace(this.RightTerm?.Term);
+
+    /// <inheritdoc />
+    public string Text =>
+        this.LeftTerm?.Text.Contains(ItemAttribute.Any.ToStringFast(), StringComparison.OrdinalIgnoreCase) == true
+            ? $"{this.RightTerm?.Text}"
+            : $"{this.LeftTerm?.Text}{ComparableExpression.Char}{this.RightTerm?.Text}";
 
     /// <inheritdoc />
     public IImmutableList<IExpression> Expressions

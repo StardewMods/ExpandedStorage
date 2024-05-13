@@ -2,13 +2,13 @@
 
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using StardewMods.BetterChests.Framework.UI.Components;
+using StardewMods.Common.UI;
 using StardewValley.Menus;
 
 /// <summary>Menu for searching for chests which contain specific items.</summary>
 internal sealed class SearchOverlay : IClickableMenu
 {
-    private readonly SearchBar searchBar;
+    private readonly TextField textField;
 
     /// <summary>Initializes a new instance of the <see cref="SearchOverlay" /> class.</summary>
     /// <param name="getMethod">The function that gets the current search text.</param>
@@ -18,8 +18,8 @@ internal sealed class SearchOverlay : IClickableMenu
         var searchBarWidth = Math.Min(12 * Game1.tileSize, Game1.uiViewport.Width);
         var origin = Utility.getTopLeftPositionForCenteringOnScreen(searchBarWidth, 48);
 
-        this.searchBar =
-            new SearchBar((int)origin.X, Game1.tileSize, searchBarWidth, getMethod, setMethod)
+        this.textField =
+            new TextField((int)origin.X, Game1.tileSize, searchBarWidth, getMethod, setMethod)
             {
                 Selected = true,
             };
@@ -28,12 +28,12 @@ internal sealed class SearchOverlay : IClickableMenu
     /// <inheritdoc />
     public override void draw(SpriteBatch b)
     {
-        this.searchBar.Draw(b);
+        this.textField.Draw(b);
         this.drawMouse(b);
     }
 
     /// <inheritdoc />
-    public override void performHoverAction(int x, int y) => this.searchBar.Update(x, y);
+    public override void performHoverAction(int x, int y) => this.textField.Update(x, y);
 
     /// <inheritdoc />
     public override void receiveKeyPress(Keys key)
@@ -47,26 +47,26 @@ internal sealed class SearchOverlay : IClickableMenu
     /// <inheritdoc />
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
-        this.searchBar.LeftClick(x, y);
-        if (this.searchBar.Selected)
+        this.textField.LeftClick(x, y);
+        if (this.textField.Selected)
         {
             return;
         }
 
-        this.searchBar.Selected = false;
+        this.textField.Selected = false;
         this.exitThisMenuNoSound();
     }
 
     /// <inheritdoc />
     public override void receiveRightClick(int x, int y, bool playSound = true)
     {
-        this.searchBar.RightClick(x, y);
-        if (this.searchBar.Selected)
+        this.textField.RightClick(x, y);
+        if (this.textField.Selected)
         {
             return;
         }
 
-        this.searchBar.Selected = false;
+        this.textField.Selected = false;
         this.exitThisMenuNoSound();
     }
 }

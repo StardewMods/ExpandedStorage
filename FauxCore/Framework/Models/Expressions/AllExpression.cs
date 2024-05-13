@@ -23,6 +23,9 @@ internal sealed class AllExpression : IExpression
     public ExpressionType ExpressionType => ExpressionType.All;
 
     /// <inheritdoc />
+    public bool IsValid => this.Expressions.Any();
+
+    /// <inheritdoc />
     public string Text =>
         $"{AllExpression.BeginChar}{string.Join(' ', this.Expressions.Select(expression => expression.Text))}{AllExpression.EndChar}";
 

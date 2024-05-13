@@ -1,11 +1,11 @@
-namespace StardewMods.BetterChests.Framework.UI.Components;
+namespace StardewMods.Common.UI;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
 
 /// <summary>Represents a search overlay control that allows the user to input text.</summary>
-internal sealed class SearchBar : ClickableComponent
+internal sealed class TextField : ClickableComponent
 {
     private const int CountdownTimer = 20;
 
@@ -16,14 +16,21 @@ internal sealed class SearchBar : ClickableComponent
     private string previousText;
     private int timeout;
 
-    /// <summary>Initializes a new instance of the <see cref="SearchBar" /> class.</summary>
-    /// <param name="x">The x-coordinate of the search bar.</param>
-    /// <param name="y">The y-coordinate of the search bar.</param>
-    /// <param name="width">The width of the search bar.</param>
-    /// <param name="getMethod">The function that gets the current search text.</param>
-    /// <param name="setMethod">The action that sets the search text.</param>
-    public SearchBar(int x, int y, int width, Func<string> getMethod, Action<string> setMethod)
-        : base(new Rectangle(x, y, width, 48), "SearchBar")
+    /// <summary>Initializes a new instance of the <see cref="TextField" /> class.</summary>
+    /// <param name="x">The x-coordinate of the text field.</param>
+    /// <param name="y">The y-coordinate of the text field.</param>
+    /// <param name="width">The width of the text field.</param>
+    /// <param name="getMethod">A function that gets the current value.</param>
+    /// <param name="setMethod">An action that sets the current value.</param>
+    /// <param name="name">The name of the text field.</param>
+    public TextField(
+        int x,
+        int y,
+        int width,
+        Func<string> getMethod,
+        Action<string> setMethod,
+        string name = "TextField")
+        : base(new Rectangle(x, y, width, 48), name)
     {
         this.previousText = getMethod();
         this.getMethod = getMethod;
@@ -60,12 +67,9 @@ internal sealed class SearchBar : ClickableComponent
 
     /// <summary>Draws the search overlay to the screen.</summary>
     /// <param name="spriteBatch">The SpriteBatch used for drawing.</param>
-    public void Draw(SpriteBatch spriteBatch)
-    {
-        this.textBox.Draw(spriteBatch);
-        this.icon.draw(spriteBatch);
-    }
+    public void Draw(SpriteBatch spriteBatch) => this.textBox.Draw(spriteBatch);
 
+    //this.icon.draw(spriteBatch);
     /// <summary>Performs a left click at the specified coordinates on the screen.</summary>
     /// <param name="mouseX">The X-coordinate of the mouse click.</param>
     /// <param name="mouseY">The Y-coordinate of the mouse click.</param>
@@ -112,7 +116,7 @@ internal sealed class SearchBar : ClickableComponent
             return;
         }
 
-        this.timeout = SearchBar.CountdownTimer;
+        this.timeout = TextField.CountdownTimer;
         this.previousText = this.textBox.Text;
     }
 }

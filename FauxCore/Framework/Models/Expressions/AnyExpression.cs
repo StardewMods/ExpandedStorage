@@ -23,6 +23,9 @@ internal class AnyExpression : IExpression
     public ExpressionType ExpressionType => ExpressionType.Any;
 
     /// <inheritdoc />
+    public bool IsValid => this.Expressions.Any();
+
+    /// <inheritdoc />
     public virtual string Text =>
         $"{AnyExpression.BeginChar}{string.Join(' ', this.Expressions.Select(expression => expression.Text))}{AnyExpression.EndChar}";
 

@@ -1,7 +1,7 @@
 namespace StardewMods.BetterChests.Framework.UI.Menus;
 
 using Microsoft.Xna.Framework.Graphics;
-using StardewMods.GarbageDay.Common.UI;
+using StardewMods.Common.UI;
 
 /// <summary>Menu for configuring layout.</summary>
 internal sealed class LayoutMenu : BaseMenu
