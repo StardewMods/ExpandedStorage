@@ -26,9 +26,8 @@ internal sealed class SearchMenu : BaseMenu
     private readonly UiManager uiManager;
 
     private List<Item> allItems = [];
+    private DropDownList? dropDown;
     private int rowOffset;
-    private int scrollAmount;
-    private int scrollArea;
     private bool scrolling;
     private IExpression? searchExpression;
     private string searchText;
@@ -45,6 +44,8 @@ internal sealed class SearchMenu : BaseMenu
         this.uiManager = uiManager;
         this.searchText = string.Empty;
         this.expressionEditor = new ExpressionEditor(
+            this,
+            this.expressionHandler,
             this.xPositionOnScreen + IClickableMenu.borderWidth,
             this.yPositionOnScreen
             + IClickableMenu.spaceToClearSideBorder
@@ -69,7 +70,6 @@ internal sealed class SearchMenu : BaseMenu
 
         this.inventory.populateClickableComponentList();
 
-        this.SearchText = searchText;
         this.searchBar = new SearchBar(
             this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2),
             this.yPositionOnScreen
@@ -77,8 +77,15 @@ internal sealed class SearchMenu : BaseMenu
             + (IClickableMenu.borderWidth / 2)
             + Game1.tileSize,
             this.width - (IClickableMenu.spaceToClearSideBorder * 2) - IClickableMenu.borderWidth,
-            () => this.SearchText,
-            value => this.SearchText = value);
+            () => this.searchText,
+            value =>
+            {
+                this.searchText = value;
+                this.UpdateSearch();
+            });
+
+        this.SearchText = searchText;
+        this.UpdateSearch();
 
         var x1 =
             this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2) + 348;
@@ -142,36 +149,26 @@ internal sealed class SearchMenu : BaseMenu
         this.populateClickableComponentList();
     }
 
-    private string SearchText
+    /// <summary>Gets or sets the hover text.</summary>
+    public string? HoverText { get; set; }
+
+    /// <summary>Gets or sets the search text.</summary>
+    public string SearchText
     {
         get => this.searchText;
         set
         {
             this.searchText = value;
-            this.searchExpression = this.expressionHandler.TryParseExpression(value, out var expression)
-                ? expression
-                : null;
-
-            this.expressionEditor.ReInitializeComponents(this.searchExpression);
-            if (this.searchExpression is null)
-            {
-                this.allItems = [];
-                this.inventory.actualInventory.Clear();
-                this.totalRows = 0;
-                return;
-            }
-
-            this.allItems = ItemRepository.GetItems(this.searchExpression.Equals).ToList();
-            this.inventory.actualInventory = this.allItems.Take(this.inventory.capacity).ToList();
-            this.totalRows = (int)Math.Ceiling(
-                (float)this.allItems.Count / (this.inventory.capacity / this.inventory.rows));
+            this.searchBar?.Reset();
         }
     }
 
     /// <inheritdoc />
     public override void draw(SpriteBatch b, int red = -1, int green = -1, int blue = -1)
     {
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
         base.draw(b, -1);
+        this.HoverText = null;
 
         this.drawHorizontalPartition(
             b,
@@ -213,14 +210,34 @@ internal sealed class SearchMenu : BaseMenu
         this.scrollBar.draw(b);
 
         // Arrows
-        this.arrowUpLeft.draw(b, this.scrollAmount > 0 ? Color.White : Color.Black * 0.35f, 1f);
-        this.arrowDownLeft.draw(b, this.scrollAmount < this.totalRows - 1 ? Color.White : Color.Black * 0.35f, 1f);
+        this.arrowUpLeft.draw(b, this.expressionEditor.OffsetY < 0 ? Color.White : Color.Black * 0.35f, 1f);
+        this.arrowDownLeft.draw(
+            b,
+            this.expressionEditor.OffsetY > this.expressionEditor.MaxOffset ? Color.White : Color.Black * 0.35f,
+            1f);
 
         this.arrowUpRight.draw(b, this.rowOffset > 0 ? Color.White : Color.Black * 0.35f, 1f);
         this.arrowDownRight.draw(
             b,
             this.rowOffset < this.totalRows - this.inventory.rows - 1 ? Color.White : Color.Black * 0.35f,
             1f);
+
+        if (this.dropDown is not null)
+        {
+            this.dropDown.draw(b);
+        }
+        else if (!string.IsNullOrWhiteSpace(this.HoverText))
+        {
+            IClickableMenu.drawToolTip(b, this.HoverText, string.Empty, null);
+        }
+        else
+        {
+            var item = this.inventory.hover(mouseX, mouseY, null);
+            if (item is not null)
+            {
+                IClickableMenu.drawToolTip(b, this.inventory.descriptionText, this.inventory.descriptionTitle, item);
+            }
+        }
 
         Game1.mouseCursorTransparency = 1f;
         this.drawMouse(b);
@@ -238,15 +255,14 @@ internal sealed class SearchMenu : BaseMenu
     {
         base.performHoverAction(x, y);
         this.searchBar.Update(x, y);
-        this.inventory.performHoverAction(x, y);
         this.expressionEditor.performHoverAction(x, y);
 
-        if (this.scrollAmount > 0)
+        if (this.expressionEditor.OffsetY < 0)
         {
             this.arrowUpLeft.tryHover(x, y);
         }
 
-        if (this.scrollAmount < this.scrollArea - 1)
+        if (this.expressionEditor.OffsetY > this.expressionEditor.MaxOffset)
         {
             this.arrowDownLeft.tryHover(x, y);
         }
@@ -279,16 +295,26 @@ internal sealed class SearchMenu : BaseMenu
     /// <inheritdoc />
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
+        this.dropDown?.receiveLeftClick(x, y);
         this.searchBar.LeftClick(x, y);
         if (this.searchBar.Selected)
         {
             return;
         }
 
-        if (this.scrollAmount > 0 && this.arrowUpLeft.containsPoint(x, y))
+        this.expressionEditor.receiveLeftClick(x, y);
+
+        if (this.arrowUpLeft.containsPoint(x, y))
         {
             Game1.playSound("shwip");
-            this.scrollAmount--;
+            this.expressionEditor.OffsetY += 20;
+            return;
+        }
+
+        if (this.arrowDownLeft.containsPoint(x, y))
+        {
+            Game1.playSound("shwip");
+            this.expressionEditor.OffsetY -= 20;
             return;
         }
 
@@ -298,13 +324,6 @@ internal sealed class SearchMenu : BaseMenu
             this.rowOffset--;
             this.inventory.actualInventory = this.allItems.Skip(this.rowOffset).Take(this.inventory.capacity).ToList();
 
-            return;
-        }
-
-        if (this.scrollAmount < this.scrollArea - 1 && this.arrowDownLeft.containsPoint(x, y))
-        {
-            Game1.playSound("shwip");
-            this.scrollAmount++;
             return;
         }
 
@@ -333,6 +352,7 @@ internal sealed class SearchMenu : BaseMenu
         }
 
         this.searchBar.Selected = false;
+        this.expressionEditor.receiveRightClick(x, y);
     }
 
     /// <inheritdoc />
@@ -381,4 +401,25 @@ internal sealed class SearchMenu : BaseMenu
     }
 
     private bool HighlightMethod(Item item) => true;
+
+    private void UpdateSearch()
+    {
+        this.searchExpression = this.expressionHandler.TryParseExpression(this.searchText, out var expression)
+            ? expression
+            : null;
+
+        this.expressionEditor.ReInitializeComponents(this.searchExpression);
+        if (this.searchExpression is null)
+        {
+            this.allItems = [];
+            this.inventory.actualInventory.Clear();
+            this.totalRows = 0;
+            return;
+        }
+
+        this.allItems = ItemRepository.GetItems(this.searchExpression.Equals).ToList();
+        this.inventory.actualInventory = this.allItems.Take(this.inventory.capacity).ToList();
+        this.totalRows = (int)Math.Ceiling(
+            (float)this.allItems.Count / (this.inventory.capacity / this.inventory.rows));
+    }
 }

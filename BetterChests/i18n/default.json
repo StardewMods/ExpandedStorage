@@ -218,7 +218,7 @@
   "priority.high.name": "High",
   "priority.higher.name": "Higher",
   "priority.highest.name": "Highest",
-  // UI - Button
+  // Buttons
   "button.configure.name": "Configure Storage",
   "button.find-chest.name": "Search for Chest",
   "button.stash-to-chest.name": "Stash to Chest",
@@ -229,7 +229,7 @@
   "button.include-existing-stacks.name": "Include Existing Stacks",
   "button.reject-uncategorized.name": "Reject Uncategorized Items",
   "button.debug.name": "Debug",
-  // UI - Tabs
+  // Tabs
   "tabs.Clothing.name": "Clothing",
   "tabs.Cooking.name": "Cooking",
   "tabs.Crops.name": "Crops",
@@ -238,6 +238,27 @@
   "tabs.Materials.name": "Materials",
   "tabs.Misc.name": "Miscellaneous",
   "tabs.Seeds.name": "Seeds",
+  // UI
+  "ui.add-term.name": "+trm",
+  "ui.add-term.tooltip": "Add Term",
+  "ui.add-group.name": "+grp",
+  "ui.add-group.tooltip": "Add Group",
+  "ui.add-not.name": "+not",
+  "ui.add-not.tooltip": "Add Not",
+  "ui.all.name": "all",
+  "ui.all.tooltip": "All must match",
+  "ui.any.name": "any",
+  "ui.any.tooltip": "Any must match",
+  "ui.not.name": "not",
+  "ui.not.tooltip": "None must match",
+  "ui.remove.tooltip": "Remove",
+  // Attributes
+  "attribute.category.name": "Category",
+  "attribute.name.name": "Name",
+  "attribute.quantity.name": "Quantity",
+  "attribute.quality.name": "Quality",
+  "attribute.tags.name": "Tags",
+  "attribute.any.name": "Any",
   // Storage Info
   "storage-info.name": "Name",
   "storage-info.icon": "Icon",

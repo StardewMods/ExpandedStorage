@@ -1,5 +1,6 @@
 namespace StardewMods.FauxCore.Framework.Models.Expressions;
 
+using System.Collections.Immutable;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Inventories;
 
@@ -9,50 +10,64 @@ internal sealed class ComparableExpression : IExpression
     /// <summary>The match character.</summary>
     public const char Char = '~';
 
-    private readonly int? comparableInt;
-    private readonly bool exact;
-    private readonly DynamicTerm leftTerm;
-    private readonly StaticTerm rightTerm;
+    private ImmutableList<IExpression> expressions;
 
     /// <summary>Initializes a new instance of the <see cref="ComparableExpression" /> class.</summary>
-    /// <param name="leftTerm">The attribute to match.</param>
-    /// <param name="rightTerm">The matched term.</param>
-    /// <param name="exact">Indicates whether exact matching should be used.</param>
-    public ComparableExpression(DynamicTerm leftTerm, StaticTerm rightTerm, bool exact)
-    {
-        this.exact = exact;
-        this.leftTerm = leftTerm;
-        this.rightTerm = rightTerm;
-        this.Expressions = [leftTerm, rightTerm];
-        if (leftTerm.TryParse(rightTerm.Term, out var parsedInt))
-        {
-            this.comparableInt = parsedInt;
-        }
-    }
-
-    /// <inheritdoc />
-    public IEnumerable<IExpression> Expressions { get; }
+    /// <param name="expressions">The left and right expressions.</param>
+    public ComparableExpression(params IExpression[] expressions) => this.Expressions = expressions.ToImmutableList();
 
     /// <inheritdoc />
     public ExpressionType ExpressionType => ExpressionType.Comparable;
 
     /// <inheritdoc />
-    public string? Term => null;
+    public string Text => $"{this.LeftTerm?.Text}{ComparableExpression.Char}{this.RightTerm?.Text}";
+
+    /// <inheritdoc />
+    public IImmutableList<IExpression> Expressions
+    {
+        get => this.expressions;
+        [MemberNotNull(nameof(ComparableExpression.expressions))]
+        set
+        {
+            this.expressions = value.ToImmutableList();
+            foreach (var expression in this.expressions)
+            {
+                expression.Parent = this;
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public IExpression? Parent { get; set; }
+
+    /// <inheritdoc />
+    public string Term
+    {
+        get => string.Empty;
+        set => throw new NotSupportedException();
+    }
+
+    private int? ComparableInt =>
+        this.LeftTerm?.TryParse(this.RightTerm?.Term, out var parsedInt) == true ? parsedInt : null;
+
+    private DynamicTerm? LeftTerm => this.Expressions.ElementAtOrDefault(0) as DynamicTerm;
+
+    private StaticTerm? RightTerm => this.Expressions.ElementAtOrDefault(1) as StaticTerm;
 
     /// <inheritdoc />
     public int Compare(Item? x, Item? y)
     {
-        if (x is null && y is null)
+        if ((x is null && y is null) || this.LeftTerm is null)
         {
             return 0;
         }
 
-        if (x is null || !this.leftTerm.TryGetValue(x, out var xValue))
+        if (x is null || !this.LeftTerm.TryGetValue(x, out var xValue))
         {
             return -1;
         }
 
-        if (y is null || !this.leftTerm.TryGetValue(y, out var yValue))
+        if (y is null || !this.LeftTerm.TryGetValue(y, out var yValue))
         {
             return 1;
         }
@@ -64,12 +79,12 @@ internal sealed class ComparableExpression : IExpression
 
         if (xValue is int xInt && yValue is int yInt)
         {
-            if (!this.comparableInt.HasValue)
+            if (!this.ComparableInt.HasValue)
             {
                 return 0;
             }
 
-            return (this.comparableInt.Value == xInt ? -1 : 1).CompareTo(this.comparableInt.Value == yInt ? -1 : 1);
+            return (this.ComparableInt.Value == xInt ? -1 : 1).CompareTo(this.ComparableInt.Value == yInt ? -1 : 1);
         }
 
         if (xValue is IEnumerable<string> xList && yValue is IEnumerable<string> yList)
@@ -99,11 +114,12 @@ internal sealed class ComparableExpression : IExpression
 
     /// <inheritdoc />
     public bool Equals(Item? item) =>
-        this.leftTerm.TryGetValue(item, out var itemValue)
+        this.LeftTerm is not null
+        && this.LeftTerm.TryGetValue(item, out var itemValue)
         && itemValue switch
         {
             string value => this.Equals(value),
-            int value => this.comparableInt.HasValue && this.comparableInt.Value == value,
+            int value => this.ComparableInt.HasValue && this.ComparableInt.Value == value,
             IEnumerable<string> value => value.Any(this.Equals),
             _ => false,
         };
@@ -114,10 +130,6 @@ internal sealed class ComparableExpression : IExpression
     /// <inheritdoc />
     public bool Equals(string? other) =>
         !string.IsNullOrWhiteSpace(other)
-        && (this.exact
-            ? string.Equals(other, this.rightTerm.Term, StringComparison.OrdinalIgnoreCase)
-            : other.Contains(this.rightTerm.Term, StringComparison.OrdinalIgnoreCase));
-
-    /// <inheritdoc />
-    public override string ToString() => $"{this.leftTerm}{ComparableExpression.Char}{this.rightTerm}";
+        && !string.IsNullOrWhiteSpace(this.RightTerm?.Term)
+        && other.Contains(this.RightTerm.Term, StringComparison.OrdinalIgnoreCase);
 }

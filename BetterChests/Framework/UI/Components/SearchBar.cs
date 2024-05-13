@@ -34,8 +34,8 @@ internal sealed class SearchBar : ClickableComponent
             X = this.bounds.X,
             Y = this.bounds.Y,
             Width = this.bounds.Width,
-            Text = this.previousText,
             limitWidth = false,
+            Text = this.previousText,
         };
 
         this.icon = new ClickableTextureComponent(

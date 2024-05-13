@@ -85,6 +85,18 @@ internal sealed class FauxCoreIntegration
     public void TraceOnce(string message, params object?[]? args) => this.log?.Value.TraceOnce(message, args);
 
     /// <inheritdoc />
+    public bool TryCreateExpression(
+        ExpressionType expressionType,
+        [NotNullWhen(true)] out IExpression? expression,
+        string? term = null,
+        params IExpression[]? expressions)
+    {
+        expression = null;
+        return this.expressionHandler?.Value.TryCreateExpression(expressionType, out expression, term, expressions)
+            ?? false;
+    }
+
+    /// <inheritdoc />
     public bool TryParseExpression(string expression, [NotNullWhen(true)] out IExpression? parsedExpression)
     {
         parsedExpression = null;

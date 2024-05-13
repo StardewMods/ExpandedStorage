@@ -1,6 +1,6 @@
 namespace StardewMods.FauxCore.Framework.Models.Expressions;
 
-using System.ComponentModel;
+using System.Collections.Immutable;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Inventories;
@@ -23,23 +23,40 @@ internal sealed class DynamicTerm : IExpression
         { ItemAttribute.Tags, item => item.GetContextTags() },
     };
 
-    private readonly ItemAttribute attribute;
+    private ItemAttribute attribute;
 
     /// <summary>Initializes a new instance of the <see cref="DynamicTerm" /> class.</summary>
     /// <param name="expression">The expression.</param>
-    public DynamicTerm(string expression) =>
-        this.attribute = ItemAttributeExtensions.TryParse(expression, out var itemAttribute, true)
-            ? itemAttribute
-            : throw new InvalidEnumArgumentException($"Invalid item attribute: {expression}");
-
-    /// <inheritdoc />
-    public IEnumerable<IExpression> Expressions => Array.Empty<IExpression>();
+    public DynamicTerm(string expression) => this.Term = expression;
 
     /// <inheritdoc />
     public ExpressionType ExpressionType => ExpressionType.Dynamic;
 
     /// <inheritdoc />
-    public string Term => this.attribute.ToStringFast();
+    public string Text => $"{DynamicTerm.BeginChar}{this.attribute.ToStringFast()}{DynamicTerm.EndChar}";
+
+    /// <inheritdoc />
+    public IImmutableList<IExpression> Expressions
+    {
+        get => ImmutableList<IExpression>.Empty;
+        set => throw new NotSupportedException();
+    }
+
+    /// <inheritdoc />
+    public IExpression? Parent { get; set; }
+
+    /// <inheritdoc />
+    public string Term
+    {
+        get => this.attribute.ToStringFast();
+        [MemberNotNull(nameof(DynamicTerm.attribute))]
+        set =>
+            this.attribute =
+                !string.IsNullOrWhiteSpace(value)
+                && ItemAttributeExtensions.TryParse(value, out var itemAttribute, true)
+                    ? itemAttribute
+                    : ItemAttribute.Any;
+    }
 
     /// <inheritdoc />
     public int Compare(Item? x, Item? y)
@@ -81,9 +98,6 @@ internal sealed class DynamicTerm : IExpression
     /// <inheritdoc />
     public bool Equals(string? other) => true;
 
-    /// <inheritdoc />
-    public override string ToString() => $"{DynamicTerm.BeginChar}{this.attribute.ToStringFast()}{DynamicTerm.EndChar}";
-
     /// <summary>Tries to retrieve the attribute value.</summary>
     /// <param name="item">The item from which to retrieve the value.</param>
     /// <param name="value">When this method returns, contains the attribute value; otherwise, default.</param>
@@ -104,10 +118,14 @@ internal sealed class DynamicTerm : IExpression
     /// <param name="value">The value to parse.</param>
     /// <param name="result">When this method returns, contains the parsed value; otherwise, default.</param>
     /// <returns><c>true</c> if the value was successfully parsed; otherwise, <c>false</c>.</returns>
-    public bool TryParse(string value, [NotNullWhen(true)] out int? result)
+    public bool TryParse(string? value, [NotNullWhen(true)] out int? result)
     {
         switch (this.attribute)
         {
+            case
+                { } when string.IsNullOrWhiteSpace(value):
+                result = null;
+                return false;
             case ItemAttribute.Quantity when int.TryParse(value, out var intValue):
                 result = intValue;
                 return true;

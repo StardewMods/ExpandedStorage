@@ -2,28 +2,45 @@ namespace StardewMods.BetterChests.Framework.Services;
 
 using System.Globalization;
 using System.Text;
+using StardewMods.Common.Enums;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 /// <summary>Helper methods to convert between different text formats.</summary>
-internal sealed class LocalizedTextManager : BaseService
+internal sealed class Localized : BaseService
 {
     private readonly ITranslationHelper translations;
 
-    /// <summary>Initializes a new instance of the <see cref="LocalizedTextManager" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="Localized" /> class.</summary>
     /// <param name="translations">Dependency used for accessing translations.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public LocalizedTextManager(ILog log, IManifest manifest, ITranslationHelper translations)
+    public Localized(ILog log, IManifest manifest, ITranslationHelper translations)
         : base(log, manifest) =>
         this.translations = translations;
+
+    /// <summary>Formats item attribute using localized text when available.</summary>
+    /// <param name="value">The value for item attribute to format.</param>
+    /// <returns>Localized text for the item attribute.</returns>
+    public static string Attribute(string? value) =>
+        ItemAttributeExtensions.TryParse(value, out var attribute)
+            ? attribute switch
+            {
+                ItemAttribute.Category => I18n.Attribute_Category_Name(),
+                ItemAttribute.Name => I18n.Attribute_Name_Name(),
+                ItemAttribute.Quantity => I18n.Attribute_Quantity_Name(),
+                ItemAttribute.Quality => I18n.Attribute_Quality_Name(),
+                ItemAttribute.Tags => I18n.Attribute_Tags_Name(),
+                _ => I18n.Attribute_Any_Name(),
+            }
+            : I18n.Attribute_Any_Name();
 
     /// <summary>Formats border using localized text when available.</summary>
     /// <param name="value">The value for border to format.</param>
     /// <returns>Localized text for the border.</returns>
-    public string Border(int value) =>
+    public static string Border(int value) =>
         value switch
         {
             (int)InventoryMenu.BorderSide.Left => I18n.Border_Left(),
@@ -33,7 +50,10 @@ internal sealed class LocalizedTextManager : BaseService
             _ => I18n.Border_Left(),
         };
 
-    public string CarryChestLimit(int value) =>
+    /// <summary>Formats carry chest limit using localized text when available.</summary>
+    /// <param name="value">The value for carry chest limit to format.</param>
+    /// <returns>Localized text for the carry chest limit distance.</returns>
+    public static string CarryChestLimit(int value) =>
         value switch
         {
             1 => I18n.Config_CarryChestLimit_ValueOne(),
@@ -44,7 +64,7 @@ internal sealed class LocalizedTextManager : BaseService
     /// <summary>Formats range distance using localized text when available.</summary>
     /// <param name="value">The value for range distance to format.</param>
     /// <returns>Localized text for the range distance.</returns>
-    public string Distance(int value) =>
+    public static string Distance(int value) =>
         value switch
         {
             (int)RangeOption.Default => I18n.Option_Default_Name(),
@@ -61,7 +81,7 @@ internal sealed class LocalizedTextManager : BaseService
     /// <param name="parentCapacity">The capacity this value inherits from.</param>
     /// <param name="getSize">Get method for the current menu size.</param>
     /// <returns>Localized text for the method value.</returns>
-    public Func<int, string> FormatCapacity(int parentCapacity, Func<int> getSize) =>
+    public static Func<int, string> FormatCapacity(int parentCapacity, Func<int> getSize) =>
         value =>
         {
             var size = getSize();
@@ -91,7 +111,7 @@ internal sealed class LocalizedTextManager : BaseService
     /// <param name="parentOption">The range this value inherits from.</param>
     /// <param name="parentValue">The distance this value inherits from.</param>
     /// <returns>Localized text for the range distance.</returns>
-    public Func<int, string> FormatDistance(RangeOption? parentOption = null, int parentValue = 0) =>
+    public static Func<int, string> FormatDistance(RangeOption? parentOption = null, int parentValue = 0) =>
         value =>
         {
             var actualValue = value switch
@@ -134,7 +154,7 @@ internal sealed class LocalizedTextManager : BaseService
     /// <summary>Formats menu size using localized text when available.</summary>
     /// <param name="parentOption">The menu size this value inherits from.</param>
     /// <returns>Localized text for the menu size.</returns>
-    public Func<string, string> FormatMenuSize(ChestMenuOption? parentOption = null) =>
+    public static Func<string, string> FormatMenuSize(ChestMenuOption? parentOption = null) =>
         value =>
         {
             var actualOption = ChestMenuOptionExtensions.TryParse(value, out var option)
@@ -147,14 +167,14 @@ internal sealed class LocalizedTextManager : BaseService
                 sb.Append(I18n.Config_DefaultOption_Indicator());
             }
 
-            sb.Append(this.FormatMenuSize(actualOption));
+            sb.Append(Localized.FormatMenuSize(actualOption));
             return sb.ToString();
         };
 
     /// <summary>Formats capacity option using localized text when available.</summary>
     /// <param name="option">The value for capacity to format.</param>
     /// <returns>Localized text for the capacity.</returns>
-    public string FormatMenuSize(ChestMenuOption option) =>
+    public static string FormatMenuSize(ChestMenuOption option) =>
         option switch
         {
             ChestMenuOption.Disabled => I18n.Option_Disabled_Name(),
@@ -165,7 +185,7 @@ internal sealed class LocalizedTextManager : BaseService
     /// <summary>Formats a method value using localized text when available.</summary>
     /// <param name="parentMethod">The method this value inherits from.</param>
     /// <returns>Localized text for the method value.</returns>
-    public Func<string, string> FormatMethod(FilterMethod? parentMethod = null) =>
+    public static Func<string, string> FormatMethod(FilterMethod? parentMethod = null) =>
         value =>
         {
             var actualMethod = FilterMethodExtensions.TryParse(value, out var method) ? method : FilterMethod.Default;
@@ -176,26 +196,14 @@ internal sealed class LocalizedTextManager : BaseService
                 sb.Append(I18n.Config_DefaultOption_Indicator());
             }
 
-            sb.Append(this.FormatMethod(actualMethod));
+            sb.Append(Localized.FormatMethod(actualMethod));
             return sb.ToString();
-        };
-
-    /// <summary>Formats a method value using localized text when available.</summary>
-    /// <param name="method">The method value to format.</param>
-    /// <returns>Localized text for the method value.</returns>
-    public string FormatMethod(FilterMethod method) =>
-        method switch
-        {
-            FilterMethod.Sorted => I18n.Method_Sorted_Name(),
-            FilterMethod.GrayedOut => I18n.Method_GrayedOut_Name(),
-            FilterMethod.Hidden => I18n.Method_Hidden_Name(),
-            _ => I18n.Option_Default_Name(),
         };
 
     /// <summary>Formats an option value using localized text when available.</summary>
     /// <param name="parentOption">The option this value inherits from.</param>
     /// <returns>Localized text for the option value.</returns>
-    public Func<string, string> FormatOption(FeatureOption? parentOption = null) =>
+    public static Func<string, string> FormatOption(FeatureOption? parentOption = null) =>
         value =>
         {
             var actualOption = FeatureOptionExtensions.TryParse(value, out var option) ? option : FeatureOption.Default;
@@ -206,14 +214,14 @@ internal sealed class LocalizedTextManager : BaseService
                 sb.Append(I18n.Config_DefaultOption_Indicator());
             }
 
-            sb.Append(this.FormatOption(actualOption));
+            sb.Append(Localized.FormatOption(actualOption));
             return sb.ToString();
         };
 
     /// <summary>Formats an option value using localized text when available.</summary>
     /// <param name="option">The option value to format.</param>
     /// <returns>Localized text for the option value.</returns>
-    public string FormatOption(FeatureOption option) =>
+    public static string FormatOption(FeatureOption option) =>
         option switch
         {
             FeatureOption.Disabled => I18n.Option_Disabled_Name(),
@@ -224,7 +232,7 @@ internal sealed class LocalizedTextManager : BaseService
     /// <summary>Formats a range value using localized text when available.</summary>
     /// <param name="parentRange">The range this value inherits from.</param>
     /// <returns>Localized text for the range value.</returns>
-    public Func<string, string> FormatRange(RangeOption? parentRange = null) =>
+    public static Func<string, string> FormatRange(RangeOption? parentRange = null) =>
         value =>
         {
             var actualRange = RangeOptionExtensions.TryParse(value, out var rangeOption)
@@ -237,14 +245,14 @@ internal sealed class LocalizedTextManager : BaseService
                 sb.Append(I18n.Config_DefaultOption_Indicator());
             }
 
-            sb.Append(this.FormatRange(actualRange));
+            sb.Append(Localized.FormatRange(actualRange));
             return sb.ToString();
         };
 
     /// <summary>Formats a range value using localized text when available.</summary>
     /// <param name="range">The range value to format.</param>
     /// <returns>Localized text for the range value.</returns>
-    public string FormatRange(RangeOption range) =>
+    public static string FormatRange(RangeOption range) =>
         range switch
         {
             RangeOption.Disabled => I18n.Option_Disabled_Name(),
@@ -257,7 +265,7 @@ internal sealed class LocalizedTextManager : BaseService
     /// <summary>Formats a priority value using localized text when available.</summary>
     /// <param name="value">The priority value to format.</param>
     /// <returns>Localized text for the priority value.</returns>
-    public string FormatStashPriority(int value) =>
+    public static string FormatStashPriority(int value) =>
         value switch
         {
             -3 => I18n.Priority_Lowest_Name(),
@@ -268,5 +276,17 @@ internal sealed class LocalizedTextManager : BaseService
             2 => I18n.Priority_Higher_Name(),
             3 => I18n.Priority_Highest_Name(),
             _ => I18n.Priority_Default_Name(),
+        };
+
+    /// <summary>Formats a method value using localized text when available.</summary>
+    /// <param name="method">The method value to format.</param>
+    /// <returns>Localized text for the method value.</returns>
+    private static string FormatMethod(FilterMethod method) =>
+        method switch
+        {
+            FilterMethod.Sorted => I18n.Method_Sorted_Name(),
+            FilterMethod.GrayedOut => I18n.Method_GrayedOut_Name(),
+            FilterMethod.Hidden => I18n.Method_Hidden_Name(),
+            _ => I18n.Option_Default_Name(),
         };
 }

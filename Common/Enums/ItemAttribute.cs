@@ -6,18 +6,21 @@ using NetEscapades.EnumGenerators;
 [EnumExtensions]
 internal enum ItemAttribute
 {
-    /// <summary>Sort by category.</summary>
+    /// <summary>Any attribute.</summary>
+    Any,
+
+    /// <summary>Category name.</summary>
     Category,
 
-    /// <summary>Sort by name.</summary>
+    /// <summary>Display name.</summary>
     Name,
 
-    /// <summary>Sort by quantity.</summary>
+    /// <summary>Stack size.</summary>
     Quantity,
 
-    /// <summary>Sort by quality.</summary>
+    /// <summary>Quality name.</summary>
     Quality,
 
-    /// <summary>Sort by tag.</summary>
+    /// <summary>Context tags.</summary>
     Tags,
 }

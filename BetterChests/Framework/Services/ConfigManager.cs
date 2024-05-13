@@ -19,7 +19,6 @@ using StardewValley.TokenizableStrings;
 internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 {
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
-    private readonly LocalizedTextManager localizedTextManager;
     private readonly ILog log;
     private readonly IManifest manifest;
     private readonly IModRegistry modRegistry;
@@ -28,7 +27,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
-    /// <param name="localizedTextManager">Dependency used for formatting and translating text.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modHelper">Dependency for events, input, and content.</param>
@@ -37,7 +35,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         IDataHelper dataHelper,
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
-        LocalizedTextManager localizedTextManager,
         ILog log,
         IManifest manifest,
         IModHelper modHelper,
@@ -45,7 +42,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         : base(dataHelper, eventManager, modHelper)
     {
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
-        this.localizedTextManager = localizedTextManager;
         this.log = log;
         this.manifest = manifest;
         this.modRegistry = modRegistry;
@@ -167,7 +163,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_AccessChests_Name,
                 I18n.Config_AccessChests_Tooltip,
                 rangeOptions,
-                this.localizedTextManager.FormatRange(parentOptions?.AccessChest));
+                Localized.FormatRange(parentOptions?.AccessChest));
         }
 
         // Auto Organize
@@ -182,7 +178,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_AutoOrganize_Name,
                 I18n.Config_AutoOrganize_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.AutoOrganize));
+                Localized.FormatOption(parentOptions?.AutoOrganize));
         }
 
         // Carry Chest
@@ -197,7 +193,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_CarryChest_Name,
                 I18n.Config_CarryChest_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.CarryChest));
+                Localized.FormatOption(parentOptions?.CarryChest));
         }
 
         // Categorize Chest
@@ -212,7 +208,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_CategorizeChest_Name,
                 I18n.Config_CategorizeChest_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.CategorizeChest));
+                Localized.FormatOption(parentOptions?.CategorizeChest));
         }
 
         // Chest Finder
@@ -227,7 +223,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_ChestFinder_Name,
                 I18n.Config_ChestFinder_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.ChestFinder));
+                Localized.FormatOption(parentOptions?.ChestFinder));
         }
 
         // Collect Items
@@ -242,7 +238,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_CollectItems_Name,
                 I18n.Config_CollectItems_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.CollectItems));
+                Localized.FormatOption(parentOptions?.CollectItems));
         }
 
         // Configure Chest
@@ -257,7 +253,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_ConfigureChest_Name,
                 I18n.Config_ConfigureChest_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.ConfigureChest));
+                Localized.FormatOption(parentOptions?.ConfigureChest));
         }
 
         // Craft from Chest
@@ -272,7 +268,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_CookFromChest_Name,
                 I18n.Config_CookFromChest_Tooltip,
                 rangeOptions,
-                this.localizedTextManager.FormatRange(parentOptions?.CookFromChest));
+                Localized.FormatRange(parentOptions?.CookFromChest));
         }
 
         // Craft from Chest
@@ -320,9 +316,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 isDefault ? (int)RangeOption.Disabled : (int)RangeOption.Default,
                 (int)RangeOption.World,
                 1,
-                this.localizedTextManager.FormatDistance(
-                    parentOptions?.CraftFromChest,
-                    parentOptions?.CraftFromChestDistance ?? 0));
+                Localized.FormatDistance(parentOptions?.CraftFromChest, parentOptions?.CraftFromChestDistance ?? 0));
         }
 
         // HSL Color Picker
@@ -337,7 +331,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_HslColorPicker_Name,
                 I18n.Config_HslColorPicker_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.HslColorPicker));
+                Localized.FormatOption(parentOptions?.HslColorPicker));
         }
 
         // Inventory Tabs
@@ -352,7 +346,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_InventoryTabs_Name,
                 I18n.Config_InventoryTabs_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.InventoryTabs));
+                Localized.FormatOption(parentOptions?.InventoryTabs));
         }
 
         // Open Held Chest
@@ -367,7 +361,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_OpenHeldChest_Name,
                 I18n.Config_OpenHeldChest_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.OpenHeldChest));
+                Localized.FormatOption(parentOptions?.OpenHeldChest));
         }
 
         // Resize Chest
@@ -405,7 +399,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             0,
             5,
             1,
-            this.localizedTextManager.FormatCapacity(parentOptions?.ResizeChestCapacity ?? 0, () => size));
+            Localized.FormatCapacity(parentOptions?.ResizeChestCapacity ?? 0, () => size));
 
         // Resize Chest Menu
         if (isDefault || this.DefaultOptions.ResizeChest != ChestMenuOption.Disabled)
@@ -419,7 +413,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_ResizeChestMenu_Name,
                 I18n.Config_ResizeChestMenu_Tooltip,
                 ChestMenuOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatMenuSize(parentOptions?.ResizeChest),
+                Localized.FormatMenuSize(parentOptions?.ResizeChest),
                 nameof(options.ResizeChest));
         }
 
@@ -435,7 +429,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_SearchItems_Name,
                 I18n.Config_SearchItems_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.SearchItems));
+                Localized.FormatOption(parentOptions?.SearchItems));
         }
 
         // Shop from Chest
@@ -450,7 +444,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_ShopFromChest_Name,
                 I18n.Config_ShopFromChest_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.ShopFromChest));
+                Localized.FormatOption(parentOptions?.ShopFromChest));
         }
 
         // Sort Inventory
@@ -465,7 +459,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_SortInventory_Name,
                 I18n.Config_SortInventory_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.SortInventory));
+                Localized.FormatOption(parentOptions?.SortInventory));
 
             gmcm.AddTextOption(
                 modManifest,
@@ -520,9 +514,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 isDefault ? (int)RangeOption.Disabled : (int)RangeOption.Default,
                 (int)RangeOption.World,
                 1,
-                this.localizedTextManager.FormatDistance(
-                    parentOptions?.StashToChest,
-                    parentOptions?.StashToChestDistance ?? 0));
+                Localized.FormatDistance(parentOptions?.StashToChest, parentOptions?.StashToChestDistance ?? 0));
         }
 
         // Storage Info
@@ -537,7 +529,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_StorageInfo_Name,
                 I18n.Config_StorageInfo_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.StorageInfo));
+                Localized.FormatOption(parentOptions?.StorageInfo));
 
             gmcm.AddTextOption(
                 modManifest,
@@ -548,7 +540,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                 I18n.Config_StorageInfoHover_Name,
                 I18n.Config_StorageInfoHover_Tooltip,
                 featureOptions,
-                this.localizedTextManager.FormatOption(parentOptions?.StorageInfoHover));
+                Localized.FormatOption(parentOptions?.StorageInfoHover));
         }
     }
 
@@ -848,7 +840,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             0,
             36,
             1,
-            this.localizedTextManager.CarryChestLimit);
+            Localized.CarryChestLimit);
 
         gmcm.AddNumberOption(
             this.manifest,
@@ -867,7 +859,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             0,
             4,
             1,
-            this.localizedTextManager.CarryChestLimit);
+            Localized.CarryChestLimit);
 
         // Hsl Color Picker Steps
         gmcm.AddNumberOption(
@@ -915,7 +907,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             low,
             high,
             high - low,
-            this.localizedTextManager.Border);
+            Localized.Border);
 
         // Lock Item
         gmcm.AddTextOption(
@@ -926,7 +918,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             I18n.Config_LockItem_Name,
             I18n.Config_LockItem_Tooltip,
             FeatureOptionExtensions.GetNames(),
-            this.localizedTextManager.FormatOption());
+            Localized.FormatOption());
 
         // Lock Item Hold
         gmcm.AddBoolOption(
@@ -945,7 +937,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             I18n.Config_SearchItemsMethod_Name,
             I18n.Config_SearchItemsMethod_Tooltip,
             FilterMethodExtensions.GetNames(),
-            this.localizedTextManager.FormatMethod());
+            Localized.FormatMethod());
 
         // Storage Info Hover Items
         gmcm.AddTextOption(

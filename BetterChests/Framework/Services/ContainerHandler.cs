@@ -24,7 +24,6 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
     private readonly ContainerFactory containerFactory;
     private readonly IEventManager eventManager;
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
-    private readonly LocalizedTextManager localizedTextManager;
     private readonly IManifest manifest;
     private readonly IReflectionHelper reflectionHelper;
 
@@ -33,7 +32,6 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
-    /// <param name="localizedTextManager">Dependency used for formatting and translating text.</param>
     /// <param name="log">Dependency used for logging debug information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
@@ -43,7 +41,6 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
         ContainerFactory containerFactory,
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
-        LocalizedTextManager localizedTextManager,
         ILog log,
         IManifest manifest,
         IPatchManager patchManager,
@@ -55,7 +52,6 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
         this.containerFactory = containerFactory;
         this.eventManager = eventManager;
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
-        this.localizedTextManager = localizedTextManager;
         this.manifest = manifest;
         this.reflectionHelper = reflectionHelper;
 
@@ -177,7 +173,7 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
                 -3,
                 3,
                 1,
-                this.localizedTextManager.FormatStashPriority);
+                Localized.FormatStashPriority);
         }
 
         // Categorize Chest
@@ -199,7 +195,7 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
                 I18n.Config_CategorizeChestIncludeStacks_Name,
                 I18n.Config_CategorizeChestIncludeStacks_Tooltip,
                 FeatureOptionExtensions.GetNames(),
-                this.localizedTextManager.FormatOption(parentOptions?.CategorizeChestIncludeStacks));
+                Localized.FormatOption(parentOptions?.CategorizeChestIncludeStacks));
         }
 
         gmcm.AddPageLink(this.manifest, "Main", I18n.Section_Main_Name, I18n.Section_Main_Description);
