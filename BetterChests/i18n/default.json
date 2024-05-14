@@ -219,7 +219,6 @@
   "priority.higher.name": "Higher",
   "priority.highest.name": "Highest",
   // Buttons
-  "button.configure.name": "Configure Storage",
   "button.find-chest.name": "Search for Chest",
   "button.stash-to-chest.name": "Stash to Chest",
   "button.craft-from-chest.name": "Craft from Chest",
@@ -228,7 +227,13 @@
   "button.save-as-categorization.name": "Save As Categorization",
   "button.include-existing-stacks.name": "Include Existing Stacks",
   "button.reject-uncategorized.name": "Reject Uncategorized Items",
+  "button.copy.name": "Copy to Clipboard",
+  "button.paste.name": "Paste from Clipboard",
   "button.debug.name": "Debug",
+  // Configure
+  "configure.options.name": "Config Options",
+  "configure.categorize.name": "Categorize",
+  "configure.sorting.name": "Sorting",
   // Tabs
   "tabs.Clothing.name": "Clothing",
   "tabs.Cooking.name": "Cooking",

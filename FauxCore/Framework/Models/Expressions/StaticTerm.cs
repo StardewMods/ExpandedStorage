@@ -18,7 +18,8 @@ internal class StaticTerm : IExpression
     public bool IsValid => !string.IsNullOrWhiteSpace(this.Term);
 
     /// <inheritdoc />
-    public virtual string Text => this.Term;
+    public virtual string Text =>
+        this.Term.Contains(' ') || string.IsNullOrWhiteSpace(this.Term) ? $"\"{this.Term}\"" : this.Term;
 
     /// <inheritdoc />
     public IImmutableList<IExpression> Expressions

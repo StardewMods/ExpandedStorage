@@ -2,10 +2,11 @@ namespace StardewMods.Common.UI;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.Common.Interfaces;
 using StardewValley.Menus;
 
 /// <summary>Represents a scrollbar with up/down arrows.</summary>
-internal sealed class VerticalScrollBar : ClickableComponent
+internal sealed class VerticalScrollBar : ClickableComponent, ICustomComponent
 {
     private readonly ClickableTextureComponent arrowDown;
     private readonly ClickableTextureComponent arrowUp;
@@ -65,6 +66,12 @@ internal sealed class VerticalScrollBar : ClickableComponent
             Game1.pixelZoom);
     }
 
+    /// <inheritdoc />
+    public ClickableComponent Component => this;
+
+    /// <inheritdoc />
+    public string? HoverText => null;
+
     /// <summary>Gets the maximum value of the source.</summary>
     public int SourceMax => this.getMax();
 
@@ -84,45 +91,8 @@ internal sealed class VerticalScrollBar : ClickableComponent
     /// <summary>Gets or sets the percentage value of the scroll bar.</summary>
     public float Value { get; set; }
 
-    /// <summary>Performs a click at the specified coordinates on the screen.</summary>
-    /// <param name="mouseX">The X-coordinate of the mouse click.</param>
-    /// <param name="mouseY">The Y-coordinate of the mouse click.</param>
-    /// <returns><c>true</c> if the search bar was clicked; otherwise, <c>false</c>.</returns>
-    public bool Click(int mouseX, int mouseY)
-    {
-        if (this.grabber.containsPoint(mouseX, mouseY))
-        {
-            this.IsActive = true;
-            return true;
-        }
-
-        if (this.runner.Contains(mouseX, mouseY))
-        {
-            this.Value = (float)(mouseY - this.runner.Y) / this.runner.Height;
-            this.SetScrollPosition();
-            return true;
-        }
-
-        if (this.arrowUp.containsPoint(mouseX, mouseY) && this.Value > 0f)
-        {
-            this.arrowUp.scale = 3.5f;
-            Game1.playSound("shwip");
-            this.SourceValue -= this.stepSize;
-            this.SetScrollPosition();
-            return true;
-        }
-
-        if (this.arrowDown.containsPoint(mouseX, mouseY) && this.Value < 1f)
-        {
-            this.arrowDown.scale = 3.5f;
-            Game1.playSound("shwip");
-            this.SourceValue += this.stepSize;
-            this.SetScrollPosition();
-            return true;
-        }
-
-        return false;
-    }
+    /// <inheritdoc />
+    public bool Contains(Vector2 position) => this.bounds.Contains(position);
 
     /// <summary>Draws the search overlay to the screen.</summary>
     /// <param name="spriteBatch">The SpriteBatch used for drawing.</param>
@@ -168,6 +138,46 @@ internal sealed class VerticalScrollBar : ClickableComponent
             Game1.playSound("shiny4");
         }
     }
+
+    /// <inheritdoc />
+    public bool TryLeftClick(int mouseX, int mouseY)
+    {
+        if (this.grabber.containsPoint(mouseX, mouseY))
+        {
+            this.IsActive = true;
+            return true;
+        }
+
+        if (this.runner.Contains(mouseX, mouseY))
+        {
+            this.Value = (float)(mouseY - this.runner.Y) / this.runner.Height;
+            this.SetScrollPosition();
+            return true;
+        }
+
+        if (this.arrowUp.containsPoint(mouseX, mouseY) && this.Value > 0f)
+        {
+            this.arrowUp.scale = 3.5f;
+            Game1.playSound("shwip");
+            this.SourceValue -= this.stepSize;
+            this.SetScrollPosition();
+            return true;
+        }
+
+        if (this.arrowDown.containsPoint(mouseX, mouseY) && this.Value < 1f)
+        {
+            this.arrowDown.scale = 3.5f;
+            Game1.playSound("shwip");
+            this.SourceValue += this.stepSize;
+            this.SetScrollPosition();
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <inheritdoc />
+    public bool TryRightClick(int x, int y) => false;
 
     /// <summary>Performs an un-click at the specified coordinates on the screen.</summary>
     /// <param name="mouseX">The X-coordinate of the mouse click.</param>

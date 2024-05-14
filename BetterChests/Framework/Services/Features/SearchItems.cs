@@ -1,6 +1,5 @@
 namespace StardewMods.BetterChests.Framework.Services.Features;
 
-using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
@@ -14,20 +13,15 @@ using StardewValley.Menus;
 /// <summary>Adds a search bar to the top of the <see cref="ItemGrabMenu" />.</summary>
 internal sealed class SearchItems : BaseFeature<SearchItems>
 {
-    private readonly AssetHandler assetHandler;
-    private readonly PerScreen<ClickableTextureComponent?> existingStacksButton = new();
     private readonly IExpressionHandler expressionHandler;
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<bool> isActive = new(() => true);
     private readonly MenuHandler menuHandler;
-    private readonly PerScreen<ClickableTextureComponent?> rejectButton = new();
-    private readonly PerScreen<ClickableTextureComponent?> saveButton = new();
     private readonly PerScreen<TextField?> searchBar = new();
     private readonly PerScreen<IExpression?> searchExpression = new();
     private readonly PerScreen<string> searchText = new(() => string.Empty);
 
     /// <summary>Initializes a new instance of the <see cref="SearchItems" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
@@ -36,7 +30,6 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     public SearchItems(
-        AssetHandler assetHandler,
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
         IInputHelper inputHelper,
@@ -46,7 +39,6 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         IModConfig modConfig)
         : base(eventManager, log, manifest, modConfig)
     {
-        this.assetHandler = assetHandler;
         this.expressionHandler = expressionHandler;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
@@ -99,52 +91,15 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         switch (e.Button)
         {
             case SButton.MouseLeft or SButton.ControllerA:
-                if (this.searchBar.Value.LeftClick(mouseX, mouseY))
+                if (this.searchBar.Value.TryLeftClick(mouseX, mouseY))
                 {
                     this.inputHelper.Suppress(e.Button);
-                    return;
-                }
-
-                if (container.CategorizeChest != FeatureOption.Enabled)
-                {
-                    return;
-                }
-
-                if (this.rejectButton.Value?.containsPoint(mouseX, mouseY) == true)
-                {
-                    this.inputHelper.Suppress(e.Button);
-                    container.CategorizeChestBlockItems = container.CategorizeChestBlockItems == FeatureOption.Enabled
-                        ? FeatureOption.Disabled
-                        : FeatureOption.Enabled;
-
-                    return;
-                }
-
-                if (this.saveButton.Value?.containsPoint(mouseX, mouseY) == true)
-                {
-                    this.inputHelper.Suppress(e.Button);
-                    container.CategorizeChestSearchTerm = this.searchText.Value;
-                    return;
-                }
-
-                if (this.existingStacksButton.Value?.containsPoint(mouseX, mouseY) == true)
-                {
-                    this.inputHelper.Suppress(e.Button);
-                    container.CategorizeChestIncludeStacks =
-                        container.CategorizeChestIncludeStacks == FeatureOption.Enabled
-                            ? FeatureOption.Disabled
-                            : FeatureOption.Enabled;
-
-                    this.existingStacksButton.Value.sourceRect =
-                        container.CategorizeChestIncludeStacks == FeatureOption.Enabled
-                            ? new Rectangle(236, 425, 9, 9)
-                            : new Rectangle(227, 425, 9, 9);
                 }
 
                 break;
 
             case SButton.MouseRight or SButton.ControllerB:
-                if (this.searchBar.Value.RightClick(mouseX, mouseY))
+                if (this.searchBar.Value.TryRightClick(mouseX, mouseY))
                 {
                     this.inputHelper.Suppress(e.Button);
                 }
@@ -206,6 +161,8 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             DesktopClipboard.GetText(ref pasteText);
             this.searchText.Value = pasteText;
             this.searchBar.Value.Reset();
+            this.expressionHandler.TryParseExpression(pasteText, out var expression);
+            this.Events.Publish(new SearchChangedEventArgs(pasteText, expression));
             return;
         }
 
@@ -267,55 +224,6 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
 
                 this.Events.Publish(new SearchChangedEventArgs(value, expression));
             });
-
-        if (container.CategorizeChest != FeatureOption.Enabled)
-        {
-            this.saveButton.Value = null;
-            this.existingStacksButton.Value = null;
-            this.rejectButton.Value = null;
-            return;
-        }
-
-        x += width;
-        y += 8;
-
-        if (this.assetHandler.Icons.TryGetValue(this.ModId + "/Save", out var icon))
-        {
-            this.saveButton.Value = new ClickableTextureComponent(
-                new Rectangle(x, y, Game1.tileSize / 2, Game1.tileSize / 2),
-                this.assetHandler.UiTexture,
-                icon.Area,
-                2f)
-            {
-                name = "Save",
-                hoverText = I18n.Button_SaveAsCategorization_Name(),
-                myID = 8_675_309,
-            };
-        }
-
-        this.existingStacksButton.Value = new ClickableTextureComponent(
-            new Rectangle(x + 32, y + 2, 27, 27),
-            Game1.mouseCursors,
-            container.CategorizeChestIncludeStacks == FeatureOption.Enabled
-                ? new Rectangle(236, 425, 9, 9)
-                : new Rectangle(227, 425, 9, 9),
-            3f)
-        {
-            name = "ExistingStacks",
-            hoverText = I18n.Button_IncludeExistingStacks_Name(),
-            myID = 8_675_310,
-        };
-
-        this.rejectButton.Value = new ClickableTextureComponent(
-            new Rectangle(x + 64, y + 2, 24, 24),
-            Game1.mouseCursors,
-            new Rectangle(322, 498, 12, 12),
-            2f)
-        {
-            name = "Reject",
-            hoverText = I18n.Button_RejectUncategorized_Name(),
-            myID = 8_675_308,
-        };
     }
 
     private void OnItemHighlighting(ItemHighlightingEventArgs e)
@@ -349,58 +257,12 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
     private void OnRenderedActiveMenu(RenderedActiveMenuEventArgs e)
     {
         var container = this.menuHandler.Top.Container;
-        if (this.searchBar.Value is null
-            || !this.isActive.Value
-            || this.menuHandler.CurrentMenu is not ItemGrabMenu itemGrabMenu
-            || container is null)
+        if (this.searchBar.Value is null || !this.isActive.Value || container is null)
         {
             return;
         }
 
         this.searchBar.Value.Draw(e.SpriteBatch);
-
-        if (container.CategorizeChest != FeatureOption.Enabled)
-        {
-            return;
-        }
-
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-
-        if (this.saveButton.Value is not null)
-        {
-            this.saveButton.Value.tryHover(mouseX, mouseY);
-            this.saveButton.Value.draw(e.SpriteBatch);
-            if (this.saveButton.Value.containsPoint(mouseX, mouseY))
-            {
-                itemGrabMenu.hoverText = this.saveButton.Value.hoverText;
-                return;
-            }
-        }
-
-        if (this.existingStacksButton.Value is not null)
-        {
-            this.existingStacksButton.Value.tryHover(mouseX, mouseY);
-            this.existingStacksButton.Value.draw(e.SpriteBatch);
-            if (this.existingStacksButton.Value.containsPoint(mouseX, mouseY))
-            {
-                itemGrabMenu.hoverText = this.existingStacksButton.Value.hoverText;
-                return;
-            }
-        }
-
-        if (this.rejectButton.Value is not null)
-        {
-            this.rejectButton.Value.tryHover(mouseX, mouseY);
-            this.rejectButton.Value.draw(
-                e.SpriteBatch,
-                container.CategorizeChestBlockItems == FeatureOption.Enabled ? Color.White : Color.Gray,
-                1f);
-
-            if (this.rejectButton.Value.containsPoint(mouseX, mouseY))
-            {
-                itemGrabMenu.hoverText = this.rejectButton.Value.hoverText;
-            }
-        }
     }
 
     private void OnRenderingActiveMenu(RenderingActiveMenuEventArgs e)

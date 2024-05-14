@@ -145,7 +145,7 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
 
     private void OnSearchChanged(SearchChangedEventArgs e)
     {
-        if (e.SearchExpression is null)
+        if (e.SearchExpression is null || string.IsNullOrWhiteSpace(e.SearchTerm))
         {
             this.cachedItems.Value = [];
             return;

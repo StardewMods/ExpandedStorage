@@ -7,13 +7,14 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.UI.Menus;
 using StardewMods.Common.Enums;
+using StardewMods.Common.Helpers;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI;
 using StardewValley.Menus;
 
 /// <summary>A sub-menu for editing the expression tree.</summary>
-internal sealed class ExpressionEditor : BaseMenu
+internal sealed class ExpressionEditor : IClickableMenu
 {
     private static readonly Color[] Colors =
     [
@@ -44,7 +45,7 @@ internal sealed class ExpressionEditor : BaseMenu
         int yPosition,
         int width,
         int height)
-        : base(xPosition, yPosition, width, height, false)
+        : base(xPosition, yPosition, width, height)
     {
         this.parent = parent;
         this.expressionHandler = expressionHandler;
@@ -393,7 +394,7 @@ internal sealed class ExpressionEditor : BaseMenu
 
             this.items.Add(
                 (Color.Gray, addTerm, null, I18n.Ui_AddTerm_Tooltip(),
-                    () => this.Add(expression, ExpressionType.Static)));
+                    () => this.Add(expression, ExpressionType.Comparable)));
 
             offsetX += subWidth + tabWidth;
             subWidth = (int)Game1.smallFont.MeasureString(I18n.Ui_AddGroup_Name()).X + 20;
@@ -436,8 +437,6 @@ internal sealed class ExpressionEditor : BaseMenu
                 I18n.Ui_Remove_Tooltip(),
                 Game1.mouseCursors,
                 new Rectangle(322, 498, 12, 12),
-
-                //new Rectangle(337, 494, 12, 12),
                 2f);
 
             this.items.Add(
@@ -497,7 +496,7 @@ internal sealed class ExpressionEditor : BaseMenu
 
         var newChildren = GetChildren().ToImmutableList();
         toAddTo.Expressions = newChildren;
-        this.parent.OverrideSearchText(this.baseExpression.Text);
+        this.parent.SetSearchText(this.baseExpression.Text);
         this.ReInitializeComponents(this.baseExpression);
         return;
 
@@ -521,7 +520,21 @@ internal sealed class ExpressionEditor : BaseMenu
         }
 
         dynamicTerm.Term = attribute.ToStringFast();
-        this.parent.OverrideSearchText(this.baseExpression.Text);
+        this.parent.SetSearchText(this.baseExpression.Text);
+        this.ReInitializeComponents(this.baseExpression);
+    }
+
+    private void ChangeTerm(IExpression toChange, string term)
+    {
+        var staticTerm = toChange.Expressions.ElementAtOrDefault(1);
+        if (this.baseExpression is null
+            || staticTerm?.ExpressionType is not (ExpressionType.Quoted or ExpressionType.Static))
+        {
+            return;
+        }
+
+        staticTerm.Term = term;
+        this.parent.SetSearchText(this.baseExpression.Text);
         this.ReInitializeComponents(this.baseExpression);
     }
 
@@ -534,7 +547,7 @@ internal sealed class ExpressionEditor : BaseMenu
 
         var newChildren = GetChildren().ToImmutableList();
         toRemove.Parent.Expressions = newChildren;
-        this.parent.OverrideSearchText(this.baseExpression.Text);
+        this.parent.SetSearchText(this.baseExpression.Text);
         this.ReInitializeComponents(this.baseExpression);
         return;
 
@@ -551,7 +564,7 @@ internal sealed class ExpressionEditor : BaseMenu
     }
 
     private void ShowDropdown(IExpression expression, ClickableComponent component) =>
-        this.parent.DropDown = new Dropdown<ItemAttribute>(
+        this.parent.DropDown = new GenericDropdown<ItemAttribute>(
             ItemAttributeExtensions.GetValues().Select(i => (i, i.ToStringFast())).ToList(),
             component.bounds.X,
             component.bounds.Bottom - this.OffsetY,
@@ -565,9 +578,32 @@ internal sealed class ExpressionEditor : BaseMenu
                 this.parent.DropDown = null;
             });
 
-    private void ShowPopup(IExpression expression, ClickableComponent component) =>
+    private void ShowPopup(IExpression expression, ClickableComponent component)
+    {
+        var leftTerm = expression.Expressions.ElementAtOrDefault(0);
+        if (leftTerm?.ExpressionType is not ExpressionType.Dynamic
+            || !ItemAttributeExtensions.TryParse(leftTerm.Term, out var itemAttribute))
+        {
+            return;
+        }
+
+        var popupItems = itemAttribute switch
+        {
+            ItemAttribute.Any => ItemRepository.Categories.Concat(ItemRepository.Names).Concat(ItemRepository.Tags),
+            ItemAttribute.Category => ItemRepository.Categories,
+            ItemAttribute.Name => ItemRepository.Names,
+            ItemAttribute.Quality => ItemQualityExtensions.GetNames(),
+            ItemAttribute.Quantity =>
+                Enumerable.Range(0, 999).Select(i => i.ToString(CultureInfo.InvariantCulture)),
+            ItemAttribute.Tags => ItemRepository.Tags,
+        };
+
         this.parent.SetChildMenu(
-            new BasePopupList(component.label ?? string.Empty, ItemAttributeExtensions.GetNames().ToList()));
+            new PopupList(
+                component.label ?? string.Empty,
+                popupItems.ToList(),
+                value => this.ChangeTerm(expression, value)));
+    }
 
     private void ToggleGroup(IExpression toToggle)
     {
@@ -587,7 +623,7 @@ internal sealed class ExpressionEditor : BaseMenu
 
         var newChildren = GetChildren().ToImmutableList();
         toToggle.Parent.Expressions = newChildren;
-        this.parent.OverrideSearchText(this.baseExpression.Text);
+        this.parent.SetSearchText(this.baseExpression.Text);
         this.ReInitializeComponents(this.baseExpression);
         return;
 

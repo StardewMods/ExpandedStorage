@@ -47,7 +47,7 @@ internal sealed class SearchOverlay : IClickableMenu
     /// <inheritdoc />
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
-        this.textField.LeftClick(x, y);
+        this.textField.TryLeftClick(x, y);
         if (this.textField.Selected)
         {
             return;
@@ -60,7 +60,7 @@ internal sealed class SearchOverlay : IClickableMenu
     /// <inheritdoc />
     public override void receiveRightClick(int x, int y, bool playSound = true)
     {
-        this.textField.RightClick(x, y);
+        this.textField.TryRightClick(x, y);
         if (this.textField.Selected)
         {
             return;

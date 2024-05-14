@@ -5,12 +5,25 @@ using StardewValley.ItemTypeDefinitions;
 /// <summary>Provides methods for retrieving items based on a predicate.</summary>
 internal static class ItemRepository
 {
+    private static readonly Lazy<List<string>> AllCategories = new(
+        () => ItemRepository.GetItems().Select(item => item.getCategoryName()).Distinct().ToList());
+
     private static readonly Lazy<List<Item>> AllItems = new(() => ItemRepository.GetAll().ToList());
 
-    private static readonly Lazy<List<string>> AllTags = new(
-        () => ItemRepository.GetAll().SelectMany(item => item.GetContextTags()).Distinct().ToList());
+    private static readonly Lazy<List<string>> AllNames = new(
+        () => ItemRepository.GetItems().Select(item => item.DisplayName).Distinct().ToList());
 
-    // TODO: Method for caching all context tags
+    private static readonly Lazy<List<string>> AllTags = new(
+        () => ItemRepository.GetItems().SelectMany(item => item.GetContextTags()).Distinct().ToList());
+
+    /// <summary>Gets all the category names for items.</summary>
+    public static IEnumerable<string> Categories => ItemRepository.AllCategories.Value;
+
+    /// <summary>Gets all the display names for items.</summary>
+    public static IEnumerable<string> Names => ItemRepository.AllNames.Value;
+
+    /// <summary>Gets all the context tags for items.</summary>
+    public static IEnumerable<string> Tags => ItemRepository.AllTags.Value;
 
     /// <summary>Retrieves items based on the provided predicate.</summary>
     /// <param name="predicate">The predicate used to filter the items. If null, all items are returned.</param>

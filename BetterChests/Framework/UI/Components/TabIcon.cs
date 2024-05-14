@@ -3,14 +3,13 @@ namespace StardewMods.BetterChests.Framework.UI.Components;
 using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Models;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewValley.Menus;
 
 /// <summary>Represents a component with an icon that expands into a label when hovered.</summary>
-internal sealed class TabIcon : IComponent
+internal sealed class TabIcon : ICustomComponent
 {
     private readonly TabData data;
     private readonly ClickableTextureComponent icon;
@@ -52,6 +51,9 @@ internal sealed class TabIcon : IComponent
 
     /// <inheritdoc />
     public ClickableComponent Component { get; }
+
+    /// <inheritdoc />
+    public string? HoverText => null;
 
     /// <inheritdoc />
     public bool Contains(Vector2 position) => this.Component.bounds.Contains(position);
@@ -152,16 +154,15 @@ internal sealed class TabIcon : IComponent
     }
 
     /// <inheritdoc />
-    public bool TryHandleInput(ButtonPressedEventArgs eventArgs)
+    public bool TryLeftClick(int x, int y)
     {
-        if (eventArgs.Button is not (SButton.MouseLeft
-            or SButton.MouseRight
-            or SButton.ControllerA
-            or SButton.ControllerB))
-        {
-            return false;
-        }
+        this.clicked.InvokeAll(this, this.data);
+        return true;
+    }
 
+    /// <inheritdoc />
+    public bool TryRightClick(int x, int y)
+    {
         this.clicked.InvokeAll(this, this.data);
         return true;
     }

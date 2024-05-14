@@ -51,9 +51,8 @@ internal sealed class DebugMenu : BaseMenu
     }
 
     /// <inheritdoc />
-    public override void draw(SpriteBatch b, int red = -1, int green = -1, int blue = -1)
+    public override void Draw(SpriteBatch spriteBatch)
     {
-        base.draw(b, -1);
         var hoverText = string.Empty;
         var (mouseX, mouseY) = Game1.getMousePosition(true);
 
@@ -61,7 +60,7 @@ internal sealed class DebugMenu : BaseMenu
         {
             var item = this.items[i];
             var area = this.areas[i];
-            b.DrawString(Game1.smallFont, item, new Vector2(area.X, area.Y), Game1.textColor);
+            spriteBatch.DrawString(Game1.smallFont, item, new Vector2(area.X, area.Y), Game1.textColor);
             if (area.Contains(mouseX, mouseY))
             {
                 hoverText = this.descriptions[i];
@@ -70,11 +69,11 @@ internal sealed class DebugMenu : BaseMenu
 
         if (!string.IsNullOrWhiteSpace(hoverText))
         {
-            IClickableMenu.drawHoverText(b, hoverText, Game1.smallFont);
+            IClickableMenu.drawHoverText(spriteBatch, hoverText, Game1.smallFont);
         }
 
         Game1.mouseCursorTransparency = 1f;
-        this.drawMouse(b);
+        this.drawMouse(spriteBatch);
     }
 
     /// <inheritdoc />

@@ -6,7 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
 
 /// <summary>A dropdown for selecting a string from a list of values.</summary>
-internal abstract class BaseDropdown : BaseMenu
+internal abstract class BaseDropdown : IClickableMenu
 {
     private readonly Rectangle bounds;
     private readonly List<ClickableComponent> components;
@@ -22,7 +22,7 @@ internal abstract class BaseDropdown : BaseMenu
     protected BaseDropdown(List<string> items, int x, int y, int maxItems = int.MaxValue)
         : base(x, y, 0, 0)
     {
-        this.items = items;
+        this.items = items.Where(item => item.Trim().Length >= 3).ToList();
         var textBounds = items.Select(item => Game1.smallFont.MeasureString(item).ToPoint()).ToList();
         var textHeight = textBounds.Max(textBound => textBound.Y);
 

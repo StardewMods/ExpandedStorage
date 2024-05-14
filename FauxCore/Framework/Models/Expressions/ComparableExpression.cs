@@ -15,7 +15,16 @@ internal sealed class ComparableExpression : IExpression
 
     /// <summary>Initializes a new instance of the <see cref="ComparableExpression" /> class.</summary>
     /// <param name="expressions">The left and right expressions.</param>
-    public ComparableExpression(params IExpression[] expressions) => this.Expressions = expressions.ToImmutableList();
+    public ComparableExpression(params IExpression[] expressions)
+    {
+        var terms = new IExpression[2];
+        terms[0] = expressions.ElementAtOrDefault(0) as DynamicTerm
+            ?? new DynamicTerm(ItemAttribute.Any.ToStringFast());
+
+        terms[1] = expressions.ElementAtOrDefault(1) as StaticTerm ?? new StaticTerm(string.Empty);
+
+        this.Expressions = terms.ToImmutableList();
+    }
 
     /// <inheritdoc />
     public ExpressionType ExpressionType => ExpressionType.Comparable;

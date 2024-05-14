@@ -12,6 +12,7 @@ using StardewMods.FauxCore.Framework.Models.Expressions;
 /// <summary>Responsible for handling parsed expressions.</summary>
 internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>, IExpressionHandler
 {
+    private static readonly IExpression DefaultExpression = new RootExpression();
     private static readonly Parser<char, IExpression> RootParser;
 
     private readonly CacheTable<IExpression?> cachedSearches;
@@ -37,26 +38,10 @@ internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>,
 
         var staticTerm = stringParser.Select(term => new StaticTerm(term)).OfType<IExpression>();
 
-        var staticParser = stringParser
-            .Select(
-                term => new ComparableExpression(
-                    new DynamicTerm(ItemAttribute.Any.ToStringFast()),
-                    new StaticTerm(term)))
-            .OfType<IExpression>();
-
         var quotedTerm = stringParser
             .Between(Parser.Char(QuotedTerm.BeginChar), Parser.Char(QuotedTerm.EndChar))
             .Between(Parser.SkipWhitespaces)
             .Select(expressions => new QuotedTerm(expressions))
-            .OfType<IExpression>();
-
-        var quotedParser = stringParser
-            .Between(Parser.Char(QuotedTerm.BeginChar), Parser.Char(QuotedTerm.EndChar))
-            .Between(Parser.SkipWhitespaces)
-            .Select(
-                term => new ComparableExpression(
-                    new DynamicTerm(ItemAttribute.Any.ToStringFast()),
-                    new QuotedTerm(term)))
             .OfType<IExpression>();
 
         var dynamicParser = stringParser
@@ -73,6 +58,22 @@ internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>,
                     Parser.Char(ComparableExpression.Char),
                     quotedTerm.Or(staticTerm))
                 .OfType<IExpression>());
+
+        var staticParser = stringParser
+            .Select(
+                term => new ComparableExpression(
+                    new DynamicTerm(ItemAttribute.Any.ToStringFast()),
+                    new StaticTerm(term)))
+            .OfType<IExpression>();
+
+        var quotedParser = stringParser
+            .Between(Parser.Char(QuotedTerm.BeginChar), Parser.Char(QuotedTerm.EndChar))
+            .Between(Parser.SkipWhitespaces)
+            .Select(
+                term => new ComparableExpression(
+                    new DynamicTerm(ItemAttribute.Any.ToStringFast()),
+                    new QuotedTerm(term)))
+            .OfType<IExpression>();
 
         Parser<char, IExpression> allParser = null!;
         Parser<char, IExpression> anyParser = null!;
@@ -151,8 +152,8 @@ internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>,
     {
         if (string.IsNullOrWhiteSpace(expression))
         {
-            parsedExpression = null;
-            return false;
+            parsedExpression = ExpressionHandler.DefaultExpression.DeepClone();
+            return true;
         }
 
         if (this.cachedSearches.TryGetValue(expression, out var cachedExpression))
@@ -206,11 +207,11 @@ internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>,
         }
         catch (ParseException ex)
         {
-            this.Log.Trace("Failed to parse search expression {0}.\n{1}", expression, ex);
-            parsedExpression = null;
+            this.Log.TraceOnce("Failed to parse search expression {0}.\n{1}", expression, ex);
+            parsedExpression = ExpressionHandler.DefaultExpression;
         }
 
         this.cachedSearches.AddOrUpdate(expression, parsedExpression.DeepClone());
-        return parsedExpression is not null;
+        return true;
     }
 }

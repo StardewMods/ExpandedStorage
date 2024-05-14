@@ -27,8 +27,8 @@ internal sealed class DynamicTerm : IExpression
     private ItemAttribute attribute;
 
     /// <summary>Initializes a new instance of the <see cref="DynamicTerm" /> class.</summary>
-    /// <param name="expression">The expression.</param>
-    public DynamicTerm(string expression) => this.Term = expression;
+    /// <param name="attribute">The attribute.</param>
+    public DynamicTerm(string attribute) => this.Term = attribute;
 
     /// <inheritdoc />
     public ExpressionType ExpressionType => ExpressionType.Dynamic;

@@ -6,7 +6,7 @@ using StardewValley.Menus;
 /// <summary>Represents the event arguments for changes in the inventory menu.</summary>
 internal sealed class InventoryMenuChangedEventArgs : EventArgs
 {
-    private readonly List<IComponent>? components;
+    private readonly List<ICustomComponent>? components;
 
     /// <summary>Initializes a new instance of the <see cref="InventoryMenuChangedEventArgs" /> class.</summary>
     /// <param name="components">The list of custom components.</param>
@@ -14,7 +14,7 @@ internal sealed class InventoryMenuChangedEventArgs : EventArgs
     /// <param name="top">The top menu.</param>
     /// <param name="bottom">The bottom menu.</param>
     public InventoryMenuChangedEventArgs(
-        List<IComponent>? components,
+        List<ICustomComponent>? components,
         IClickableMenu? parent,
         IClickableMenu? top,
         IClickableMenu? bottom)
@@ -35,6 +35,6 @@ internal sealed class InventoryMenuChangedEventArgs : EventArgs
     public IClickableMenu? Top { get; }
 
     /// <summary>Add a custom component to the menu.</summary>
-    /// <param name="component">The component to add.</param>
-    public void AddComponent(IComponent component) => this.components?.Add(component);
+    /// <param name="customComponent">The component to add.</param>
+    public void AddComponent(ICustomComponent customComponent) => this.components?.Add(customComponent);
 }

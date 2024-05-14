@@ -7,9 +7,12 @@ using Microsoft.Xna.Framework.Input;
 using StardewValley.Menus;
 
 /// <summary>A popup menu for selecting from a list of values.</summary>
-internal class BasePopupList : BaseMenu
+internal class PopupList : BaseMenu
 {
     private readonly Rectangle bounds;
+    private readonly ClickableTextureComponent buttonCancel;
+    private readonly ClickableTextureComponent buttonOk;
+    private readonly Action<string> callback;
     private readonly List<ClickableComponent> components;
     private readonly List<string> items;
     private readonly TextField textField;
@@ -17,18 +20,23 @@ internal class BasePopupList : BaseMenu
     private string currentText;
     private int offset;
 
-    /// <summary>Initializes a new instance of the <see cref="BasePopupList" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="PopupList" /> class.</summary>
     /// <param name="initialText">The initial text.</param>
     /// <param name="items">The popup list items.</param>
-    public BasePopupList(string initialText, List<string> items)
-        : base(
-            (Game1.uiViewport.Width / 2) - ((400 + (IClickableMenu.borderWidth * 2)) / 2),
-            (Game1.uiViewport.Height / 2) - ((480 + (IClickableMenu.borderWidth * 2)) / 2),
-            400,
-            480)
+    /// <param name="callback">The action to call when a value is selected.</param>
+    public PopupList(string initialText, List<string> items, Action<string> callback)
+        : base(0, 0, 400, 480, false)
     {
-        this.items = items;
+        this.items = items.Where(item => item.Trim().Length >= 3).ToList();
+        var textBounds = items.Select(item => Game1.smallFont.MeasureString(item).ToPoint()).ToList();
+        var textHeight = textBounds.Max(textBound => textBound.Y);
+
+        this.width = Math.Max(400, textBounds.Max(textBound => textBound.X) + 16);
+        this.xPositionOnScreen = (Game1.uiViewport.Width / 2) - ((this.width + (IClickableMenu.borderWidth * 2)) / 2);
+        this.yPositionOnScreen = (Game1.uiViewport.Height / 2) - ((480 + (IClickableMenu.borderWidth * 2)) / 2);
+
         this.currentText = initialText;
+        this.callback = callback;
         this.textField = new TextField(
             this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2),
             this.yPositionOnScreen
@@ -42,8 +50,6 @@ internal class BasePopupList : BaseMenu
             Selected = true,
         };
 
-        var textBounds = items.Select(item => Game1.smallFont.MeasureString(item).ToPoint()).ToList();
-        var textHeight = textBounds.Max(textBound => textBound.Y);
         this.bounds = new Rectangle(
             this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2),
             this.yPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2) + 112,
@@ -65,7 +71,36 @@ internal class BasePopupList : BaseMenu
                     item))
             .ToList();
 
-        // ok button
+        this.RefreshItems();
+
+        this.buttonOk = new ClickableTextureComponent(
+            "Ok",
+            new Rectangle(
+                this.xPositionOnScreen + this.width + 4,
+                this.yPositionOnScreen + this.height - (IClickableMenu.borderWidth / 2) - Game1.tileSize,
+                Game1.tileSize,
+                Game1.tileSize),
+            null,
+            null,
+            Game1.mouseCursors,
+            Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 46),
+            1f);
+
+        this.buttonCancel = new ClickableTextureComponent(
+            "Cancel",
+            new Rectangle(
+                this.xPositionOnScreen + this.width + 4,
+                this.yPositionOnScreen + this.height - (IClickableMenu.borderWidth / 2) - (Game1.tileSize * 2) - 16,
+                Game1.tileSize,
+                Game1.tileSize),
+            null,
+            null,
+            Game1.mouseCursors,
+            Game1.getSourceRectForStandardTileSheet(Game1.mouseCursors, 47),
+            1f);
+
+        this.allClickableComponents.Add(this.buttonOk);
+        this.allClickableComponents.Add(this.buttonCancel);
     }
 
     /// <summary>Gets or sets the current text.</summary>
@@ -75,21 +110,13 @@ internal class BasePopupList : BaseMenu
         set
         {
             this.currentText = value;
-            var newItems = new List<string>(
-                this
-                    .items.OrderByDescending(i => i.Contains(value, StringComparison.OrdinalIgnoreCase))
-                    .ThenBy(i => i));
-
-            this.items.Clear();
-            this.items.AddRange(newItems);
+            this.RefreshItems();
         }
     }
 
     /// <inheritdoc />
-    public override void draw(SpriteBatch b)
+    public override void Draw(SpriteBatch b)
     {
-        base.draw(b);
-
         // Draw background
         IClickableMenu.drawTextureBox(
             b,
@@ -108,7 +135,7 @@ internal class BasePopupList : BaseMenu
         this.textField.Draw(b);
 
         // Draw items
-        var (x, y) = Game1.getMousePosition(true);
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
         foreach (var component in this.components)
         {
             var index = this.offset + int.Parse(component.name, CultureInfo.InvariantCulture);
@@ -118,7 +145,7 @@ internal class BasePopupList : BaseMenu
                 continue;
             }
 
-            if (component.bounds.Contains(x, y))
+            if (component.bounds.Contains(mouseX, mouseY))
             {
                 b.Draw(
                     Game1.staminaRect,
@@ -176,10 +203,22 @@ internal class BasePopupList : BaseMenu
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
         base.receiveLeftClick(x, y, playSound);
-
-        this.textField.LeftClick(x, y);
+        this.textField.TryLeftClick(x, y);
         if (this.textField.Selected)
         {
+            return;
+        }
+
+        if (this.buttonOk.containsPoint(x, y) && this.readyToClose())
+        {
+            this.callback(this.CurrentText);
+            this.exitThisMenuNoSound();
+            return;
+        }
+
+        if (this.buttonCancel.containsPoint(x, y) && this.readyToClose())
+        {
+            this.exitThisMenuNoSound();
             return;
         }
 
@@ -203,7 +242,7 @@ internal class BasePopupList : BaseMenu
     /// <inheritdoc />
     public override void receiveRightClick(int x, int y, bool playSound = true)
     {
-        this.textField.RightClick(x, y);
+        this.textField.TryRightClick(x, y);
         if (this.textField.Selected)
         {
             return;
@@ -224,32 +263,28 @@ internal class BasePopupList : BaseMenu
         // Scroll down
         if (direction < 0)
         {
-            this.offset--;
+            this.offset++;
             Game1.playSound("shiny4");
         }
 
         // Scroll up
         if (direction > 0)
         {
-            this.offset++;
+            this.offset--;
             Game1.playSound("shiny4");
         }
 
-        this.offset = Math.Max(0, Math.Min(this.items.Count - this.components.Count, 0));
+        this.offset = Math.Max(0, Math.Min(this.items.Count - this.components.Count, this.offset));
     }
 
-    /// <summary>Performs a left click at the specified location and returns the result.</summary>
-    /// <param name="x">The x-coordinate of the location to click.</param>
-    /// <param name="y">The y-coordinate of the location to click.</param>
-    /// <returns>Returns the index of the selected item, or -1 if an item was not clicked.</returns>
-    protected int LeftClick(int x, int y)
+    private void RefreshItems()
     {
-        var component = this.components.FirstOrDefault(i => i.bounds.Contains(x, y));
-        if (component is null)
-        {
-            return -1;
-        }
+        var newItems = new List<string>(
+            this
+                .items.OrderByDescending(i => i.Contains(this.currentText, StringComparison.OrdinalIgnoreCase))
+                .ThenBy(i => i));
 
-        return this.offset + int.Parse(component.name, CultureInfo.InvariantCulture);
+        this.items.Clear();
+        this.items.AddRange(newItems);
     }
 }

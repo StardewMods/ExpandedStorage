@@ -17,7 +17,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\CommonExtensions.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\ItemRepository.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\ReverseComparer.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IComponent.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\ICustomComponent.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IEventManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IModIntegration.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Cache\BaseCachedObject.cs"/>
@@ -92,6 +92,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)UI\BaseDropdown.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\BaseMenu.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Dropdown.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\GenericDropdown.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\PopupList.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\VerticalScrollBar.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\TextField.cs"/>

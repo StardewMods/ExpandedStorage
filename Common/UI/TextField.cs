@@ -2,10 +2,11 @@ namespace StardewMods.Common.UI;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.Common.Interfaces;
 using StardewValley.Menus;
 
 /// <summary>Represents a search overlay control that allows the user to input text.</summary>
-internal sealed class TextField : ClickableComponent
+internal sealed class TextField : ClickableComponent, ICustomComponent
 {
     private const int CountdownTimer = 20;
 
@@ -52,6 +53,12 @@ internal sealed class TextField : ClickableComponent
             2.5f);
     }
 
+    /// <inheritdoc />
+    public ClickableComponent Component => this;
+
+    /// <inheritdoc />
+    public string? HoverText => null;
+
     /// <summary>Gets or sets a value indicating whether the search bar is currently selected.</summary>
     public bool Selected
     {
@@ -65,29 +72,25 @@ internal sealed class TextField : ClickableComponent
         set => this.setMethod(value);
     }
 
+    /// <inheritdoc />
+    public bool Contains(Vector2 position) => this.bounds.Contains(position);
+
     /// <summary>Draws the search overlay to the screen.</summary>
     /// <param name="spriteBatch">The SpriteBatch used for drawing.</param>
     public void Draw(SpriteBatch spriteBatch) => this.textBox.Draw(spriteBatch);
 
-    //this.icon.draw(spriteBatch);
-    /// <summary>Performs a left click at the specified coordinates on the screen.</summary>
-    /// <param name="mouseX">The X-coordinate of the mouse click.</param>
-    /// <param name="mouseY">The Y-coordinate of the mouse click.</param>
-    /// <returns><c>true</c> if the search bar was clicked; otherwise, <c>false</c>.</returns>
-    public bool LeftClick(int mouseX, int mouseY)
+    /// <summary>Reset the value of the text box.</summary>
+    public void Reset() => this.textBox.Text = this.Text;
+
+    /// <inheritdoc />
+    public bool TryLeftClick(int mouseX, int mouseY)
     {
         this.Selected = this.bounds.Contains(mouseX, mouseY);
         return this.Selected;
     }
 
-    /// <summary>Reset the value of the text box.</summary>
-    public void Reset() => this.textBox.Text = this.Text;
-
-    /// <summary>Performs a right click at the specified coordinates on the screen.</summary>
-    /// <param name="mouseX">The X-coordinate of the mouse click.</param>
-    /// <param name="mouseY">The Y-coordinate of the mouse click.</param>
-    /// <returns><c>true</c> if the search bar was clicked; otherwise, <c>false</c>.</returns>
-    public bool RightClick(int mouseX, int mouseY)
+    /// <inheritdoc />
+    public bool TryRightClick(int mouseX, int mouseY)
     {
         if (!this.bounds.Contains(mouseX, mouseY))
         {

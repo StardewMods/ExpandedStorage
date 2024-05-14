@@ -169,7 +169,6 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
                 return;
             case "search":
                 Game1.activeClickableMenu = new SearchMenu(
-                    this.assetHandler,
                     this.expressionHandler,
                     "({category}~\"fish\" !{tags}~\"ocean\" [{quality}~iridium {quality}~gold])",
                     this.uiManager);

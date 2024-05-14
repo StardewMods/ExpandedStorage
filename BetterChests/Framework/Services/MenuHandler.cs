@@ -27,7 +27,7 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
     private readonly PerScreen<MenuManager> bottomMenu;
 
     private readonly Type? chestsAnywhereType;
-    private readonly PerScreen<List<IComponent>> components = new(() => []);
+    private readonly PerScreen<List<ICustomComponent>> components = new(() => []);
     private readonly ContainerFactory containerFactory;
     private readonly PerScreen<IClickableMenu?> currentMenu = new();
     private readonly IEventManager eventManager;
@@ -331,11 +331,28 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
-        if (this
-            .components.Value.Where(c => c.Contains(e.Cursor.GetScaledScreenPixels()))
-            .Any(component => component.TryHandleInput(e)))
+        var cursorPos = e.Cursor.GetScaledScreenPixels().ToPoint();
+        switch (e.Button)
         {
-            this.inputHelper.Suppress(e.Button);
+            case SButton.MouseLeft or SButton.ControllerA:
+                if (this
+                    .components.Value.Where(c => c.Contains(e.Cursor.GetScaledScreenPixels()))
+                    .Any(component => component.TryLeftClick(cursorPos.X, cursorPos.Y)))
+                {
+                    this.inputHelper.Suppress(e.Button);
+                }
+
+                return;
+
+            case SButton.MouseRight or SButton.ControllerB:
+                if (this
+                    .components.Value.Where(c => c.Contains(e.Cursor.GetScaledScreenPixels()))
+                    .Any(component => component.TryRightClick(cursorPos.X, cursorPos.Y)))
+                {
+                    this.inputHelper.Suppress(e.Button);
+                }
+
+                return;
         }
     }
 
