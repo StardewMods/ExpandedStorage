@@ -17,10 +17,12 @@ public interface IIcon
     public string Path { get; }
 
     /// <summary>Gets the icon texture.</summary>
-    public Texture2D Texture { get; }
+    /// <param name="style">The style of the icon.</param>
+    /// <returns>Returns the texture.</returns>
+    public Texture2D GetTexture(IconStyle style);
 
     /// <summary>Gets a component with the icon.</summary>
-    /// <param name="style">The style of the component</param>
+    /// <param name="style">The style of the component.</param>
     /// <returns>Returns a new button.</returns>
-    public ClickableTextureComponent GetComponent(ComponentStyle style);
+    public ClickableTextureComponent GetComponent(IconStyle style);
 }

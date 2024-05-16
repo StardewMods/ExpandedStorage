@@ -80,10 +80,10 @@ internal sealed class IconRegistry : BaseService, IIconRegistry
         return icon is not null;
     }
 
-    private ClickableTextureComponent CreateComponent(IIcon icon, ComponentStyle style) =>
+    private ClickableTextureComponent CreateComponent(IIcon icon, IconStyle style) =>
         style switch
         {
-            ComponentStyle.Transparent => new ClickableTextureComponent(
+            IconStyle.Transparent => new ClickableTextureComponent(
                 icon.Id,
                 new Rectangle(0, 0, icon.Area.Width * Game1.pixelZoom, icon.Area.Height * Game1.pixelZoom),
                 null,
@@ -91,16 +91,22 @@ internal sealed class IconRegistry : BaseService, IIconRegistry
                 this.assetHandler.GetTexture(icon),
                 icon.Area,
                 Game1.pixelZoom),
-            ComponentStyle.Button => new ClickableTextureComponent(
+            IconStyle.Button => new ClickableTextureComponent(
                 icon.Id,
                 new Rectangle(0, 0, Game1.tileSize, Game1.tileSize),
                 null,
                 null,
                 this.assetHandler.CreateButtonTexture(icon),
-                icon.Area,
+                new Rectangle(0, 0, 16, 16),
                 Game1.pixelZoom),
             _ => throw new ArgumentOutOfRangeException(nameof(style), style, null),
         };
 
-    private Texture2D GetTexture(IIcon icon) => this.assetHandler.GetTexture(icon);
+    private Texture2D GetTexture(IIcon icon, IconStyle style) =>
+        style switch
+        {
+            IconStyle.Transparent => this.assetHandler.GetTexture(icon),
+            IconStyle.Button => this.assetHandler.CreateButtonTexture(icon),
+            _ => throw new ArgumentOutOfRangeException(nameof(style), style, null),
+        };
 }

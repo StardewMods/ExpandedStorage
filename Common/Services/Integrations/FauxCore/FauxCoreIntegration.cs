@@ -9,7 +9,7 @@ internal sealed class FauxCoreIntegration
     : ModIntegration<IFauxCoreApi>, IExpressionHandler, IIconRegistry, ILog, IPatchManager, IThemeHelper
 {
     private const string ModUniqueId = "furyx639.FauxCore";
-    private readonly Queue<Action> delayedActions = [];
+    private readonly Queue<Action> deferred = [];
     private readonly Lazy<IExpressionHandler>? expressionHandler;
     private readonly Lazy<IIconRegistry>? iconRegistry;
     private readonly Lazy<ILog>? log;
@@ -50,7 +50,7 @@ internal sealed class FauxCoreIntegration
             return;
         }
 
-        this.delayedActions.Enqueue(() => this.patchManager?.Value.Add(id, patches));
+        this.deferred.Enqueue(() => this.patchManager?.Value.Add(id, patches));
     }
 
     /// <inheritdoc />
@@ -62,7 +62,7 @@ internal sealed class FauxCoreIntegration
             return;
         }
 
-        this.delayedActions.Enqueue(() => this.themeHelper?.Value.AddAsset(path, data));
+        this.deferred.Enqueue(() => this.themeHelper?.Value.AddAsset(path, data));
     }
 
     /// <inheritdoc />
@@ -74,7 +74,7 @@ internal sealed class FauxCoreIntegration
             return;
         }
 
-        this.delayedActions.Enqueue(() => this.iconRegistry?.Value.AddIcon(id, path, area));
+        this.deferred.Enqueue(() => this.iconRegistry?.Value.AddIcon(id, path, area));
     }
 
     /// <inheritdoc />
@@ -101,7 +101,7 @@ internal sealed class FauxCoreIntegration
             return;
         }
 
-        this.delayedActions.Enqueue(() => this.patchManager?.Value.Patch(id));
+        this.deferred.Enqueue(() => this.patchManager?.Value.Patch(id));
     }
 
     /// <inheritdoc />
@@ -166,7 +166,7 @@ internal sealed class FauxCoreIntegration
             return;
         }
 
-        this.delayedActions.Enqueue(() => this.patchManager?.Value.Unpatch(id));
+        this.deferred.Enqueue(() => this.patchManager?.Value.Unpatch(id));
     }
 
     /// <inheritdoc />
@@ -186,7 +186,7 @@ internal sealed class FauxCoreIntegration
         this.initialized = true;
         this.Api.Monitor = this.monitor;
 
-        while (this.delayedActions.TryDequeue(out var delayedPatch))
+        while (this.deferred.TryDequeue(out var delayedPatch))
         {
             delayedPatch.Invoke();
         }

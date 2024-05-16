@@ -278,6 +278,8 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
 
     private void OnSearchChanged(SearchChangedEventArgs e)
     {
+        this.searchText.Value = e.SearchTerm;
+        this.searchExpression.Value = e.SearchExpression;
         if (this.searchBar.Value is null || !this.isActive.Value || this.menuHandler.CurrentMenu is not ItemGrabMenu)
         {
             return;

@@ -65,11 +65,11 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
 
     private ClickableTextureComponent LeftArrow =>
         this.leftArrow.Value ??=
-            this.iconRegistry.RequireIcon("SDV.Vanilla/LeftArrow").GetComponent(ComponentStyle.Transparent);
+            this.iconRegistry.RequireIcon("SDV.Vanilla/LeftArrow").GetComponent(IconStyle.Transparent);
 
     private ClickableTextureComponent RightArrow =>
         this.rightArrow.Value ??=
-            this.iconRegistry.RequireIcon("SDV.Vanilla/RightArrow").GetComponent(ComponentStyle.Transparent);
+            this.iconRegistry.RequireIcon("SDV.Vanilla/RightArrow").GetComponent(IconStyle.Transparent);
 
     /// <inheritdoc />
     protected override void Activate()
@@ -368,7 +368,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         if (icon is not null)
         {
             e.SpriteBatch.Draw(
-                Game1.content.Load<Texture2D>(icon.Path),
+                icon.GetTexture(IconStyle.Transparent),
                 new Vector2(this.currentContainer.Value.bounds.X, this.currentContainer.Value.bounds.Y),
                 icon.Area,
                 Color.White,
@@ -427,7 +427,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             {
                 xOffset = 32;
                 e.SpriteBatch.Draw(
-                    Game1.content.Load<Texture2D>(icon.Path),
+                    icon.GetTexture(IconStyle.Transparent),
                     new Vector2(item.bounds.X, item.bounds.Y),
                     icon.Area,
                     Color.White,

@@ -43,7 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\CustomBush\ICustomBush.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\CustomBush\ICustomBushApi.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\CustomBush\ICustomBushDrop.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Enums\ComponentStyle.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Enums\IconStyle.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Enums\ExpressionType.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\IExpression.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\IIcon.cs"/>

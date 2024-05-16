@@ -37,7 +37,6 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
     };
 
     private bool initialize;
-    private IRawTextureData? mouseCursors;
 
     /// <summary>Initializes a new instance of the <see cref="ThemeHelper" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
@@ -53,9 +52,6 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
         eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
         eventManager.Subscribe<SaveLoadedEventArgs>(this.OnSaveLoaded);
     }
-
-    /// <summary>Gets the raw texture data for mouse cursors.</summary>
-    public IRawTextureData MouseCursors => this.mouseCursors ??= new VanillaTexture(Game1.mouseCursors);
 
     /// <inheritdoc />
     public void AddAsset(string path, IRawTextureData data)
@@ -98,11 +94,11 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
     private void InitializePalette()
     {
         var changed = false;
-        this.mouseCursors = null;
+        var mouseCursors = new VanillaTexture(Game1.mouseCursors);
         foreach (var (points, color) in this.vanillaPalette)
         {
             var sample = points
-                .Select(point => this.MouseCursors.Data[point.X + (point.Y * this.MouseCursors.Width)])
+                .Select(point => mouseCursors.Data[point.X + (point.Y * mouseCursors.Width)])
                 .GroupBy(sample => sample)
                 .OrderByDescending(group => group.Count())
                 .First()
@@ -127,6 +123,14 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
         {
             managedTexture.InvalidateCache();
             this.gameContentHelper.InvalidateCache(assetName);
+
+            for (var index = 0; index < managedTexture.Data.Length; ++index)
+            {
+                managedTexture.Data[index] =
+                    this.paletteSwap.TryGetValue(managedTexture.RawData[index], out var newColor)
+                        ? newColor
+                        : managedTexture.RawData[index];
+            }
         }
     }
 
@@ -151,17 +155,6 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
         e.LoadFrom(
             () =>
             {
-                if (this.paletteSwap.Any())
-                {
-                    for (var index = 0; index < managedTexture.Data.Length; ++index)
-                    {
-                        if (this.paletteSwap.TryGetValue(managedTexture.RawData[index], out var newColor))
-                        {
-                            managedTexture.Data[index] = newColor;
-                        }
-                    }
-                }
-
                 var texture = new Texture2D(
                     Game1.spriteBatch.GraphicsDevice,
                     managedTexture.Width,

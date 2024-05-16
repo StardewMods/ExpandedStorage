@@ -53,7 +53,8 @@ internal sealed class AssetHandler : BaseService
         this.modConfig = modConfig;
         this.hslTexturePath = this.ModId + "/HueBar";
 
-        themeHelper.AddAsset(this.ModId + "/UI", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
+        var data = modContentHelper.Load<IRawTextureData>("assets/icons.png");
+        themeHelper.AddAsset(this.ModId + "/UI", data);
 
         // Events
         eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);

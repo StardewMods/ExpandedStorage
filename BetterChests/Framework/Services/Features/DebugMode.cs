@@ -96,7 +96,6 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         }
 
         this.toolbarIconsIntegration.Api.AddToolbarIcon(this.Id, icon.Path, icon.Area, I18n.Button_Debug_Name());
-
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
     }
 

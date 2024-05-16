@@ -5,6 +5,7 @@
 ### Added
 
 * Added ExpressionHandler service for parsing expressions.
+* Added IconRegistry service for managing icons.
 
 ### Changed
 

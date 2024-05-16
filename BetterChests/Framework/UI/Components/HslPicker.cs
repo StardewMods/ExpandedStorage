@@ -102,22 +102,11 @@ internal sealed class HslPicker
                 + this.xPosition,
         };
 
-        if (!iconRegistry.TryGetIcon("Copy", out var copyIcon))
-        {
-            throw new InvalidOperationException("The copy icon is missing.");
-        }
-
-        this.copyComponent = new ClickableTextureComponent(
-            copyIcon.Id,
-            new Rectangle(this.xPosition + 30, this.yPosition - 4, 36, 36),
-            null,
-            I18n.Button_Copy_Name(),
-            copyIcon.Texture,
-            copyIcon.Area,
-            3)
-        {
-            myID = (int)Math.Pow(this.yPosition + 2, 2) + this.xPosition + 34,
-        };
+        this.copyComponent = iconRegistry.RequireIcon("Copy").GetComponent(IconStyle.Transparent);
+        this.copyComponent.bounds = new Rectangle(this.xPosition + 30, this.yPosition - 4, 36, 36);
+        this.copyComponent.hoverText = I18n.Button_Copy_Name();
+        this.copyComponent.scale = 3f;
+        this.copyComponent.myID = (int)Math.Pow(this.yPosition + 2, 2) + this.xPosition + 34;
 
         this.defaultColorArea = new Rectangle(this.xPosition - 6, this.yPosition - 4, 36, 36);
         this.defaultColorComponent = new ClickableTextureComponent(

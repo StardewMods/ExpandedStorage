@@ -9,12 +9,12 @@ using StardewValley.Menus;
 /// <summary>A menu for assigning categories to a container.</summary>
 internal sealed class CategorizeMenu : SearchMenu
 {
-    private readonly ClickableTextureComponent buttonCopy;
-    private readonly ClickableTextureComponent buttonPaste;
-    private readonly ClickableTextureComponent buttonSave;
-    private readonly ClickableTextureComponent buttonStack;
     private readonly IStorageContainer container;
+    private readonly ClickableTextureComponent copyComponent;
     private readonly IIcon iconNoStack;
+    private readonly ClickableTextureComponent pasteComponent;
+    private readonly ClickableTextureComponent saveComponent;
+    private readonly ClickableTextureComponent stackComponent;
 
     /// <summary>Initializes a new instance of the <see cref="CategorizeMenu" /> class.</summary>
     /// <param name="container">The container to categorize.</param>
@@ -30,89 +30,49 @@ internal sealed class CategorizeMenu : SearchMenu
     {
         this.container = container;
 
-        if (!iconRegistry.TryGetIcon("Save", out var saveIcon))
-        {
-            throw new InvalidOperationException("The save icon is missing.");
-        }
+        this.saveComponent = iconRegistry.RequireIcon("Save").GetComponent(IconStyle.Button);
+        this.saveComponent.hoverText = I18n.Button_SaveAsCategorization_Name();
+        this.saveComponent.bounds = new Rectangle(
+            this.xPositionOnScreen + this.width + 4,
+            this.yPositionOnScreen + Game1.tileSize + 16,
+            Game1.tileSize,
+            Game1.tileSize);
 
-        if (!iconRegistry.TryGetIcon("NoStack", out var noStackIcon))
-        {
-            throw new InvalidOperationException("The save icon is missing.");
-        }
-
-        if (!iconRegistry.TryGetIcon("Copy", out var copyIcon))
-        {
-            throw new InvalidOperationException("The save icon is missing.");
-        }
-
-        if (!iconRegistry.TryGetIcon("Paste", out var pasteIcon))
-        {
-            throw new InvalidOperationException("The save icon is missing.");
-        }
-
-        this.buttonSave = new ClickableTextureComponent(
-            saveIcon.Id,
-            new Rectangle(
-                this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + Game1.tileSize + 16,
-                Game1.tileSize,
-                Game1.tileSize),
-            string.Empty,
-            I18n.Button_SaveAsCategorization_Name(),
-            saveIcon.Texture,
-            saveIcon.Area,
-            Game1.pixelZoom);
-
-        this.iconNoStack = noStackIcon;
-        this.buttonStack = new ClickableTextureComponent(
-            noStackIcon.Id,
-            new Rectangle(
-                this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 2),
-                Game1.tileSize,
-                Game1.tileSize),
-            string.Empty,
-            I18n.Button_IncludeExistingStacks_Name(),
-            noStackIcon.Texture,
-            noStackIcon.Area,
-            Game1.pixelZoom);
+        this.iconNoStack = iconRegistry.RequireIcon("NoStack");
+        this.stackComponent = this.iconNoStack.GetComponent(IconStyle.Button);
+        this.stackComponent.hoverText = I18n.Button_IncludeExistingStacks_Name();
+        this.stackComponent.bounds = new Rectangle(
+            this.xPositionOnScreen + this.width + 4,
+            this.yPositionOnScreen + ((Game1.tileSize + 16) * 2),
+            Game1.tileSize,
+            Game1.tileSize);
 
         if (this.container.CategorizeChestIncludeStacks is FeatureOption.Enabled)
         {
-            this.buttonStack.texture = Game1.mouseCursors;
-            this.buttonStack.sourceRect = new Rectangle(103, 469, 16, 16);
+            this.stackComponent.texture = Game1.mouseCursors;
+            this.stackComponent.sourceRect = new Rectangle(103, 469, 16, 16);
         }
 
-        this.buttonCopy = new ClickableTextureComponent(
-            copyIcon.Id,
-            new Rectangle(
-                this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 3),
-                Game1.tileSize,
-                Game1.tileSize),
-            string.Empty,
-            I18n.Button_Copy_Name(),
-            copyIcon.Texture,
-            copyIcon.Area,
-            Game1.pixelZoom);
+        this.copyComponent = iconRegistry.RequireIcon("Copy").GetComponent(IconStyle.Button);
+        this.copyComponent.hoverText = I18n.Button_Copy_Name();
+        this.copyComponent.bounds = new Rectangle(
+            this.xPositionOnScreen + this.width + 4,
+            this.yPositionOnScreen + ((Game1.tileSize + 16) * 3),
+            Game1.tileSize,
+            Game1.tileSize);
 
-        this.buttonPaste = new ClickableTextureComponent(
-            pasteIcon.Id,
-            new Rectangle(
-                this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 4),
-                Game1.tileSize,
-                Game1.tileSize),
-            string.Empty,
-            I18n.Button_Paste_Name(),
-            pasteIcon.Texture,
-            pasteIcon.Area,
-            Game1.pixelZoom);
+        this.pasteComponent = iconRegistry.RequireIcon("Paste").GetComponent(IconStyle.Button);
+        this.pasteComponent.hoverText = I18n.Button_Paste_Name();
+        this.pasteComponent.bounds = new Rectangle(
+            this.xPositionOnScreen + this.width + 4,
+            this.yPositionOnScreen + ((Game1.tileSize + 16) * 4),
+            Game1.tileSize,
+            Game1.tileSize);
 
-        this.allClickableComponents.Add(this.buttonSave);
-        this.allClickableComponents.Add(this.buttonStack);
-        this.allClickableComponents.Add(this.buttonCopy);
-        this.allClickableComponents.Add(this.buttonPaste);
+        this.allClickableComponents.Add(this.saveComponent);
+        this.allClickableComponents.Add(this.stackComponent);
+        this.allClickableComponents.Add(this.copyComponent);
+        this.allClickableComponents.Add(this.pasteComponent);
     }
 
     /// <inheritdoc />
@@ -120,10 +80,10 @@ internal sealed class CategorizeMenu : SearchMenu
     {
         base.receiveLeftClick(x, y, playSound);
 
-        if (this.buttonSave.containsPoint(x, y) && this.readyToClose())
+        if (this.saveComponent.containsPoint(x, y) && this.readyToClose())
         {
             this.container.CategorizeChestSearchTerm = this.SearchText;
-            this.container.CategorizeChestIncludeStacks = this.buttonStack.sourceRect.Equals(this.iconNoStack.Area)
+            this.container.CategorizeChestIncludeStacks = this.stackComponent.sourceRect.Equals(this.iconNoStack.Area)
                 ? FeatureOption.Disabled
                 : FeatureOption.Enabled;
 
@@ -132,27 +92,27 @@ internal sealed class CategorizeMenu : SearchMenu
             return;
         }
 
-        if (this.buttonStack.containsPoint(x, y))
+        if (this.stackComponent.containsPoint(x, y))
         {
-            if (this.buttonStack.sourceRect.Equals(this.iconNoStack.Area))
+            if (this.stackComponent.sourceRect.Equals(this.iconNoStack.Area))
             {
-                this.buttonStack.texture = Game1.mouseCursors;
-                this.buttonStack.sourceRect = new Rectangle(103, 469, 16, 16);
+                this.stackComponent.texture = Game1.mouseCursors;
+                this.stackComponent.sourceRect = new Rectangle(103, 469, 16, 16);
                 return;
             }
 
-            this.buttonStack.texture = this.iconNoStack.Texture;
-            this.buttonStack.sourceRect = this.iconNoStack.Area;
+            this.stackComponent.texture = this.iconNoStack.GetTexture(IconStyle.Button);
+            this.stackComponent.sourceRect = this.iconNoStack.Area;
             return;
         }
 
-        if (this.buttonCopy.containsPoint(x, y))
+        if (this.copyComponent.containsPoint(x, y))
         {
             DesktopClipboard.SetText(this.SearchText);
             return;
         }
 
-        if (this.buttonPaste.containsPoint(x, y))
+        if (this.pasteComponent.containsPoint(x, y))
         {
             var searchText = string.Empty;
             DesktopClipboard.GetText(ref searchText);

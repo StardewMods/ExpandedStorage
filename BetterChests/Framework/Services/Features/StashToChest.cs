@@ -218,8 +218,8 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
             return;
         }
 
-        itemGrabMenu.fillStacksButton.texture = icon.Texture;
-        itemGrabMenu.fillStacksButton.sourceRect = icon.Area;
+        itemGrabMenu.fillStacksButton.texture = icon.GetTexture(IconStyle.Button);
+        itemGrabMenu.fillStacksButton.sourceRect = new Rectangle(0, 0, 16, 16);
     }
 
     private void StashIntoAll()

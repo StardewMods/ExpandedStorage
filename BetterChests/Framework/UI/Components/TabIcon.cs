@@ -1,6 +1,5 @@
 namespace StardewMods.BetterChests.Framework.UI.Components;
 
-using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Models;
@@ -13,7 +12,6 @@ using StardewValley.Menus;
 internal sealed class TabIcon : ICustomComponent
 {
     private readonly TabData data;
-    private readonly ClickableTextureComponent icon;
     private readonly Vector2 origin;
     private readonly int textWidth;
 
@@ -26,20 +24,12 @@ internal sealed class TabIcon : ICustomComponent
     /// <param name="tabData">The inventory tab data.</param>
     public TabIcon(int x, int y, IIcon icon, TabData tabData)
     {
-        this.Component = new ClickableComponent(
-            new Rectangle(x, y, Game1.tileSize, Game1.tileSize),
-            ((int)Math.Pow(y, 2) + x).ToString(CultureInfo.InvariantCulture),
-            tabData.Label) { myID = (int)(Math.Pow(y, 2) + x) };
-
+        var textBounds = Game1.smallFont.MeasureString(tabData.Label).ToPoint();
         this.data = tabData;
         this.origin = new Vector2(x, y);
-        this.icon = new ClickableTextureComponent(
-            new Rectangle(x, y, Game1.tileSize, Game1.tileSize),
-            icon.Texture,
-            icon.Area,
-            Game1.pixelZoom);
-
-        var textBounds = Game1.smallFont.MeasureString(tabData.Label).ToPoint();
+        this.Component = icon.GetComponent(IconStyle.Transparent);
+        this.Component.bounds = new Rectangle(x, y, Game1.tileSize, Game1.tileSize);
+        this.Component.name = tabData.Label;
         this.textWidth = textBounds.X;
     }
 
@@ -140,13 +130,13 @@ internal sealed class TabIcon : ICustomComponent
             SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically,
             0.5f);
 
-        this.icon.draw(spriteBatch);
+        ((ClickableTextureComponent)this.Component).draw(spriteBatch);
 
         if (this.Component.bounds.Width == this.textWidth + Game1.tileSize + IClickableMenu.borderWidth)
         {
             spriteBatch.DrawString(
                 Game1.smallFont,
-                this.Component.label,
+                this.Component.name,
                 new Vector2(
                     this.Component.bounds.X + Game1.tileSize,
                     this.Component.bounds.Y + (IClickableMenu.borderWidth / 2f)),
@@ -176,6 +166,5 @@ internal sealed class TabIcon : ICustomComponent
             : Math.Max(this.Component.bounds.Width - 16, Game1.tileSize);
 
         this.Component.bounds.X = (int)this.origin.X - this.Component.bounds.Width;
-        this.icon.bounds.X = this.Component.bounds.X;
     }
 }

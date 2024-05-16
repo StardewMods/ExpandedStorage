@@ -102,6 +102,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
         if (e.Button is not (SButton.MouseLeft or SButton.ControllerA)
+            || e.IsSuppressed(e.Button)
             || !this.menuHandler.TryGetFocus(this, out var focus))
         {
             return;

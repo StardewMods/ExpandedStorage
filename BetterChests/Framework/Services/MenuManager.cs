@@ -52,17 +52,6 @@ internal sealed class MenuManager : BaseService
         this.menuHandler = menuHandler;
         this.modConfig = modConfig;
 
-        if (!iconRegistry.TryGetIcon("SDV.Vanilla/DownArrow", out var downIcon))
-        {
-            throw new InvalidOperationException("The down arrow icon is missing.");
-        }
-
-        this.downArrow = new ClickableTextureComponent(
-            new Rectangle(0, 0, downIcon.Area.Width * Game1.pixelZoom, downIcon.Area.Height * Game1.pixelZoom),
-            downIcon.Texture,
-            downIcon.Area,
-            Game1.pixelZoom) { myID = 5318008 };
-
         // Events
         eventManager.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         eventManager.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
@@ -95,53 +84,11 @@ internal sealed class MenuManager : BaseService
     /// <summary>Gets or sets the method used to highlight an item in the inventory menu.</summary>
     public InventoryMenu.highlightThisItem? OriginalHighlightMethod { get; set; }
 
-    private ClickableTextureComponent DownArrow
-    {
-        get
-        {
-            if (this.downArrow is not null)
-            {
-                return this.downArrow;
-            }
+    private ClickableTextureComponent DownArrow =>
+        this.downArrow ??= this.iconRegistry.RequireIcon("SDV.Vanilla/DownArrow").GetComponent(IconStyle.Transparent);
 
-            if (!this.iconRegistry.TryGetIcon("SDV.Vanilla/DownArrow", out var downIcon))
-            {
-                throw new InvalidOperationException("The down arrow icon is missing.");
-            }
-
-            this.downArrow = new ClickableTextureComponent(
-                new Rectangle(0, 0, downIcon.Area.Width * Game1.pixelZoom, downIcon.Area.Height * Game1.pixelZoom),
-                downIcon.Texture,
-                downIcon.Area,
-                Game1.pixelZoom) { myID = 5318008 };
-
-            return this.downArrow;
-        }
-    }
-
-    private ClickableTextureComponent UpArrow
-    {
-        get
-        {
-            if (this.upArrow is not null)
-            {
-                return this.upArrow;
-            }
-
-            if (!this.iconRegistry.TryGetIcon("SDV.Vanilla/UpArrow", out var upIcon))
-            {
-                throw new InvalidOperationException("The up arrow icon is missing.");
-            }
-
-            this.upArrow = new ClickableTextureComponent(
-                new Rectangle(0, 0, upIcon.Area.Width * Game1.pixelZoom, upIcon.Area.Height * Game1.pixelZoom),
-                upIcon.Texture,
-                upIcon.Area,
-                Game1.pixelZoom) { myID = 5318009 };
-
-            return this.upArrow;
-        }
-    }
+    private ClickableTextureComponent UpArrow =>
+        this.upArrow ??= this.iconRegistry.RequireIcon("SDV.Vanilla/UpArrow").GetComponent(IconStyle.Transparent);
 
     /// <summary>Draws overlay components to the SpriteBatch.</summary>
     /// <param name="spriteBatch">The SpriteBatch used to draw the game object.</param>
@@ -297,12 +244,8 @@ internal sealed class MenuManager : BaseService
             return;
         }
 
-        this.Icon = new ClickableTextureComponent(
-            new Rectangle(x, y, Game1.tileSize, Game1.tileSize + 12),
-            storageIcon.Texture,
-            storageIcon.Area,
-            Game1.pixelZoom);
-
+        this.Icon = storageIcon.GetComponent(IconStyle.Transparent);
+        this.Icon.bounds = new Rectangle(x, y, Game1.tileSize, Game1.tileSize + 12);
         parent.allClickableComponents?.Add(this.Icon);
     }
 
