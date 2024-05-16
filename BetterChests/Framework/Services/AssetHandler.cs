@@ -21,19 +21,17 @@ internal sealed class AssetHandler : BaseService
 {
     private readonly IGameContentHelper gameContentHelper;
     private readonly string hslTexturePath;
-    private readonly string iconsPath;
+    private readonly IIconRegistry iconRegistry;
     private readonly IModConfig modConfig;
-    private readonly Lazy<IManagedTexture> uiTextures;
     private HslColor[]? hslColors;
     private Texture2D? hslTexture;
     private Color[]? hslTextureData;
 
-    private Dictionary<string, Icon>? icons;
-
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
@@ -41,6 +39,7 @@ internal sealed class AssetHandler : BaseService
     public AssetHandler(
         IEventManager eventManager,
         IGameContentHelper gameContentHelper,
+        IIconRegistry iconRegistry,
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
@@ -50,16 +49,16 @@ internal sealed class AssetHandler : BaseService
     {
         // Init
         this.gameContentHelper = gameContentHelper;
+        this.iconRegistry = iconRegistry;
         this.modConfig = modConfig;
         this.hslTexturePath = this.ModId + "/HueBar";
-        this.iconsPath = this.ModId + "/Icons";
 
-        this.uiTextures = new Lazy<IManagedTexture>(
-            () => themeHelper.AddAsset(this.ModId + "/UI", modContentHelper.Load<IRawTextureData>("assets/icons.png")));
+        themeHelper.AddAsset(this.ModId + "/UI", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
 
         // Events
         eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
         eventManager.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
+        eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
     }
 
     /// <summary>Gets the hsl colors data.</summary>
@@ -81,185 +80,11 @@ internal sealed class AssetHandler : BaseService
     /// <summary>Gets the hsl texture.</summary>
     public Texture2D HslTexture => this.hslTexture ??= this.gameContentHelper.Load<Texture2D>(this.hslTexturePath);
 
-    /// <summary>Gets the tab icons.</summary>
-    public Dictionary<string, Icon> Icons
-    {
-        get
-        {
-            if (this.icons is not null)
-            {
-                return this.icons;
-            }
-
-            this.icons = this.gameContentHelper.Load<Dictionary<string, Icon>>(this.iconsPath);
-            foreach (var (id, icon) in this.icons)
-            {
-                icon.Id = id;
-            }
-
-            return this.icons;
-        }
-    }
-
-    /// <summary>Gets the texture used for UI elements.</summary>
-    public Texture2D UiTexture => this.uiTextures.Value.Value;
-
     private void OnAssetRequested(AssetRequestedEventArgs e)
     {
         if (e.Name.IsEquivalentTo(this.hslTexturePath))
         {
             e.LoadFromModFile<Texture2D>("assets/hue.png", AssetLoadPriority.Exclusive);
-            return;
-        }
-
-        if (e.Name.IsEquivalentTo(this.iconsPath))
-        {
-            e.LoadFrom(
-                () => new Dictionary<string, Icon>
-                {
-                    {
-                        this.ModId + "/Clothing", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(0, 0, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Cooking", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(16, 0, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Crops", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(32, 0, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Equipment", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(48, 0, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Fishing", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(64, 0, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Materials", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(0, 16, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Miscellaneous", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(16, 16, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Seeds", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(32, 16, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Config", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(48, 16, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Stash", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(64, 16, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Craft", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(0, 32, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Search", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(16, 32, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Copy", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(32, 32, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Save", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(48, 32, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Paste", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(64, 32, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/TransferUp", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(0, 48, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/TransferDown", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(16, 48, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/HSL", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(32, 48, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/Debug", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(48, 48, 16, 16),
-                        }
-                    },
-                    {
-                        this.ModId + "/NoStack", new Icon
-                        {
-                            Path = this.uiTextures.Value.Name.Name,
-                            Area = new Rectangle(0, 64, 16, 16),
-                        }
-                    },
-                },
-                AssetLoadPriority.Exclusive);
-
             return;
         }
 
@@ -336,6 +161,41 @@ internal sealed class AssetHandler : BaseService
         foreach (var dataType in e.Config.StorageOptions.Keys)
         {
             this.gameContentHelper.InvalidateCache($"Data/{dataType}");
+        }
+    }
+
+    private void OnGameLaunched(GameLaunchedEventArgs e)
+    {
+        var icons = new[]
+        {
+            "Clothing",
+            "Cooking",
+            "Crops",
+            "Equipment",
+            "Fishing",
+            "Materials",
+            "Miscellaneous",
+            "Seeds",
+            "Config",
+            "Stash",
+            "Craft",
+            "Search",
+            "Copy",
+            "Save",
+            "Paste",
+            "TransferUp",
+            "TransferDown",
+            "HSL",
+            "Debug",
+            "NoStack",
+        };
+
+        for (var index = 0; index < icons.Length; index++)
+        {
+            this.iconRegistry.AddIcon(
+                icons[index],
+                $"{this.ModId}/UI",
+                new Rectangle(16 * (index % 5), 16 * (int)(index / 5f), 16, 16));
         }
     }
 }

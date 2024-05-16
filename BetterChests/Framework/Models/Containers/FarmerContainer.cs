@@ -13,7 +13,8 @@ internal sealed class FarmerContainer : BaseContainer<Farmer>
     /// <summary>Initializes a new instance of the <see cref="FarmerContainer" /> class.</summary>
     /// <param name="farmer">The farmer whose inventory is holding the container.</param>
     public FarmerContainer(Farmer farmer)
-        : base(farmer) { }
+        : base(farmer) =>
+        this.InitOptions();
 
     /// <inheritdoc />
     public override int Capacity => this.Farmer.MaxItems;
@@ -63,5 +64,16 @@ internal sealed class FarmerContainer : BaseContainer<Farmer>
 
         this.Farmer.removeItemFromInventory(item);
         return true;
+    }
+
+    /// <inheritdoc />
+    protected override void InitOptions()
+    {
+        base.InitOptions();
+
+        if (string.IsNullOrWhiteSpace(this.StorageIcon))
+        {
+            this.StorageIcon = "StardewValley.Vanilla/Backpack";
+        }
     }
 }

@@ -16,7 +16,7 @@ internal sealed class BetterCraftingInventoryProvider : BaseService, IInventoryP
 
     /// <summary>Initializes a new instance of the <see cref="BetterCraftingInventoryProvider" /> class.</summary>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     public BetterCraftingInventoryProvider(ContainerHandler containerHandler, ILog log, IManifest manifest)
         : base(log, manifest) =>

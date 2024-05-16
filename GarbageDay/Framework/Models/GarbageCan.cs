@@ -32,7 +32,7 @@ internal sealed class GarbageCan
     private ModDataDictionary ModData => this.chest.modData;
 
     /// <summary>Adds an item to the garbage can determined by luck and mirroring vanilla chances.</summary>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="overrideItem">Manually override the item.</param>
     public void AddLoot(ILog log, Item? overrideItem = null)
     {

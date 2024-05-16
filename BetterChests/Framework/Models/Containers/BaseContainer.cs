@@ -590,7 +590,7 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     }
 
     /// <summary>Initialize the individual mod data storage options for this container.</summary>
-    protected void InitOptions()
+    protected virtual void InitOptions()
     {
         var modDataOptions = new ModDataStorageOptions(this.ModData);
         this.AddOptions(StorageOption.Individual, () => modDataOptions);

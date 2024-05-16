@@ -5,9 +5,15 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewMods.Common.Interfaces;
 using StardewValley.Menus;
 
+// TODO: Add frame and scrolling support to BaseMenu
+
 /// <summary>Base menu.</summary>
 internal abstract class BaseMenu : IClickableMenu
 {
+    private readonly List<IClickableMenu> subMenus = [];
+
+    private string? hoverText;
+
     /// <summary>Initializes a new instance of the <see cref="BaseMenu" /> class.</summary>
     /// <param name="x">The x-position of the menu.</param>
     /// <param name="y">The y-position of the menu.</param>
@@ -19,7 +25,7 @@ internal abstract class BaseMenu : IClickableMenu
         int? y = null,
         int? width = null,
         int? height = null,
-        bool showUpperRightCloseButton = true)
+        bool showUpperRightCloseButton = false)
         : base(
             x ?? (Game1.uiViewport.Width / 2) - ((800 + (IClickableMenu.borderWidth * 2)) / 2),
             y ?? (Game1.uiViewport.Height / 2) - ((600 + (IClickableMenu.borderWidth * 2)) / 2),
@@ -29,7 +35,26 @@ internal abstract class BaseMenu : IClickableMenu
         this.allClickableComponents ??= [];
 
     /// <summary>Gets or sets the hover text.</summary>
-    public string? HoverText { get; set; }
+    public string? HoverText
+    {
+        get => this.Parent?.HoverText ?? this.hoverText;
+        set
+        {
+            if (this.Parent is not null)
+            {
+                this.Parent.HoverText = value;
+                return;
+            }
+
+            this.hoverText = value;
+        }
+    }
+
+    /// <summary>Gets the parent menu.</summary>
+    public BaseMenu? Parent { get; private set; }
+
+    /// <summary>Gets the sub menus.</summary>
+    protected IEnumerable<IClickableMenu> SubMenus => this.subMenus;
 
     /// <inheritdoc />
     public sealed override void draw(SpriteBatch b) => this.draw(b, -1);
@@ -40,7 +65,7 @@ internal abstract class BaseMenu : IClickableMenu
         this.HoverText = null;
 
         // Draw background
-        if (!Game1.options.showClearBackgrounds)
+        if (!Game1.options.showClearBackgrounds && this.Parent is null && this.GetParentMenu() is null)
         {
             b.Draw(
                 Game1.fadeToBlackRect,
@@ -48,25 +73,17 @@ internal abstract class BaseMenu : IClickableMenu
                 Color.Black * 0.5f);
         }
 
-        // Draw menu background
-        Game1.drawDialogueBox(
-            this.xPositionOnScreen,
-            this.yPositionOnScreen,
-            this.width,
-            this.height,
-            false,
-            true,
-            null,
-            false,
-            false,
-            red,
-            green,
-            blue);
+        // Draw under
+        this.DrawUnder(b);
 
-        this.upperRightCloseButton?.draw(b);
+        // Draw sub-menus
+        var point = Game1.getMousePosition(true);
+        foreach (var subMenu in this.SubMenus)
+        {
+            subMenu.draw(b, red, green, blue);
+        }
 
         // Draw components
-        var point = Game1.getMousePosition(true);
         foreach (var component in this.allClickableComponents)
         {
             switch (component)
@@ -92,6 +109,8 @@ internal abstract class BaseMenu : IClickableMenu
             }
         }
 
+        this.upperRightCloseButton?.draw(b);
+
         // Draw menu
         this.Draw(b);
 
@@ -106,20 +125,26 @@ internal abstract class BaseMenu : IClickableMenu
             IClickableMenu.drawToolTip(b, this.HoverText, string.Empty, null);
         }
 
+        // Draw over
+        this.DrawOver(b);
+
         // Draw cursor
         Game1.mouseCursorTransparency = 1f;
         this.drawMouse(b);
     }
-
-    /// <summary>Draw to the menu.</summary>
-    /// <param name="spriteBatch">The sprite batch to draw to.</param>
-    public abstract void Draw(SpriteBatch spriteBatch);
 
     /// <inheritdoc />
     public override void performHoverAction(int x, int y)
     {
         base.performHoverAction(x, y);
 
+        // Hover sub-menus
+        foreach (var subMenu in this.SubMenus)
+        {
+            subMenu.performHoverAction(x, y);
+        }
+
+        // Hover components
         foreach (var component in this.allClickableComponents)
         {
             switch (component)
@@ -139,6 +164,13 @@ internal abstract class BaseMenu : IClickableMenu
     {
         base.receiveLeftClick(x, y, playSound);
 
+        // Click sub-menus
+        foreach (var subMenu in this.SubMenus)
+        {
+            subMenu.receiveLeftClick(x, y, playSound);
+        }
+
+        // Click components
         foreach (var component in this.allClickableComponents)
         {
             switch (component)
@@ -153,6 +185,13 @@ internal abstract class BaseMenu : IClickableMenu
     {
         base.receiveRightClick(x, y, playSound);
 
+        // Click sub-menus
+        foreach (var subMenu in this.SubMenus)
+        {
+            subMenu.receiveRightClick(x, y, playSound);
+        }
+
+        // Click components
         foreach (var component in this.allClickableComponents)
         {
             switch (component)
@@ -161,4 +200,40 @@ internal abstract class BaseMenu : IClickableMenu
             }
         }
     }
+
+    /// <inheritdoc />
+    public override void receiveScrollWheelAction(int direction) => base.receiveScrollWheelAction(direction);
+
+    /// <summary>Adds a submenu to the current menu.</summary>
+    /// <param name="subMenu">The submenu to add.</param>
+    protected void AddSubMenu(IClickableMenu subMenu)
+    {
+        this.subMenus.Add(subMenu);
+        if (subMenu is BaseMenu baseMenu)
+        {
+            baseMenu.Parent = this;
+        }
+    }
+
+    /// <summary>Draw to the menu.</summary>
+    /// <param name="spriteBatch">The sprite batch to draw to.</param>
+    protected virtual void Draw(SpriteBatch spriteBatch) { }
+
+    /// <summary>Draw over the menu.</summary>
+    /// <param name="spriteBatch">The sprite batch to draw to.</param>
+    protected virtual void DrawOver(SpriteBatch spriteBatch) { }
+
+    /// <summary>Draw under the menu.</summary>
+    /// <param name="spriteBatch">The sprite batch to draw to.</param>
+    protected virtual void DrawUnder(SpriteBatch spriteBatch) =>
+        Game1.drawDialogueBox(
+            this.xPositionOnScreen,
+            this.yPositionOnScreen,
+            this.width,
+            this.height,
+            false,
+            true,
+            null,
+            false,
+            false);
 }

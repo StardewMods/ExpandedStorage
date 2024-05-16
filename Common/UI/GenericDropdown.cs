@@ -1,5 +1,7 @@
 namespace StardewMods.Common.UI;
 
+using StardewValley.Menus;
+
 /// <inheritdoc />
 internal class GenericDropdown<TKey> : BaseDropdown
     where TKey : struct
@@ -8,18 +10,16 @@ internal class GenericDropdown<TKey> : BaseDropdown
     private readonly List<(TKey Key, string Value)> items;
 
     /// <summary>Initializes a new instance of the <see cref="GenericDropdown{TKey}" /> class.</summary>
+    /// <param name="anchor">The component to anchor the dropdown to.</param>
     /// <param name="items">The list of values to display.</param>
-    /// <param name="x">The x-coordinate of the dropdown.</param>
-    /// <param name="y">The y-coordinate of the dropdown.</param>
     /// <param name="callback">The action to call when a value is selected.</param>
     /// <param name="maxItems">The maximum number of items to display at once.</param>
     public GenericDropdown(
+        ClickableComponent anchor,
         List<(TKey Key, string Value)> items,
-        int x,
-        int y,
         Action<TKey?> callback,
         int maxItems = int.MaxValue)
-        : base(items.Select(item => item.Value).ToList(), x, y, maxItems)
+        : base(anchor, items.Select(item => item.Value).ToList(), maxItems)
     {
         this.items = items;
         this.callback = callback;
@@ -32,11 +32,13 @@ internal class GenericDropdown<TKey> : BaseDropdown
         if (selectedIndex == -1)
         {
             this.callback(null);
+            this.exitThisMenuNoSound();
             return;
         }
 
         var (key, _) = this.items.ElementAtOrDefault(selectedIndex);
         this.callback(key);
+        this.exitThisMenuNoSound();
     }
 
     /// <inheritdoc />

@@ -23,6 +23,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
 
     private readonly AssetHandler assetHandler;
     private readonly PerScreen<HslPicker?> colorPicker = new();
+    private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly IPatchManager patchManager;
@@ -31,9 +32,10 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
     /// <summary>Initializes a new instance of the <see cref="HslColorPicker" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
@@ -41,6 +43,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
     public HslColorPicker(
         AssetHandler assetHandler,
         IEventManager eventManager,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
         ILog log,
@@ -52,6 +55,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
     {
         HslColorPicker.instance = this;
         this.assetHandler = assetHandler;
+        this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
         this.patchManager = patchManager;
@@ -225,7 +229,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
             {
                 HslColorPicker: FeatureOption.Enabled,
             } container
-            || !this.assetHandler.Icons.TryGetValue(this.ModId + "/HSL", out var icon))
+            || !this.iconRegistry.TryGetIcon("HSL", out var icon))
         {
             this.colorPicker.Value = null;
             return;
@@ -237,12 +241,13 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
         }
 
         itemGrabMenu.chestColorPicker.visible = false;
-        itemGrabMenu.colorPickerToggleButton.texture = this.assetHandler.UiTexture;
+        itemGrabMenu.colorPickerToggleButton.texture = icon.Texture;
         itemGrabMenu.colorPickerToggleButton.sourceRect = icon.Area;
 
         this.colorPicker.Value = new HslPicker(
             this.assetHandler,
             chestColorPicker,
+            this.iconRegistry,
             this.inputHelper,
             itemGrabMenu,
             this.reflectionHelper,

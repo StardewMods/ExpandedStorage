@@ -6,6 +6,9 @@ public interface IFauxCoreApi
     /// <summary>Gets an instance of the expression handler service.</summary>
     public IExpressionHandler ExpressionHandler { get; }
 
+    /// <summary>Gets an instance of the icon registry service.</summary>
+    public IIconRegistry IconRegistry { get; }
+
     /// <summary>Gets or sets the <see cref="IMonitor" /> instance.</summary>
     public IMonitor? Monitor { get; set; }
 

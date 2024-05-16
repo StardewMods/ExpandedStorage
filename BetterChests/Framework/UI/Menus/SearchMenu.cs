@@ -1,6 +1,5 @@
 namespace StardewMods.BetterChests.Framework.UI.Menus;
 
-using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
 using StardewMods.BetterChests.Framework.UI.Components;
@@ -19,7 +18,6 @@ internal class SearchMenu : BaseMenu
     private readonly VerticalScrollBar scrollExpressions;
     private readonly VerticalScrollBar scrollInventory;
     private readonly TextField textField;
-    private readonly UiManager uiManager;
 
     private List<Item> allItems = [];
     private int rowOffset;
@@ -33,10 +31,11 @@ internal class SearchMenu : BaseMenu
     public SearchMenu(IExpressionHandler expressionHandler, string searchText, UiManager uiManager)
     {
         this.expressionHandler = expressionHandler;
-        this.uiManager = uiManager;
         this.expressionEditor = new ExpressionEditor(
-            this,
             this.expressionHandler,
+            uiManager,
+            () => this.SearchText!,
+            value => this.SetSearchText(value),
             this.xPositionOnScreen + IClickableMenu.borderWidth,
             this.yPositionOnScreen
             + IClickableMenu.spaceToClearSideBorder
@@ -45,6 +44,8 @@ internal class SearchMenu : BaseMenu
             + 12,
             340,
             448);
+
+        this.AddSubMenu(this.expressionEditor);
 
         this.inventory = new InventoryMenu(
             this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2) + 428,
@@ -59,6 +60,7 @@ internal class SearchMenu : BaseMenu
             35,
             7);
 
+        this.AddSubMenu(this.inventory);
         this.SetSearchText(searchText, true);
 
         this.textField = new TextField(
@@ -116,59 +118,8 @@ internal class SearchMenu : BaseMenu
         this.allClickableComponents.Add(this.scrollInventory);
     }
 
-    /// <summary>Gets or sets the dropdown.</summary>
-    public BaseDropdown? DropDown { get; set; }
-
     /// <summary>Gets the current search text.</summary>
     public string SearchText { get; private set; }
-
-    /// <inheritdoc />
-    public override void Draw(SpriteBatch b)
-    {
-        this.drawHorizontalPartition(
-            b,
-            this.yPositionOnScreen + (IClickableMenu.borderWidth / 2) + Game1.tileSize + 40);
-
-        this.drawVerticalIntersectingPartition(
-            b,
-            this.xPositionOnScreen + (IClickableMenu.borderWidth / 2) + 400,
-            this.yPositionOnScreen + (IClickableMenu.borderWidth / 2) + Game1.tileSize + 40);
-
-        this.uiManager.DrawInFrame(
-            b,
-            SpriteSortMode.Deferred,
-            new Rectangle(
-                this.expressionEditor.xPositionOnScreen - 4,
-                this.expressionEditor.yPositionOnScreen - 8,
-                this.expressionEditor.width + 8,
-                this.expressionEditor.height + 16),
-            () =>
-            {
-                this.expressionEditor.draw(b);
-            });
-
-        this.inventory.draw(b);
-
-        if (this.GetChildMenu() is not null)
-        {
-            return;
-        }
-
-        if (this.DropDown is not null)
-        {
-            this.DropDown.draw(b);
-            this.HoverText = null;
-        }
-        else if (string.IsNullOrWhiteSpace(this.HoverText))
-        {
-            var (mouseX, mouseY) = Game1.getMousePosition(true);
-            var item = this.inventory.hover(mouseX, mouseY, null);
-            if (item is not null)
-            {
-                IClickableMenu.drawToolTip(b, this.inventory.descriptionText, this.inventory.descriptionTitle, item);
-            }
-        }
-    }
 
     /// <inheritdoc />
     public override void leftClickHeld(int x, int y)
@@ -187,13 +138,6 @@ internal class SearchMenu : BaseMenu
     }
 
     /// <inheritdoc />
-    public override void performHoverAction(int x, int y)
-    {
-        base.performHoverAction(x, y);
-        this.expressionEditor.performHoverAction(x, y);
-    }
-
-    /// <inheritdoc />
     public override void receiveKeyPress(Keys key)
     {
         if (key is Keys.Escape && this.readyToClose())
@@ -208,42 +152,9 @@ internal class SearchMenu : BaseMenu
     }
 
     /// <inheritdoc />
-    public override void receiveLeftClick(int x, int y, bool playSound = true)
-    {
-        if (this.DropDown is not null)
-        {
-            this.DropDown.receiveLeftClick(x, y, playSound);
-            return;
-        }
-
-        base.receiveLeftClick(x, y, playSound);
-        this.expressionEditor.receiveLeftClick(x, y);
-    }
-
-    /// <inheritdoc />
-    public override void receiveRightClick(int x, int y, bool playSound = true)
-    {
-        if (this.DropDown is not null)
-        {
-            this.DropDown.receiveRightClick(x, y, playSound);
-            return;
-        }
-
-        base.receiveRightClick(x, y, playSound);
-        this.textField.Selected = false;
-        this.expressionEditor.receiveRightClick(x, y);
-    }
-
-    /// <inheritdoc />
     public override void receiveScrollWheelAction(int direction)
     {
         var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (this.DropDown is not null)
-        {
-            this.DropDown.receiveScrollWheelAction(direction);
-            return;
-        }
-
         if (this.expressionEditor.isWithinBounds(mouseX, mouseY))
         {
             this.scrollExpressions.Scroll(direction);
@@ -264,20 +175,37 @@ internal class SearchMenu : BaseMenu
         this.scrollInventory.UnClick(x, y);
     }
 
-    /// <summary>Updates the search text without parsing.</summary>
-    /// <param name="value">The new search text value.</param>
-    /// <param name="parse">Indicates whether to parse the text.</param>
-    [MemberNotNull(nameof(SearchMenu.SearchText))]
-    public void SetSearchText(string value, bool parse = false)
+    /// <inheritdoc />
+    protected override void Draw(SpriteBatch spriteBatch)
     {
-        this.SearchText = value;
-        if (parse)
+        this.drawHorizontalPartition(
+            spriteBatch,
+            this.yPositionOnScreen + (IClickableMenu.borderWidth / 2) + Game1.tileSize + 40);
+
+        this.drawVerticalIntersectingPartition(
+            spriteBatch,
+            this.xPositionOnScreen + (IClickableMenu.borderWidth / 2) + 400,
+            this.yPositionOnScreen + (IClickableMenu.borderWidth / 2) + Game1.tileSize + 40);
+    }
+
+    /// <inheritdoc />
+    protected override void DrawOver(SpriteBatch spriteBatch)
+    {
+        if (!string.IsNullOrWhiteSpace(this.HoverText))
         {
-            this.ParseSearch();
+            return;
         }
 
-        this.textField?.Reset();
-        this.RefreshItems();
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        var item = this.inventory.hover(mouseX, mouseY, null);
+        if (item is not null)
+        {
+            IClickableMenu.drawToolTip(
+                spriteBatch,
+                this.inventory.descriptionText,
+                this.inventory.descriptionTitle,
+                item);
+        }
     }
 
     /// <summary>Get the items that should be displayed in the menu.</summary>
@@ -292,17 +220,23 @@ internal class SearchMenu : BaseMenu
     /// <returns>A value indicating whether the item should be highlighted.</returns>
     protected virtual bool HighlightMethod(Item item) => InventoryMenu.highlightAllItems(item);
 
-    private void ParseSearch()
+    /// <summary>Updates the search text without parsing.</summary>
+    /// <param name="value">The new search text value.</param>
+    /// <param name="parse">Indicates whether to parse the text.</param>
+    [MemberNotNull(nameof(SearchMenu.SearchText))]
+    protected void SetSearchText(string value, bool parse = false)
     {
-        this.searchExpression = this.expressionHandler.TryParseExpression(this.SearchText, out var expression)
-            ? expression
-            : null;
+        this.SearchText = value;
+        if (parse)
+        {
+            this.searchExpression = this.expressionHandler.TryParseExpression(this.SearchText, out var expression)
+                ? expression
+                : null;
 
-        this.expressionEditor.ReInitializeComponents(this.searchExpression);
-    }
+            this.expressionEditor.ReInitializeComponents(this.searchExpression);
+        }
 
-    private void RefreshItems()
-    {
+        this.textField?.Reset();
         this.allItems = this.GetItems();
         if (!this.allItems.Any())
         {

@@ -22,7 +22,7 @@ internal sealed class ContainerFactory : BaseService
     private readonly Dictionary<string, IStorageOptions> storageOptions = new();
 
     /// <summary>Initializes a new instance of the <see cref="ContainerFactory" /> class.</summary>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="proxyChestFactory">Dependency used for creating virtualized chests.</param>

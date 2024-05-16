@@ -1,24 +1,23 @@
 namespace StardewMods.BetterChests.Framework.UI.Components;
 
+using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.Common.Models;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Represents a component that allows the player to select a color using HSL sliders.</summary>
 internal sealed class HslPicker
 {
-    private static readonly PerScreen<HslColor> SavedColor = new(() => HslPicker.Transparent);
     private static readonly HslColor Transparent = new(0, 0, 0);
 
     private readonly Chest chest;
     private readonly ClickableComponent chestComponent;
     private readonly DiscreteColorPicker colorPicker;
-    private readonly Rectangle copyArea;
     private readonly ClickableTextureComponent copyComponent;
     private readonly IReflectedField<int> currentLidFrame;
     private readonly Rectangle defaultColorArea;
@@ -42,6 +41,7 @@ internal sealed class HslPicker
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="colorPicker">The vanilla color picker component.</param>
     /// <param name="menu">The menu that the color picker is attached to.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
@@ -50,6 +50,7 @@ internal sealed class HslPicker
     public HslPicker(
         AssetHandler assetHandler,
         DiscreteColorPicker colorPicker,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         ItemGrabMenu menu,
         IReflectionHelper reflectionHelper,
@@ -72,7 +73,8 @@ internal sealed class HslPicker
             InventoryMenu.BorderSide.Left => this.menu.xPositionOnScreen
                 - (2 * Game1.tileSize)
                 - (IClickableMenu.borderWidth / 2),
-            _ => this.menu.colorPickerToggleButton.bounds.Right + Game1.tileSize,
+            _ => Math.Max(this.menu.colorPickerToggleButton.bounds.Right, this.menu.okButton.bounds.Right)
+                + Game1.tileSize,
         };
 
         this.yPosition = this.menu.yPositionOnScreen - 56 + (IClickableMenu.borderWidth / 2);
@@ -100,11 +102,18 @@ internal sealed class HslPicker
                 + this.xPosition,
         };
 
-        this.copyArea = new Rectangle(this.xPosition + 30, this.yPosition - 4, 36, 36);
+        if (!iconRegistry.TryGetIcon("Copy", out var copyIcon))
+        {
+            throw new InvalidOperationException("The copy icon is missing.");
+        }
+
         this.copyComponent = new ClickableTextureComponent(
-            new Rectangle(this.xPosition + 34, this.yPosition + 2, 8, 8),
-            assetHandler.UiTexture,
-            new Rectangle(116, 4, 8, 8),
+            copyIcon.Id,
+            new Rectangle(this.xPosition + 30, this.yPosition - 4, 36, 36),
+            null,
+            I18n.Button_Copy_Name(),
+            copyIcon.Texture,
+            copyIcon.Area,
             3)
         {
             myID = (int)Math.Pow(this.yPosition + 2, 2) + this.xPosition + 34,
@@ -303,9 +312,9 @@ internal sealed class HslPicker
             return true;
         }
 
-        if (this.copyArea.Contains(mouseX, mouseY))
+        if (this.copyComponent.bounds.Contains(mouseX, mouseY))
         {
-            HslPicker.SavedColor.Value = this.CurrentColor;
+            DesktopClipboard.SetText(this.colorPicker.colorSelection.ToString(CultureInfo.InvariantCulture));
             return true;
         }
 
@@ -341,9 +350,18 @@ internal sealed class HslPicker
             return false;
         }
 
-        if (this.copyArea.Contains(mouseX, mouseY))
+        if (this.copyComponent.bounds.Contains(mouseX, mouseY))
         {
-            this.CurrentColor = HslPicker.SavedColor.Value;
+            var textColor = string.Empty;
+            DesktopClipboard.GetText(ref textColor);
+            if (!int.TryParse(textColor, out var selection))
+            {
+                return false;
+            }
+
+            var playerChoiceColor = DiscreteColorPicker.getColorFromSelection(selection);
+            this.CurrentColor = HslColor.FromColor(playerChoiceColor);
+            this.colorPicker.colorSelection = selection;
             this.UpdateColor();
             return true;
         }

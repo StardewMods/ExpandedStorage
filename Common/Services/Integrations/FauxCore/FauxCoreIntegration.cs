@@ -1,15 +1,17 @@
 namespace StardewMods.Common.Services.Integrations.FauxCore;
 
+using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 
 /// <inheritdoc cref="StardewMods.Common.Services.Integrations.ModIntegration{T}" />
 [SuppressMessage("StyleCop", "SA1124", Justification = "Reviewed")]
 internal sealed class FauxCoreIntegration
-    : ModIntegration<IFauxCoreApi>, IExpressionHandler, ILog, IPatchManager, IThemeHelper
+    : ModIntegration<IFauxCoreApi>, IExpressionHandler, IIconRegistry, ILog, IPatchManager, IThemeHelper
 {
     private const string ModUniqueId = "furyx639.FauxCore";
     private readonly Queue<Action> delayedActions = [];
     private readonly Lazy<IExpressionHandler>? expressionHandler;
+    private readonly Lazy<IIconRegistry>? iconRegistry;
     private readonly Lazy<ILog>? log;
     private readonly IMonitor monitor;
     private readonly Lazy<IPatchManager>? patchManager;
@@ -31,6 +33,7 @@ internal sealed class FauxCoreIntegration
         }
 
         this.expressionHandler = new Lazy<IExpressionHandler>(() => this.Api.ExpressionHandler);
+        this.iconRegistry = new Lazy<IIconRegistry>(() => this.Api.IconRegistry);
         this.log = new Lazy<ILog>(() => this.Api.Log);
         this.patchManager = new Lazy<IPatchManager>(() => this.Api.PatchManager);
         this.themeHelper = new Lazy<IThemeHelper>(() => this.Api.ThemeHelper);
@@ -51,8 +54,28 @@ internal sealed class FauxCoreIntegration
     }
 
     /// <inheritdoc />
-    public IManagedTexture AddAsset(string path, IRawTextureData data) =>
-        this.themeHelper?.Value.AddAsset(path, data) ?? throw new InvalidOperationException("ThemeHelper is not set.");
+    public void AddAsset(string path, IRawTextureData data)
+    {
+        if (this.initialized)
+        {
+            this.themeHelper?.Value.AddAsset(path, data);
+            return;
+        }
+
+        this.delayedActions.Enqueue(() => this.themeHelper?.Value.AddAsset(path, data));
+    }
+
+    /// <inheritdoc />
+    public void AddIcon(string id, string path, Rectangle area)
+    {
+        if (this.initialized)
+        {
+            this.iconRegistry?.Value.AddIcon(id, path, area);
+            return;
+        }
+
+        this.delayedActions.Enqueue(() => this.iconRegistry?.Value.AddIcon(id, path, area));
+    }
 
     /// <inheritdoc />
     public void Alert(string message, object?[]? args = null) => this.log?.Value.Alert(message, args);
@@ -62,6 +85,9 @@ internal sealed class FauxCoreIntegration
 
     /// <inheritdoc />
     public void Error(string message, object?[]? args = null) => this.log?.Value.Error(message, args);
+
+    /// <inheritdoc />
+    public IEnumerable<IIcon> GetIcons() => this.iconRegistry?.Value.GetIcons() ?? Enumerable.Empty<IIcon>();
 
     /// <inheritdoc />
     public void Info(string message, object?[]? args = null) => this.log?.Value.Info(message, args);
@@ -79,6 +105,15 @@ internal sealed class FauxCoreIntegration
     }
 
     /// <inheritdoc />
+    public IManagedTexture RequireAsset(string path) =>
+        this.themeHelper?.Value.RequireAsset(path)
+        ?? throw new InvalidOperationException($"Failed to load asset: {path}.");
+
+    /// <inheritdoc />
+    public IIcon RequireIcon(string id) =>
+        this.iconRegistry?.Value.RequireIcon(id) ?? throw new InvalidOperationException($"Failed to load icon: {id}.");
+
+    /// <inheritdoc />
     public void Trace(string message, object?[]? args = null) => this.log?.Value.Trace(message, args);
 
     /// <inheritdoc />
@@ -94,6 +129,25 @@ internal sealed class FauxCoreIntegration
         expression = null;
         return this.expressionHandler?.Value.TryCreateExpression(expressionType, out expression, term, expressions)
             ?? false;
+    }
+
+    /// <inheritdoc />
+    public bool TryGetAsset(string path, [NotNullWhen(true)] out IManagedTexture? texture)
+    {
+        if (this.themeHelper?.Value.TryGetAsset(path, out texture) == true)
+        {
+            return true;
+        }
+
+        texture = null;
+        return false;
+    }
+
+    /// <inheritdoc />
+    public bool TryGetIcon(string id, [NotNullWhen(true)] out IIcon? icon)
+    {
+        icon = null;
+        return this.iconRegistry?.Value.TryGetIcon(id, out icon) ?? false;
     }
 
     /// <inheritdoc />

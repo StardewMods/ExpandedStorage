@@ -19,6 +19,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
     private readonly AssetHandler assetHandler;
     private readonly ContainerFactory containerFactory;
     private readonly ContainerHandler containerHandler;
+    private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
@@ -28,9 +29,10 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
@@ -39,6 +41,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         ContainerFactory containerFactory,
         ContainerHandler containerHandler,
         IEventManager eventManager,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
         ILog log,
@@ -50,6 +53,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         this.assetHandler = assetHandler;
         this.containerFactory = containerFactory;
         this.containerHandler = containerHandler;
+        this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
@@ -67,17 +71,14 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         this.Events.Subscribe<RenderingActiveMenuEventArgs>(this.OnRenderingActiveMenu);
 
         // Integrations
-        if (this.toolbarIconsIntegration.IsLoaded
-            && this.assetHandler.Icons.TryGetValue(this.ModId + "/Stash", out var icon))
+        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon("Stash", out var icon))
         {
-            this.toolbarIconsIntegration.Api.AddToolbarIcon(
-                this.Id,
-                icon.Path,
-                icon.Area,
-                I18n.Button_StashToChest_Name());
-
-            this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
+            return;
         }
+
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(this.Id, icon.Path, icon.Area, I18n.Button_StashToChest_Name());
+
+        this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
     }
 
     /// <inheritdoc />
@@ -212,12 +213,12 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
             : I18n.Button_TransferUp_Name();
 
         var iconId = this.Config.Controls.TransferItemsReverse.IsDown() ? "TransferDown" : "TransferUp";
-        if (!this.assetHandler.Icons.TryGetValue(this.ModId + "/" + iconId, out var icon))
+        if (!this.iconRegistry.TryGetIcon(iconId, out var icon))
         {
             return;
         }
 
-        itemGrabMenu.fillStacksButton.texture = this.assetHandler.UiTexture;
+        itemGrabMenu.fillStacksButton.texture = icon.Texture;
         itemGrabMenu.fillStacksButton.sourceRect = icon.Area;
     }
 

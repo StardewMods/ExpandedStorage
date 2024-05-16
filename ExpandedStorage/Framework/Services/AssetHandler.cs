@@ -20,7 +20,7 @@ internal sealed class AssetHandler : BaseService
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     public AssetHandler(IEventManager eventManager, ILog log, IManifest manifest)
         : base(log, manifest)

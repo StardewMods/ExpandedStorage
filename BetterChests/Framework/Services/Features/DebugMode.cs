@@ -14,32 +14,32 @@ using StardewMods.Common.Services.Integrations.ToolbarIcons;
 /// <summary>Feature used for debugging purposes.</summary>
 internal sealed class DebugMode : BaseFeature<DebugMode>
 {
-    private readonly AssetHandler assetHandler;
     private readonly ContainerFactory containerFactory;
     private readonly ContainerHandler containerHandler;
     private readonly IExpressionHandler expressionHandler;
+    private readonly IIconRegistry iconRegistry;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
     private readonly UiManager uiManager;
 
     /// <summary>Initializes a new instance of the <see cref="DebugMode" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="commandHelper">Dependency used for handling console commands.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     /// <param name="uiManager">Dependency used for managing ui.</param>
     public DebugMode(
-        AssetHandler assetHandler,
         ICommandHelper commandHelper,
         ContainerFactory containerFactory,
         ContainerHandler containerHandler,
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
+        IIconRegistry iconRegistry,
         ILog log,
         IManifest manifest,
         IModConfig modConfig,
@@ -48,10 +48,10 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         : base(eventManager, log, manifest, modConfig)
     {
         // Init
-        this.assetHandler = assetHandler;
         this.containerFactory = containerFactory;
         this.containerHandler = containerHandler;
         this.expressionHandler = expressionHandler;
+        this.iconRegistry = iconRegistry;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
         this.uiManager = uiManager;
 
@@ -90,23 +90,26 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     /// <inheritdoc />
     protected override void Activate()
     {
-        if (this.toolbarIconsIntegration.IsLoaded
-            && this.assetHandler.Icons.TryGetValue(this.ModId + "/Debug", out var icon))
+        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon("Debug", out var icon))
         {
-            this.toolbarIconsIntegration.Api.AddToolbarIcon(this.Id, icon.Path, icon.Area, I18n.Button_Debug_Name());
-
-            this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
+            return;
         }
+
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(this.Id, icon.Path, icon.Area, I18n.Button_Debug_Name());
+
+        this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
     }
 
     /// <inheritdoc />
     protected override void Deactivate()
     {
-        if (this.toolbarIconsIntegration.IsLoaded)
+        if (!this.toolbarIconsIntegration.IsLoaded)
         {
-            this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.Id);
-            this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
+            return;
         }
+
+        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.Id);
+        this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
     }
 
     private void OnIconPressed(IIconPressedEventArgs e)

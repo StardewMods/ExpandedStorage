@@ -16,6 +16,7 @@ using StardewMods.Common.Models;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.Common.UI;
 using StardewValley.Buildings;
 using StardewValley.Menus;
 using StardewValley.Objects;
@@ -38,8 +39,9 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
     /// <summary>Initializes a new instance of the <see cref="MenuHandler" /> class.</summary>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="modEvents">Dependency used for managing access to SMAPI events.</param>
@@ -47,6 +49,7 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
     public MenuHandler(
         ContainerFactory containerFactory,
         IEventManager eventManager,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
@@ -62,10 +65,10 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
         this.inputHelper = inputHelper;
 
         this.topMenu = new PerScreen<MenuManager>(
-            () => new MenuManager(eventManager, inputHelper, log, manifest, modConfig));
+            () => new MenuManager(eventManager, iconRegistry, inputHelper, log, manifest, this, modConfig));
 
         this.bottomMenu = new PerScreen<MenuManager>(
-            () => new MenuManager(eventManager, inputHelper, log, manifest, modConfig));
+            () => new MenuManager(eventManager, iconRegistry, inputHelper, log, manifest, this, modConfig));
 
         // Events
         eventManager.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
@@ -332,9 +335,19 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
         var cursorPos = e.Cursor.GetScaledScreenPixels().ToPoint();
+        var baseMenu = Game1.activeClickableMenu?.GetChildMenu() as BaseMenu;
         switch (e.Button)
         {
             case SButton.MouseLeft or SButton.ControllerA:
+                // Child menus
+                if (baseMenu is not null)
+                {
+                    baseMenu.receiveLeftClick(cursorPos.X, cursorPos.Y);
+                    this.inputHelper.Suppress(e.Button);
+                    return;
+                }
+
+                // Components
                 if (this
                     .components.Value.Where(c => c.Contains(e.Cursor.GetScaledScreenPixels()))
                     .Any(component => component.TryLeftClick(cursorPos.X, cursorPos.Y)))
@@ -345,6 +358,15 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
                 return;
 
             case SButton.MouseRight or SButton.ControllerB:
+                // Child menus
+                if (baseMenu is not null)
+                {
+                    baseMenu.receiveLeftClick(cursorPos.X, cursorPos.Y);
+                    this.inputHelper.Suppress(e.Button);
+                    return;
+                }
+
+                // Components
                 if (this
                     .components.Value.Where(c => c.Contains(e.Cursor.GetScaledScreenPixels()))
                     .Any(component => component.TryRightClick(cursorPos.X, cursorPos.Y)))
@@ -609,23 +631,63 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
 
         while (++depth != 2)
         {
-            this.CurrentMenu = Game1.activeClickableMenu switch
-            {
-                { } menuWithChild when menuWithChild.GetChildMenu() is
-                    { } childMenu => childMenu,
-                GameMenu gameMenu => gameMenu.GetCurrentPage(),
-                _ => Game1.activeClickableMenu,
-            };
+            var newMenu = Game1.activeClickableMenu;
+            IClickableMenu? parent = null;
+            IClickableMenu? top = null;
+            IClickableMenu? bottom = null;
 
-            var (parent, top, bottom) = this.CurrentMenu switch
+            // Navigate down menus
+            while (newMenu?.GetChildMenu() is not null)
             {
-                ItemGrabMenu menu => (menu, menu.showReceivingMenu ? menu.ItemsToGrabMenu : null, menu.inventory),
-                InventoryPage menu => (menu, null, menu.inventory),
-                ShopMenu menu => (menu, menu, menu.inventory),
-                _ => (default(IClickableMenu), default(IClickableMenu), default(IClickableMenu)),
-            };
+                newMenu = newMenu.GetChildMenu();
+            }
 
-            if (parent is null)
+            // Navigate up/sideways
+            while (true)
+            {
+                switch (newMenu)
+                {
+                    case ItemGrabMenu menu:
+                        parent = menu;
+                        top = menu.showReceivingMenu ? menu.ItemsToGrabMenu : null;
+                        bottom = menu.inventory;
+                        break;
+                    case GameMenu menu:
+                        newMenu = menu.GetCurrentPage();
+                        continue;
+                    case InventoryPage menu:
+                        parent = menu;
+                        top = null;
+                        bottom = menu.inventory;
+                        break;
+                    case ShopMenu menu:
+                        parent = menu;
+                        top = menu;
+                        bottom = menu.inventory;
+                        break;
+                    case BaseMenu
+                    {
+                        Parent:
+                        { } baseMenuParent,
+                    }:
+                        newMenu = baseMenuParent;
+                        continue;
+                    case not null when newMenu.GetParentMenu() is
+                        { } parentMenu:
+                        newMenu = parentMenu;
+                        continue;
+                }
+
+                break;
+            }
+
+            if (this.CurrentMenu == newMenu)
+            {
+                return;
+            }
+
+            this.CurrentMenu = newMenu;
+            if (this.CurrentMenu is null || parent is null)
             {
                 this.Top.Container = null;
                 this.Bottom.Container = null;

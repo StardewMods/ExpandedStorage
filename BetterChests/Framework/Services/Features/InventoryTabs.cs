@@ -13,31 +13,31 @@ using StardewValley.Menus;
 /// <summary>Adds inventory tabs to the side of the <see cref="ItemGrabMenu" />.</summary>
 internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
 {
-    private readonly AssetHandler assetHandler;
     private readonly IExpressionHandler expressionHandler;
+    private readonly IIconRegistry iconRegistry;
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<List<TabIcon>> tabs = new(() => []);
 
     /// <summary>Initializes a new instance of the <see cref="InventoryTabs" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     public InventoryTabs(
-        AssetHandler assetHandler,
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
+        IIconRegistry iconRegistry,
         ILog log,
         IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig)
         : base(eventManager, log, manifest, modConfig)
     {
-        this.assetHandler = assetHandler;
         this.expressionHandler = expressionHandler;
+        this.iconRegistry = iconRegistry;
         this.menuHandler = menuHandler;
     }
 
@@ -86,7 +86,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
 
         foreach (var tabData in this.Config.InventoryTabList)
         {
-            if (!this.assetHandler.Icons.TryGetValue(tabData.Icon, out var icon))
+            if (!this.iconRegistry.TryGetIcon(tabData.Icon, out var icon))
             {
                 continue;
             }

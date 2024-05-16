@@ -15,7 +15,7 @@ internal abstract class BaseFeature<TFeature> : GenericBaseService<TFeature>, IF
 
     /// <summary>Initializes a new instance of the <see cref="BaseFeature{TFeature}" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     protected BaseFeature(IEventManager eventManager, ILog log, IManifest manifest, IModConfig modConfig)

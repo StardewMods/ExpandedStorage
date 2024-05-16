@@ -1,5 +1,7 @@
 namespace StardewMods.Common.UI;
 
+using StardewValley.Menus;
+
 /// <inheritdoc />
 internal sealed class Dropdown : BaseDropdown
 {
@@ -7,18 +9,16 @@ internal sealed class Dropdown : BaseDropdown
     private readonly List<(string Key, string Value)> items;
 
     /// <summary>Initializes a new instance of the <see cref="Dropdown" /> class.</summary>
+    /// <param name="anchor">The component to anchor the dropdown to.</param>
     /// <param name="items">The list of values to display.</param>
-    /// <param name="x">The x-coordinate of the dropdown.</param>
-    /// <param name="y">The y-coordinate of the dropdown.</param>
     /// <param name="callback">The action to call when a value is selected.</param>
     /// <param name="maxItems">The maximum number of items to display at once.</param>
     public Dropdown(
+        ClickableComponent anchor,
         List<(string Key, string Value)> items,
-        int x,
-        int y,
         Action<string?> callback,
         int maxItems = int.MaxValue)
-        : base(items.Select(item => item.Value).ToList(), x, y, maxItems)
+        : base(anchor, items.Select(item => item.Value).ToList(), maxItems)
     {
         this.items = items;
         this.callback = callback;
@@ -31,11 +31,13 @@ internal sealed class Dropdown : BaseDropdown
         if (selectedIndex == -1)
         {
             this.callback(null);
+            this.exitThisMenuNoSound();
             return;
         }
 
         var (key, _) = this.items.ElementAtOrDefault(selectedIndex);
         this.callback(key);
+        this.exitThisMenuNoSound();
     }
 
     /// <inheritdoc />

@@ -6,7 +6,6 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
-using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Services.Factory;
@@ -21,33 +20,33 @@ using StardewValley.Menus;
 /// <summary>Access chests remotely.</summary>
 internal sealed class AccessChest : BaseFeature<AccessChest>
 {
-    private readonly AssetHandler assetHandler;
     private readonly PerScreen<Rectangle> bounds = new(() => Rectangle.Empty);
     private readonly ContainerFactory containerFactory;
+    private readonly PerScreen<ClickableComponent?> currentContainer = new();
     private readonly PerScreen<List<IStorageContainer>> currentContainers = new(() => []);
-    private readonly PerScreen<ClickableComponent?> dropDown = new();
+    private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<bool> isActive = new();
     private readonly PerScreen<List<ClickableComponent>> items = new(() => []);
-    private readonly PerScreen<ClickableTextureComponent> leftArrow;
+    private readonly PerScreen<ClickableTextureComponent?> leftArrow = new();
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<int> offset = new();
-    private readonly PerScreen<ClickableTextureComponent> rightArrow;
+    private readonly PerScreen<ClickableTextureComponent?> rightArrow = new();
     private readonly PerScreen<IExpression?> searchExpression = new();
 
     /// <summary>Initializes a new instance of the <see cref="AccessChest" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     public AccessChest(
-        AssetHandler assetHandler,
         ContainerFactory containerFactory,
         IEventManager eventManager,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
         ILog log,
@@ -55,28 +54,22 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         IModConfig modConfig)
         : base(eventManager, log, manifest, modConfig)
     {
-        this.assetHandler = assetHandler;
         this.containerFactory = containerFactory;
+        this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
-
-        this.leftArrow = new PerScreen<ClickableTextureComponent>(
-            () => new ClickableTextureComponent(
-                new Rectangle(0, 0, 11 * Game1.pixelZoom, 12 * Game1.pixelZoom),
-                Game1.mouseCursors,
-                new Rectangle(352, 495, 11, 12),
-                Game1.pixelZoom) { myID = 5318007 });
-
-        this.rightArrow = new PerScreen<ClickableTextureComponent>(
-            () => new ClickableTextureComponent(
-                new Rectangle(0, 0, 11 * Game1.pixelZoom, 12 * Game1.pixelZoom),
-                Game1.mouseCursors,
-                new Rectangle(365, 495, 11, 12),
-                Game1.pixelZoom) { myID = 5318006 });
     }
 
     /// <inheritdoc />
     public override bool ShouldBeActive => this.Config.DefaultOptions.AccessChest != RangeOption.Disabled;
+
+    private ClickableTextureComponent LeftArrow =>
+        this.leftArrow.Value ??=
+            this.iconRegistry.RequireIcon("SDV.Vanilla/LeftArrow").GetComponent(ComponentStyle.Transparent);
+
+    private ClickableTextureComponent RightArrow =>
+        this.rightArrow.Value ??=
+            this.iconRegistry.RequireIcon("SDV.Vanilla/RightArrow").GetComponent(ComponentStyle.Transparent);
 
     /// <inheritdoc />
     protected override void Activate()
@@ -106,17 +99,15 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
-        if (this.dropDown.Value is null
+        if (this.currentContainer.Value is null
             || e.Button is not (SButton.MouseLeft or SButton.ControllerA)
-            || e.IsSuppressed(SButton.MouseLeft)
-            || e.IsSuppressed(SButton.ControllerA)
             || !this.menuHandler.TryGetFocus(this, out var focus))
         {
             return;
         }
 
         var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (this.dropDown.Value.containsPoint(mouseX, mouseY))
+        if (this.currentContainer.Value.containsPoint(mouseX, mouseY))
         {
             this.inputHelper.Suppress(e.Button);
             this.isActive.Value = !this.isActive.Value;
@@ -146,7 +137,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
 
         focus.Release();
         if (this.menuHandler.Top.Container is null) { }
-        else if (this.leftArrow.Value.containsPoint(mouseX, mouseY))
+        else if (this.LeftArrow.containsPoint(mouseX, mouseY))
         {
             this.inputHelper.Suppress(e.Button);
             this.isActive.Value = !this.isActive.Value;
@@ -160,7 +151,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             previousContainer?.ShowMenu();
             return;
         }
-        else if (this.rightArrow.Value.containsPoint(mouseX, mouseY))
+        else if (this.RightArrow.containsPoint(mouseX, mouseY))
         {
             this.inputHelper.Suppress(e.Button);
             this.isActive.Value = !this.isActive.Value;
@@ -203,7 +194,9 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             return;
         }
 
-        if (this.dropDown.Value is null || this.menuHandler.Top.Container is null || !this.menuHandler.CanFocus(this))
+        if (this.currentContainer.Value is null
+            || this.menuHandler.Top.Container is null
+            || !this.menuHandler.CanFocus(this))
         {
             return;
         }
@@ -240,7 +233,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         var top = this.menuHandler.Top;
         if (top.Container?.AccessChest is RangeOption.Disabled or null)
         {
-            this.dropDown.Value = null;
+            this.currentContainer.Value = null;
             return;
         }
 
@@ -251,16 +244,16 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         var x = Math.Max(IClickableMenu.borderWidth / 2, (Game1.uiViewport.Width / 2) - (Game1.tileSize * 10));
         var y = IClickableMenu.borderWidth / 2;
 
-        this.leftArrow.Value.bounds.X = x;
-        this.leftArrow.Value.bounds.Y = y + Game1.tileSize + 20;
-        this.leftArrow.Value.bounds.Y = y + 10;
+        this.LeftArrow.bounds.X = x;
+        this.LeftArrow.bounds.Y = y + Game1.tileSize + 20;
+        this.LeftArrow.bounds.Y = y + 10;
 
-        this.rightArrow.Value.bounds.X = x + (Game1.tileSize * 2);
-        this.rightArrow.Value.bounds.Y = y + Game1.tileSize + 20;
-        this.rightArrow.Value.bounds.Y = y + 10;
+        this.RightArrow.bounds.X = x + (Game1.tileSize * 2);
+        this.RightArrow.bounds.Y = y + Game1.tileSize + 20;
+        this.RightArrow.bounds.Y = y + 10;
 
         var (width, height) = Game1.smallFont.MeasureString(name);
-        this.dropDown.Value = new ClickableComponent(
+        this.currentContainer.Value = new ClickableComponent(
             new Rectangle(
                 x + (Game1.tileSize * 3),
                 y,
@@ -282,7 +275,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
 
     private void OnMouseWheelScrolled(MouseWheelScrolledEventArgs e)
     {
-        if (this.dropDown.Value is null || !this.isActive.Value)
+        if (this.currentContainer.Value is null || !this.isActive.Value)
         {
             return;
         }
@@ -312,7 +305,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
     [Priority(int.MinValue + 1)]
     private void OnRenderedActiveMenu(RenderedActiveMenuEventArgs e)
     {
-        if (this.dropDown.Value is null)
+        if (this.currentContainer.Value is null)
         {
             return;
         }
@@ -330,8 +323,8 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
                 SpriteText.drawString(
                     e.SpriteBatch,
                     textIndex,
-                    (this.leftArrow.Value.bounds.Left + this.rightArrow.Value.bounds.Left + Game1.tileSize - width) / 2,
-                    this.leftArrow.Value.bounds.Y - 4,
+                    (this.LeftArrow.bounds.Left + this.RightArrow.bounds.Left + Game1.tileSize - width) / 2,
+                    this.LeftArrow.bounds.Y - 4,
                     999999,
                     -1,
                     999999,
@@ -342,40 +335,41 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
                     string.Empty,
                     SpriteText.color_White);
 
-                this.leftArrow.Value.scale = this.leftArrow.Value.containsPoint(mouseX, mouseY)
-                    ? Math.Min(Game1.pixelZoom * 1.1f, this.leftArrow.Value.scale + 0.05f)
-                    : Math.Max(Game1.pixelZoom, this.leftArrow.Value.scale - 0.05f);
+                this.LeftArrow.scale = this.LeftArrow.containsPoint(mouseX, mouseY)
+                    ? Math.Min(Game1.pixelZoom * 1.1f, this.LeftArrow.scale + 0.05f)
+                    : Math.Max(Game1.pixelZoom, this.LeftArrow.scale - 0.05f);
 
-                this.rightArrow.Value.scale = this.rightArrow.Value.containsPoint(mouseX, mouseY)
-                    ? Math.Min(Game1.pixelZoom * 1.1f, this.rightArrow.Value.scale + 0.05f)
-                    : Math.Max(Game1.pixelZoom, this.rightArrow.Value.scale - 0.05f);
+                this.RightArrow.scale = this.RightArrow.containsPoint(mouseX, mouseY)
+                    ? Math.Min(Game1.pixelZoom * 1.1f, this.RightArrow.scale + 0.05f)
+                    : Math.Max(Game1.pixelZoom, this.RightArrow.scale - 0.05f);
 
-                this.leftArrow.Value.draw(e.SpriteBatch);
-                this.rightArrow.Value.draw(e.SpriteBatch);
+                this.LeftArrow.draw(e.SpriteBatch);
+                this.RightArrow.draw(e.SpriteBatch);
             }
         }
 
         // Draw current container icon
-        Icon? icon = null;
+        IIcon? icon = null;
         if (this.menuHandler.Top.Container is not null
-            && !string.IsNullOrWhiteSpace(this.menuHandler.Top.Container.StorageIcon))
+            && !string.IsNullOrWhiteSpace(this.menuHandler.Top.Container.StorageIcon)
+            && this.iconRegistry.TryGetIcon(this.menuHandler.Top.Container.StorageIcon, out var storageIcon))
         {
-            icon = this.assetHandler.Icons.GetValueOrDefault(this.menuHandler.Top.Container.StorageIcon);
+            icon = storageIcon;
         }
 
         // Draw current container name
         IClickableMenu.drawHoverText(
             e.SpriteBatch,
-            (icon is null ? string.Empty : "     ") + this.dropDown.Value.name,
+            (icon is null ? string.Empty : "     ") + this.currentContainer.Value.name,
             Game1.smallFont,
-            overrideX: this.dropDown.Value.bounds.X,
-            overrideY: this.dropDown.Value.bounds.Y);
+            overrideX: this.currentContainer.Value.bounds.X,
+            overrideY: this.currentContainer.Value.bounds.Y);
 
         if (icon is not null)
         {
             e.SpriteBatch.Draw(
                 Game1.content.Load<Texture2D>(icon.Path),
-                new Vector2(this.dropDown.Value.bounds.X, this.dropDown.Value.bounds.Y),
+                new Vector2(this.currentContainer.Value.bounds.X, this.currentContainer.Value.bounds.Y),
                 icon.Area,
                 Color.White,
                 0,
@@ -429,7 +423,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
 
             var xOffset = 0;
             if (!string.IsNullOrWhiteSpace(container.StorageIcon)
-                && this.assetHandler.Icons.TryGetValue(container.StorageIcon, out icon))
+                && this.iconRegistry.TryGetIcon(container.StorageIcon, out icon))
             {
                 xOffset = 32;
                 e.SpriteBatch.Draw(
@@ -472,7 +466,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
 
     private void OnSearchChanged(SearchChangedEventArgs e)
     {
-        if (this.dropDown.Value is not null)
+        if (this.currentContainer.Value is not null)
         {
             this.ReinitializeContainers();
         }
@@ -489,7 +483,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
     private void ReinitializeContainers()
     {
         var top = this.menuHandler.Top;
-        if (this.dropDown.Value is null || top.Container is null)
+        if (this.currentContainer.Value is null || top.Container is null)
         {
             return;
         }
@@ -514,7 +508,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             var textValue = container.ToString()!;
             var textBounds = Game1.smallFont.MeasureString(textValue).ToPoint();
             if (!string.IsNullOrWhiteSpace(container.StorageIcon)
-                && this.assetHandler.Icons.ContainsKey(container.StorageIcon))
+                && this.iconRegistry.TryGetIcon(container.StorageIcon, out _))
             {
                 textBounds.X += 32;
             }
@@ -524,8 +518,8 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         }
 
         this.bounds.Value = new Rectangle(
-            this.dropDown.Value.bounds.X,
-            this.dropDown.Value.bounds.Bottom,
+            this.currentContainer.Value.bounds.X,
+            this.currentContainer.Value.bounds.Bottom,
             maxWidth + 16,
             (maxHeight * Math.Min(10, this.currentContainers.Value.Count)) + 32);
 

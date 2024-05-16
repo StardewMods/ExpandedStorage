@@ -13,7 +13,7 @@ internal sealed class PatchManager : GenericBaseService<PatchManager>, IPatchMan
     private readonly Dictionary<string, List<ISavedPatch>> savedPatches = new();
 
     /// <summary>Initializes a new instance of the <see cref="PatchManager" /> class.</summary>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     public PatchManager(ILog log, IManifest manifest)
         : base(log, manifest) =>

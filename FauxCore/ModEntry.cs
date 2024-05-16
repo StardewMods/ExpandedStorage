@@ -3,6 +3,7 @@ namespace StardewMods.FauxCore;
 using SimpleInjector;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.FauxCore.Framework;
@@ -33,15 +34,20 @@ public sealed class ModEntry : Mod
         this.container.RegisterInstance(this.Helper.ModRegistry);
         this.container.RegisterInstance(this.Helper.Reflection);
         this.container.RegisterInstance(this.Helper.Translation);
-        this.container.RegisterInstance<Func<IModConfig>>(this.GetConfig);
+
+        this.container.RegisterSingleton<IAssetHandler, AssetHandler>();
         this.container.RegisterSingleton<CacheManager>();
         this.container.RegisterSingleton<IModConfig, ConfigManager>();
         this.container.RegisterSingleton<ConfigManager, ConfigManager>();
+        this.container.RegisterSingleton<ContentPatcherIntegration>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
         this.container.RegisterSingleton<IExpressionHandler, ExpressionHandler>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.container.RegisterSingleton<ILog, Log>();
+        this.container.RegisterSingleton<ThemeHelper>();
         this.container.RegisterSingleton<IThemeHelper, ThemeHelper>();
+
+        this.container.RegisterInstance<Func<IModConfig>>(this.GetConfig);
 
         // Verify
         this.container.Verify();
@@ -51,6 +57,7 @@ public sealed class ModEntry : Mod
     public override object GetApi(IModInfo mod) =>
         new FauxCoreApi(
             mod,
+            this.container.GetInstance<IAssetHandler>(),
             this.container.GetInstance<IExpressionHandler>(),
             this.container.GetInstance<Func<IModConfig>>(),
             this.container.GetInstance<IThemeHelper>());

@@ -24,7 +24,7 @@ internal sealed class ProxyChestFactory : GenericBaseService<ProxyChestFactory>
 
     /// <summary>Initializes a new instance of the <see cref="ProxyChestFactory" /> class.</summary>
     /// <param name="harmony">Dependency used to patch external code.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     public ProxyChestFactory(Harmony harmony, ILog log, IManifest manifest)
         : base(log, manifest)

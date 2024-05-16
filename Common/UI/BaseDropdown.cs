@@ -6,21 +6,17 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
 
 /// <summary>A dropdown for selecting a string from a list of values.</summary>
-internal abstract class BaseDropdown : IClickableMenu
+internal abstract class BaseDropdown : BaseMenu
 {
     private readonly Rectangle bounds;
-    private readonly List<ClickableComponent> components;
     private readonly List<string> items;
 
-    private int offset;
-
     /// <summary>Initializes a new instance of the <see cref="BaseDropdown" /> class.</summary>
+    /// <param name="anchor">The component to anchor the dropdown to.</param>
     /// <param name="items">The dropdown list items.</param>
-    /// <param name="x">The x-coordinate of the dropdown.</param>
-    /// <param name="y">The y-coordinate of the dropdown.</param>
     /// <param name="maxItems">The maximum number of items to display.</param>
-    protected BaseDropdown(List<string> items, int x, int y, int maxItems = int.MaxValue)
-        : base(x, y, 0, 0)
+    protected BaseDropdown(ClickableComponent anchor, IReadOnlyCollection<string> items, int maxItems = int.MaxValue)
+        : base(0, 0, 0, 0)
     {
         this.items = items.Where(item => item.Trim().Length >= 3).ToList();
         var textBounds = items.Select(item => Game1.smallFont.MeasureString(item).ToPoint()).ToList();
@@ -28,8 +24,21 @@ internal abstract class BaseDropdown : IClickableMenu
 
         this.width = textBounds.Max(textBound => textBound.X) + 16;
         this.height = textBounds.Take(maxItems).Sum(textBound => textBound.Y) + 16;
-        this.bounds = new Rectangle(x, y, this.width, this.height);
-        this.components = items
+
+        this.xPositionOnScreen = anchor.bounds.Left;
+        this.yPositionOnScreen = anchor.bounds.Bottom;
+        if (this.xPositionOnScreen + this.width > Game1.uiViewport.Width)
+        {
+            this.xPositionOnScreen = anchor.bounds.Right - this.width;
+        }
+
+        if (this.yPositionOnScreen + this.height > Game1.uiViewport.Height)
+        {
+            this.yPositionOnScreen = anchor.bounds.Top - this.height;
+        }
+
+        this.bounds = new Rectangle(this.xPositionOnScreen, this.yPositionOnScreen, this.width, this.height);
+        this.Components = items
             .Take(maxItems)
             .Select(
                 (_, index) => new ClickableComponent(
@@ -42,28 +51,40 @@ internal abstract class BaseDropdown : IClickableMenu
             .ToList();
     }
 
-    /// <inheritdoc />
-    public override void draw(SpriteBatch b)
-    {
-        // Draw background
-        IClickableMenu.drawTextureBox(
-            b,
-            Game1.mouseCursors,
-            OptionsDropDown.dropDownBGSource,
-            this.bounds.X,
-            this.bounds.Y,
-            this.bounds.Width,
-            this.bounds.Height,
-            Color.White,
-            Game1.pixelZoom,
-            false,
-            0.97f);
+    /// <summary>Gets the components.</summary>
+    protected List<ClickableComponent> Components { get; }
 
+    /// <summary>Gets the offset.</summary>
+    protected int Offset { get; private set; }
+
+    /// <inheritdoc />
+    public override void receiveScrollWheelAction(int direction)
+    {
+        // Scroll down
+        if (direction < 0)
+        {
+            this.Offset--;
+            Game1.playSound("shiny4");
+        }
+
+        // Scroll up
+        if (direction > 0)
+        {
+            this.Offset++;
+            Game1.playSound("shiny4");
+        }
+
+        this.Offset = Math.Min(Math.Max(this.Offset, 0), Math.Max(this.items.Count - this.Components.Count, 0));
+    }
+
+    /// <inheritdoc />
+    protected override void Draw(SpriteBatch b)
+    {
         // Draw items
         var (x, y) = Game1.getMousePosition(true);
-        foreach (var component in this.components)
+        foreach (var component in this.Components)
         {
-            var index = this.offset + int.Parse(component.name, CultureInfo.InvariantCulture);
+            var index = this.Offset + int.Parse(component.name, CultureInfo.InvariantCulture);
             var item = this.items.ElementAtOrDefault(index);
             if (string.IsNullOrWhiteSpace(item))
             {
@@ -88,24 +109,19 @@ internal abstract class BaseDropdown : IClickableMenu
     }
 
     /// <inheritdoc />
-    public override void receiveScrollWheelAction(int direction)
-    {
-        // Scroll down
-        if (direction < 0)
-        {
-            this.offset--;
-            Game1.playSound("shiny4");
-        }
-
-        // Scroll up
-        if (direction > 0)
-        {
-            this.offset++;
-            Game1.playSound("shiny4");
-        }
-
-        this.offset = Math.Min(Math.Max(this.offset, 0), Math.Max(this.items.Count - this.components.Count, 0));
-    }
+    protected override void DrawUnder(SpriteBatch b) =>
+        IClickableMenu.drawTextureBox(
+            b,
+            Game1.mouseCursors,
+            OptionsDropDown.dropDownBGSource,
+            this.bounds.X,
+            this.bounds.Y,
+            this.bounds.Width,
+            this.bounds.Height,
+            Color.White,
+            Game1.pixelZoom,
+            false,
+            0.97f);
 
     /// <summary>Performs a left click at the specified location and returns the result.</summary>
     /// <param name="x">The x-coordinate of the location to click.</param>
@@ -113,12 +129,12 @@ internal abstract class BaseDropdown : IClickableMenu
     /// <returns>Returns the index of the selected item, or -1 if an item was not clicked.</returns>
     protected int LeftClick(int x, int y)
     {
-        var component = this.components.FirstOrDefault(i => i.bounds.Contains(x, y));
+        var component = this.Components.FirstOrDefault(i => i.bounds.Contains(x, y));
         if (component is null)
         {
             return -1;
         }
 
-        return this.offset + int.Parse(component.name, CultureInfo.InvariantCulture);
+        return this.Offset + int.Parse(component.name, CultureInfo.InvariantCulture);
     }
 }

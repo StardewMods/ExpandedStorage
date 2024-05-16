@@ -53,7 +53,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<ContentPatcherIntegration>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
         this.container.RegisterSingleton<IExpressionHandler, FauxCoreIntegration>();
-        this.container.RegisterSingleton<FauxCoreIntegration>();
+        this.container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.container.RegisterSingleton<MenuHandler>();
         this.container.RegisterSingleton<Localized>();

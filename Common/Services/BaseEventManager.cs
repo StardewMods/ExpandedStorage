@@ -12,7 +12,7 @@ internal class BaseEventManager : BaseService, IEventManager
     private static readonly ReverseComparer<int> ReverseComparer = new();
 
     /// <summary>Initializes a new instance of the <see cref="BaseEventManager" /> class.</summary>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     public BaseEventManager(ILog log, IManifest manifest)
         : base(log, manifest) { }

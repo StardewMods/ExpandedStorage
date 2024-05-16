@@ -21,7 +21,7 @@ internal sealed class DispenseService : GenericBaseService<DispenseService>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
@@ -86,7 +86,7 @@ internal sealed class DispenseService : GenericBaseService<DispenseService>
 
         this.toolbarIconsIntegration.Api.AddToolbarIcon(
             this.UniqueId,
-            this.assetHandler.IconTexture.Name.BaseName,
+            this.assetHandler.Icon.Name.BaseName,
             new Rectangle(16, 0, 16, 16),
             I18n.Button_DispenseInputs_Name());
 

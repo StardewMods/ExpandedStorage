@@ -51,32 +51,6 @@ internal sealed class DebugMenu : BaseMenu
     }
 
     /// <inheritdoc />
-    public override void Draw(SpriteBatch spriteBatch)
-    {
-        var hoverText = string.Empty;
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-
-        for (var i = 0; i < this.items.Count; i++)
-        {
-            var item = this.items[i];
-            var area = this.areas[i];
-            spriteBatch.DrawString(Game1.smallFont, item, new Vector2(area.X, area.Y), Game1.textColor);
-            if (area.Contains(mouseX, mouseY))
-            {
-                hoverText = this.descriptions[i];
-            }
-        }
-
-        if (!string.IsNullOrWhiteSpace(hoverText))
-        {
-            IClickableMenu.drawHoverText(spriteBatch, hoverText, Game1.smallFont);
-        }
-
-        Game1.mouseCursorTransparency = 1f;
-        this.drawMouse(spriteBatch);
-    }
-
-    /// <inheritdoc />
     public override void receiveLeftClick(int x, int y, bool playSound = true)
     {
         for (var i = 0; i < this.items.Count; i++)
@@ -103,5 +77,31 @@ internal sealed class DebugMenu : BaseMenu
                 }
             }
         }
+    }
+
+    /// <inheritdoc />
+    protected override void Draw(SpriteBatch spriteBatch)
+    {
+        var hoverText = string.Empty;
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+
+        for (var i = 0; i < this.items.Count; i++)
+        {
+            var item = this.items[i];
+            var area = this.areas[i];
+            spriteBatch.DrawString(Game1.smallFont, item, new Vector2(area.X, area.Y), Game1.textColor);
+            if (area.Contains(mouseX, mouseY))
+            {
+                hoverText = this.descriptions[i];
+            }
+        }
+
+        if (!string.IsNullOrWhiteSpace(hoverText))
+        {
+            IClickableMenu.drawHoverText(spriteBatch, hoverText, Game1.smallFont);
+        }
+
+        Game1.mouseCursorTransparency = 1f;
+        this.drawMouse(spriteBatch);
     }
 }

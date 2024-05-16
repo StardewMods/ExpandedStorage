@@ -30,7 +30,7 @@ internal sealed class IntegrationManager : BaseService
 
     /// <summary>Initializes a new instance of the <see cref="IntegrationManager" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="customIntegrations">Integrations directly supported by the mod.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>

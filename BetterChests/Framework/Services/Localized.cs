@@ -15,7 +15,7 @@ internal sealed class Localized : BaseService
 
     /// <summary>Initializes a new instance of the <see cref="Localized" /> class.</summary>
     /// <param name="translations">Dependency used for accessing translations.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     public Localized(ILog log, IManifest manifest, ITranslationHelper translations)
         : base(log, manifest) =>

@@ -6,6 +6,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Models;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 /// <summary>Represents a component with an icon that expands into a label when hovered.</summary>
@@ -23,7 +24,7 @@ internal sealed class TabIcon : ICustomComponent
     /// <param name="y">The y-coordinate of the tab component.</param>
     /// <param name="icon">The tab icon.</param>
     /// <param name="tabData">The inventory tab data.</param>
-    public TabIcon(int x, int y, Icon icon, TabData tabData)
+    public TabIcon(int x, int y, IIcon icon, TabData tabData)
     {
         this.Component = new ClickableComponent(
             new Rectangle(x, y, Game1.tileSize, Game1.tileSize),
@@ -34,7 +35,7 @@ internal sealed class TabIcon : ICustomComponent
         this.origin = new Vector2(x, y);
         this.icon = new ClickableTextureComponent(
             new Rectangle(x, y, Game1.tileSize, Game1.tileSize),
-            Game1.content.Load<Texture2D>(icon.Path),
+            icon.Texture,
             icon.Area,
             Game1.pixelZoom);
 

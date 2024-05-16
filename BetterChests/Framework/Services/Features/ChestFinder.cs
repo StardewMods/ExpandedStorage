@@ -15,10 +15,10 @@ using StardewMods.Common.Services.Integrations.ToolbarIcons;
 /// <summary>Search for which chests have the item you're looking for.</summary>
 internal sealed class ChestFinder : BaseFeature<ChestFinder>
 {
-    private readonly AssetHandler assetHandler;
     private readonly ContainerFactory containerFactory;
     private readonly PerScreen<int> currentIndex = new();
     private readonly IExpressionHandler expressionHandler;
+    private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<List<Pointer>> pointers = new(() => []);
@@ -27,21 +27,21 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="ChestFinder" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public ChestFinder(
-        AssetHandler assetHandler,
         ContainerFactory containerFactory,
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
@@ -50,9 +50,9 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         ToolbarIconsIntegration toolbarIconsIntegration)
         : base(eventManager, log, manifest, modConfig)
     {
-        this.assetHandler = assetHandler;
         this.containerFactory = containerFactory;
         this.expressionHandler = expressionHandler;
+        this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
@@ -72,14 +72,12 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         this.Events.Subscribe<WarpedEventArgs>(this.OnWarped);
 
         // Integrations
-        if (!this.toolbarIconsIntegration.IsLoaded
-            || !this.assetHandler.Icons.TryGetValue(this.ModId + "/Search", out var icon))
+        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon("Search", out var icon))
         {
             return;
         }
 
         this.toolbarIconsIntegration.Api.AddToolbarIcon(this.Id, icon.Path, icon.Area, I18n.Button_FindChest_Name());
-
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
     }
 

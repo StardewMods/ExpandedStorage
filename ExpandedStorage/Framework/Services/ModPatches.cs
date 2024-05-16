@@ -32,7 +32,7 @@ internal sealed class ModPatches : BaseService
 
     /// <summary>Initializes a new instance of the <see cref="ModPatches" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="assetHandler">Dependency used to handle the objects which should be managed by Expanded Storages.</param>

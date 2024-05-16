@@ -37,11 +37,12 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
     };
 
     private bool initialize;
+    private IRawTextureData? mouseCursors;
 
     /// <summary>Initializes a new instance of the <see cref="ThemeHelper" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     public ThemeHelper(IEventManager eventManager, IGameContentHelper gameContentHelper, ILog log, IManifest manifest)
         : base(log, manifest)
@@ -53,27 +54,55 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
         eventManager.Subscribe<SaveLoadedEventArgs>(this.OnSaveLoaded);
     }
 
+    /// <summary>Gets the raw texture data for mouse cursors.</summary>
+    public IRawTextureData MouseCursors => this.mouseCursors ??= new VanillaTexture(Game1.mouseCursors);
+
     /// <inheritdoc />
-    public IManagedTexture AddAsset(string path, IRawTextureData data)
+    public void AddAsset(string path, IRawTextureData data)
     {
-        var managedTexture = new ManagedTexture(this.gameContentHelper, path, data);
-        if (!this.trackedAssets.TryAdd(managedTexture.Name, managedTexture))
+        var assetName = this.gameContentHelper.ParseAssetName(path);
+        if (this.trackedAssets.ContainsKey(assetName))
         {
-            this.Log.Trace("Error, conflicting key {0} found in ThemeHelper. Asset not added.", managedTexture.Name);
+            this.Log.Trace("Error, conflicting key {0} found in ThemeHelper. Asset not added.", assetName.Name);
         }
 
-        return managedTexture;
+        var managedTexture = new ManagedTexture(this.gameContentHelper, path, data);
+        this.trackedAssets.TryAdd(assetName, managedTexture);
+    }
+
+    /// <inheritdoc />
+    public IManagedTexture RequireAsset(string path)
+    {
+        if (this.TryGetAsset(path, out var texture))
+        {
+            return texture;
+        }
+
+        throw new KeyNotFoundException($"No asset found for path: {path}");
+    }
+
+    /// <inheritdoc />
+    public bool TryGetAsset(string path, [NotNullWhen(true)] out IManagedTexture? texture)
+    {
+        var assetName = this.gameContentHelper.ParseAssetName(path);
+        if (!this.trackedAssets.TryGetValue(assetName, out var managedTexture))
+        {
+            texture = null;
+            return false;
+        }
+
+        texture = managedTexture;
+        return true;
     }
 
     private void InitializePalette()
     {
         var changed = false;
-        var colors = new Color[Game1.mouseCursors.Width * Game1.mouseCursors.Height];
-        Game1.mouseCursors.GetData(colors);
+        this.mouseCursors = null;
         foreach (var (points, color) in this.vanillaPalette)
         {
             var sample = points
-                .Select(point => colors[point.X + (point.Y * Game1.mouseCursors.Width)])
+                .Select(point => this.MouseCursors.Data[point.X + (point.Y * this.MouseCursors.Width)])
                 .GroupBy(sample => sample)
                 .OrderByDescending(group => group.Count())
                 .First()
@@ -122,20 +151,23 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
         e.LoadFrom(
             () =>
             {
-                var rawTexture = managedTexture.RawData;
                 if (this.paletteSwap.Any())
                 {
-                    for (var index = 0; index < rawTexture.Data.Length; ++index)
+                    for (var index = 0; index < managedTexture.Data.Length; ++index)
                     {
-                        if (this.paletteSwap.TryGetValue(rawTexture.Data[index], out var newColor))
+                        if (this.paletteSwap.TryGetValue(managedTexture.RawData[index], out var newColor))
                         {
-                            rawTexture.Data[index] = newColor;
+                            managedTexture.Data[index] = newColor;
                         }
                     }
                 }
 
-                var texture = new Texture2D(Game1.spriteBatch.GraphicsDevice, rawTexture.Width, rawTexture.Height);
-                texture.SetData(rawTexture.Data);
+                var texture = new Texture2D(
+                    Game1.spriteBatch.GraphicsDevice,
+                    managedTexture.Width,
+                    managedTexture.Height);
+
+                texture.SetData(managedTexture.Data);
                 return texture;
             },
             AssetLoadPriority.Medium);

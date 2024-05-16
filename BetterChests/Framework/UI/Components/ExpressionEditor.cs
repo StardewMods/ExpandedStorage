@@ -5,16 +5,16 @@ using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Services;
-using StardewMods.BetterChests.Framework.UI.Menus;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Models;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI;
 using StardewValley.Menus;
 
 /// <summary>A sub-menu for editing the expression tree.</summary>
-internal sealed class ExpressionEditor : IClickableMenu
+internal sealed class ExpressionEditor : BaseMenu
 {
     private static readonly Color[] Colors =
     [
@@ -22,33 +22,42 @@ internal sealed class ExpressionEditor : IClickableMenu
     ];
 
     private readonly IExpressionHandler expressionHandler;
+    private readonly Func<string> getSearchText;
 
     private readonly List<(Color Color, ClickableComponent Component, IExpression? Expression, string Tooltip, Action?
         Action)> items = [];
 
-    private readonly SearchMenu parent;
+    private readonly Action<string> setSearchText;
+
+    private readonly UiManager uiManager;
 
     private IExpression? baseExpression;
     private int offsetY;
 
     /// <summary>Initializes a new instance of the <see cref="ExpressionEditor" /> class.</summary>
-    /// <param name="parent">The parent search menu.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
+    /// <param name="uiManager">Dependency used for managing ui.</param>
+    /// <param name="getSearchText">A function that gets the current search text.</param>
+    /// <param name="setSearchText">An action that sets the current search text.</param>
     /// <param name="xPosition">The x-position of the menu.</param>
     /// <param name="yPosition">The y-position of the menu.</param>
     /// <param name="width">The width of the menu.</param>
     /// <param name="height">The height of the menu.</param>
     public ExpressionEditor(
-        SearchMenu parent,
         IExpressionHandler expressionHandler,
+        UiManager uiManager,
+        Func<string> getSearchText,
+        Action<string> setSearchText,
         int xPosition,
         int yPosition,
         int width,
         int height)
         : base(xPosition, yPosition, width, height)
     {
-        this.parent = parent;
         this.expressionHandler = expressionHandler;
+        this.uiManager = uiManager;
+        this.getSearchText = getSearchText;
+        this.setSearchText = setSearchText;
     }
 
     /// <summary>Gets the maximum offset.</summary>
@@ -61,88 +70,10 @@ internal sealed class ExpressionEditor : IClickableMenu
         set => this.offsetY = Math.Min(this.MaxOffset, Math.Max(0, value));
     }
 
-    /// <inheritdoc />
-    public override void draw(SpriteBatch b) => this.draw(b, -1);
-
-    /// <inheritdoc />
-    public override void draw(SpriteBatch b, int red = -1, int green = -1, int blue = -1)
+    private string SearchText
     {
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        foreach (var (baseColor, component, expression, tooltip, _) in this.items)
-        {
-            var hover = component.containsPoint(mouseX, mouseY - this.OffsetY);
-            var color = hover && this.parent.DropDown is null && this.parent.GetChildMenu() is null
-                ? ExpressionEditor.Highlighted(baseColor)
-                : ExpressionEditor.Muted(baseColor);
-
-            switch (expression?.ExpressionType)
-            {
-                case ExpressionType.All:
-                case ExpressionType.Any:
-                case ExpressionType.Not:
-                    IClickableMenu.drawTextureBox(
-                        b,
-                        Game1.mouseCursors,
-                        new Rectangle(403, 373, 9, 9),
-                        component.bounds.X,
-                        component.bounds.Y - this.OffsetY,
-                        component.bounds.Width,
-                        component.bounds.Height,
-                        color,
-                        Game1.pixelZoom,
-                        false);
-
-                    continue;
-                case ExpressionType.Comparable: continue;
-            }
-
-            if (component is ClickableTextureComponent clickableTextureComponent)
-            {
-                if (hover)
-                {
-                    this.parent.HoverText ??= clickableTextureComponent.hoverText;
-                }
-
-                clickableTextureComponent.draw(b, Color.White, 1f, yOffset: -this.OffsetY);
-                continue;
-            }
-
-            if (hover && !string.IsNullOrWhiteSpace(tooltip))
-            {
-                this.parent.HoverText ??= tooltip;
-            }
-
-            if (component.label is not null)
-            {
-                IClickableMenu.drawTextureBox(
-                    b,
-                    Game1.mouseCursors,
-                    new Rectangle(432, 439, 9, 9),
-                    component.bounds.X,
-                    component.bounds.Y - this.OffsetY,
-                    component.bounds.Width,
-                    component.bounds.Height,
-                    color,
-                    Game1.pixelZoom,
-                    false);
-            }
-
-            if (string.IsNullOrWhiteSpace(component.label))
-            {
-                continue;
-            }
-
-            b.DrawString(
-                Game1.smallFont,
-                component.label,
-                new Vector2(component.bounds.X + 8, component.bounds.Y - this.OffsetY + 2),
-                Game1.textColor,
-                0f,
-                Vector2.Zero,
-                1f,
-                SpriteEffects.None,
-                1f);
-        }
+        get => this.getSearchText();
+        set => this.setSearchText(value);
     }
 
     /// <inheritdoc />
@@ -472,6 +403,97 @@ internal sealed class ExpressionEditor : IClickableMenu
         }
     }
 
+    /// <inheritdoc />
+    protected override void Draw(SpriteBatch spriteBatch)
+    {
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        this.uiManager.DrawInFrame(
+            spriteBatch,
+            SpriteSortMode.Deferred,
+            new Rectangle(this.xPositionOnScreen - 4, this.yPositionOnScreen - 8, this.width + 8, this.height + 16),
+            () =>
+            {
+                foreach (var (baseColor, component, expression, tooltip, _) in this.items)
+                {
+                    var hover = component.containsPoint(mouseX, mouseY - this.OffsetY);
+                    var color = hover && this.Parent!.GetChildMenu() is null
+                        ? ExpressionEditor.Highlighted(baseColor)
+                        : ExpressionEditor.Muted(baseColor);
+
+                    switch (expression?.ExpressionType)
+                    {
+                        case ExpressionType.All:
+                        case ExpressionType.Any:
+                        case ExpressionType.Not:
+                            IClickableMenu.drawTextureBox(
+                                spriteBatch,
+                                Game1.mouseCursors,
+                                new Rectangle(403, 373, 9, 9),
+                                component.bounds.X,
+                                component.bounds.Y - this.OffsetY,
+                                component.bounds.Width,
+                                component.bounds.Height,
+                                color,
+                                Game1.pixelZoom,
+                                false);
+
+                            continue;
+                        case ExpressionType.Comparable: continue;
+                    }
+
+                    if (component is ClickableTextureComponent clickableTextureComponent)
+                    {
+                        if (hover)
+                        {
+                            this.HoverText ??= clickableTextureComponent.hoverText;
+                        }
+
+                        clickableTextureComponent.draw(spriteBatch, Color.White, 1f, yOffset: -this.OffsetY);
+                        continue;
+                    }
+
+                    if (hover && !string.IsNullOrWhiteSpace(tooltip))
+                    {
+                        this.HoverText ??= tooltip;
+                    }
+
+                    if (component.label is not null)
+                    {
+                        IClickableMenu.drawTextureBox(
+                            spriteBatch,
+                            Game1.mouseCursors,
+                            new Rectangle(432, 439, 9, 9),
+                            component.bounds.X,
+                            component.bounds.Y - this.OffsetY,
+                            component.bounds.Width,
+                            component.bounds.Height,
+                            color,
+                            Game1.pixelZoom,
+                            false);
+                    }
+
+                    if (string.IsNullOrWhiteSpace(component.label))
+                    {
+                        continue;
+                    }
+
+                    spriteBatch.DrawString(
+                        Game1.smallFont,
+                        component.label,
+                        new Vector2(component.bounds.X + 8, component.bounds.Y - this.OffsetY + 2),
+                        Game1.textColor,
+                        0f,
+                        Vector2.Zero,
+                        1f,
+                        SpriteEffects.None,
+                        1f);
+                }
+            });
+    }
+
+    /// <inheritdoc />
+    protected override void DrawUnder(SpriteBatch b) { }
+
     private static Color Highlighted(Color color) => Color.Lerp(color, Color.White, 0.5f);
 
     private static Color Muted(Color color)
@@ -496,7 +518,7 @@ internal sealed class ExpressionEditor : IClickableMenu
 
         var newChildren = GetChildren().ToImmutableList();
         toAddTo.Expressions = newChildren;
-        this.parent.SetSearchText(this.baseExpression.Text);
+        this.SearchText = this.baseExpression.Text;
         this.ReInitializeComponents(this.baseExpression);
         return;
 
@@ -511,16 +533,21 @@ internal sealed class ExpressionEditor : IClickableMenu
         }
     }
 
-    private void ChangeAttribute(IExpression toChange, ItemAttribute attribute)
+    private void ChangeAttribute(IExpression toChange, ItemAttribute? attribute)
     {
+        if (attribute is null)
+        {
+            return;
+        }
+
         var dynamicTerm = toChange.Expressions.ElementAtOrDefault(0);
         if (this.baseExpression is null || dynamicTerm?.ExpressionType is not ExpressionType.Dynamic)
         {
             return;
         }
 
-        dynamicTerm.Term = attribute.ToStringFast();
-        this.parent.SetSearchText(this.baseExpression.Text);
+        dynamicTerm.Term = ((ItemAttribute)attribute).ToStringFast();
+        this.SearchText = this.baseExpression.Text;
         this.ReInitializeComponents(this.baseExpression);
     }
 
@@ -534,7 +561,7 @@ internal sealed class ExpressionEditor : IClickableMenu
         }
 
         staticTerm.Term = term;
-        this.parent.SetSearchText(this.baseExpression.Text);
+        this.SearchText = this.baseExpression.Text;
         this.ReInitializeComponents(this.baseExpression);
     }
 
@@ -547,7 +574,7 @@ internal sealed class ExpressionEditor : IClickableMenu
 
         var newChildren = GetChildren().ToImmutableList();
         toRemove.Parent.Expressions = newChildren;
-        this.parent.SetSearchText(this.baseExpression.Text);
+        this.SearchText = this.baseExpression.Text;
         this.ReInitializeComponents(this.baseExpression);
         return;
 
@@ -564,19 +591,11 @@ internal sealed class ExpressionEditor : IClickableMenu
     }
 
     private void ShowDropdown(IExpression expression, ClickableComponent component) =>
-        this.parent.DropDown = new GenericDropdown<ItemAttribute>(
-            ItemAttributeExtensions.GetValues().Select(i => (i, i.ToStringFast())).ToList(),
-            component.bounds.X,
-            component.bounds.Bottom - this.OffsetY,
-            value =>
-            {
-                if (value is not null)
-                {
-                    this.ChangeAttribute(expression, (ItemAttribute)value);
-                }
-
-                this.parent.DropDown = null;
-            });
+        this.Parent?.SetChildMenu(
+            new GenericDropdown<ItemAttribute>(
+                component,
+                ItemAttributeExtensions.GetValues().Select(i => (i, i.ToStringFast())).ToList(),
+                value => this.ChangeAttribute(expression, value)));
 
     private void ShowPopup(IExpression expression, ClickableComponent component)
     {
@@ -598,7 +617,7 @@ internal sealed class ExpressionEditor : IClickableMenu
             ItemAttribute.Tags => ItemRepository.Tags,
         };
 
-        this.parent.SetChildMenu(
+        this.Parent?.SetChildMenu(
             new PopupList(
                 component.label ?? string.Empty,
                 popupItems.ToList(),
@@ -623,7 +642,7 @@ internal sealed class ExpressionEditor : IClickableMenu
 
         var newChildren = GetChildren().ToImmutableList();
         toToggle.Parent.Expressions = newChildren;
-        this.parent.SetSearchText(this.baseExpression.Text);
+        this.SearchText = this.baseExpression.Text;
         this.ReInitializeComponents(this.baseExpression);
         return;
 

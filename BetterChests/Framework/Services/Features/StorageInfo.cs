@@ -23,29 +23,28 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
     private static readonly Lazy<int> LineHeight =
         new(() => (int)Game1.smallFont.MeasureString(StorageInfo.AlphaNumeric).Y);
 
-    private readonly AssetHandler assetHandler;
-
     private readonly PerScreen<Dictionary<StorageInfoItem, Info>> cachedInfo = new(() => []);
     private readonly ContainerFactory containerFactory;
     private readonly PerScreen<IStorageContainer?> currentContainer = new();
+    private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<bool> isActive = new();
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<bool> resetCache = new(() => true);
 
     /// <summary>Initializes a new instance of the <see cref="StorageInfo" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     public StorageInfo(
-        AssetHandler assetHandler,
         ContainerFactory containerFactory,
         IEventManager eventManager,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
@@ -53,8 +52,8 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
         IModConfig modConfig)
         : base(eventManager, log, manifest, modConfig)
     {
-        this.assetHandler = assetHandler;
         this.containerFactory = containerFactory;
+        this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
     }
@@ -254,7 +253,7 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
         IClickableMenu.drawHoverText(e.SpriteBatch, sb.ToString(), Game1.smallFont, boxWidthOverride: valueWidth + 32);
 
         // Draw icon
-        if (infoIcon.HasValue && this.assetHandler.Icons.TryGetValue(infoIcon.Value.Value, out var icon))
+        if (infoIcon.HasValue && this.iconRegistry.TryGetIcon(infoIcon.Value.Value, out var icon))
         {
             e.SpriteBatch.Draw(
                 Game1.content.Load<Texture2D>(icon.Path),
@@ -283,7 +282,7 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
 
         // Add icon
         if (!string.IsNullOrWhiteSpace(container.StorageIcon)
-            && this.assetHandler.Icons.ContainsKey(container.StorageIcon))
+            && this.iconRegistry.TryGetIcon(container.StorageIcon, out _))
         {
             this.cachedInfo.Value.TryAdd(
                 StorageInfoItem.Icon,

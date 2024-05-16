@@ -18,30 +18,30 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
 {
     private static CraftFromChest instance = null!;
 
-    private readonly AssetHandler assetHandler;
     private readonly BetterCraftingIntegration betterCraftingIntegration;
     private readonly BetterCraftingInventoryProvider betterCraftingInventoryProvider;
     private readonly ContainerFactory containerFactory;
+    private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="CraftFromChest" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="betterCraftingIntegration">Dependency for Better Crafting integration.</param>
     /// <param name="betterCraftingInventoryProvider">Dependency used for providing inventories to Better Crafting.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public CraftFromChest(
-        AssetHandler assetHandler,
         BetterCraftingIntegration betterCraftingIntegration,
         BetterCraftingInventoryProvider betterCraftingInventoryProvider,
         ContainerFactory containerFactory,
         IEventManager eventManager,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
@@ -50,10 +50,10 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
         : base(eventManager, log, manifest, modConfig)
     {
         CraftFromChest.instance = this;
-        this.assetHandler = assetHandler;
         this.betterCraftingIntegration = betterCraftingIntegration;
         this.betterCraftingInventoryProvider = betterCraftingInventoryProvider;
         this.containerFactory = containerFactory;
+        this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
 
@@ -104,17 +104,18 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
             this.betterCraftingIntegration.Api.MenuPopulateContainers += this.OnMenuPopulateContainers;
         }
 
-        if (this.toolbarIconsIntegration.IsLoaded
-            && this.assetHandler.Icons.TryGetValue(this.ModId + "/Craft", out var icon))
+        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon("Craft", out var icon))
         {
-            this.toolbarIconsIntegration.Api.AddToolbarIcon(
-                this.Id,
-                icon.Path,
-                icon.Area,
-                I18n.Button_CraftFromChest_Name());
-
-            this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
+            return;
         }
+
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(
+            this.Id,
+            icon.Path,
+            icon.Area,
+            I18n.Button_CraftFromChest_Name());
+
+        this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
     }
 
     /// <inheritdoc />

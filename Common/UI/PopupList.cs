@@ -24,8 +24,8 @@ internal class PopupList : BaseMenu
     /// <param name="initialText">The initial text.</param>
     /// <param name="items">The popup list items.</param>
     /// <param name="callback">The action to call when a value is selected.</param>
-    public PopupList(string initialText, List<string> items, Action<string> callback)
-        : base(0, 0, 400, 480, false)
+    public PopupList(string initialText, IReadOnlyCollection<string> items, Action<string> callback)
+        : base(0, 0, 400, 480)
     {
         this.items = items.Where(item => item.Trim().Length >= 3).ToList();
         var textBounds = items.Select(item => Game1.smallFont.MeasureString(item).ToPoint()).ToList();
@@ -112,63 +112,6 @@ internal class PopupList : BaseMenu
             this.currentText = value;
             this.RefreshItems();
         }
-    }
-
-    /// <inheritdoc />
-    public override void Draw(SpriteBatch b)
-    {
-        // Draw background
-        IClickableMenu.drawTextureBox(
-            b,
-            Game1.mouseCursors,
-            OptionsDropDown.dropDownBGSource,
-            this.bounds.X,
-            this.bounds.Y,
-            this.bounds.Width,
-            this.bounds.Height,
-            Color.White,
-            Game1.pixelZoom,
-            false,
-            0.97f);
-
-        // Draw text field
-        this.textField.Draw(b);
-
-        // Draw items
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        foreach (var component in this.components)
-        {
-            var index = this.offset + int.Parse(component.name, CultureInfo.InvariantCulture);
-            var item = this.items.ElementAtOrDefault(index);
-            if (string.IsNullOrWhiteSpace(item))
-            {
-                continue;
-            }
-
-            if (component.bounds.Contains(mouseX, mouseY))
-            {
-                b.Draw(
-                    Game1.staminaRect,
-                    component.bounds with { Width = component.bounds.Width - 16 },
-                    new Rectangle(0, 0, 1, 1),
-                    Color.Wheat,
-                    0f,
-                    Vector2.Zero,
-                    SpriteEffects.None,
-                    0.975f);
-            }
-
-            b.DrawString(
-                Game1.smallFont,
-                item,
-                new Vector2(component.bounds.X, component.bounds.Y),
-                item.Contains(this.CurrentText, StringComparison.OrdinalIgnoreCase)
-                    ? Game1.textColor
-                    : Game1.unselectedOptionColor);
-        }
-
-        Game1.mouseCursorTransparency = 1f;
-        this.drawMouse(b);
     }
 
     /// <inheritdoc />
@@ -275,6 +218,60 @@ internal class PopupList : BaseMenu
         }
 
         this.offset = Math.Max(0, Math.Min(this.items.Count - this.components.Count, this.offset));
+    }
+
+    /// <inheritdoc />
+    protected override void Draw(SpriteBatch b)
+    {
+        // Draw background
+        IClickableMenu.drawTextureBox(
+            b,
+            Game1.mouseCursors,
+            OptionsDropDown.dropDownBGSource,
+            this.bounds.X,
+            this.bounds.Y,
+            this.bounds.Width,
+            this.bounds.Height,
+            Color.White,
+            Game1.pixelZoom,
+            false,
+            0.97f);
+
+        // Draw text field
+        this.textField.Draw(b);
+
+        // Draw items
+        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        foreach (var component in this.components)
+        {
+            var index = this.offset + int.Parse(component.name, CultureInfo.InvariantCulture);
+            var item = this.items.ElementAtOrDefault(index);
+            if (string.IsNullOrWhiteSpace(item))
+            {
+                continue;
+            }
+
+            if (component.bounds.Contains(mouseX, mouseY))
+            {
+                b.Draw(
+                    Game1.staminaRect,
+                    component.bounds with { Width = component.bounds.Width - 16 },
+                    new Rectangle(0, 0, 1, 1),
+                    Color.Wheat,
+                    0f,
+                    Vector2.Zero,
+                    SpriteEffects.None,
+                    0.975f);
+            }
+
+            b.DrawString(
+                Game1.smallFont,
+                item,
+                new Vector2(component.bounds.X, component.bounds.Y),
+                item.Contains(this.CurrentText, StringComparison.OrdinalIgnoreCase)
+                    ? Game1.textColor
+                    : Game1.unselectedOptionColor);
+        }
     }
 
     private void RefreshItems()

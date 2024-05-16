@@ -1,6 +1,5 @@
 namespace StardewMods.BetterChests.Framework.Services.Features;
 
-using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Models.Events;
@@ -17,39 +16,38 @@ using StardewValley.Menus;
 /// <summary>Configure storages individually.</summary>
 internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 {
-    private readonly AssetHandler assetHandler;
     private readonly ConfigManager configManager;
     private readonly ContainerFactory containerFactory;
     private readonly ContainerHandler containerHandler;
-    private readonly PerScreen<BaseDropdown?> dropdown = new();
     private readonly IExpressionHandler expressionHandler;
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
+    private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<IStorageContainer?> lastContainer = new();
     private readonly MenuHandler menuHandler;
     private readonly UiManager uiManager;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigureChest" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="configManager">Dependency used for managing config data.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="uiManager">Dependency used for managing ui.</param>
     public ConfigureChest(
-        AssetHandler assetHandler,
         ConfigManager configManager,
         ContainerFactory containerFactory,
         ContainerHandler containerHandler,
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
         ILog log,
@@ -57,12 +55,12 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         UiManager uiManager)
         : base(eventManager, log, manifest, configManager)
     {
-        this.assetHandler = assetHandler;
         this.configManager = configManager;
         this.containerFactory = containerFactory;
         this.containerHandler = containerHandler;
         this.expressionHandler = expressionHandler;
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
+        this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
         this.uiManager = uiManager;
@@ -78,11 +76,9 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     {
         // Events
         this.Events.Subscribe<MenuChangedEventArgs>(this.OnMenuChanged);
-        this.Events.Subscribe<RenderedActiveMenuEventArgs>(this.OnRenderedActiveMenu);
         this.Events.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         this.Events.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
-        this.Events.Subscribe<InventoryMenuChangedEventArgs>(this.OnInventoryMenuChanged);
-        this.Events.Subscribe<ItemHighlightingEventArgs>(this.OnItemHighlighting);
+        this.Events.Subscribe<ItemHighlightingEventArgs>(ConfigureChest.OnItemHighlighting);
     }
 
     /// <inheritdoc />
@@ -90,52 +86,47 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     {
         // Events
         this.Events.Unsubscribe<MenuChangedEventArgs>(this.OnMenuChanged);
-        this.Events.Unsubscribe<RenderedActiveMenuEventArgs>(this.OnRenderedActiveMenu);
         this.Events.Unsubscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         this.Events.Unsubscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
-        this.Events.Unsubscribe<InventoryMenuChangedEventArgs>(this.OnInventoryMenuChanged);
-        this.Events.Unsubscribe<ItemHighlightingEventArgs>(this.OnItemHighlighting);
+        this.Events.Unsubscribe<ItemHighlightingEventArgs>(ConfigureChest.OnItemHighlighting);
+    }
+
+    private static void OnItemHighlighting(ItemHighlightingEventArgs e)
+    {
+        if (Game1.activeClickableMenu?.GetChildMenu() is Dropdown)
+        {
+            e.UnHighlight();
+        }
     }
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
-        var container = this.menuHandler.Top.Container ?? this.menuHandler.Bottom.Container;
-        if (container?.ConfigureChest is not FeatureOption.Enabled
-            || e.Button is not (SButton.MouseLeft or SButton.ControllerA)
-            || e.IsSuppressed(SButton.MouseLeft)
-            || e.IsSuppressed(SButton.ControllerA)
+        if (e.Button is not (SButton.MouseLeft or SButton.ControllerA)
             || !this.menuHandler.TryGetFocus(this, out var focus))
         {
             return;
         }
 
         var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (this.dropdown.Value is not null)
+        IStorageContainer? container = null;
+        ClickableComponent? icon = null;
+        if (this.menuHandler.Top.Container?.ConfigureChest is FeatureOption.Enabled
+            && this.menuHandler.Top.Icon?.containsPoint(mouseX, mouseY) == true)
         {
-            focus.Release();
-            this.dropdown.Value.receiveLeftClick(mouseX, mouseY);
-            this.inputHelper.Suppress(e.Button);
-            return;
+            container = this.menuHandler.Top.Container;
+            icon = this.menuHandler.Top.Icon;
         }
 
-        var bounds = this.menuHandler.CurrentMenu switch
+        if (container is null
+            && this.menuHandler.Bottom.Container?.ConfigureChest is FeatureOption.Enabled
+            && this.menuHandler.Bottom.Icon?.containsPoint(mouseX, mouseY) == true)
         {
-            ItemGrabMenu itemGrabMenu => new Rectangle(
-                itemGrabMenu.ItemsToGrabMenu.xPositionOnScreen - 100,
-                itemGrabMenu.yPositionOnScreen + Game1.tileSize - 48,
-                Game1.tileSize,
-                Game1.tileSize),
-            _ => Rectangle.Empty,
-        };
+            container = this.menuHandler.Bottom.Container;
+            icon = this.menuHandler.Bottom.Icon;
+        }
 
-        if (!bounds.Contains(mouseX, mouseY))
+        if (container is null || icon is null)
         {
-            if (this.dropdown.Value is not null)
-            {
-                this.inputHelper.Suppress(e.Button);
-                this.dropdown.Value = null;
-            }
-
             focus.Release();
             return;
         }
@@ -147,16 +138,10 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
             ("sort", I18n.Configure_Sorting_Name()),
         };
 
-        this.dropdown.Value = new Dropdown(
-            options,
-            bounds.X,
-            bounds.Bottom,
-            value =>
-            {
-                this.dropdown.Value = null;
-                this.ShowMenu(container, value);
-            },
-            3);
+        focus.Release();
+        this.inputHelper.Suppress(e.Button);
+        Game1.activeClickableMenu?.SetChildMenu(
+            new Dropdown(icon, options, value => this.ShowMenu(container, value), 3));
     }
 
     private void OnButtonsChanged(ButtonsChangedEventArgs e)
@@ -171,16 +156,6 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
         this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.ConfigureChest);
         this.ShowMenu(container);
-    }
-
-    private void OnInventoryMenuChanged(InventoryMenuChangedEventArgs e) => this.dropdown.Value = null;
-
-    private void OnItemHighlighting(ItemHighlightingEventArgs e)
-    {
-        if (this.dropdown.Value is not null)
-        {
-            e.UnHighlight();
-        }
     }
 
     private void OnMenuChanged(MenuChangedEventArgs e)
@@ -204,8 +179,6 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         this.lastContainer.Value = null;
     }
 
-    private void OnRenderedActiveMenu(RenderedActiveMenuEventArgs e) => this.dropdown.Value?.draw(e.SpriteBatch);
-
     private void ShowMenu(IStorageContainer container, string? whichMenu = "configure")
     {
         this.lastContainer.Value = container;
@@ -216,9 +189,9 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
                 return;
             case "categorize":
                 Game1.activeClickableMenu = new CategorizeMenu(
-                    this.assetHandler,
                     container,
                     this.expressionHandler,
+                    this.iconRegistry,
                     this.uiManager);
 
                 return;

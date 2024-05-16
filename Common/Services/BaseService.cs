@@ -6,7 +6,7 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 internal abstract class BaseService
 {
     /// <summary>Initializes a new instance of the <see cref="BaseService" /> class.</summary>
-    /// <param name="log">Dependency used for logging debug information to the console.</param>
+    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     protected BaseService(ILog log, IManifest manifest)
     {

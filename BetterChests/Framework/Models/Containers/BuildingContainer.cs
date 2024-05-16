@@ -200,4 +200,15 @@ internal sealed class BuildingContainer : BaseContainer<Building>
         this.Items.RemoveEmptySlots();
         return true;
     }
+
+    /// <inheritdoc />
+    protected override void InitOptions()
+    {
+        base.InitOptions();
+
+        if (this.Building is ShippingBin && string.IsNullOrWhiteSpace(this.StorageIcon))
+        {
+            this.StorageIcon = "StardewValley.Vanilla/ShippingBin";
+        }
+    }
 }
