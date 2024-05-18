@@ -2,49 +2,81 @@ namespace StardewMods.ToolbarIcons.Framework.UI;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
-using StardewMods.ToolbarIcons.Framework.Interfaces;
-using StardewMods.ToolbarIcons.Framework.Models;
-using StardewMods.ToolbarIcons.Framework.Services;
+using StardewValley.BellsAndWhistles;
 using StardewValley.Menus;
 
 /// <summary>Represents a complex menu option for arranging toolbar icons.</summary>
 internal sealed class ToolbarIconOption : BaseComplexOption
 {
-    private readonly AssetHandler assetHandler;
-    private readonly Dictionary<string, ClickableTextureComponent> components;
+    private readonly IIcon checkedIcon;
+    private readonly IIcon downArrow;
+    private readonly Func<string> getCurrentId;
+    private readonly Func<bool> getEnabled;
+    private readonly IIconRegistry iconRegistry;
+    private readonly Dictionary<string, string?> icons;
     private readonly IInputHelper inputHelper;
-    private readonly IModConfig modConfig;
+    private readonly Action? moveDown;
+    private readonly Action? moveUp;
+    private readonly Action<bool> setEnabled;
+    private readonly IIcon uncheckedIcon;
+    private readonly IIcon upArrow;
 
-    private ClickableTextureComponent? component;
-    private ToolbarIcon? icon;
-    private int index;
+    private string currentId;
+    private IIcon icon;
+    private string name;
+    private string tooltip;
 
     /// <summary>Initializes a new instance of the <see cref="ToolbarIconOption" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
-    /// <param name="components">Dependency used for the toolbar icon components.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
+    /// <param name="icons">Dictionary containing all added icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="getCurrentId">Function which returns the current id.</param>
+    /// <param name="getEnabled">Function which returns if icon is enabled.</param>
+    /// <param name="setEnabled">Action which sets if the icon is enabled.</param>
+    /// <param name="moveDown">Action to perform when down is pressed.</param>
+    /// <param name="moveUp">Action to perform when up is pressed.</param>
     public ToolbarIconOption(
-        AssetHandler assetHandler,
-        Dictionary<string, ClickableTextureComponent> components,
+        IIconRegistry iconRegistry,
+        Dictionary<string, string?> icons,
         IInputHelper inputHelper,
-        IModConfig modConfig)
+        Func<string> getCurrentId,
+        Func<bool> getEnabled,
+        Action<bool> setEnabled,
+        Action? moveDown,
+        Action? moveUp)
     {
-        this.assetHandler = assetHandler;
-        this.components = components;
+        this.Height = Game1.tileSize;
+        this.iconRegistry = iconRegistry;
+        this.icons = icons;
         this.inputHelper = inputHelper;
-        this.modConfig = modConfig;
+        this.getCurrentId = getCurrentId;
+        this.getEnabled = getEnabled;
+        this.setEnabled = setEnabled;
+        this.moveDown = moveDown;
+        this.moveUp = moveUp;
+        this.downArrow = iconRegistry.RequireIcon(VanillaIcon.ArrowDown);
+        this.upArrow = iconRegistry.RequireIcon(VanillaIcon.ArrowUp);
+        this.checkedIcon = iconRegistry.RequireIcon(VanillaIcon.Checked);
+        this.uncheckedIcon = iconRegistry.RequireIcon(VanillaIcon.Unchecked);
+        this.UpdateId();
     }
 
     /// <inheritdoc />
-    public override string Name => this.component?.name ?? string.Empty;
+    public override string Name => string.Empty;
 
     /// <inheritdoc />
-    public override string Tooltip => this.component?.hoverText ?? string.Empty;
+    public override string Tooltip => this.tooltip;
 
     /// <inheritdoc />
     public override int Height { get; protected set; }
+
+    private bool Enabled
+    {
+        get => this.getEnabled();
+        set => this.setEnabled(value);
+    }
 
     /// <inheritdoc />
     public override void Draw(SpriteBatch spriteBatch, Vector2 pos)
@@ -52,122 +84,115 @@ internal sealed class ToolbarIconOption : BaseComplexOption
         var (mouseX, mouseY) = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
         var mouseLeft = this.inputHelper.GetState(SButton.MouseLeft) == SButtonState.Pressed;
         var mouseRight = this.inputHelper.GetState(SButton.MouseRight) == SButtonState.Pressed;
+        var clicked = (mouseLeft || mouseRight) && mouseY >= pos.Y && mouseY < pos.Y + this.Height;
+        var hoverText = string.Empty;
 
-        if (this.component is not null && this.icon is not null)
+        if (this.currentId != this.getCurrentId())
         {
-            if (this.icon != this.modConfig.Icons[this.index])
+            this.UpdateId();
+        }
+
+        Utility.drawTextWithShadow(
+            spriteBatch,
+            this.name,
+            Game1.dialogueFont,
+            pos - new Vector2(540, 0),
+            SpriteText.color_Gray);
+
+        // Checkbox
+        var checkbox = this.Enabled ? this.checkedIcon : this.uncheckedIcon;
+        spriteBatch.Draw(
+            checkbox.GetTexture(IconStyle.Transparent),
+            pos + new Vector2(Game1.tileSize * 1, 0),
+            checkbox.Area,
+            Color.White,
+            0f,
+            Vector2.Zero,
+            Game1.pixelZoom,
+            SpriteEffects.None,
+            1f);
+
+        if (mouseX >= pos.X + (Game1.tileSize * 1) && mouseX < pos.X + (Game1.tileSize * 2))
+        {
+            hoverText = I18n.Config_CheckBox_Tooltip();
+            if (clicked)
             {
-                this.Update();
+                this.Enabled = !this.Enabled;
             }
-
-            // Arrows
-            spriteBatch.Draw(
-                this.assetHandler.Arrows.Value,
-                pos + new Vector2(0, 0),
-                new Rectangle(0, 0, 8, 8),
-                Color.White * (this.index > 0 ? 1f : 0.5f),
-                0f,
-                Vector2.Zero,
-                Game1.pixelZoom,
-                SpriteEffects.None,
-                1f);
-
-            spriteBatch.Draw(
-                this.assetHandler.Arrows.Value,
-                pos + new Vector2(96, 0),
-                new Rectangle(8, 0, 8, 8),
-                Color.White * (this.index < this.components.Count - 1 ? 1f : 0.5f),
-                0f,
-                Vector2.Zero,
-                Game1.pixelZoom,
-                SpriteEffects.None,
-                1f);
-
-            // Checkbox
-            spriteBatch.Draw(
-                Game1.mouseCursors,
-                pos + new Vector2(160, 0),
-                this.icon.Enabled ? OptionsCheckbox.sourceRectChecked : OptionsCheckbox.sourceRectUnchecked,
-                Color.White,
-                0f,
-                Vector2.Zero,
-                Game1.pixelZoom,
-                SpriteEffects.None,
-                0.4f);
-
-            // Icon
-            this.component.bounds.X = (int)pos.X + 40;
-            this.component.bounds.Y = (int)pos.Y - 12;
-            this.component.draw(spriteBatch);
         }
 
-        if (!(mouseLeft || mouseRight) || mouseY < pos.Y || mouseY > pos.Y + this.Height)
+        // Down Arrow
+        spriteBatch.Draw(
+            this.downArrow.GetTexture(IconStyle.Transparent),
+            pos + new Vector2(Game1.tileSize * 2, 0),
+            this.downArrow.Area,
+            this.moveDown is not null ? Color.White : Color.Black * 0.35f,
+            0f,
+            Vector2.Zero,
+            Game1.pixelZoom,
+            SpriteEffects.None,
+            1f);
+
+        if (mouseX >= pos.X + (Game1.tileSize * 2) && mouseX < pos.X + (Game1.tileSize * 3))
         {
-            return;
+            hoverText = I18n.Config_MoveDown_Tooltip();
+            if (clicked)
+            {
+                this.moveDown?.Invoke();
+            }
         }
 
-        // Move up
-        if (this.index > 0 && mouseX >= pos.X && mouseX <= pos.X + 32)
-        {
-            (this.modConfig.Icons[this.index - 1], this.modConfig.Icons[this.index]) = (
-                this.modConfig.Icons[this.index], this.modConfig.Icons[this.index - 1]);
+        // Icon
+        spriteBatch.Draw(
+            this.icon.GetTexture(IconStyle.Transparent),
+            pos + new Vector2((Game1.tileSize * 3) - 10, -12),
+            this.icon.Area,
+            Color.White,
+            0f,
+            Vector2.Zero,
+            Game1.pixelZoom,
+            SpriteEffects.None,
+            1f);
 
-            return;
+        // Up Arrow
+        spriteBatch.Draw(
+            this.upArrow.GetTexture(IconStyle.Transparent),
+            pos + new Vector2(Game1.tileSize * 4, 0),
+            this.upArrow.Area,
+            this.moveUp is not null ? Color.White : Color.Black * 0.35f,
+            0f,
+            Vector2.Zero,
+            Game1.pixelZoom,
+            SpriteEffects.None,
+            1f);
+
+        if (mouseX >= pos.X + (Game1.tileSize * 4) && mouseX < pos.X + (Game1.tileSize * 5))
+        {
+            hoverText = I18n.Config_MoveUp_Tooltip();
+            if (clicked)
+            {
+                this.moveUp?.Invoke();
+            }
         }
 
-        // Move down
-        if (this.index < this.components.Count - 1 && mouseX >= pos.X + 96 && mouseX <= pos.X + 128)
+        if (!string.IsNullOrWhiteSpace(hoverText))
         {
-            (this.modConfig.Icons[this.index + 1], this.modConfig.Icons[this.index]) = (
-                this.modConfig.Icons[this.index], this.modConfig.Icons[this.index + 1]);
-
-            return;
-        }
-
-        // Toggle
-        if (this.icon is not null && mouseX >= pos.X + 160 && mouseX <= pos.X + 192)
-        {
-            this.icon.Enabled = !this.icon.Enabled;
+            IClickableMenu.drawToolTip(spriteBatch, hoverText, string.Empty, null);
         }
     }
 
-    /// <summary>Initializes the toolbar icons.</summary>
-    /// <param name="initIndex">The index.</param>
-    public void Init(int initIndex)
+    [MemberNotNull(
+        nameof(ToolbarIconOption.currentId),
+        nameof(ToolbarIconOption.name),
+        nameof(ToolbarIconOption.icon),
+        nameof(ToolbarIconOption.tooltip))]
+    private void UpdateId()
     {
-        this.index = initIndex;
-        this.icon = this.modConfig.Icons[initIndex];
-
-        if (!this.components.TryGetValue(this.icon.Id, out var initComponent))
-        {
-            return;
-        }
-
-        this.component = new ClickableTextureComponent(
-            new Rectangle(0, 0, 32, 32),
-            initComponent.texture,
-            initComponent.sourceRect,
-            3)
-        {
-            hoverText = initComponent.hoverText,
-            name = initComponent.name,
-        };
-
-        var textBounds = Game1.dialogueFont.MeasureString(initComponent.hoverText);
-        this.Height = (int)textBounds.Y;
-    }
-
-    private void Update()
-    {
-        this.icon = this.modConfig.Icons[this.index];
-        if (this.component is null || !this.components.TryGetValue(this.icon.Id, out var updateComponent))
-        {
-            return;
-        }
-
-        this.component.texture = updateComponent.texture;
-        this.component.sourceRect = updateComponent.sourceRect;
-        this.component.hoverText = updateComponent.hoverText;
-        this.component.name = updateComponent.name;
+        this.currentId = this.getCurrentId();
+        this.name = this.currentId.Split('/')[^1];
+        this.icon = this.iconRegistry.RequireIcon(this.currentId);
+        this.tooltip = this.icons.TryGetValue(this.currentId, out var hoverText)
+            ? hoverText ?? string.Empty
+            : string.Empty;
     }
 }

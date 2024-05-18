@@ -16,7 +16,7 @@ using StardewMods.Common.Models;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
-using StardewMods.Common.UI;
+using StardewMods.Common.UI.Menus;
 using StardewValley.Buildings;
 using StardewValley.Menus;
 using StardewValley.Objects;
@@ -361,7 +361,7 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
                 // Child menus
                 if (baseMenu is not null)
                 {
-                    baseMenu.receiveLeftClick(cursorPos.X, cursorPos.Y);
+                    baseMenu.receiveRightClick(cursorPos.X, cursorPos.Y);
                     this.inputHelper.Suppress(e.Button);
                     return;
                 }

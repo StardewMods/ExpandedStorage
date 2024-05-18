@@ -6,11 +6,10 @@ using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.BetterChests.Framework.UI.Menus;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
-using StardewMods.Common.UI;
+using StardewMods.Common.UI.Menus;
 using StardewValley.Menus;
 
 /// <summary>Configure storages individually.</summary>
@@ -25,7 +24,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<IStorageContainer?> lastContainer = new();
     private readonly MenuHandler menuHandler;
-    private readonly UiManager uiManager;
+    private readonly IReflectionHelper reflectionHelper;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigureChest" /> class.</summary>
     /// <param name="configManager">Dependency used for managing config data.</param>
@@ -39,7 +38,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    /// <param name="uiManager">Dependency used for managing ui.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public ConfigureChest(
         ConfigManager configManager,
         ContainerFactory containerFactory,
@@ -52,7 +51,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         MenuHandler menuHandler,
         ILog log,
         IManifest manifest,
-        UiManager uiManager)
+        IReflectionHelper reflectionHelper)
         : base(eventManager, log, manifest, configManager)
     {
         this.configManager = configManager;
@@ -63,7 +62,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
-        this.uiManager = uiManager;
+        this.reflectionHelper = reflectionHelper;
     }
 
     /// <inheritdoc />
@@ -132,17 +131,23 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
             return;
         }
 
-        var options = new List<(string Key, string Value)>
+        var options = new List<KeyValuePair<string, string>>
         {
-            ("configure", I18n.Configure_Options_Name()),
-            ("categorize", I18n.Configure_Categorize_Name()),
-            ("sort", I18n.Configure_Sorting_Name()),
+            new("configure", I18n.Configure_Options_Name()),
+            new("categorize", I18n.Configure_Categorize_Name()),
+            new("sort", I18n.Configure_Sorting_Name()),
         };
 
         focus.Release();
         this.inputHelper.Suppress(e.Button);
         Game1.activeClickableMenu?.SetChildMenu(
-            new Dropdown(icon, options, value => this.ShowMenu(container, value), 3));
+            new Dropdown(
+                this.inputHelper,
+                this.reflectionHelper,
+                icon,
+                options,
+                value => this.ShowMenu(container, value),
+                3));
     }
 
     private void OnButtonsChanged(ButtonsChangedEventArgs e)
@@ -193,7 +198,8 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
                     container,
                     this.expressionHandler,
                     this.iconRegistry,
-                    this.uiManager);
+                    this.inputHelper,
+                    this.reflectionHelper);
 
                 return;
             case "sort": return;

@@ -35,7 +35,7 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
     /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public ContainerHandler(
         ConfigManager configManager,
         ContainerFactory containerFactory,

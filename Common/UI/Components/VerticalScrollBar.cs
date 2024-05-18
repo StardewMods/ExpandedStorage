@@ -1,24 +1,25 @@
-namespace StardewMods.Common.UI;
+namespace StardewMods.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewMods.Common.Interfaces;
 using StardewValley.Menus;
 
 /// <summary>Represents a scrollbar with up/down arrows.</summary>
-internal sealed class VerticalScrollBar : ClickableComponent, ICustomComponent
+internal sealed class VerticalScrollBar : BaseComponent
 {
     private readonly ClickableTextureComponent arrowDown;
     private readonly ClickableTextureComponent arrowUp;
     private readonly Func<int> getMax;
     private readonly Func<int> getMethod;
     private readonly Func<int> getMin;
+    private readonly Func<int> getStepSize;
     private readonly ClickableTextureComponent grabber;
-    private readonly Rectangle runner;
     private readonly Action<int> setMethod;
-    private readonly int stepSize;
+
+    private Rectangle runner;
 
     /// <summary>Initializes a new instance of the <see cref="VerticalScrollBar" /> class.</summary>
+    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="x">The x-coordinate of the scroll bar.</param>
     /// <param name="y">The y-coordinate of the scroll bar.</param>
     /// <param name="height">The height of the scroll bar.</param>
@@ -26,9 +27,10 @@ internal sealed class VerticalScrollBar : ClickableComponent, ICustomComponent
     /// <param name="setMethod">An action that sets the current value.</param>
     /// <param name="getMin">A function that gets the minimum value.</param>
     /// <param name="getMax">A function that gets the maximum value.</param>
-    /// <param name="stepSize">The step size for arrows or scroll wheel.</param>
+    /// <param name="getStepSize">The step size for arrows or scroll wheel.</param>
     /// <param name="name">The name of the scroll bar.</param>
     public VerticalScrollBar(
+        IInputHelper inputHelper,
         int x,
         int y,
         int height,
@@ -36,15 +38,15 @@ internal sealed class VerticalScrollBar : ClickableComponent, ICustomComponent
         Action<int> setMethod,
         Func<int> getMin,
         Func<int> getMax,
-        int stepSize = 1,
+        Func<int>? getStepSize = null,
         string name = "ScrollBar")
-        : base(new Rectangle(x, y, 48, height), name)
+        : base(inputHelper, x, y, 48, height, name)
     {
         this.getMethod = getMethod;
         this.setMethod = setMethod;
         this.getMin = getMin;
         this.getMax = getMax;
-        this.stepSize = stepSize;
+        this.getStepSize = getStepSize ?? VerticalScrollBar.GetDefaultStepSize;
 
         this.arrowUp = new ClickableTextureComponent(
             new Rectangle(x, y, 11 * Game1.pixelZoom, 12 * Game1.pixelZoom),
@@ -66,17 +68,14 @@ internal sealed class VerticalScrollBar : ClickableComponent, ICustomComponent
             Game1.pixelZoom);
     }
 
-    /// <inheritdoc />
-    public ClickableComponent Component => this;
-
-    /// <inheritdoc />
-    public string? HoverText => null;
-
     /// <summary>Gets the maximum value of the source.</summary>
-    public int SourceMax => this.getMax();
+    public int MaxValue => this.getMax();
 
     /// <summary>Gets the minimum value of the source.</summary>
-    public int SourceMin => this.getMin();
+    public int MinValue => this.getMin();
+
+    /// <summary>Gets the step size.</summary>
+    public int StepSize => this.getStepSize();
 
     /// <summary>Gets a value indicating whether the scroll bar is currently active.</summary>
     public bool IsActive { get; private set; }
@@ -85,18 +84,15 @@ internal sealed class VerticalScrollBar : ClickableComponent, ICustomComponent
     public int SourceValue
     {
         get => this.getMethod();
-        set => this.setMethod(Math.Min(this.SourceMax, Math.Max(this.SourceMin, value)));
+        set => this.setMethod(Math.Min(this.MaxValue, Math.Max(this.MinValue, value)));
     }
 
     /// <summary>Gets or sets the percentage value of the scroll bar.</summary>
     public float Value { get; set; }
 
-    /// <inheritdoc />
-    public bool Contains(Vector2 position) => this.bounds.Contains(position);
-
     /// <summary>Draws the search overlay to the screen.</summary>
     /// <param name="spriteBatch">The SpriteBatch used for drawing.</param>
-    public void Draw(SpriteBatch spriteBatch)
+    public override void Draw(SpriteBatch spriteBatch)
     {
         IClickableMenu.drawTextureBox(
             spriteBatch,
@@ -109,38 +105,47 @@ internal sealed class VerticalScrollBar : ClickableComponent, ICustomComponent
             Color.White,
             Game1.pixelZoom);
 
-        this.grabber.draw(spriteBatch);
-        this.arrowUp.draw(spriteBatch, this.Value > 0f ? Color.White : Color.Black * 0.35f, 1f);
-        this.arrowDown.draw(spriteBatch, this.Value < 1f ? Color.White : Color.Black * 0.35f, 1f);
-    }
-
-    /// <summary>Performs a scroll in the specified direction.</summary>
-    /// <param name="direction">The direction to scroll.</param>
-    public void Scroll(int direction)
-    {
-        var initialValue = this.SourceValue;
-
-        // Scroll down
-        if (direction < 0)
+        if (this.SourceValue > this.MinValue || this.SourceValue < this.MaxValue)
         {
-            this.SourceValue += this.stepSize;
+            this.grabber.draw(spriteBatch);
         }
 
-        // Scroll up
-        if (direction > 0)
-        {
-            this.SourceValue -= this.stepSize;
-        }
-
-        this.SetScrollPosition();
-        if (this.SourceValue != initialValue)
-        {
-            Game1.playSound("shiny4");
-        }
+        this.arrowUp.draw(spriteBatch, this.SourceValue > this.MinValue ? Color.White : Color.Black * 0.35f, 1f);
+        this.arrowDown.draw(spriteBatch, this.SourceValue < this.MaxValue ? Color.White : Color.Black * 0.35f, 1f);
     }
 
     /// <inheritdoc />
-    public bool TryLeftClick(int mouseX, int mouseY)
+    public override void MoveTo(int x, int y)
+    {
+        base.MoveTo(x, y);
+        this.arrowUp.bounds.X = this.bounds.X;
+        this.arrowUp.bounds.Y = this.bounds.Y;
+        this.arrowDown.bounds.X = this.bounds.X;
+        this.arrowDown.bounds.Y = this.bounds.Y + this.bounds.Height - (12 * Game1.pixelZoom);
+        this.runner = new Rectangle(
+            this.bounds.X + 12,
+            this.bounds.Y + (12 * Game1.pixelZoom) + 4,
+            24,
+            this.bounds.Height - (24 * Game1.pixelZoom) - 12);
+
+        this.grabber.bounds.X = this.bounds.X + 12;
+        this.SetScrollPosition();
+    }
+
+    /// <inheritdoc />
+    public override void Resize(int width, int height)
+    {
+        base.Resize(width, height);
+        this.arrowDown.bounds.Y = this.bounds.Y + this.bounds.Height - (12 * Game1.pixelZoom);
+        this.runner = new Rectangle(
+            this.bounds.X + 12,
+            this.bounds.Y + (12 * Game1.pixelZoom) + 4,
+            24,
+            this.bounds.Height - (24 * Game1.pixelZoom) - 12);
+    }
+
+    /// <inheritdoc />
+    public override bool TryLeftClick(int mouseX, int mouseY)
     {
         if (this.grabber.containsPoint(mouseX, mouseY))
         {
@@ -155,20 +160,20 @@ internal sealed class VerticalScrollBar : ClickableComponent, ICustomComponent
             return true;
         }
 
-        if (this.arrowUp.containsPoint(mouseX, mouseY) && this.Value > 0f)
+        if (this.arrowUp.containsPoint(mouseX, mouseY) && this.SourceValue > this.MinValue)
         {
             this.arrowUp.scale = 3.5f;
             Game1.playSound("shwip");
-            this.SourceValue -= this.stepSize;
+            this.SourceValue -= this.StepSize;
             this.SetScrollPosition();
             return true;
         }
 
-        if (this.arrowDown.containsPoint(mouseX, mouseY) && this.Value < 1f)
+        if (this.arrowDown.containsPoint(mouseX, mouseY) && this.SourceValue < this.MaxValue)
         {
             this.arrowDown.scale = 3.5f;
             Game1.playSound("shwip");
-            this.SourceValue += this.stepSize;
+            this.SourceValue += this.StepSize;
             this.SetScrollPosition();
             return true;
         }
@@ -177,26 +182,45 @@ internal sealed class VerticalScrollBar : ClickableComponent, ICustomComponent
     }
 
     /// <inheritdoc />
-    public bool TryRightClick(int x, int y) => false;
+    public override bool TryScroll(int direction)
+    {
+        var initialValue = this.SourceValue;
 
-    /// <summary>Performs an un-click at the specified coordinates on the screen.</summary>
-    /// <param name="mouseX">The X-coordinate of the mouse click.</param>
-    /// <param name="mouseY">The Y-coordinate of the mouse click.</param>
-    public void UnClick(int mouseX, int mouseY) => this.IsActive = false;
+        // Scroll down
+        if (direction < 0)
+        {
+            this.SourceValue += this.StepSize;
+        }
+
+        // Scroll up
+        if (direction > 0)
+        {
+            this.SourceValue -= this.StepSize;
+        }
+
+        this.SetScrollPosition();
+        if (this.SourceValue != initialValue)
+        {
+            Game1.playSound("shiny4");
+            return true;
+        }
+
+        return false;
+    }
 
     /// <summary>Updates the search bar based on the mouse position.</summary>
     /// <param name="mouseX">The x-coordinate of the mouse position.</param>
     /// <param name="mouseY">The y-coordinate of the mouse position.</param>
-    public void Update(int mouseX, int mouseY)
+    public override void Update(int mouseX, int mouseY)
     {
         if (!this.IsActive)
         {
-            if (this.Value > 0f)
+            if (this.SourceValue > this.MinValue)
             {
                 this.arrowUp.tryHover(mouseX, mouseY);
             }
 
-            if (this.Value < 1f)
+            if (this.SourceValue < this.MaxValue)
             {
                 this.arrowDown.tryHover(mouseX, mouseY);
             }
@@ -206,17 +230,21 @@ internal sealed class VerticalScrollBar : ClickableComponent, ICustomComponent
 
         this.Value = Math.Min(1, Math.Max(0, (float)(mouseY - this.runner.Y) / this.runner.Height));
         var initialY = this.grabber.bounds.Y;
-        this.SourceValue = (int)((this.Value * (this.SourceMax - this.SourceMin)) + this.SourceMin);
+        this.SourceValue = (int)((this.Value * (this.MaxValue - this.MinValue)) + this.MinValue);
         this.SetScrollPosition();
         if (initialY != this.grabber.bounds.Y)
         {
             Game1.playSound("shiny4");
         }
+
+        this.IsActive = this.Input.IsDown(SButton.MouseLeft) || this.Input.IsSuppressed(SButton.MouseLeft);
     }
+
+    private static int GetDefaultStepSize() => 1;
 
     private void SetScrollPosition()
     {
-        this.Value = (float)(this.SourceValue - this.SourceMin) / (this.SourceMax - this.SourceMin);
+        this.Value = (float)Math.Round((float)(this.SourceValue - this.MinValue) / (this.MaxValue - this.MinValue), 2);
         this.grabber.bounds.Y = Math.Max(
             this.runner.Y,
             Math.Min(

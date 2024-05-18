@@ -3,45 +3,48 @@
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.ToolbarIcons.Framework.Interfaces;
 using StardewMods.ToolbarIcons.Framework.Models;
 using StardewMods.ToolbarIcons.Framework.Models.Events;
-using StardewMods.ToolbarIcons.Framework.UI;
-using StardewValley.Menus;
+using StardewMods.ToolbarIcons.Framework.Services.Factory;
 
 /// <summary>Handles generic mod config menu.</summary>
 internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 {
-    private readonly Dictionary<string, ClickableTextureComponent> components;
+    private readonly ComplexOptionFactory complexOptionFactory;
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
-    private readonly Func<ToolbarIconOption> getToolbarIconsOption;
+    private readonly Dictionary<string, string?> icons;
     private readonly IManifest manifest;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigManager" /> class.</summary>
-    /// <param name="components">Dependency used for the toolbar icon components.</param>
+    /// <param name="complexOptionFactory">Dependency used for creating complex options.</param>
+    /// <param name="contentPatcherIntegration">Dependency for Content Patcher integration.</param>
     /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
-    /// <param name="getToolbarIconsOption">Gets a new instance of <see cref="ToolbarIconOption" />.</param>
+    /// <param name="icons">Dictionary containing all added icons.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modHelper">Dependency for events, input, and content.</param>
     public ConfigManager(
-        Dictionary<string, ClickableTextureComponent> components,
+        ComplexOptionFactory complexOptionFactory,
+        ContentPatcherIntegration contentPatcherIntegration,
         IDataHelper dataHelper,
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
-        Func<ToolbarIconOption> getToolbarIconsOption,
+        Dictionary<string, string?> icons,
         IManifest manifest,
         IModHelper modHelper)
-        : base(dataHelper, eventManager, modHelper)
+        : base(contentPatcherIntegration, dataHelper, eventManager, modHelper)
     {
+        this.complexOptionFactory = complexOptionFactory;
         this.manifest = manifest;
-        this.components = components;
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
-        this.getToolbarIconsOption = getToolbarIconsOption;
+        this.icons = icons;
 
         eventManager.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
+        eventManager.Subscribe<IconsChangedEventArgs>(this.OnIconsChanged);
         eventManager.Subscribe<ToolbarIconsLoadedEventArgs>(this.OnToolbarIconsLoaded);
     }
 
@@ -51,18 +54,13 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     /// <inheritdoc />
     public float Scale => this.Config.Scale;
 
-    /// <inheritdoc />
-    public override DefaultConfig GetDefault()
-    {
-        var defaultConfig = base.GetDefault();
-
-        // Add icons to config with default sorting
-        defaultConfig.Icons.Sort((i1, i2) => string.Compare(i1.Id, i2.Id, StringComparison.OrdinalIgnoreCase));
-
-        return defaultConfig;
-    }
-
     private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) => this.ReloadConfig();
+
+    private void OnIconsChanged(IconsChangedEventArgs e)
+    {
+        this.Config.Icons.RemoveAll(icon => e.Removed.Contains(icon.Id));
+        this.Config.Icons.AddRange(e.Added.Select(id => new ToolbarIcon(id)));
+    }
 
     private void OnToolbarIconsLoaded(ToolbarIconsLoadedEventArgs e) => this.ReloadConfig();
 
@@ -75,24 +73,64 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         var gmcm = this.genericModConfigMenuIntegration.Api;
         var config = this.GetNew();
+        config.Icons.RemoveAll(icon => !this.icons.ContainsKey(icon.Id));
+        config.Icons.AddRange(
+            this.icons.Keys.Where(id => config.Icons.All(icon => icon.Id != id)).Select(id => new ToolbarIcon(id)));
+
         this.genericModConfigMenuIntegration.Register(this.Reset, () => this.Save(config));
 
         gmcm.AddSectionTitle(this.manifest, I18n.Config_CustomizeToolbar_Name, I18n.Config_CustomizeToolbar_Tooltip);
+        var total = config.Icons.Count;
 
-        var index = 0;
-        while (index < config.Icons.Count)
+        for (var index = 0; index < config.Icons.Count; index++)
         {
-            var icon = config.Icons[index];
-            if (!this.components.ContainsKey(icon.Id))
+            if (!this.complexOptionFactory.TryGetToolbarIconOption(
+                GetCurrentId(index),
+                GetEnabled(index),
+                SetEnabled(index),
+                GetMoveDown(index),
+                GetMoveUp(index),
+                out var option))
             {
-                config.Icons.RemoveAt(index);
+                total--;
                 continue;
             }
 
-            var toolbarIconsOption = this.getToolbarIconsOption();
-            toolbarIconsOption.Init(index);
-            this.genericModConfigMenuIntegration.AddComplexOption(toolbarIconsOption);
-            index++;
+            this.genericModConfigMenuIntegration.AddComplexOption(option);
+        }
+
+        return;
+
+        Func<string> GetCurrentId(int i) => () => config.Icons[i].Id;
+
+        Func<bool> GetEnabled(int i) => () => config.Icons[i].Enabled;
+
+        Action<bool> SetEnabled(int i) => enabled => config.Icons[i].Enabled = enabled;
+
+        Action? GetMoveDown(int i)
+        {
+            if (i == total - 1)
+            {
+                return null;
+            }
+
+            return () =>
+            {
+                (config.Icons[i], config.Icons[i + 1]) = (config.Icons[i + 1], config.Icons[i]);
+            };
+        }
+
+        Action? GetMoveUp(int i)
+        {
+            if (i == 0)
+            {
+                return null;
+            }
+
+            return () =>
+            {
+                (config.Icons[i], config.Icons[i - 1]) = (config.Icons[i - 1], config.Icons[i]);
+            };
         }
     }
 }

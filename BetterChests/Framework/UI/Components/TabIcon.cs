@@ -4,12 +4,12 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Models;
 using StardewMods.Common.Helpers;
-using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
 
 /// <summary>Represents a component with an icon that expands into a label when hovered.</summary>
-internal sealed class TabIcon : ICustomComponent
+internal sealed class TabIcon : BaseComponent
 {
     private readonly TabData data;
     private readonly Vector2 origin;
@@ -18,18 +18,20 @@ internal sealed class TabIcon : ICustomComponent
     private EventHandler<TabData>? clicked;
 
     /// <summary>Initializes a new instance of the <see cref="TabIcon" /> class.</summary>
+    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="x">The x-coordinate of the tab component.</param>
     /// <param name="y">The y-coordinate of the tab component.</param>
     /// <param name="icon">The tab icon.</param>
     /// <param name="tabData">The inventory tab data.</param>
-    public TabIcon(int x, int y, IIcon icon, TabData tabData)
+    public TabIcon(IInputHelper inputHelper, int x, int y, IIcon icon, TabData tabData)
+        : base(inputHelper, x, y, Game1.tileSize, Game1.tileSize, tabData.Label)
     {
         var textBounds = Game1.smallFont.MeasureString(tabData.Label).ToPoint();
         this.data = tabData;
         this.origin = new Vector2(x, y);
         this.Component = icon.GetComponent(IconStyle.Transparent);
-        this.Component.bounds = new Rectangle(x, y, Game1.tileSize, Game1.tileSize);
-        this.Component.name = tabData.Label;
+        this.Component.bounds = this.bounds;
+        this.Component.name = this.name;
         this.textWidth = textBounds.X;
     }
 
@@ -41,16 +43,10 @@ internal sealed class TabIcon : ICustomComponent
     }
 
     /// <inheritdoc />
-    public ClickableComponent Component { get; }
+    public override ClickableComponent Component { get; }
 
     /// <inheritdoc />
-    public string? HoverText => null;
-
-    /// <inheritdoc />
-    public bool Contains(Vector2 position) => this.Component.bounds.Contains(position);
-
-    /// <inheritdoc />
-    public void Draw(SpriteBatch spriteBatch)
+    public override void Draw(SpriteBatch spriteBatch)
     {
         // Top-Center
         spriteBatch.Draw(
@@ -145,21 +141,21 @@ internal sealed class TabIcon : ICustomComponent
     }
 
     /// <inheritdoc />
-    public bool TryLeftClick(int x, int y)
+    public override bool TryLeftClick(int x, int y)
     {
         this.clicked.InvokeAll(this, this.data);
         return true;
     }
 
     /// <inheritdoc />
-    public bool TryRightClick(int x, int y)
+    public override bool TryRightClick(int x, int y)
     {
         this.clicked.InvokeAll(this, this.data);
         return true;
     }
 
     /// <inheritdoc />
-    public void Update(int mouseX, int mouseY)
+    public override void Update(int mouseX, int mouseY)
     {
         this.Component.bounds.Width = this.Component.bounds.Contains(mouseX, mouseY)
             ? Math.Min(this.Component.bounds.Width + 16, this.textWidth + Game1.tileSize + IClickableMenu.borderWidth)

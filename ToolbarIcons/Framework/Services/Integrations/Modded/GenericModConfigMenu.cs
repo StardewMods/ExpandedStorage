@@ -1,5 +1,6 @@
 namespace StardewMods.ToolbarIcons.Framework.Services.Integrations.Modded;
 
+using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Interfaces;
 
 /// <inheritdoc />
@@ -12,7 +13,7 @@ internal sealed class GenericModConfigMenu : IMethodIntegration
     public string HoverText => I18n.Button_GenericModConfigMenu();
 
     /// <inheritdoc />
-    public int Index => 4;
+    public string Icon => InternalIcon.GenericModConfigMenu.ToStringFast();
 
     /// <inheritdoc />
     public string MethodName => "OpenListMenu";

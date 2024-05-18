@@ -32,9 +32,9 @@ internal sealed class IconRegistry : BaseService, IIconRegistry
     {
         var icon = new Icon(this.GetTexture, this.CreateComponent)
         {
+            Area = area,
             Id = id,
             Path = path,
-            Area = area,
         };
 
         IconRegistry.Icons.TryAdd(id, icon);
@@ -68,6 +68,9 @@ internal sealed class IconRegistry : BaseService, IIconRegistry
     }
 
     /// <inheritdoc />
+    public IIcon RequireIcon(VanillaIcon icon) => this.RequireIcon(icon.ToStringFast());
+
+    /// <inheritdoc />
     public bool TryGetIcon(string id, [NotNullWhen(true)] out IIcon? icon)
     {
         icon = null;
@@ -80,27 +83,43 @@ internal sealed class IconRegistry : BaseService, IIconRegistry
         return icon is not null;
     }
 
-    private ClickableTextureComponent CreateComponent(IIcon icon, IconStyle style) =>
-        style switch
+    [SuppressMessage("ReSharper", "PossibleLossOfFraction", Justification = "Reviewed")]
+    private ClickableTextureComponent CreateComponent(
+        IIcon icon,
+        IconStyle style,
+        int x = 0,
+        int y = 0,
+        float scale = Game1.pixelZoom)
+    {
+        var texture = this.GetTexture(icon, style);
+        scale = style switch
+        {
+            IconStyle.Transparent => (int)Math.Ceiling(16f * scale / icon.Area.Width),
+            IconStyle.Button => 16f * scale / texture.Width,
+            _ => scale,
+        };
+
+        return style switch
         {
             IconStyle.Transparent => new ClickableTextureComponent(
                 icon.Id,
-                new Rectangle(0, 0, icon.Area.Width * Game1.pixelZoom, icon.Area.Height * Game1.pixelZoom),
+                new Rectangle(x, y, (int)(icon.Area.Width * scale), (int)(icon.Area.Height * scale)),
                 null,
                 null,
-                this.assetHandler.GetTexture(icon),
+                texture,
                 icon.Area,
-                Game1.pixelZoom),
+                scale),
             IconStyle.Button => new ClickableTextureComponent(
                 icon.Id,
-                new Rectangle(0, 0, Game1.tileSize, Game1.tileSize),
+                new Rectangle(x, y, (int)(scale * 16), (int)(scale * 16)),
                 null,
                 null,
-                this.assetHandler.CreateButtonTexture(icon),
-                new Rectangle(0, 0, 16, 16),
-                Game1.pixelZoom),
+                texture,
+                new Rectangle(0, 0, texture.Width, texture.Height),
+                scale),
             _ => throw new ArgumentOutOfRangeException(nameof(style), style, null),
         };
+    }
 
     private Texture2D GetTexture(IIcon icon, IconStyle style) =>
         style switch

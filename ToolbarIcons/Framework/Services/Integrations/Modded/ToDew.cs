@@ -1,6 +1,7 @@
 namespace StardewMods.ToolbarIcons.Framework.Services.Integrations.Modded;
 
 using System.Reflection;
+using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Interfaces;
 using StardewValley.Menus;
 
@@ -11,7 +12,7 @@ internal sealed class ToDew : IActionIntegration
     public string HoverText => I18n.Button_ToDew();
 
     /// <inheritdoc />
-    public int Index => 7;
+    public string Icon => InternalIcon.ToDew.ToStringFast();
 
     /// <inheritdoc />
     public string ModId => "jltaylor-us.ToDew";

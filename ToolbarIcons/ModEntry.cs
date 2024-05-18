@@ -1,7 +1,6 @@
-﻿namespace StardewMods.ToolbarIcons;
+namespace StardewMods.ToolbarIcons;
 
 using SimpleInjector;
-using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
@@ -10,10 +9,9 @@ using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.ToolbarIcons.Framework;
 using StardewMods.ToolbarIcons.Framework.Interfaces;
 using StardewMods.ToolbarIcons.Framework.Services;
+using StardewMods.ToolbarIcons.Framework.Services.Factory;
 using StardewMods.ToolbarIcons.Framework.Services.Integrations.Modded;
 using StardewMods.ToolbarIcons.Framework.Services.Integrations.Vanilla;
-using StardewMods.ToolbarIcons.Framework.UI;
-using StardewValley.Menus;
 
 /// <inheritdoc />
 public sealed class ModEntry : Mod
@@ -41,8 +39,10 @@ public sealed class ModEntry : Mod
         this.container.RegisterInstance(this.Helper.Translation);
 
         this.container.RegisterSingleton<AssetHandler>();
+        this.container.RegisterSingleton<ComplexOptionFactory>();
         this.container.RegisterSingleton<ContentPatcherIntegration>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
+        this.container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.container.RegisterSingleton<IModConfig, ConfigManager>();
@@ -52,27 +52,21 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
         this.container.RegisterSingleton<ToolbarManager>();
 
-        this.container.RegisterInstance(new Dictionary<string, ClickableTextureComponent>());
-        this.container.RegisterInstance<Func<ToolbarIconOption>>(this.container.GetInstance<ToolbarIconOption>);
-        this.container.Register<ToolbarIconOption>();
-
         this.container.Collection.Register<ICustomIntegration>(
             typeof(AlwaysScrollMap),
             typeof(CjbCheatsMenu),
             typeof(CjbItemSpawner),
             typeof(DailyQuests),
-            typeof(DynamicGameAssets),
             typeof(GenericModConfigMenu),
             typeof(SpecialOrders),
             typeof(StardewAquarium),
             typeof(ToDew),
             typeof(ToggleCollision));
 
+        this.container.RegisterInstance(new Dictionary<string, string?>());
+
         // Verify
         this.container.Verify();
-
-        // Events
-        this.container.GetInstance<IEventManager>().Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
     }
 
     /// <inheritdoc />
@@ -80,13 +74,7 @@ public sealed class ModEntry : Mod
         new ToolbarIconsApi(
             mod,
             this.container.GetInstance<IEventManager>(),
-            this.container.GetInstance<IGameContentHelper>(),
+            this.container.GetInstance<IIconRegistry>(),
             this.container.GetInstance<ILog>(),
             this.container.GetInstance<ToolbarManager>());
-
-    private void OnGameLaunched(GameLaunchedEventArgs e)
-    {
-        var configManager = this.container.GetInstance<ConfigManager>();
-        configManager.Init();
-    }
 }

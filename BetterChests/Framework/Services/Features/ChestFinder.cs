@@ -2,6 +2,7 @@ namespace StardewMods.BetterChests.Framework.Services.Features;
 
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
+using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Models.Events;
@@ -72,7 +73,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         this.Events.Subscribe<WarpedEventArgs>(this.OnWarped);
 
         // Integrations
-        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon("Search", out var icon))
+        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon(InternalIcon.Search, out var icon))
         {
             return;
         }
@@ -171,6 +172,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
 
     private void OpenSearchBar() =>
         Game1.activeClickableMenu = new SearchOverlay(
+            this.inputHelper,
             () => this.searchText.Value,
             value =>
             {

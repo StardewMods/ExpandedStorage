@@ -4,6 +4,7 @@ using HarmonyLib;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
+using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Models.Events;
@@ -39,7 +40,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public HslColorPicker(
         AssetHandler assetHandler,
         IEventManager eventManager,
@@ -229,7 +230,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
             {
                 HslColorPicker: FeatureOption.Enabled,
             } container
-            || !this.iconRegistry.TryGetIcon("HSL", out var icon))
+            || !this.iconRegistry.TryGetIcon(InternalIcon.Hsl, out var icon))
         {
             this.colorPicker.Value = null;
             return;

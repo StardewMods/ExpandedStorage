@@ -15,6 +15,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
 {
     private readonly IExpressionHandler expressionHandler;
     private readonly IIconRegistry iconRegistry;
+    private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<List<TabIcon>> tabs = new(() => []);
 
@@ -22,6 +23,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
+    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
@@ -30,6 +32,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
         IIconRegistry iconRegistry,
+        IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
         MenuHandler menuHandler,
@@ -38,6 +41,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     {
         this.expressionHandler = expressionHandler;
         this.iconRegistry = iconRegistry;
+        this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
     }
 
@@ -91,7 +95,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
                 continue;
             }
 
-            var tabIcon = new TabIcon(x, y, icon, tabData);
+            var tabIcon = new TabIcon(this.inputHelper, x, y, icon, tabData);
             tabIcon.Clicked += this.OnClicked;
             e.AddComponent(tabIcon);
 

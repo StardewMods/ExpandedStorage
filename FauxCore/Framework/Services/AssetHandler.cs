@@ -9,11 +9,42 @@ using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Interfaces;
 using StardewMods.FauxCore.Framework.Models;
+using StardewValley.Menus;
 
 /// <inheritdoc cref="StardewMods.FauxCore.Framework.Interfaces.IAssetHandler" />
 internal sealed class AssetHandler : BaseService, IAssetHandler
 {
-    private readonly Dictionary<string, IManagedTexture> cachedData = new();
+    private static readonly Dictionary<VanillaIcon, Rectangle> VanillaIcons = new()
+    {
+        { VanillaIcon.ArrowDown, new Rectangle(421, 472, 11, 12) },
+        { VanillaIcon.ArrowLeft, new Rectangle(352, 495, 12, 11) },
+        { VanillaIcon.ArrowRight, new Rectangle(365, 495, 12, 11) },
+        { VanillaIcon.ArrowUp, new Rectangle(421, 459, 11, 12) },
+        { VanillaIcon.Backpack, new Rectangle(4, 372, 8, 11) },
+        { VanillaIcon.Cancel, new Rectangle(192, 256, 64, 64) },
+        { VanillaIcon.Checked, OptionsCheckbox.sourceRectChecked },
+        { VanillaIcon.Chest, new Rectangle(127, 412, 10, 11) },
+        { VanillaIcon.Coin, new Rectangle(4, 388, 8, 8) },
+        { VanillaIcon.DoNot, new Rectangle(322, 498, 12, 12) },
+        { VanillaIcon.EmptyHeart, new Rectangle(218, 428, 7, 6) },
+        { VanillaIcon.Fish, new Rectangle(20, 428, 10, 10) },
+        { VanillaIcon.FishingChest, new Rectangle(137, 412, 10, 11) },
+        { VanillaIcon.Gift, new Rectangle(147, 412, 10, 11) },
+        { VanillaIcon.Heart, new Rectangle(211, 428, 7, 6) },
+        { VanillaIcon.Ok, new Rectangle(128, 256, 64, 64) },
+        { VanillaIcon.Organize, new Rectangle(162, 440, 16, 16) },
+        { VanillaIcon.QualityGold, new Rectangle(346, 400, 8, 8) },
+        { VanillaIcon.QualityIridium, new Rectangle(346, 392, 8, 8) },
+        { VanillaIcon.QualitySilver, new Rectangle(338, 400, 8, 8) },
+        { VanillaIcon.Shield, new Rectangle(110, 428, 10, 10) },
+        { VanillaIcon.Skull, new Rectangle(140, 428, 10, 10) },
+        { VanillaIcon.Sword, new Rectangle(120, 428, 10, 10) },
+        { VanillaIcon.Tool, new Rectangle(30, 428, 10, 10) },
+        { VanillaIcon.Trash, new Rectangle(323, 433, 9, 10) },
+        { VanillaIcon.Unchecked, OptionsCheckbox.sourceRectUnchecked },
+        { VanillaIcon.Vegetable, new Rectangle(10, 428, 10, 10) },
+    };
+
     private readonly Dictionary<string, Texture2D> cachedTextures = new();
     private readonly IGameContentHelper gameContentHelper;
     private readonly IconRegistry iconRegistry;
@@ -56,50 +87,58 @@ internal sealed class AssetHandler : BaseService, IAssetHandler
             return texture;
         }
 
-        // Get icon base
-        if (!this.themeHelper.TryGetAsset(this.ModId + "/UI", out var baseTexture))
+        // Get icon texture
+        if (!this.themeHelper.TryGetRawTextureData(icon.Path, out var iconTexture))
+        {
+            throw new InvalidOperationException("The icon texture is missing.");
+        }
+
+        // Get button texture
+        if (!this.themeHelper.TryGetRawTextureData(this.ModId + "/UI", out var baseTexture))
         {
             throw new InvalidOperationException("The ui texture is missing.");
         }
 
-        var colors = new Color[16 * 16];
+        var length = (int)(16 * Math.Ceiling(icon.Area.Width / 16d));
+        var scale = length / 16;
+        var area = length * length;
+        var colors = new Color[area];
 
         // Copy base to colors
-        for (var i = 0; i < colors.Length; i++)
+        for (var x = 0; x < length; x++)
         {
-            var x = i % 16;
-            var y = i / 16;
-            colors[i] = baseTexture.Data[(y * baseTexture.Width) + x];
-        }
-
-        // Get icon data
-        if (!this.themeHelper.TryGetAsset(icon.Path, out var managedTexture)
-            && !this.cachedData.TryGetValue(icon.Path, out managedTexture))
-        {
-            var iconData = new VanillaTexture(icon.GetTexture(IconStyle.Transparent));
-            managedTexture = new ManagedTexture(this.gameContentHelper, icon.Path, iconData);
-            this.cachedData.Add(icon.Id, managedTexture);
+            for (var y = 0; y < length; y++)
+            {
+                var targetIndex = (y * length) + x;
+                var sourceX = x / scale;
+                var sourceY = y / scale;
+                var sourceIndex = (sourceY * 16) + sourceX;
+                colors[targetIndex] = baseTexture.Data[sourceIndex];
+            }
         }
 
         // Copy icon to colors
-        var xOffset = (16 - icon.Area.Width) / 2;
-        var yOffset = (16 - icon.Area.Height) / 2;
-        for (var i = 0; i < icon.Area.Width * icon.Area.Height; i++)
+        var xOffset = (length - icon.Area.Width) / 2;
+        var yOffset = (length - icon.Area.Height) / 2;
+        for (var x = xOffset; x < xOffset + icon.Area.Width; x++)
         {
-            var x = i % icon.Area.Width;
-            var y = i / icon.Area.Width;
-            var j = x + xOffset + ((y + yOffset) * 16);
-            var k = x + icon.Area.Left + ((y + icon.Area.Top) * managedTexture.Width);
-            if (managedTexture.Data[k].A > 0)
+            for (var y = yOffset; y < yOffset + icon.Area.Height; y++)
             {
-                colors[j] = managedTexture.Data[k];
+                var targetIndex = (y * length) + x;
+                var sourceX = x - xOffset + icon.Area.X;
+                var sourceY = y - yOffset + icon.Area.Y;
+                var sourceIndex = (sourceY * iconTexture.Width) + sourceX;
+                if (iconTexture.Data[sourceIndex].A > 0)
+                {
+                    colors[targetIndex] = iconTexture.Data[sourceIndex];
+                }
             }
         }
 
         // Create texture
-        texture = new Texture2D(Game1.spriteBatch.GraphicsDevice, 16, 16);
+        texture = new Texture2D(Game1.spriteBatch.GraphicsDevice, length, length);
         texture.SetData(colors);
-        this.cachedTextures.TryAdd($"{this.ModId}/Buttons/{icon.Id}", texture);
+        this.cachedTextures.Add($"{this.ModId}/Buttons/{icon.Id}", texture);
         return texture;
     }
 
@@ -136,27 +175,10 @@ internal sealed class AssetHandler : BaseService, IAssetHandler
 
     private void OnGameLaunched(GameLaunchedEventArgs e)
     {
-        this.iconRegistry.Add("SDV.Vanilla/Backpack", "LooseSprites/Cursors", new Rectangle(4, 372, 8, 11));
-        this.iconRegistry.Add("SDV.Vanilla/Shipping", "LooseSprites/Cursors", new Rectangle(4, 388, 8, 8));
-        this.iconRegistry.Add("SDV.Vanilla/UpArrow", "LooseSprites/Cursors", new Rectangle(421, 459, 11, 12));
-        this.iconRegistry.Add("SDV.Vanilla/DownArrow", "LooseSprites/Cursors", new Rectangle(421, 472, 11, 12));
-        this.iconRegistry.Add("SDV.Vanilla/LeftArrow", "LooseSprites/Cursors", new Rectangle(352, 495, 12, 11));
-        this.iconRegistry.Add("SDV.Vanilla/RightArrow", "LooseSprites/Cursors", new Rectangle(365, 495, 12, 11));
-        this.iconRegistry.Add("SDV.Vanilla/Chest", "LooseSprites/Cursors", new Rectangle(127, 412, 10, 11));
-        this.iconRegistry.Add("SDV.Vanilla/Chest", "LooseSprites/Cursors", new Rectangle(127, 412, 10, 11));
-        this.iconRegistry.Add("SDV.Vanilla/FishingChest", "LooseSprites/Cursors", new Rectangle(137, 412, 10, 11));
-        this.iconRegistry.Add("SDV.Vanilla/Gift", "LooseSprites/Cursors", new Rectangle(147, 412, 10, 11));
-        this.iconRegistry.Add("SDV.Vanilla/Skull", "LooseSprites/Cursors", new Rectangle(140, 428, 10, 10));
-        this.iconRegistry.Add("SDV.Vanilla/Sword", "LooseSprites/Cursors", new Rectangle(120, 428, 10, 10));
-        this.iconRegistry.Add("SDV.Vanilla/Shield", "LooseSprites/Cursors", new Rectangle(110, 428, 10, 10));
-        this.iconRegistry.Add("SDV.Vanilla/Tool", "LooseSprites/Cursors", new Rectangle(30, 428, 10, 10));
-        this.iconRegistry.Add("SDV.Vanilla/Fishing", "LooseSprites/Cursors", new Rectangle(20, 428, 10, 10));
-        this.iconRegistry.Add("SDV.Vanilla/Crops", "LooseSprites/Cursors", new Rectangle(10, 428, 10, 10));
-        this.iconRegistry.Add("SDV.Vanilla/Trash", "LooseSprites/Cursors", new Rectangle(323, 433, 9, 10));
-        this.iconRegistry.Add("SDV.Vanilla/DoNot", "LooseSprites/Cursors", new Rectangle(322, 498, 12, 12));
-        this.iconRegistry.Add("SDV.Vanilla/Silver", "LooseSprites/Cursors", new Rectangle(338, 400, 8, 8));
-        this.iconRegistry.Add("SDV.Vanilla/Gold", "LooseSprites/Cursors", new Rectangle(346, 400, 8, 8));
-        this.iconRegistry.Add("SDV.Vanilla/Iridium", "LooseSprites/Cursors", new Rectangle(346, 392, 8, 8));
+        foreach (var (key, area) in AssetHandler.VanillaIcons)
+        {
+            this.iconRegistry.Add(key.ToStringFast(), "LooseSprites/Cursors", area);
+        }
     }
 
     private void RefreshIcons()
@@ -164,7 +186,7 @@ internal sealed class AssetHandler : BaseService, IAssetHandler
         var icons = this.gameContentHelper.Load<Dictionary<string, IconData>>($"{this.ModId}/Icons");
         foreach (var (key, icon) in icons)
         {
-            this.iconRegistry.AddIcon(key, icon.Path, icon.Area);
+            this.iconRegistry.Add(key, icon.Path, icon.Area);
         }
     }
 }

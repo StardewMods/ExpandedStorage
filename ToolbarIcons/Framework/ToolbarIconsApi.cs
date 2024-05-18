@@ -1,7 +1,6 @@
 namespace StardewMods.ToolbarIcons.Framework;
 
 using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -13,7 +12,7 @@ using StardewMods.ToolbarIcons.Framework.Services;
 public sealed class ToolbarIconsApi : IToolbarIconsApi
 {
     private readonly BaseEventManager eventManager;
-    private readonly IGameContentHelper gameContentHelper;
+    private readonly IIconRegistry iconRegistry;
     private readonly ILog log;
     private readonly IModInfo modInfo;
     private readonly string prefix;
@@ -24,19 +23,19 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
     /// <summary>Initializes a new instance of the <see cref="ToolbarIconsApi" /> class.</summary>
     /// <param name="modInfo">Mod info from the calling mod.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="log">Dependency used for monitoring and logging.</param>
-    /// <param name="toolbarManager">Dependency for managing the toolbar icons.</param>
+    /// <param name="toolbarManager">Dependency used for adding or removing icons on the toolbar.</param>
     internal ToolbarIconsApi(
         IModInfo modInfo,
         IEventManager eventManager,
-        IGameContentHelper gameContentHelper,
+        IIconRegistry iconRegistry,
         ILog log,
         ToolbarManager toolbarManager)
     {
         // Init
         this.modInfo = modInfo;
-        this.gameContentHelper = gameContentHelper;
+        this.iconRegistry = iconRegistry;
         this.log = log;
         this.toolbarManager = toolbarManager;
         this.prefix = this.modInfo.Manifest.UniqueID + "/";
@@ -63,15 +62,20 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
     }
 
     /// <inheritdoc />
-    public void AddToolbarIcon(string id, string texturePath, Rectangle? sourceRect, string? hoverText) =>
-        this.toolbarManager.AddToolbarIcon(
-            $"{this.prefix}{id}",
-            () => this.gameContentHelper.Load<Texture2D>(texturePath),
-            sourceRect,
-            hoverText);
+    public void AddToolbarIcon(string id, string texturePath, Rectangle? sourceRect, string? hoverText)
+    {
+        this.iconRegistry.AddIcon($"{this.prefix}{id}", texturePath, sourceRect ?? new Rectangle(0, 0, 16, 16));
+        this.toolbarManager.AddIcon($"{this.prefix}{id}", hoverText);
+    }
 
     /// <inheritdoc />
-    public void RemoveToolbarIcon(string id) => this.toolbarManager.RemoveToolbarIcon($"{this.prefix}{id}");
+    public void AddToolbarIcon(IIcon icon, string? hoverText) => this.toolbarManager.AddIcon(icon.Id, hoverText);
+
+    /// <inheritdoc />
+    public void RemoveToolbarIcon(string id) => this.toolbarManager.RemoveIcon($"{this.prefix}{id}");
+
+    /// <inheritdoc />
+    public void RemoveToolbarIcon(IIcon icon) => this.toolbarManager.RemoveIcon(icon.Id);
 
     /// <inheritdoc />
     public void Subscribe(Action<IIconPressedEventArgs> handler) => this.eventManager.Subscribe(handler);

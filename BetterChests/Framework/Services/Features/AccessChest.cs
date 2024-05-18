@@ -65,11 +65,11 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
 
     private ClickableTextureComponent LeftArrow =>
         this.leftArrow.Value ??=
-            this.iconRegistry.RequireIcon("SDV.Vanilla/LeftArrow").GetComponent(IconStyle.Transparent);
+            this.iconRegistry.RequireIcon(VanillaIcon.ArrowLeft).GetComponent(IconStyle.Transparent);
 
     private ClickableTextureComponent RightArrow =>
         this.rightArrow.Value ??=
-            this.iconRegistry.RequireIcon("SDV.Vanilla/RightArrow").GetComponent(IconStyle.Transparent);
+            this.iconRegistry.RequireIcon(VanillaIcon.ArrowRight).GetComponent(IconStyle.Transparent);
 
     /// <inheritdoc />
     protected override void Activate()

@@ -11,6 +11,8 @@ using StardewMods.FauxCore.Framework.Models;
 /// <inheritdoc cref="IThemeHelper" />
 internal sealed class ThemeHelper : BaseService, IThemeHelper
 {
+    private readonly Dictionary<IAssetName, IRawTextureData> cachedTextureData = new();
+    private readonly Dictionary<IAssetName, Texture2D?> cachedTextures = new();
     private readonly IGameContentHelper gameContentHelper;
     private readonly Dictionary<Color, Color> paletteSwap = new();
     private readonly Dictionary<IAssetName, ManagedTexture> trackedAssets = [];
@@ -37,6 +39,7 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
     };
 
     private bool initialize;
+    private IRawTextureData? mouseCursors;
 
     /// <summary>Initializes a new instance of the <see cref="ThemeHelper" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
@@ -52,6 +55,9 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
         eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
         eventManager.Subscribe<SaveLoadedEventArgs>(this.OnSaveLoaded);
     }
+
+    /// <summary>Gets the raw data for the mouse cursors texture.</summary>
+    public IRawTextureData MouseCursors => this.mouseCursors ??= new VanillaTexture(Game1.mouseCursors);
 
     /// <inheritdoc />
     public void AddAsset(string path, IRawTextureData data)
@@ -91,21 +97,66 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
         return true;
     }
 
+    /// <inheritdoc />
+    public bool TryGetRawTextureData(string path, [NotNullWhen(true)] out IRawTextureData? rawTextureData)
+    {
+        var assetName = this.gameContentHelper.ParseAssetName(path);
+        if (this.cachedTextureData.TryGetValue(assetName, out rawTextureData))
+        {
+            return true;
+        }
+
+        if (this.TryGetAsset(path, out var managedTexture))
+        {
+            rawTextureData = managedTexture;
+            return true;
+        }
+
+        if (assetName.IsEquivalentTo("LooseSprites/MouseCursors"))
+        {
+            rawTextureData = this.MouseCursors;
+            return true;
+        }
+
+        if (!this.TryGetTexture(path, out var texture))
+        {
+            rawTextureData = null;
+            return false;
+        }
+
+        rawTextureData = new VanillaTexture(texture);
+        this.cachedTextureData.Add(assetName, rawTextureData);
+        return true;
+    }
+
     private void InitializePalette()
     {
         var changed = false;
-        var mouseCursors = new VanillaTexture(Game1.mouseCursors);
+        this.mouseCursors = new VanillaTexture(Game1.mouseCursors);
         foreach (var (points, color) in this.vanillaPalette)
         {
             var sample = points
-                .Select(point => mouseCursors.Data[point.X + (point.Y * mouseCursors.Width)])
+                .Select(point => this.mouseCursors.Data[point.X + (point.Y * this.mouseCursors.Width)])
                 .GroupBy(sample => sample)
                 .OrderByDescending(group => group.Count())
                 .First()
                 .Key;
 
-            if (color.Equals(sample)
-                || (this.paletteSwap.TryGetValue(color, out var currentColor) && currentColor == sample))
+            var same = color.Equals(sample);
+            if (this.paletteSwap.TryGetValue(color, out var currentColor))
+            {
+                if (same)
+                {
+                    this.paletteSwap.Remove(color);
+                    continue;
+                }
+
+                if (currentColor == sample)
+                {
+                    continue;
+                }
+            }
+            else if (same)
             {
                 continue;
             }
@@ -168,6 +219,16 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
 
     private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
     {
+        foreach (var name in e.NamesWithoutLocale)
+        {
+            this.cachedTextures.Remove(name);
+            this.cachedTextureData.Remove(name);
+            if (name.IsEquivalentTo("LooseSprites/Cursors"))
+            {
+                this.InitializePalette();
+            }
+        }
+
         if (e.NamesWithoutLocale.Any(name => name.IsEquivalentTo("LooseSprites/Cursors")))
         {
             this.initialize = true;
@@ -175,4 +236,26 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
     }
 
     private void OnSaveLoaded(SaveLoadedEventArgs e) => this.InitializePalette();
+
+    private bool TryGetTexture(string path, [NotNullWhen(true)] out Texture2D? texture)
+    {
+        var assetName = this.gameContentHelper.ParseAssetName(path);
+        if (this.cachedTextures.TryGetValue(assetName, out texture))
+        {
+            return texture is not null;
+        }
+
+        try
+        {
+            texture = this.gameContentHelper.Load<Texture2D>(path);
+            this.cachedTextures.Add(assetName, texture);
+            return true;
+        }
+        catch
+        {
+            texture = null;
+            this.cachedTextures.Add(assetName, null);
+            return false;
+        }
+    }
 }

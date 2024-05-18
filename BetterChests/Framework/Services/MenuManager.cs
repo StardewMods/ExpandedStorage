@@ -85,10 +85,10 @@ internal sealed class MenuManager : BaseService
     public InventoryMenu.highlightThisItem? OriginalHighlightMethod { get; set; }
 
     private ClickableTextureComponent DownArrow =>
-        this.downArrow ??= this.iconRegistry.RequireIcon("SDV.Vanilla/DownArrow").GetComponent(IconStyle.Transparent);
+        this.downArrow ??= this.iconRegistry.RequireIcon(VanillaIcon.ArrowDown).GetComponent(IconStyle.Transparent);
 
     private ClickableTextureComponent UpArrow =>
-        this.upArrow ??= this.iconRegistry.RequireIcon("SDV.Vanilla/UpArrow").GetComponent(IconStyle.Transparent);
+        this.upArrow ??= this.iconRegistry.RequireIcon(VanillaIcon.ArrowUp).GetComponent(IconStyle.Transparent);
 
     /// <summary>Draws overlay components to the SpriteBatch.</summary>
     /// <param name="spriteBatch">The SpriteBatch used to draw the game object.</param>

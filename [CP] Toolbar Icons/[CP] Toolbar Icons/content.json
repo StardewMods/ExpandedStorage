@@ -95,7 +95,7 @@
         "furyx639.ToolbarIconsCP/FashionSense.ShowMenu": {
           "ModId": "PeacefulEnd.FashionSense",
           "Type": "Menu",
-          "ExtraData": "FashionSense.Framework.UI.HandMirrorMenu",
+          "ExtraData": "FashionSense.Framework.UI.HandMirrorMenu, FashionSense",
           "HoverText": "{{i18n: button.FashionSense}}",
           "Texture": "furyx639.ToolbarIconsCP/Icons",
           "Index": 4
@@ -171,7 +171,7 @@
         "furyx639.ToolbarIconsCP/Magic.ShowMenu": {
           "ModId": "spacechase0.Magic",
           "Type": "Menu",
-          "ExtraData": "Magic.Framework.Game.Interface.MagicMenu",
+          "ExtraData": "Magic.Framework.Game.Interface.MagicMenu, Magic",
           "HoverText": "{{i18n: button.Magic}}",
           "Texture": "furyx639.ToolbarIconsCP/Icons",
           "Index": 9

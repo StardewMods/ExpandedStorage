@@ -45,6 +45,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\CustomBush\ICustomBushDrop.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Enums\IconStyle.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Enums\ExpressionType.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Enums\VanillaIcon.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\IExpression.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\IIcon.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\IManagedTexture.cs"/>
@@ -92,12 +93,13 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ToolbarIcons\ToolbarIconsIntegration.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\EventManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\UiManager.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)UI\BaseDropdown.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)UI\BaseMenu.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)UI\Dropdown.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)UI\GenericDropdown.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)UI\PopupList.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)UI\VerticalScrollBar.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)UI\TextField.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Components\BaseComponent.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Components\TextField.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Components\VerticalScrollBar.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\BaseMenu.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\Dropdown.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\FramedMenu.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\PopupSelect.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\SelectOption.cs"/>
   </ItemGroup>
 </Project>

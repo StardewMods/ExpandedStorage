@@ -1,49 +1,38 @@
 namespace StardewMods.ToolbarIcons.Framework.Services;
 
 using System.Reflection;
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
+using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Interfaces;
-using StardewMods.ToolbarIcons.Framework.Models.Events;
+using StardewMods.ToolbarIcons.Framework.Models;
 using StardewValley.Menus;
 
 /// <summary>Base class for adding toolbar icons for integrated mods.</summary>
 internal sealed class IntegrationManager : BaseService
 {
-    private readonly AssetHandler assetHandler;
     private readonly IEnumerable<ICustomIntegration> customIntegrations;
-    private readonly IEventManager eventManager;
-    private readonly IGameContentHelper gameContentHelper;
     private readonly Dictionary<string, Action> icons = new();
     private readonly IModRegistry modRegistry;
     private readonly MethodInfo overrideButtonReflected;
     private readonly IReflectionHelper reflectionHelper;
     private readonly ToolbarManager toolbarManager;
 
-    private bool isLoaded;
-
     /// <summary>Initializes a new instance of the <see cref="IntegrationManager" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="customIntegrations">Integrations directly supported by the mod.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modRegistry">Dependency for fetching metadata about loaded mods.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
-    /// <param name="toolbarManager">API to add icons above or below the toolbar.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
+    /// <param name="toolbarManager">Dependency used for adding or removing icons on the toolbar.</param>
     public IntegrationManager(
-        AssetHandler assetHandler,
         ILog log,
         IEnumerable<ICustomIntegration> customIntegrations,
         IEventManager eventManager,
-        IGameContentHelper gameContentHelper,
         IManifest manifest,
         IModRegistry modRegistry,
         IReflectionHelper reflectionHelper,
@@ -51,10 +40,7 @@ internal sealed class IntegrationManager : BaseService
         : base(log, manifest)
     {
         // Init
-        this.assetHandler = assetHandler;
         this.customIntegrations = customIntegrations;
-        this.eventManager = eventManager;
-        this.gameContentHelper = gameContentHelper;
         this.modRegistry = modRegistry;
         this.reflectionHelper = reflectionHelper;
         this.toolbarManager = toolbarManager;
@@ -62,244 +48,64 @@ internal sealed class IntegrationManager : BaseService
             ?? throw new MethodAccessException("Unable to access OverrideButton");
 
         // Events
-        eventManager.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
+        eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
         eventManager.Subscribe<IIconPressedEventArgs>(this.OnIconPressed);
     }
 
-    /// <summary>Adds a complex integration for vanilla.</summary>
-    /// <param name="index">The index of the mod icon.</param>
-    /// <param name="hoverText">The text to display.</param>
-    /// <param name="action">Function which returns the action to perform.</param>
-    private void AddCustomAction(int index, string hoverText, Action action) =>
-        this.AddIcon(string.Empty, index, hoverText, action, () => this.assetHandler.Icons.Value);
-
-    /// <summary>Adds a complex mod integration.</summary>
-    /// <param name="modId">The id of the mod.</param>
-    /// <param name="index">The index of the mod icon.</param>
-    /// <param name="hoverText">The text to display.</param>
-    /// <param name="getAction">Function which returns the action to perform.</param>
-    private void AddCustomAction(string modId, int index, string hoverText, Func<IMod, Action?> getAction)
+    public void AddIcon(string id, IntegrationData data)
     {
-        if (!this.TryGetMod(modId, out var mod))
+        Action? action;
+        switch (data.Type)
         {
-            return;
+            case IntegrationType.Menu when this.TryGetMenuAction(data.ModId, data.ExtraData, out var integrationAction):
+                action = integrationAction;
+                break;
+            case IntegrationType.Method when this.TryGetMethod(data.ModId, data.ExtraData, out var integrationAction):
+                action = integrationAction;
+                break;
+            case IntegrationType.Keybind when this.TryGetKeybindAction(
+                data.ModId,
+                data.ExtraData,
+                out var integrationAction):
+                action = integrationAction;
+                break;
+            default: return;
         }
 
-        var action = getAction(mod);
-        if (action is null)
-        {
-            return;
-        }
-
-        this.AddIcon(modId, index, hoverText, () => action.Invoke(), () => this.assetHandler.Icons.Value);
+        this.icons.Add(id, action);
+        this.toolbarManager.AddIcon(id, data.HoverText);
     }
 
-    /// <summary>Adds a toolbar icon for an integrated mod.</summary>
-    /// <param name="modId">The id of the mod.</param>
-    /// <param name="index">The index of the mod icon.</param>
-    /// <param name="hoverText">The text to display.</param>
-    /// <param name="action">The action to perform for this icon.</param>
-    /// <param name="getTexture">Get method for the texture.</param>
-    private void AddIcon(string modId, int index, string hoverText, Action action, Func<Texture2D> getTexture)
+    private void OnGameLaunched(GameLaunchedEventArgs e)
     {
-        const int cols = AssetHandler.IconTextureWidth / 16;
-        this.toolbarManager.AddToolbarIcon(
-            $"{modId}.{hoverText}",
-            getTexture,
-            new Rectangle(16 * (index % cols), 16 * (index / cols), 16, 16),
-            hoverText);
-
-        this.icons.Add($"{modId}.{hoverText}", action);
-    }
-
-    /// <summary>Adds a simple mod integration for a keybind.</summary>
-    /// <param name="modId">The id of the mod.</param>
-    /// <param name="index">The index of the mod icon.</param>
-    /// <param name="hoverText">The text to display.</param>
-    /// <param name="keybinds">The method to run.</param>
-    /// <param name="getTexture">Get method for the texture.</param>
-    private void AddKeybind(string modId, int index, string hoverText, string keybinds, Func<Texture2D> getTexture)
-    {
-        if (!this.modRegistry.IsLoaded(modId))
-        {
-            return;
-        }
-
-        var keys = keybinds.Trim().Split(' ');
-        IList<SButton> buttons = new List<SButton>();
-        foreach (var key in keys)
-        {
-            if (Enum.TryParse(key, out SButton button))
-            {
-                buttons.Add(button);
-            }
-        }
-
-        this.AddIcon(
-            modId,
-            index,
-            hoverText,
-            () =>
-            {
-                foreach (var button in buttons)
-                {
-                    this.OverrideButton(button, true);
-                }
-            },
-            getTexture);
-    }
-
-    /// <summary>Adds a simple mod integration for a parameterless menu.</summary>
-    /// <param name="modId">The id of the mod.</param>
-    /// <param name="index">The index of the mod icon.</param>
-    /// <param name="hoverText">The text to display.</param>
-    /// <param name="fullName">The full name to the menu class.</param>
-    /// <param name="getTexture">Get method for the texture.</param>
-    private void AddMenu(string modId, int index, string hoverText, string fullName, Func<Texture2D> getTexture)
-    {
-        if (!this.TryGetMod(modId, out var mod))
-        {
-            return;
-        }
-
-        var action = mod.GetType().Assembly.GetType(fullName)?.GetConstructor(Array.Empty<Type>());
-        if (action is null)
-        {
-            return;
-        }
-
-        this.AddIcon(
-            modId,
-            index,
-            hoverText,
-            () =>
-            {
-                var menu = action.Invoke(Array.Empty<object>());
-                Game1.activeClickableMenu = (IClickableMenu)menu;
-            },
-            getTexture);
-    }
-
-    /// <summary>Adds a simple mod integration for a parameterless method.</summary>
-    /// <param name="modId">The id of the mod.</param>
-    /// <param name="index">The index of the mod icon.</param>
-    /// <param name="hoverText">The text to display.</param>
-    /// <param name="method">The method to run.</param>
-    /// <param name="getTexture">Get method for the texture.</param>
-    private void AddMethod(string modId, int index, string hoverText, string method, Func<Texture2D> getTexture)
-    {
-        if (!this.TryGetMod(modId, out var mod))
-        {
-            return;
-        }
-
-        var action = this.reflectionHelper.GetMethod(mod, method, false);
-        if (action is null)
-        {
-            return;
-        }
-
-        this.AddIcon(modId, index, hoverText, () => action.Invoke(), getTexture);
-    }
-
-    /// <summary>Adds a simple mod integration for a method with parameters.</summary>
-    /// <param name="modId">The id of the mod.</param>
-    /// <param name="index">The index of the mod icon.</param>
-    /// <param name="hoverText">The text to display.</param>
-    /// <param name="method">The method to run.</param>
-    /// <param name="arguments">The arguments to pass to the method.</param>
-    private void AddMethodWithParams(string modId, int index, string hoverText, string method, object?[] arguments)
-    {
-        if (!this.TryGetMod(modId, out var mod))
-        {
-            return;
-        }
-
-        var action = this.reflectionHelper.GetMethod(mod, method, false);
-        if (action is null)
-        {
-            return;
-        }
-
-        this.AddIcon(modId, index, hoverText, () => action.Invoke(arguments), () => this.assetHandler.Icons.Value);
-    }
-
-    private void OnConditionsApiReady(ConditionsApiReadyEventArgs e)
-    {
-        if (this.isLoaded)
-        {
-            return;
-        }
-
         // Load Custom Integrations
-        foreach (var integration in this.customIntegrations)
+        foreach (var customIntegration in this.customIntegrations)
         {
-            switch (integration)
+            Action? action;
+            switch (customIntegration)
             {
-                case IActionIntegration actionIntegration:
-                    this.AddCustomAction(
-                        actionIntegration.ModId,
-                        actionIntegration.Index,
-                        actionIntegration.HoverText,
-                        actionIntegration.GetAction);
-
+                case IActionIntegration integration when this.TryGetCustomAction(
+                    integration.ModId,
+                    integration.GetAction,
+                    out var integrationAction):
+                    action = integrationAction;
                     break;
-                case IMethodIntegration methodIntegration:
-                    this.AddMethodWithParams(
-                        methodIntegration.ModId,
-                        methodIntegration.Index,
-                        methodIntegration.HoverText,
-                        methodIntegration.MethodName,
-                        methodIntegration.Arguments);
-
+                case IMethodIntegration integration when this.TryGetMethodWithParams(
+                    integration.ModId,
+                    integration.MethodName,
+                    integration.Arguments,
+                    out var integrationAction):
+                    action = integrationAction;
                     break;
                 case IVanillaIntegration vanillaIntegration:
-                    this.AddCustomAction(
-                        vanillaIntegration.Index,
-                        vanillaIntegration.HoverText,
-                        vanillaIntegration.DoAction);
-
+                    action = vanillaIntegration.DoAction;
                     break;
+                default: continue;
             }
+
+            this.icons.Add(customIntegration.Icon, action);
+            this.toolbarManager.AddIcon(customIntegration.Icon, customIntegration.HoverText);
         }
-
-        // Load Data Integrations
-        foreach (var (_, data) in this.assetHandler.Data)
-        {
-            switch (data.Type)
-            {
-                case IntegrationType.Menu:
-                    this.AddMenu(
-                        data.ModId,
-                        data.Index,
-                        data.HoverText,
-                        data.ExtraData,
-                        () => this.gameContentHelper.Load<Texture2D>(data.Texture));
-
-                    break;
-                case IntegrationType.Method:
-                    this.AddMethod(
-                        data.ModId,
-                        data.Index,
-                        data.HoverText,
-                        data.ExtraData,
-                        () => this.gameContentHelper.Load<Texture2D>(data.Texture));
-
-                    break;
-                case IntegrationType.Keybind:
-                    this.AddKeybind(
-                        data.ModId,
-                        data.Index,
-                        data.HoverText,
-                        data.ExtraData,
-                        () => this.gameContentHelper.Load<Texture2D>(data.Texture));
-
-                    break;
-            }
-        }
-
-        this.isLoaded = true;
-        this.eventManager.Publish(new ToolbarIconsLoadedEventArgs());
     }
 
     private void OnIconPressed(IIconPressedEventArgs e)
@@ -312,6 +118,137 @@ internal sealed class IntegrationManager : BaseService
 
     private void OverrideButton(SButton button, bool inputState) =>
         this.overrideButtonReflected.Invoke(Game1.input, [button, inputState]);
+
+    /// <summary>Attempt to retrieve a custom action.</summary>
+    /// <param name="modId">The id of the mod.</param>
+    /// <param name="getAction">Function which returns the action to perform.</param>
+    /// <param name="action">When this method returns, contains the action; otherwise, null.</param>
+    /// <returns><c>true</c> if the integration was added; otherwise, <c>false</c>.</returns>
+    private bool TryGetCustomAction(string modId, Func<IMod, Action?> getAction, [NotNullWhen(true)] out Action? action)
+    {
+        if (!this.TryGetMod(modId, out var mod))
+        {
+            action = null;
+            return false;
+        }
+
+        action = getAction(mod);
+        return action is not null;
+    }
+
+    /// <summary>Attempt to retrieve a keybind action.</summary>
+    /// <param name="modId">The id of the mod.</param>
+    /// <param name="keybinds">The method to run.</param>
+    /// <param name="action">When this method returns, contains the action; otherwise, null.</param>
+    /// <returns><c>true</c> if the integration was added; otherwise, <c>false</c>.</returns>
+    private bool TryGetKeybindAction(string modId, string keybinds, [NotNullWhen(true)] out Action? action)
+    {
+        action = null;
+        if (!this.modRegistry.IsLoaded(modId))
+        {
+            return false;
+        }
+
+        var keys = keybinds.Trim().Split(' ');
+        IList<SButton> buttons = new List<SButton>();
+        foreach (var key in keys)
+        {
+            if (Enum.TryParse(key, out SButton button))
+            {
+                buttons.Add(button);
+            }
+        }
+
+        action = () =>
+        {
+            foreach (var button in buttons)
+            {
+                this.OverrideButton(button, true);
+            }
+        };
+
+        return true;
+    }
+
+    /// <summary>Attempt to retrieve a menu action.</summary>
+    /// <param name="modId">The id of the mod.</param>
+    /// <param name="fullName">The full name to the menu class.</param>
+    /// <param name="action">When this method returns, contains the action; otherwise, null.</param>
+    /// <returns><c>true</c> if the integration was added; otherwise, <c>false</c>.</returns>
+    private bool TryGetMenuAction(string modId, string fullName, [NotNullWhen(true)] out Action? action)
+    {
+        action = null;
+        if (!this.TryGetMod(modId, out var mod))
+        {
+            return false;
+        }
+
+        var type = Type.GetType(fullName);
+        var constructor = type?.GetConstructor(Array.Empty<Type>());
+        if (constructor is null)
+        {
+            return false;
+        }
+
+        action = () =>
+        {
+            var menu = constructor.Invoke(Array.Empty<object>());
+            Game1.activeClickableMenu = (IClickableMenu)menu;
+        };
+
+        return true;
+    }
+
+    /// <summary>Attempt to retrieve a method.</summary>
+    /// <param name="modId">The id of the mod.</param>
+    /// <param name="method">The method to run.</param>
+    /// <param name="action">When this method returns, contains the action; otherwise, null.</param>
+    /// <returns><c>true</c> if the integration was added; otherwise, <c>false</c>.</returns>
+    private bool TryGetMethod(string modId, string method, [NotNullWhen(true)] out Action? action)
+    {
+        action = null;
+        if (!this.TryGetMod(modId, out var mod))
+        {
+            return false;
+        }
+
+        var reflectedMethod = this.reflectionHelper.GetMethod(mod, method, false);
+        if (reflectedMethod is null)
+        {
+            return false;
+        }
+
+        action = () => reflectedMethod.Invoke();
+        return true;
+    }
+
+    /// <summary>Attempt to retrieve a method with parameters.</summary>
+    /// <param name="modId">The id of the mod.</param>
+    /// <param name="method">The method to run.</param>
+    /// <param name="arguments">The arguments to pass to the method.</param>
+    /// <param name="action">When this method returns, contains the action; otherwise, null.</param>
+    /// <returns><c>true</c> if the integration was added; otherwise, <c>false</c>.</returns>
+    private bool TryGetMethodWithParams(
+        string modId,
+        string method,
+        object?[] arguments,
+        [NotNullWhen(true)] out Action? action)
+    {
+        action = null;
+        if (!this.TryGetMod(modId, out var mod))
+        {
+            return false;
+        }
+
+        var reflectedMethod = this.reflectionHelper.GetMethod(mod, method, false);
+        if (reflectedMethod is null)
+        {
+            return false;
+        }
+
+        action = () => reflectedMethod.Invoke(arguments);
+        return true;
+    }
 
     /// <summary>Tries to get the instance of a mod based on the mod id.</summary>
     /// <param name="modId">The unique id of the mod.</param>

@@ -7,7 +7,7 @@ using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
-using StardewMods.Common.UI;
+using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
 
 /// <summary>Adds a search bar to the top of the <see cref="ItemGrabMenu" />.</summary>
@@ -201,6 +201,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             - (top.Rows == 3 ? 25 : 4);
 
         this.searchBar.Value = new TextField(
+            this.inputHelper,
             x,
             y,
             width,

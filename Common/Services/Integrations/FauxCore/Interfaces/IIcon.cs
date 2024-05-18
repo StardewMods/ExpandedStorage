@@ -22,7 +22,10 @@ public interface IIcon
     public Texture2D GetTexture(IconStyle style);
 
     /// <summary>Gets a component with the icon.</summary>
-    /// <param name="style">The style of the component.</param>
+    /// <param name="style">The component style.</param>
+    /// <param name="x">The component x-coordinate.</param>
+    /// <param name="y">The component y-coordinate.</param>
+    /// <param name="scale">The target component scale.</param>
     /// <returns>Returns a new button.</returns>
-    public ClickableTextureComponent GetComponent(IconStyle style);
+    public ClickableTextureComponent GetComponent(IconStyle style, int x = 0, int y = 0, float scale = Game1.pixelZoom);
 }

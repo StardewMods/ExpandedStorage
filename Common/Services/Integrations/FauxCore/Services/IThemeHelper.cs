@@ -14,9 +14,15 @@ public interface IThemeHelper
     /// <exception cref="KeyNotFoundException">Thrown when no asset is found for the given path.</exception>
     public IManagedTexture RequireAsset(string path);
 
-    /// <summary>Attempt to retrieve a managed texture from theme helper for the given path.</summary>
-    /// <param name="path">The game content path to the asset.</param>
-    /// <param name="texture">When this method returns, contains the managed texture if found; otherwise, null.</param>
+    /// <summary>Attempt to retrieve a managed texture based on the given path.</summary>
+    /// <param name="path">The path to the asset.</param>
+    /// <param name="texture">When this method returns, contains the managed texture; otherwise, null.</param>
     /// <returns><c>true</c> if the managed texture exists; otherwise, <c>false</c>.</returns>
     public bool TryGetAsset(string path, [NotNullWhen(true)] out IManagedTexture? texture);
+
+    /// <summary>Attempt to retrieve the raw texture data based on the given path.</summary>
+    /// <param name="path">The path to the asset.</param>
+    /// <param name="rawTextureData">When this method returns, contains the raw texture data; otherwise, null.</param>
+    /// <returns><c>true</c> if the raw texture dat exists; otherwise, <c>false</c>.</returns>
+    public bool TryGetRawTextureData(string path, [NotNullWhen(true)] out IRawTextureData? rawTextureData);
 }

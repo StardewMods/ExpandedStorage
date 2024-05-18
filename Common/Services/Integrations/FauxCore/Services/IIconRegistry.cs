@@ -21,6 +21,11 @@ public interface IIconRegistry
     /// <exception cref="KeyNotFoundException">Thrown when no icon is found for the given id.</exception>
     public IIcon RequireIcon(string id);
 
+    /// <summary>Retrieves a vanilla icon.</summary>
+    /// <param name="icon">The vanilla icon..</param>
+    /// <returns>Returns the icon.</returns>
+    public IIcon RequireIcon(VanillaIcon icon);
+
     /// <summary>Attempt to retrieve a specific icon with the given id.</summary>
     /// <param name="id">The unique identifier of the icon.</param>
     /// <param name="icon">When this method returns, contains the icon; otherwise, null.</param>

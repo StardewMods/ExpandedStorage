@@ -10,6 +10,7 @@ using StardewMods.Common.Models;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewValley.Menus;
@@ -24,6 +25,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     private readonly IModRegistry modRegistry;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigManager" /> class.</summary>
+    /// <param name="contentPatcherIntegration">Dependency for Content Patcher integration.</param>
     /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
@@ -32,6 +34,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     /// <param name="modHelper">Dependency for events, input, and content.</param>
     /// <param name="modRegistry">Dependency used for fetching metadata about loaded mods.</param>
     public ConfigManager(
+        ContentPatcherIntegration contentPatcherIntegration,
         IDataHelper dataHelper,
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
@@ -39,7 +42,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         IManifest manifest,
         IModHelper modHelper,
         IModRegistry modRegistry)
-        : base(dataHelper, eventManager, modHelper)
+        : base(contentPatcherIntegration, dataHelper, eventManager, modHelper)
     {
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
         this.log = log;

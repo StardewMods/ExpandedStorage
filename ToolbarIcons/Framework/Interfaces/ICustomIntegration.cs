@@ -6,6 +6,6 @@ internal interface ICustomIntegration
     /// <summary>Gets the text used when hovering over the toolbar icon.</summary>
     string HoverText { get; }
 
-    /// <summary>Gets the index of the icon on the sprite sheet.</summary>
-    int Index { get; }
+    /// <summary>Gets the unique identifier for the icon.</summary>
+    string Icon { get; }
 }

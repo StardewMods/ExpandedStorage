@@ -15,6 +15,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
 {
     private readonly ContainerHandler containerHandler;
     private readonly IExpressionHandler expressionHandler;
+    private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<ClickableTextureComponent?> organizeButton = new();
@@ -23,6 +24,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
@@ -32,6 +34,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
         ContainerHandler containerHandler,
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
@@ -41,6 +44,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
     {
         this.containerHandler = containerHandler;
         this.expressionHandler = expressionHandler;
+        this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
     }
@@ -138,6 +142,15 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
         // Add new organize button to the bottom inventory menu
         var x = itemGrabMenu.okButton.bounds.X;
         var y = itemGrabMenu.okButton.bounds.Y - Game1.tileSize - 16;
+        this.organizeButton.Value =
+            this.iconRegistry.RequireIcon(VanillaIcon.Organize).GetComponent(IconStyle.Transparent, x, y);
+
+        this.organizeButton.Value.bounds = this.organizeButton.Value.bounds with
+        {
+            X = x,
+            Y = y,
+        };
+
         this.organizeButton.Value = new ClickableTextureComponent(
             string.Empty,
             new Rectangle(x, y, Game1.tileSize, Game1.tileSize),

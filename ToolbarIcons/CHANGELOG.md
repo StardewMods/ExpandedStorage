@@ -6,6 +6,11 @@
 
 * Updated for FauxCore 1.2.0.
 * If config file is missing, it will attempt to restore from global data.
+* Removed support for Dynamic Game Assets.
+
+### Fixed
+
+* Fixed issue with not being able to configure toolbar icons.
 
 ## 2.7.2 (April 12, 2024)
 

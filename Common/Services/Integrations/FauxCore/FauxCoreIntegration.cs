@@ -113,6 +113,11 @@ internal sealed class FauxCoreIntegration
     public IIcon RequireIcon(string id) =>
         this.iconRegistry?.Value.RequireIcon(id) ?? throw new InvalidOperationException($"Failed to load icon: {id}.");
 
+    /// <inheritdoc/>
+    public IIcon RequireIcon(VanillaIcon icon) =>
+        this.iconRegistry?.Value.RequireIcon(icon)
+        ?? throw new InvalidOperationException($"Failed to load icon: {icon.ToStringFast()}.");
+
     /// <inheritdoc />
     public void Trace(string message, object?[]? args = null) => this.log?.Value.Trace(message, args);
 
@@ -148,6 +153,18 @@ internal sealed class FauxCoreIntegration
     {
         icon = null;
         return this.iconRegistry?.Value.TryGetIcon(id, out icon) ?? false;
+    }
+
+    /// <inheritdoc />
+    public bool TryGetRawTextureData(string path, [NotNullWhen(true)] out IRawTextureData? rawTextureData)
+    {
+        if (this.themeHelper?.Value.TryGetRawTextureData(path, out rawTextureData) == true)
+        {
+            return true;
+        }
+
+        rawTextureData = null;
+        return false;
     }
 
     /// <inheritdoc />

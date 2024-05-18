@@ -3,6 +3,7 @@ namespace StardewMods.EasyAccess;
 using SimpleInjector;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
@@ -37,6 +38,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<CollectService>();
         this.container.RegisterSingleton<IModConfig, ConfigManager>();
         this.container.RegisterSingleton<ConfigManager, ConfigManager>();
+        this.container.RegisterSingleton<ContentPatcherIntegration>();
         this.container.RegisterSingleton<DispenseService>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
         this.container.RegisterSingleton<FauxCoreIntegration>();

@@ -3,7 +3,7 @@ namespace StardewMods.BetterChests.Framework.UI.Menus;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Services.Features;
-using StardewMods.Common.UI;
+using StardewMods.Common.UI.Menus;
 using StardewValley.Menus;
 
 /// <summary>Menu for accessing debug mode.</summary>
@@ -16,7 +16,9 @@ internal sealed class DebugMenu : BaseMenu
 
     /// <summary>Initializes a new instance of the <see cref="DebugMenu" /> class.</summary>
     /// <param name="debugMode">Dependency used for debugging features.</param>
-    public DebugMenu(DebugMode debugMode)
+    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
+    public DebugMenu(DebugMode debugMode, IInputHelper inputHelper)
+        : base(inputHelper)
     {
         this.debugMode = debugMode;
         var lineHeight = Game1.smallFont.MeasureString("T").ToPoint().Y;
@@ -51,35 +53,6 @@ internal sealed class DebugMenu : BaseMenu
     }
 
     /// <inheritdoc />
-    public override void receiveLeftClick(int x, int y, bool playSound = true)
-    {
-        for (var i = 0; i < this.items.Count; i++)
-        {
-            var item = this.items[i];
-            var area = this.areas[i];
-            if (area.Contains(x, y))
-            {
-                switch (item)
-                {
-                    case "backpack":
-                        this.debugMode.Command("bc_config", [item]);
-                        return;
-                    case "reset":
-                        this.debugMode.Command("bc_reset", [item]);
-                        return;
-                    case "config":
-                    case "layout":
-                    case "search":
-                    case "sort":
-                    case "tab":
-                        this.debugMode.Command("bc_menu", [item]);
-                        return;
-                }
-            }
-        }
-    }
-
-    /// <inheritdoc />
     protected override void Draw(SpriteBatch spriteBatch)
     {
         var hoverText = string.Empty;
@@ -103,5 +76,36 @@ internal sealed class DebugMenu : BaseMenu
 
         Game1.mouseCursorTransparency = 1f;
         this.drawMouse(spriteBatch);
+    }
+
+    /// <inheritdoc />
+    protected override bool TryLeftClick(int x, int y)
+    {
+        for (var i = 0; i < this.items.Count; i++)
+        {
+            var item = this.items[i];
+            var area = this.areas[i];
+            if (area.Contains(x, y))
+            {
+                switch (item)
+                {
+                    case "backpack":
+                        this.debugMode.Command("bc_config", [item]);
+                        return true;
+                    case "reset":
+                        this.debugMode.Command("bc_reset", [item]);
+                        return true;
+                    case "config":
+                    case "layout":
+                    case "search":
+                    case "sort":
+                    case "tab":
+                        this.debugMode.Command("bc_menu", [item]);
+                        return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

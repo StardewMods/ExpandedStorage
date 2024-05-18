@@ -2,6 +2,7 @@ namespace StardewMods.BetterChests.Framework.Services.Features;
 
 using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
+using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Services.Factory;
@@ -71,7 +72,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         this.Events.Subscribe<RenderingActiveMenuEventArgs>(this.OnRenderingActiveMenu);
 
         // Integrations
-        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon("Stash", out var icon))
+        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon(InternalIcon.Stash, out var icon))
         {
             return;
         }

@@ -2,7 +2,6 @@ namespace StardewMods.BetterChests;
 
 using HarmonyLib;
 using SimpleInjector;
-using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services;
@@ -94,8 +93,6 @@ public sealed class ModEntry : Mod
 
         // Verify
         this.container.Verify();
-
-        this.Init();
     }
 
     /// <inheritdoc />
@@ -105,19 +102,4 @@ public sealed class ModEntry : Mod
             this.container.GetInstance<ConfigManager>(),
             this.container.GetInstance<ContainerHandler>(),
             this.container.GetInstance<ContainerFactory>());
-
-    private void Init()
-    {
-        var eventManager = this.container.GetInstance<IEventManager>();
-        var configManager = this.container.GetInstance<ConfigManager>();
-        var contentPatcherIntegration = this.container.GetInstance<ContentPatcherIntegration>();
-
-        if (contentPatcherIntegration.IsLoaded)
-        {
-            eventManager.Subscribe<ConditionsApiReadyEventArgs>(_ => configManager.Init());
-            return;
-        }
-
-        eventManager.Subscribe<GameLaunchedEventArgs>(_ => configManager.Init());
-    }
 }

@@ -1,14 +1,11 @@
 namespace StardewMods.ToolbarIcons.Framework.Services;
 
-using Microsoft.Xna.Framework;
-using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.ToolbarIcons.Framework.Models;
@@ -20,38 +17,31 @@ using StardewValley.Menus;
 /// <summary>Service for handling the toolbar icons on the screen.</summary>
 internal sealed class ToolbarManager : BaseService
 {
-    private readonly Queue<Action> actionQueue = new();
-    private readonly AssetHandler assetHandler;
-    private readonly Dictionary<string, ClickableTextureComponent> components;
     private readonly ConfigManager configManager;
-    private readonly ContentPatcherIntegration contentPatcherIntegration;
-    private readonly PerScreen<string> currentHoverText = new();
     private readonly IEventManager eventManager;
+    private readonly IIconRegistry iconRegistry;
+    private readonly Dictionary<string, string?> icons;
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<ComponentArea> lastArea = new(() => ComponentArea.Custom);
-    private readonly PerScreen<ClickableComponent> lastButton = new();
-    private readonly PerScreen<Toolbar> lastToolbar = new();
+    private readonly PerScreen<ClickableComponent?> lastButton = new();
+    private readonly PerScreen<Toolbar?> lastToolbar = new();
     private readonly ILog log;
     private readonly IReflectionHelper reflectionHelper;
 
-    private int ticks;
-
     /// <summary>Initializes a new instance of the <see cref="ToolbarManager" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
-    /// <param name="components">Dependency used for the toolbar icon components.</param>
     /// <param name="configManager">Dependency used for managing config data.</param>
-    /// <param name="contentPatcherIntegration">Dependency used for integration with Content Patcher.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
+    /// <param name="icons">Dictionary containing all added icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="log">Dependency used for monitoring and logging.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public ToolbarManager(
-        AssetHandler assetHandler,
-        Dictionary<string, ClickableTextureComponent> components,
         ConfigManager configManager,
-        ContentPatcherIntegration contentPatcherIntegration,
         IEventManager eventManager,
+        IIconRegistry iconRegistry,
+        Dictionary<string, string?> icons,
         IInputHelper inputHelper,
         ILog log,
         IManifest manifest,
@@ -59,113 +49,97 @@ internal sealed class ToolbarManager : BaseService
         : base(log, manifest)
     {
         // Init
-        this.assetHandler = assetHandler;
-        this.components = components;
         this.configManager = configManager;
-        this.contentPatcherIntegration = contentPatcherIntegration;
         this.eventManager = eventManager;
+        this.iconRegistry = iconRegistry;
+        this.icons = icons;
         this.inputHelper = inputHelper;
         this.log = log;
         this.reflectionHelper = reflectionHelper;
 
         // Events
+        eventManager.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         eventManager.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
-        eventManager.Subscribe<ToolbarIconsLoadedEventArgs>(this.OnToolbarIconsLoaded);
-
-        if (!contentPatcherIntegration.IsLoaded)
-        {
-            eventManager.Subscribe<UpdateTickedEventArgs>(this.OnUpdateTicked);
-            return;
-        }
-
-        eventManager.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
+        eventManager.Subscribe<RenderedHudEventArgs>(this.OnRenderedHud);
+        eventManager.Subscribe<RenderingHudEventArgs>(this.OnRenderingHud);
+        eventManager.Subscribe<ReturnedToTitleEventArgs>(this.OnReturnedToTitle);
+        eventManager.Subscribe<SaveLoadedEventArgs>(this.OnSaveLoaded);
     }
 
-    private static bool ShowToolbar =>
+    private ClickableComponent? Button
+    {
+        get
+        {
+            if (this.lastButton.Value is not null)
+            {
+                return this.lastButton.Value;
+            }
+
+            if (this.Toolbar is null)
+            {
+                return null;
+            }
+
+            this.lastButton.Value =
+                this.reflectionHelper.GetField<List<ClickableComponent>>(this.Toolbar, "buttons").GetValue().First();
+
+            return this.lastButton.Value;
+        }
+    }
+
+    [MemberNotNullWhen(true, nameof(ToolbarManager.Toolbar))]
+    private bool ShowToolbar =>
         Context.IsPlayerFree
         && !Game1.eventUp
         && Game1.farmEvent == null
         && Game1.displayHUD
         && Game1.activeClickableMenu is null
-        && Game1.onScreenMenus.OfType<Toolbar>().Any();
+        && this.Toolbar is not null;
+
+    private Toolbar? Toolbar => this.lastToolbar.Value ??= Game1.onScreenMenus.OfType<Toolbar>().FirstOrDefault();
 
     /// <summary>Adds an icon next to the <see cref="Toolbar" />.</summary>
     /// <param name="id">A unique identifier for the icon.</param>
-    /// <param name="getTexture">Get method for the texture.</param>
-    /// <param name="sourceRect">The source rectangle of the icon.</param>
     /// <param name="hoverText">Text to appear when hovering over the icon.</param>
-    public void AddToolbarIcon(string id, Func<Texture2D> getTexture, Rectangle? sourceRect, string? hoverText) =>
-        this.actionQueue.Enqueue(
-            () =>
-            {
-                var icon = this.configManager.Icons.FirstOrDefault(
-                    icon => icon.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
-
-                if (icon is null)
-                {
-                    icon = new ToolbarIcon(id);
-                    var config = this.configManager.GetNew();
-                    config.Icons.Add(icon);
-                    this.configManager.Save(config);
-                }
-
-                if (this.components.ContainsKey(id))
-                {
-                    return;
-                }
-
-                this.log.Trace("Adding icon: {0}", id);
-                this.components.Add(
-                    id,
-                    new ClickableTextureComponent(
-                        new Rectangle(0, 0, 32, 32),
-                        getTexture(),
-                        sourceRect ?? new Rectangle(0, 0, 16, 16),
-                        2f)
-                    {
-                        hoverText = hoverText,
-                        name = id,
-                        visible = icon.Enabled,
-                    });
-            });
+    public void AddIcon(string id, string? hoverText)
+    {
+        this.log.Trace("Adding icon: {0}", id);
+        this.icons.Add(id, hoverText);
+        this.eventManager.Publish(new IconsChangedEventArgs([id], []));
+        this.RefreshComponents(true);
+    }
 
     /// <summary>Removes an icon.</summary>
     /// <param name="id">A unique identifier for the icon.</param>
-    public void RemoveToolbarIcon(string id) =>
-        this.actionQueue.Enqueue(
-            () =>
-            {
-                var toolbarIcon = this.configManager.Icons.FirstOrDefault(
-                    toolbarIcon => toolbarIcon.Id.Equals(id, StringComparison.OrdinalIgnoreCase));
+    public void RemoveIcon(string id)
+    {
+        if (!this.icons.ContainsKey(id))
+        {
+            return;
+        }
 
-                if (toolbarIcon is null)
-                {
-                    return;
-                }
-
-                this.log.Trace("Removing icon: {0}", id);
-                var config = this.configManager.GetNew();
-                config.Icons.Remove(toolbarIcon);
-                this.configManager.Save(config);
-                this.components.Remove(id);
-            });
+        this.log.Trace("Removing icon: {0}", id);
+        this.icons.Remove(id);
+        this.eventManager.Publish(new IconsChangedEventArgs([], [id]));
+        this.RefreshComponents(true);
+    }
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
-        if (!ToolbarManager.ShowToolbar || this.inputHelper.IsSuppressed(e.Button))
+        if (!this.ShowToolbar || this.inputHelper.IsSuppressed(e.Button))
         {
             return;
         }
 
-        if (e.Button is not (SButton.MouseLeft or SButton.MouseRight)
-            && !(e.Button.IsActionButton() || e.Button.IsUseToolButton()))
+        if (!e.Button.IsActionButton() && !e.Button.IsUseToolButton())
         {
             return;
         }
 
-        var (x, y) = Game1.getMousePosition(true);
+        var cursorPos = e.Cursor.GetScaledScreenPixels().ToPoint();
         var component =
-            this.components.Values.FirstOrDefault(component => component.visible && component.containsPoint(x, y));
+            this.Toolbar.allClickableComponents.FirstOrDefault(
+                component => component.containsPoint(cursorPos.X, cursorPos.Y));
 
         if (component is null)
         {
@@ -179,201 +153,134 @@ internal sealed class ToolbarManager : BaseService
         this.inputHelper.Suppress(e.Button);
     }
 
-    private void OnConditionsApiReady(ConditionsApiReadyEventArgs e) =>
-        this.eventManager.Subscribe<UpdateTickedEventArgs>(this.OnUpdateTicked);
-
-    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e)
-    {
-        foreach (var icon in this.configManager.Icons)
-        {
-            if (this.components.TryGetValue(icon.Id, out var component))
-            {
-                component.visible = icon.Enabled;
-            }
-        }
-
-        this.ReorientComponents();
-    }
-
-    private void OnCursorMoved(CursorMovedEventArgs e)
-    {
-        if (!ToolbarManager.ShowToolbar)
-        {
-            return;
-        }
-
-        var (x, y) = Game1.getMousePosition(true);
-        this.currentHoverText.Value = string.Empty;
-        foreach (var component in this.components.Values.Where(component => component.visible))
-        {
-            component.tryHover(x, y);
-            if (component.bounds.Contains(x, y))
-            {
-                this.currentHoverText.Value = component.hoverText;
-            }
-        }
-    }
+    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) => this.RefreshComponents(true);
 
     private void OnRenderedHud(RenderedHudEventArgs e)
     {
-        if (!ToolbarManager.ShowToolbar)
+        if (!this.ShowToolbar)
         {
             return;
         }
 
-        if (!string.IsNullOrWhiteSpace(this.currentHoverText.Value))
+        var cursorPos = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        var component =
+            this
+                .Toolbar.allClickableComponents.OfType<ClickableTextureComponent>()
+                .FirstOrDefault(component => component.containsPoint(cursorPos.X, cursorPos.Y));
+
+        if (component is not null && !string.IsNullOrWhiteSpace(component.hoverText))
         {
-            IClickableMenu.drawHoverText(e.SpriteBatch, this.currentHoverText.Value, Game1.smallFont);
+            IClickableMenu.drawHoverText(e.SpriteBatch, component.hoverText, Game1.smallFont);
         }
     }
 
     private void OnRenderingHud(RenderingHudEventArgs e)
     {
-        if (!ToolbarManager.ShowToolbar)
+        if (!this.ShowToolbar)
         {
             return;
         }
 
-        this.ReorientComponents();
-
-        foreach (var component in this.components.Values.Where(component => component.visible))
+        var cursorPos = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        foreach (var component in this.Toolbar.allClickableComponents.OfType<ClickableTextureComponent>())
         {
-            e.SpriteBatch.Draw(
-                this.assetHandler.Icons.Value,
-                new Vector2(component.bounds.X, component.bounds.Y),
-                new Rectangle(0, 0, 16, 16),
-                Color.White,
-                0f,
-                Vector2.Zero,
-                2f,
-                SpriteEffects.None,
-                1f);
-
+            component.tryHover(cursorPos.X, cursorPos.Y);
             component.draw(e.SpriteBatch);
         }
     }
 
-    private void OnToolbarIconsLoaded(ToolbarIconsLoadedEventArgs e)
+    private void OnReturnedToTitle(ReturnedToTitleEventArgs e)
     {
-        // Init
-        this.ReorientComponents();
-
-        // Events
-        this.eventManager.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
-        this.eventManager.Subscribe<CursorMovedEventArgs>(this.OnCursorMoved);
-        this.eventManager.Subscribe<RenderedHudEventArgs>(this.OnRenderedHud);
-        this.eventManager.Subscribe<RenderingHudEventArgs>(this.OnRenderingHud);
+        this.lastButton.Value = null;
+        this.lastToolbar.Value = null;
     }
 
-    private void OnUpdateTicked(UpdateTickedEventArgs e)
+    private void OnSaveLoaded(SaveLoadedEventArgs e)
     {
-        if (!this.contentPatcherIntegration.IsLoaded && ++this.ticks < 2)
+        if (this.Toolbar is null)
         {
             return;
         }
 
-        while (this.actionQueue.TryDequeue(out var action))
-        {
-            action();
-        }
+        this.Toolbar.allClickableComponents ??= [];
+        this.RefreshComponents();
     }
 
-    private void ReorientComponents()
+    private void RefreshComponents(bool force = false)
     {
-        if (!this.TryGetButton(out var button) || this.components.Values.All(component => !component.visible))
+        if (this.Button is null || this.Toolbar is null)
         {
             return;
         }
 
-        var xAlign = button.bounds.X * (1f / Game1.options.zoomLevel) < Game1.viewport.Width / 2;
-        var yAlign = button.bounds.Y * (1f / Game1.options.zoomLevel) < Game1.viewport.Height / 2;
+        // Calculate top-left
+        var xAlign = this.Button.bounds.X * (1f / Game1.options.zoomLevel) < Game1.viewport.Width / 2f;
+        var yAlign = this.Button.bounds.Y * (1f / Game1.options.zoomLevel) < Game1.viewport.Height / 2f;
         ComponentArea area;
         int x;
         int y;
-        if (this.lastToolbar.Value.width > this.lastToolbar.Value.height)
+        if (this.Toolbar.width > this.Toolbar.height)
         {
-            x = button.bounds.Left;
+            x = this.Button.bounds.Left;
             if (yAlign)
             {
                 area = ComponentArea.Top;
-                y = button.bounds.Bottom + 20;
+                y = this.Button.bounds.Bottom + 20;
             }
             else
             {
                 area = ComponentArea.Bottom;
-                y = button.bounds.Top - 52;
+                y = this.Button.bounds.Top - 52;
             }
         }
         else
         {
-            y = button.bounds.Top;
+            y = this.Button.bounds.Top;
             if (xAlign)
             {
                 area = ComponentArea.Left;
-                x = button.bounds.Right + 20;
+                x = this.Button.bounds.Right + 20;
             }
             else
             {
                 area = ComponentArea.Right;
-                x = button.bounds.Left - 52;
+                x = this.Button.bounds.Left - 52;
             }
         }
 
-        this.ReorientComponents(area, x, y);
-    }
+        if (!force && this.lastArea.Value == area)
+        {
+            return;
+        }
 
-    private void ReorientComponents(ComponentArea area, int x, int y)
-    {
         this.lastArea.Value = area;
-        foreach (var icon in this.configManager.Icons)
+        this.Toolbar.allClickableComponents ??= [];
+        this.Toolbar.allClickableComponents.Clear();
+        foreach (var toolbarIcon in this.configManager.Icons)
         {
-            if (this.components.TryGetValue(icon.Id, out var component))
+            if (!this.icons.TryGetValue(toolbarIcon.Id, out var hoverText)
+                || !this.iconRegistry.TryGetIcon(toolbarIcon.Id, out var icon))
             {
-                if (!icon.Enabled)
-                {
-                    component.visible = false;
-                    continue;
-                }
+                continue;
+            }
 
-                component.visible = true;
-                component.bounds.X = x;
-                component.bounds.Y = y;
-                switch (area)
-                {
-                    case ComponentArea.Top:
-                    case ComponentArea.Bottom:
-                        x += component.bounds.Width + 4;
-                        break;
-                    case ComponentArea.Right:
-                    case ComponentArea.Left:
-                        y += component.bounds.Height + 4;
-                        break;
-                    case ComponentArea.Custom:
-                    default:
-                        break;
-                }
+            var component = icon.GetComponent(IconStyle.Button, x, y, 2f);
+            component.name = toolbarIcon.Id;
+            component.hoverText = hoverText;
+            component.visible = toolbarIcon.Enabled;
+            this.Toolbar.allClickableComponents.Add(component);
+
+            switch (area)
+            {
+                case ComponentArea.Top:
+                case ComponentArea.Bottom:
+                    x += component.bounds.Width + 4;
+                    break;
+                case ComponentArea.Right:
+                case ComponentArea.Left:
+                    y += component.bounds.Height + 4;
+                    break;
             }
         }
-    }
-
-    private bool TryGetButton([NotNullWhen(true)] out ClickableComponent? button)
-    {
-        var activeToolbar = Game1.onScreenMenus.OfType<Toolbar>().FirstOrDefault();
-        if (this.lastToolbar.IsActiveForScreen() && activeToolbar == this.lastToolbar.Value)
-        {
-            button = this.lastButton.Value;
-            return true;
-        }
-
-        if (activeToolbar is null)
-        {
-            button = null;
-            return false;
-        }
-
-        this.lastToolbar.Value = activeToolbar;
-        var buttons = this.reflectionHelper.GetField<List<ClickableComponent>>(activeToolbar, "buttons").GetValue();
-        button = this.lastButton.Value = buttons.First();
-        return true;
     }
 }

@@ -3,6 +3,7 @@ namespace StardewMods.BetterChests.Framework.UI.Components;
 using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.Common.Models;
@@ -43,7 +44,7 @@ internal sealed class HslPicker
     /// <param name="menu">The menu that the color picker is attached to.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="getColor">Get method for the current color.</param>
     /// <param name="setColor">Set method for the current color.</param>
@@ -102,7 +103,7 @@ internal sealed class HslPicker
                 + this.xPosition,
         };
 
-        this.copyComponent = iconRegistry.RequireIcon("Copy").GetComponent(IconStyle.Transparent);
+        this.copyComponent = iconRegistry.RequireIcon(InternalIcon.Copy).GetComponent(IconStyle.Transparent);
         this.copyComponent.bounds = new Rectangle(this.xPosition + 30, this.yPosition - 4, 36, 36);
         this.copyComponent.hoverText = I18n.Button_Copy_Name();
         this.copyComponent.scale = 3f;

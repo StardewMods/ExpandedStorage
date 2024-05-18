@@ -3,6 +3,7 @@ namespace StardewMods.BetterChests.Framework.Services;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
+using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Models.StorageOptions;
@@ -169,32 +170,32 @@ internal sealed class AssetHandler : BaseService
     {
         var icons = new[]
         {
-            "Clothing",
-            "Cooking",
-            "Crops",
-            "Equipment",
-            "Fishing",
-            "Materials",
-            "Miscellaneous",
-            "Seeds",
-            "Config",
-            "Stash",
-            "Craft",
-            "Search",
-            "Copy",
-            "Save",
-            "Paste",
-            "TransferUp",
-            "TransferDown",
-            "HSL",
-            "Debug",
-            "NoStack",
+            InternalIcon.Clothing,
+            InternalIcon.Cooking,
+            InternalIcon.Crops,
+            InternalIcon.Equipment,
+            InternalIcon.Fishing,
+            InternalIcon.Materials,
+            InternalIcon.Miscellaneous,
+            InternalIcon.Seeds,
+            InternalIcon.Config,
+            InternalIcon.Stash,
+            InternalIcon.Craft,
+            InternalIcon.Search,
+            InternalIcon.Copy,
+            InternalIcon.Save,
+            InternalIcon.Paste,
+            InternalIcon.TransferUp,
+            InternalIcon.TransferDown,
+            InternalIcon.Hsl,
+            InternalIcon.Debug,
+            InternalIcon.NoStack,
         };
 
         for (var index = 0; index < icons.Length; index++)
         {
             this.iconRegistry.AddIcon(
-                icons[index],
+                icons[index].ToStringFast(),
                 $"{this.ModId}/UI",
                 new Rectangle(16 * (index % 5), 16 * (int)(index / 5f), 16, 16));
         }

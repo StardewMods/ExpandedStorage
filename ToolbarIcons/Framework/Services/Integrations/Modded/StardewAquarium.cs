@@ -1,5 +1,6 @@
 namespace StardewMods.ToolbarIcons.Framework.Services.Integrations.Modded;
 
+using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Interfaces;
 
 /// <inheritdoc />
@@ -12,7 +13,7 @@ internal sealed class StardewAquarium : IMethodIntegration
     public string HoverText => I18n.Button_StardewAquarium();
 
     /// <inheritdoc />
-    public int Index => 1;
+    public string Icon => InternalIcon.StardewAquarium.ToStringFast();
 
     /// <inheritdoc />
     public string MethodName => "OpenAquariumCollectionMenu";

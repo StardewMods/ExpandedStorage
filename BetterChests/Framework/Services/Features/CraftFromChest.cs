@@ -1,6 +1,7 @@
 namespace StardewMods.BetterChests.Framework.Services.Features;
 
 using StardewModdingAPI.Events;
+using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Services.Factory;
@@ -104,7 +105,7 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
             this.betterCraftingIntegration.Api.MenuPopulateContainers += this.OnMenuPopulateContainers;
         }
 
-        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon("Craft", out var icon))
+        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon(InternalIcon.Craft, out var icon))
         {
             return;
         }

@@ -1,6 +1,7 @@
 ﻿namespace StardewMods.Common.Services.Integrations.ToolbarIcons;
 
 using Microsoft.Xna.Framework;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 /// <summary>Public api to add icons above or below the toolbar.</summary>
@@ -17,9 +18,18 @@ public interface IToolbarIconsApi
     /// <param name="hoverText">Text to appear when hovering over the icon.</param>
     public void AddToolbarIcon(string id, string texturePath, Rectangle? sourceRect, string? hoverText);
 
+    /// <summary>Adds an icon next to the <see cref="Toolbar" />.</summary>
+    /// <param name="icon">The icon to add.</param>
+    /// <param name="hoverText">Text to appear when hovering over the icon.</param>
+    public void AddToolbarIcon(IIcon icon, string? hoverText);
+
     /// <summary>Removes an icon.</summary>
     /// <param name="id">A unique identifier for the icon.</param>
     public void RemoveToolbarIcon(string id);
+
+    /// <summary>Removes an icon.</summary>
+    /// <param name="icon">The icon to remove.</param>
+    public void RemoveToolbarIcon(IIcon icon);
 
     /// <summary>Subscribes to an event handler.</summary>
     /// <param name="handler">The event handler to subscribe.</param>

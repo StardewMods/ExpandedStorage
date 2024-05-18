@@ -1,7 +1,9 @@
 namespace StardewMods.Common.Services;
 
+using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Events;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 
 /// <summary>Service for managing the mod configuration file.</summary>
 /// <typeparam name="TConfig">The mod configuration type.</typeparam>
@@ -15,15 +17,28 @@ internal class ConfigManager<TConfig>
     private bool initialized;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigManager{TConfig}" /> class.</summary>
+    /// <param name="contentPatcherIntegration">Dependency for Content Patcher integration.</param>
     /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="modHelper">Dependency for events, input, and content.</param>
-    protected ConfigManager(IDataHelper dataHelper, IEventManager eventManager, IModHelper modHelper)
+    protected ConfigManager(
+        ContentPatcherIntegration contentPatcherIntegration,
+        IDataHelper dataHelper,
+        IEventManager eventManager,
+        IModHelper modHelper)
     {
         this.dataHelper = dataHelper;
         this.eventManager = eventManager;
         this.modHelper = modHelper;
         this.Config = this.GetNew();
+
+        if (contentPatcherIntegration.IsLoaded)
+        {
+            eventManager.Subscribe<ConditionsApiReadyEventArgs>(_ => this.Init());
+            return;
+        }
+
+        eventManager.Subscribe<GameLaunchedEventArgs>(_ => this.Init());
     }
 
     /// <summary>Gets the backing config.</summary>

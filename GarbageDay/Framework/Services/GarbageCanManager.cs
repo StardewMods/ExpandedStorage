@@ -34,7 +34,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
     /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into external code.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public GarbageCanManager(
         AssetHandler assetHandler,

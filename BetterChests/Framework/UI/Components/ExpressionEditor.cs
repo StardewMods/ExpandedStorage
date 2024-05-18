@@ -8,13 +8,12 @@ using StardewMods.BetterChests.Framework.Services;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Models;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
-using StardewMods.Common.UI;
+using StardewMods.Common.UI.Menus;
 using StardewValley.Menus;
 
 /// <summary>A sub-menu for editing the expression tree.</summary>
-internal sealed class ExpressionEditor : BaseMenu
+internal sealed class ExpressionEditor : FramedMenu
 {
     private static readonly Color[] Colors =
     [
@@ -23,20 +22,22 @@ internal sealed class ExpressionEditor : BaseMenu
 
     private readonly IExpressionHandler expressionHandler;
     private readonly Func<string> getSearchText;
+    private readonly IIconRegistry iconRegistry;
 
     private readonly List<(Color Color, ClickableComponent Component, IExpression? Expression, string Tooltip, Action?
         Action)> items = [];
 
+    private readonly IReflectionHelper reflectionHelper;
+
     private readonly Action<string> setSearchText;
 
-    private readonly UiManager uiManager;
-
     private IExpression? baseExpression;
-    private int offsetY;
 
     /// <summary>Initializes a new instance of the <see cref="ExpressionEditor" /> class.</summary>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
-    /// <param name="uiManager">Dependency used for managing ui.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
+    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="getSearchText">A function that gets the current search text.</param>
     /// <param name="setSearchText">An action that sets the current search text.</param>
     /// <param name="xPosition">The x-position of the menu.</param>
@@ -45,95 +46,35 @@ internal sealed class ExpressionEditor : BaseMenu
     /// <param name="height">The height of the menu.</param>
     public ExpressionEditor(
         IExpressionHandler expressionHandler,
-        UiManager uiManager,
+        IIconRegistry iconRegistry,
+        IInputHelper inputHelper,
+        IReflectionHelper reflectionHelper,
         Func<string> getSearchText,
         Action<string> setSearchText,
         int xPosition,
         int yPosition,
         int width,
         int height)
-        : base(xPosition, yPosition, width, height)
+        : base(inputHelper, reflectionHelper, xPosition, yPosition, width, height)
     {
         this.expressionHandler = expressionHandler;
-        this.uiManager = uiManager;
+        this.iconRegistry = iconRegistry;
+        this.reflectionHelper = reflectionHelper;
         this.getSearchText = getSearchText;
         this.setSearchText = setSearchText;
     }
 
-    /// <summary>Gets the maximum offset.</summary>
-    public int MaxOffset { get; private set; }
+    /// <inheritdoc />
+    protected override Rectangle Frame =>
+        new(this.xPositionOnScreen - 4, this.yPositionOnScreen - 8, this.width + 8, this.height + 16);
 
-    /// <summary>Gets or sets the y-offset.</summary>
-    public int OffsetY
-    {
-        get => this.offsetY;
-        set => this.offsetY = Math.Min(this.MaxOffset, Math.Max(0, value));
-    }
+    /// <inheritdoc />
+    protected override int StepSize => 40;
 
     private string SearchText
     {
         get => this.getSearchText();
         set => this.setSearchText(value);
-    }
-
-    /// <inheritdoc />
-    public override void performHoverAction(int x, int y)
-    {
-        base.performHoverAction(x, y + this.OffsetY);
-        foreach (var (_, component, _, _, _) in this.items)
-        {
-            if (component is ClickableTextureComponent clickableTextureComponent)
-            {
-                clickableTextureComponent.tryHover(x, y + this.OffsetY);
-            }
-        }
-    }
-
-    /// <inheritdoc />
-    public override void receiveLeftClick(int x, int y, bool playSound = true)
-    {
-        foreach (var (_, component, _, _, action) in this.items)
-        {
-            if (action is not null && component.containsPoint(x, y + this.OffsetY))
-            {
-                action.Invoke();
-                return;
-            }
-        }
-    }
-
-    /// <inheritdoc />
-    public override void receiveRightClick(int x, int y, bool playSound = true)
-    {
-        foreach (var (_, component, _, _, action) in this.items)
-        {
-            if (component.containsPoint(x, y + this.OffsetY))
-            {
-                action?.Invoke();
-                return;
-            }
-        }
-    }
-
-    /// <inheritdoc />
-    public override void receiveScrollWheelAction(int direction)
-    {
-        const int scrollAmount = 40;
-
-        // Scroll down
-        if (direction < 0)
-        {
-            this.OffsetY += scrollAmount;
-            Game1.playSound("shiny4");
-            return;
-        }
-
-        // Scroll up
-        if (direction > 0)
-        {
-            this.OffsetY -= scrollAmount;
-            Game1.playSound("shiny4");
-        }
     }
 
     /// <summary>Re-initializes the components of the object with the given initialization expression.</summary>
@@ -156,8 +97,7 @@ internal sealed class ExpressionEditor : BaseMenu
         var offsetX = -1;
         Enqueue(initExpression);
         this.MaxOffset = Math.Max(0, currentY - this.yPositionOnScreen - this.height);
-        this.offsetY = Math.Min(Math.Max(0, this.offsetY), this.MaxOffset);
-        this.populateClickableComponentList();
+        this.Offset = Math.Min(Math.Max(0, this.Offset), this.MaxOffset);
         return;
 
         void AddGroup(IExpression expression)
@@ -407,15 +347,14 @@ internal sealed class ExpressionEditor : BaseMenu
     protected override void Draw(SpriteBatch spriteBatch)
     {
         var (mouseX, mouseY) = Game1.getMousePosition(true);
-        this.uiManager.DrawInFrame(
+        this.DrawInFrame(
             spriteBatch,
             SpriteSortMode.Deferred,
-            new Rectangle(this.xPositionOnScreen - 4, this.yPositionOnScreen - 8, this.width + 8, this.height + 16),
             () =>
             {
                 foreach (var (baseColor, component, expression, tooltip, _) in this.items)
                 {
-                    var hover = component.containsPoint(mouseX, mouseY - this.OffsetY);
+                    var hover = component.containsPoint(mouseX, mouseY - this.Offset);
                     var color = hover && this.Parent!.GetChildMenu() is null
                         ? ExpressionEditor.Highlighted(baseColor)
                         : ExpressionEditor.Muted(baseColor);
@@ -430,7 +369,7 @@ internal sealed class ExpressionEditor : BaseMenu
                                 Game1.mouseCursors,
                                 new Rectangle(403, 373, 9, 9),
                                 component.bounds.X,
-                                component.bounds.Y - this.OffsetY,
+                                component.bounds.Y - this.Offset,
                                 component.bounds.Width,
                                 component.bounds.Height,
                                 color,
@@ -448,7 +387,7 @@ internal sealed class ExpressionEditor : BaseMenu
                             this.HoverText ??= clickableTextureComponent.hoverText;
                         }
 
-                        clickableTextureComponent.draw(spriteBatch, Color.White, 1f, yOffset: -this.OffsetY);
+                        clickableTextureComponent.draw(spriteBatch, Color.White, 1f, yOffset: -this.Offset);
                         continue;
                     }
 
@@ -464,7 +403,7 @@ internal sealed class ExpressionEditor : BaseMenu
                             Game1.mouseCursors,
                             new Rectangle(432, 439, 9, 9),
                             component.bounds.X,
-                            component.bounds.Y - this.OffsetY,
+                            component.bounds.Y - this.Offset,
                             component.bounds.Width,
                             component.bounds.Height,
                             color,
@@ -480,7 +419,7 @@ internal sealed class ExpressionEditor : BaseMenu
                     spriteBatch.DrawString(
                         Game1.smallFont,
                         component.label,
-                        new Vector2(component.bounds.X + 8, component.bounds.Y - this.OffsetY + 2),
+                        new Vector2(component.bounds.X + 8, component.bounds.Y - this.Offset + 2),
                         Game1.textColor,
                         0f,
                         Vector2.Zero,
@@ -493,6 +432,54 @@ internal sealed class ExpressionEditor : BaseMenu
 
     /// <inheritdoc />
     protected override void DrawUnder(SpriteBatch b) { }
+
+    /// <inheritdoc />
+    protected override bool TryHover(int x, int y)
+    {
+        foreach (var (_, component, _, _, _) in this.items)
+        {
+            if (component is ClickableTextureComponent clickableTextureComponent)
+            {
+                clickableTextureComponent.tryHover(x, y + this.Offset);
+            }
+        }
+
+        return false;
+    }
+
+    /// <inheritdoc />
+    protected override bool TryLeftClick(int x, int y)
+    {
+        foreach (var (_, component, _, _, action) in this.items)
+        {
+            if (action is null || !component.containsPoint(x, y + this.Offset))
+            {
+                continue;
+            }
+
+            action.Invoke();
+            return true;
+        }
+
+        return false;
+    }
+
+    /// <inheritdoc />
+    protected override bool TryRightClick(int x, int y)
+    {
+        foreach (var (_, component, _, _, action) in this.items)
+        {
+            if (!component.containsPoint(x, y + this.Offset))
+            {
+                continue;
+            }
+
+            action?.Invoke();
+            return true;
+        }
+
+        return false;
+    }
 
     private static Color Highlighted(Color color) => Color.Lerp(color, Color.White, 0.5f);
 
@@ -533,9 +520,9 @@ internal sealed class ExpressionEditor : BaseMenu
         }
     }
 
-    private void ChangeAttribute(IExpression toChange, ItemAttribute? attribute)
+    private void ChangeAttribute(IExpression toChange, string value)
     {
-        if (attribute is null)
+        if (string.IsNullOrWhiteSpace(value) || !ItemAttributeExtensions.TryParse(value, out var attribute))
         {
             return;
         }
@@ -546,7 +533,7 @@ internal sealed class ExpressionEditor : BaseMenu
             return;
         }
 
-        dynamicTerm.Term = ((ItemAttribute)attribute).ToStringFast();
+        dynamicTerm.Term = attribute.ToStringFast();
         this.SearchText = this.baseExpression.Text;
         this.ReInitializeComponents(this.baseExpression);
     }
@@ -592,9 +579,17 @@ internal sealed class ExpressionEditor : BaseMenu
 
     private void ShowDropdown(IExpression expression, ClickableComponent component) =>
         this.Parent?.SetChildMenu(
-            new GenericDropdown<ItemAttribute>(
+            new Dropdown(
+                this.Input,
+                this.reflectionHelper,
                 component,
-                ItemAttributeExtensions.GetValues().Select(i => (i, i.ToStringFast())).ToList(),
+                ItemAttributeExtensions
+                    .GetValues()
+                    .Select(
+                        value => new KeyValuePair<string, string>(
+                            value.ToStringFast(),
+                            Localized.Attribute(value.ToStringFast())))
+                    .ToList(),
                 value => this.ChangeAttribute(expression, value)));
 
     private void ShowPopup(IExpression expression, ClickableComponent component)
@@ -618,10 +613,14 @@ internal sealed class ExpressionEditor : BaseMenu
         };
 
         this.Parent?.SetChildMenu(
-            new PopupList(
-                component.label ?? string.Empty,
-                popupItems.ToList(),
-                value => this.ChangeTerm(expression, value)));
+            new PopupSelect(
+                this.iconRegistry,
+                this.Input,
+                this.reflectionHelper,
+                popupItems.Select(popupItem => new KeyValuePair<string, string>(popupItem, popupItem)).ToList(),
+                component.label,
+                value => this.ChangeTerm(expression, value),
+                10));
     }
 
     private void ToggleGroup(IExpression toToggle)
