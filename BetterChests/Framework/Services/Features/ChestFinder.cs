@@ -48,7 +48,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         MenuHandler menuHandler,
         IModConfig modConfig,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         this.containerFactory = containerFactory;
         this.expressionHandler = expressionHandler;

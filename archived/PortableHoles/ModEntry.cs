@@ -10,7 +10,7 @@ using StardewMods.PortableHoles.Framework;
 using StardewValley.Locations;
 
 /// <inheritdoc />
-public sealed class ModEntry : Mod
+public sealed class ModEntry : StardewModdingAPI.Mod
 {
     private ModConfig? config;
 

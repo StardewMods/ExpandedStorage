@@ -22,13 +22,12 @@ using StardewValley.Objects;
 using StardewValley.TerrainFeatures;
 
 /// <summary>Responsible for handling tea logic.</summary>
-internal sealed class ModPatches : BaseService
+internal sealed class ModPatches
 {
     private static ModPatches instance = null!;
 
     private readonly AssetHandler assetHandler;
     private readonly MethodInfo checkItemPlantRules;
-    private readonly IEventManager eventManager;
     private readonly IGameContentHelper gameContentHelper;
     private readonly string modDataId;
     private readonly string modDataItem;
@@ -42,27 +41,23 @@ internal sealed class ModPatches : BaseService
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public ModPatches(
         AssetHandler assetHandler,
         IEventManager eventManager,
         IGameContentHelper gameContentHelper,
-        IManifest manifest,
         IPatchManager patchManager,
         IReflectionHelper reflectionHelper)
-        : base(manifest)
     {
         // Init
         ModPatches.instance = this;
-        this.modDataId = this.ModId + "/Id";
-        this.modDataItem = this.ModId + "/ShakeOff";
-        this.modDataQuality = this.ModId + "/Quality";
-        this.modDataStack = this.ModId + "/Stack";
-        this.modDataTexture = this.ModId + "/Texture";
+        this.modDataId = Mod.Id + "/Id";
+        this.modDataItem = Mod.Id + "/ShakeOff";
+        this.modDataQuality = Mod.Id + "/Quality";
+        this.modDataStack = Mod.Id + "/Stack";
+        this.modDataTexture = Mod.Id + "/Texture";
         this.assetHandler = assetHandler;
-        this.eventManager = eventManager;
         this.gameContentHelper = gameContentHelper;
         this.patchManager = patchManager;
         this.reflectionHelper = reflectionHelper;
@@ -71,7 +66,7 @@ internal sealed class ModPatches : BaseService
             ?? throw new MethodAccessException("Unable to access CheckItemPlantRules");
 
         // Events
-        this.eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
+        eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
     }
 
     /// <summary>Determines if the given Bush instance is a custom bush.</summary>
@@ -586,7 +581,7 @@ internal sealed class ModPatches : BaseService
     {
         // Patches
         this.patchManager.Add(
-            this.ModId,
+            Mod.Id,
             new SavedPatch(
                 AccessTools.DeclaredMethod(typeof(Bush), nameof(Bush.draw), [typeof(SpriteBatch)]),
                 AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Bush_draw_prefix)),
@@ -652,7 +647,7 @@ internal sealed class ModPatches : BaseService
             if (methodGetOutput is not null)
             {
                 this.patchManager.Add(
-                    this.ModId,
+                    Mod.Id,
                     new SavedPatch(
                         methodGetOutput,
                         AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Automate_GetOutput_postfix)),
@@ -660,7 +655,7 @@ internal sealed class ModPatches : BaseService
             }
         }
 
-        this.patchManager.Patch(this.ModId);
+        this.patchManager.Patch(Mod.Id);
     }
 
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]

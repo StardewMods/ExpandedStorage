@@ -14,6 +14,7 @@ using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
+using Mod = StardewModdingAPI.Mod;
 
 /// <inheritdoc />
 public sealed class ModEntry : Mod
@@ -57,6 +58,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<MenuHandler>();
         this.container.RegisterSingleton<Localized>();
         this.container.RegisterSingleton<Log>();
+        this.container.RegisterSingleton<Common.Services.Mod>();
         this.container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
         this.container.RegisterSingleton<ProxyChestFactory>();
         this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();

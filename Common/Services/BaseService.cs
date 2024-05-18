@@ -1,12 +1,23 @@
 namespace StardewMods.Common.Services;
 
 /// <summary>This abstract class serves as the base for all service classes.</summary>
-internal abstract class BaseService
+internal abstract class BaseService<TService>
+    where TService : class
 {
-    /// <summary>Initializes a new instance of the <see cref="BaseService" /> class.</summary>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    protected BaseService(IManifest manifest) => this.ModId = manifest.UniqueID;
+    /// <summary>Initializes a new instance of the <see cref="BaseService{TService}" /> class.</summary>
+    protected BaseService()
+    {
+        this.Id = typeof(TService).Name;
+        this.UniqueId = Mod.Id + "/" + this.Id;
+        this.Prefix = Mod.Id + "-" + this.Id + "-";
+    }
 
-    /// <summary>Gets the unique id for this mod.</summary>
-    protected string ModId { get; }
+    /// <summary>Gets a unique id for this service.</summary>
+    public string Id { get; }
+
+    /// <summary>Gets a globally unique prefix for this service.</summary>
+    public string Prefix { get; }
+
+    /// <summary>Gets a globally unique id for this service.</summary>
+    public string UniqueId { get; }
 }

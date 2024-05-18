@@ -9,6 +9,7 @@ using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.GarbageDay.Framework.Interfaces;
 using StardewMods.GarbageDay.Framework.Models;
 using StardewMods.GarbageDay.Framework.Services;
+using Mod = StardewModdingAPI.Mod;
 
 /// <inheritdoc />
 public sealed class ModEntry : Mod
@@ -43,6 +44,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<GarbageCanManager>();
         this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
         this.container.RegisterSingleton<Log>();
+        this.container.RegisterSingleton<Common.Services.Mod>();
         this.container.RegisterSingleton<ToolbarIconsIntegration>();
 
         this.container.RegisterInstance(new Dictionary<string, FoundGarbageCan>());

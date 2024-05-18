@@ -10,7 +10,7 @@ using StardewMods.Common.Services;
 using StardewValley.Objects;
 
 /// <summary>Manages the global inventories and chest/item creation and retrieval operations.</summary>
-internal sealed class ProxyChestFactory : GenericBaseService<ProxyChestFactory>
+internal sealed class ProxyChestFactory : BaseService<ProxyChestFactory>
 {
     private const string AlphaNumeric = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private const string ColorKey = "PlayerChoiceColor";
@@ -23,9 +23,7 @@ internal sealed class ProxyChestFactory : GenericBaseService<ProxyChestFactory>
 
     /// <summary>Initializes a new instance of the <see cref="ProxyChestFactory" /> class.</summary>
     /// <param name="harmony">Dependency used to patch external code.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public ProxyChestFactory(Harmony harmony, IManifest manifest)
-        : base(manifest)
+    public ProxyChestFactory(Harmony harmony)
     {
         // Init
         ProxyChestFactory.instance = this;

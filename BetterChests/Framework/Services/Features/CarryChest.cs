@@ -44,7 +44,7 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
         IPatchManager patchManager,
         ProxyChestFactory proxyChestFactory,
         StatusEffectManager statusEffectManager)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         CarryChest.instance = this;
         this.containerFactory = containerFactory;

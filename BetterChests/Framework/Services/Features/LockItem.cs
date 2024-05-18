@@ -30,7 +30,7 @@ internal sealed class LockItem : BaseFeature<LockItem>
         MenuHandler menuHandler,
         IManifest manifest,
         IModConfig modConfig)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;

@@ -28,7 +28,7 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
         MenuHandler menuHandler,
         IManifest manifest,
         IModConfig modConfig)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         this.expressionHandler = expressionHandler;
         this.menuHandler = menuHandler;

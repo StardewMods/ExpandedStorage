@@ -50,7 +50,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
         IModConfig modConfig,
         IPatchManager patchManager,
         IReflectionHelper reflectionHelper)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         HslColorPicker.instance = this;
         this.assetHandler = assetHandler;

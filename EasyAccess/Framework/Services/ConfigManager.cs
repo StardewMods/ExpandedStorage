@@ -12,26 +12,22 @@ using StardewMods.EasyAccess.Framework.Models;
 internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 {
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
-    private readonly IManifest manifest;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigManager" /> class.</summary>
     /// <param name="contentPatcherIntegration">Dependency for Content Patcher integration.</param>
     /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modHelper">Dependency for events, input, and content.</param>
     public ConfigManager(
         ContentPatcherIntegration contentPatcherIntegration,
         IDataHelper dataHelper,
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
-        IManifest manifest,
         IModHelper modHelper)
         : base(contentPatcherIntegration, dataHelper, eventManager, modHelper)
     {
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
-        this.manifest = manifest;
 
         eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
     }
@@ -80,7 +76,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         // Collect Items
         gmcm.AddKeybindList(
-            this.manifest,
+            Mod.Manifest,
             () => config.ControlScheme.CollectItems,
             value => config.ControlScheme.CollectItems = value,
             I18n.Config_CollectItems_Name,
@@ -89,7 +85,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         // Dispense Items
         gmcm.AddKeybindList(
-            this.manifest,
+            Mod.Manifest,
             () => config.ControlScheme.DispenseItems,
             value => config.ControlScheme.DispenseItems = value,
             I18n.Config_DispenseItems_Name,
@@ -98,7 +94,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         // Collect Output Distance
         gmcm.AddNumberOption(
-            this.manifest,
+            Mod.Manifest,
             () => config.CollectOutputDistance,
             value => config.CollectOutputDistance = value,
             I18n.Config_CollectOutputsDistance_Name,
@@ -110,7 +106,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         // Dispense Input Distance
         gmcm.AddNumberOption(
-            this.manifest,
+            Mod.Manifest,
             () => config.DispenseInputDistance,
             value => config.DispenseInputDistance = value,
             I18n.Config_DispenseInputsDistance_Name,
@@ -122,7 +118,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         // Do Dig Spots
         gmcm.AddBoolOption(
-            this.manifest,
+            Mod.Manifest,
             () => config.DoDigSpots,
             value => config.DoDigSpots = value,
             I18n.Config_DoDigSpots_Name,
@@ -131,7 +127,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         // Do Forage
         gmcm.AddBoolOption(
-            this.manifest,
+            Mod.Manifest,
             () => config.DoForage,
             value => config.DoForage = value,
             I18n.Config_DoForage_Name,
@@ -140,7 +136,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         // Do Machines
         gmcm.AddBoolOption(
-            this.manifest,
+            Mod.Manifest,
             () => config.DoMachines,
             value => config.DoMachines = value,
             I18n.Config_DoMachines_Name,
@@ -149,7 +145,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         // Do Terrain
         gmcm.AddBoolOption(
-            this.manifest,
+            Mod.Manifest,
             () => config.DoTerrain,
             value => config.DoTerrain = value,
             I18n.Config_DoTerrain_Name,

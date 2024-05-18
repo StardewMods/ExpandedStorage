@@ -22,7 +22,7 @@ public sealed class ExpandedStorageApi : IExpandedStorageApi
         // Init
         this.modInfo = modInfo;
         this.assetHandler = assetHandler;
-        this.eventManager = new BaseEventManager(modInfo.Manifest);
+        this.eventManager = new BaseEventManager();
 
         // Events
         eventManager.Subscribe<ChestCreatedEventArgs>(this.OnChestCreated);

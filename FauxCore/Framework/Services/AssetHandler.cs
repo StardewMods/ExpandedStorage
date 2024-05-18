@@ -12,7 +12,7 @@ using StardewMods.FauxCore.Framework.Models;
 using StardewValley.Menus;
 
 /// <inheritdoc cref="StardewMods.FauxCore.Framework.Interfaces.IAssetHandler" />
-internal sealed class AssetHandler : BaseService, IAssetHandler
+internal sealed class AssetHandler : IAssetHandler
 {
     private static readonly Dictionary<VanillaIcon, Rectangle> VanillaIcons = new()
     {
@@ -53,22 +53,19 @@ internal sealed class AssetHandler : BaseService, IAssetHandler
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public AssetHandler(
         IEventManager eventManager,
         IGameContentHelper gameContentHelper,
-        IManifest manifest,
         IModContentHelper modContentHelper,
         ThemeHelper themeHelper)
-        : base(manifest)
     {
         this.gameContentHelper = gameContentHelper;
         this.themeHelper = themeHelper;
-        this.iconRegistry = new IconRegistry(this, manifest);
+        this.iconRegistry = new IconRegistry(this);
 
-        themeHelper.AddAsset(this.ModId + "/UI", modContentHelper.Load<IRawTextureData>("assets/ui.png"));
+        themeHelper.AddAsset(Mod.Id + "/UI", modContentHelper.Load<IRawTextureData>("assets/ui.png"));
 
         // Events
         eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
@@ -80,7 +77,7 @@ internal sealed class AssetHandler : BaseService, IAssetHandler
     /// <inheritdoc />
     public Texture2D CreateButtonTexture(IIcon icon)
     {
-        if (this.cachedTextures.TryGetValue($"{this.ModId}/Buttons/{icon.Id}", out var texture))
+        if (this.cachedTextures.TryGetValue($"{Mod.Id}/Buttons/{icon.Id}", out var texture))
         {
             return texture;
         }
@@ -92,7 +89,7 @@ internal sealed class AssetHandler : BaseService, IAssetHandler
         }
 
         // Get button texture
-        if (!this.themeHelper.TryGetRawTextureData(this.ModId + "/UI", out var baseTexture))
+        if (!this.themeHelper.TryGetRawTextureData(Mod.Id + "/UI", out var baseTexture))
         {
             throw new InvalidOperationException("The ui texture is missing.");
         }
@@ -136,7 +133,7 @@ internal sealed class AssetHandler : BaseService, IAssetHandler
         // Create texture
         texture = new Texture2D(Game1.spriteBatch.GraphicsDevice, length, length);
         texture.SetData(colors);
-        this.cachedTextures.Add($"{this.ModId}/Buttons/{icon.Id}", texture);
+        this.cachedTextures.Add($"{Mod.Id}/Buttons/{icon.Id}", texture);
         return texture;
     }
 
@@ -155,7 +152,7 @@ internal sealed class AssetHandler : BaseService, IAssetHandler
 
     private void OnAssetRequested(AssetRequestedEventArgs e)
     {
-        if (e.Name.IsEquivalentTo($"{this.ModId}/Icons"))
+        if (e.Name.IsEquivalentTo($"{Mod.Id}/Icons"))
         {
             e.LoadFrom(() => new Dictionary<string, IconData>(), AssetLoadPriority.Exclusive);
         }
@@ -163,7 +160,7 @@ internal sealed class AssetHandler : BaseService, IAssetHandler
 
     private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
     {
-        if (e.Names.Any(name => name.IsEquivalentTo($"{this.ModId}/Icons")))
+        if (e.Names.Any(name => name.IsEquivalentTo($"{Mod.Id}/Icons")))
         {
             this.RefreshIcons();
         }
@@ -181,7 +178,7 @@ internal sealed class AssetHandler : BaseService, IAssetHandler
 
     private void RefreshIcons()
     {
-        var icons = this.gameContentHelper.Load<Dictionary<string, IconData>>($"{this.ModId}/Icons");
+        var icons = this.gameContentHelper.Load<Dictionary<string, IconData>>($"{Mod.Id}/Icons");
         foreach (var (key, icon) in icons)
         {
             this.iconRegistry.Add(key, icon.Path, icon.Area);

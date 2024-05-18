@@ -36,7 +36,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         this.expressionHandler = expressionHandler;
         this.inputHelper = inputHelper;

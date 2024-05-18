@@ -35,7 +35,7 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
         this.iconRegistry = iconRegistry;
         this.toolbarManager = toolbarManager;
         this.prefix = this.modInfo.Manifest.UniqueID + "/";
-        this.eventManager = new BaseEventManager(modInfo.Manifest);
+        this.eventManager = new BaseEventManager();
 
         // Events
         eventManager.Subscribe<IIconPressedEventArgs>(this.OnIconPressed);

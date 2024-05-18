@@ -48,7 +48,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         IManifest manifest,
         IModConfig modConfig,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         this.assetHandler = assetHandler;
         this.containerFactory = containerFactory;

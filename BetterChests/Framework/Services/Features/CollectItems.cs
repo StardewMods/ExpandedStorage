@@ -37,7 +37,7 @@ internal sealed class CollectItems : BaseFeature<CollectItems>
         IManifest manifest,
         IModConfig modConfig,
         IPatchManager patchManager)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         CollectItems.instance = this;
         this.containerFactory = containerFactory;

@@ -6,17 +6,14 @@ using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
 /// <inheritdoc cref="IPatchManager" />
-internal sealed class PatchManager : GenericBaseService<PatchManager>, IPatchManager
+internal sealed class PatchManager : BaseService<PatchManager>, IPatchManager
 {
     private readonly HashSet<string> appliedPatches = [];
     private readonly Lazy<Harmony> harmony;
     private readonly Dictionary<string, List<ISavedPatch>> savedPatches = new();
 
     /// <summary>Initializes a new instance of the <see cref="PatchManager" /> class.</summary>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public PatchManager(IManifest manifest)
-        : base(manifest) =>
-        this.harmony = new Lazy<Harmony>(() => new Harmony(this.ModId));
+    public PatchManager() => this.harmony = new Lazy<Harmony>(() => new Harmony(Mod.Id));
 
     /// <inheritdoc />
     public void Add(string id, params ISavedPatch[] patches)

@@ -1,7 +1,6 @@
 namespace StardewMods.BetterChests.Framework.Services;
 
 using Microsoft.Xna.Framework;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterCrafting;
 using StardewValley.Inventories;
@@ -9,15 +8,13 @@ using StardewValley.Network;
 using StardewValley.Objects;
 
 /// <inheritdoc cref="StardewMods.Common.Services.Integrations.BetterCrafting.IInventoryProvider" />
-internal sealed class BetterCraftingInventoryProvider : BaseService, IInventoryProvider
+internal sealed class BetterCraftingInventoryProvider : IInventoryProvider
 {
     private readonly ContainerHandler containerHandler;
 
     /// <summary>Initializes a new instance of the <see cref="BetterCraftingInventoryProvider" /> class.</summary>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public BetterCraftingInventoryProvider(ContainerHandler containerHandler, IManifest manifest)
-        : base(manifest) =>
+    public BetterCraftingInventoryProvider(ContainerHandler containerHandler) =>
         this.containerHandler = containerHandler;
 
     /// <inheritdoc />

@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Models.StorageOptions;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewValley.Buildings;
 using StardewValley.Characters;
@@ -13,7 +12,7 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Provides access to all known storages for other services.</summary>
-internal sealed class ContainerFactory : BaseService
+internal sealed class ContainerFactory
 {
     private readonly ConditionalWeakTable<object, IStorageContainer> cachedContainers = new();
     private readonly IModConfig modConfig;
@@ -21,11 +20,9 @@ internal sealed class ContainerFactory : BaseService
     private readonly Dictionary<string, IStorageOptions> storageOptions = new();
 
     /// <summary>Initializes a new instance of the <see cref="ContainerFactory" /> class.</summary>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="proxyChestFactory">Dependency used for creating virtualized chests.</param>
-    public ContainerFactory(IManifest manifest, IModConfig modConfig, ProxyChestFactory proxyChestFactory)
-        : base(manifest)
+    public ContainerFactory(IModConfig modConfig, ProxyChestFactory proxyChestFactory)
     {
         this.modConfig = modConfig;
         this.proxyChestFactory = proxyChestFactory;

@@ -46,7 +46,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         IModConfig modConfig,
         IReflectionHelper reflectionHelper,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         // Init
         this.containerFactory = containerFactory;

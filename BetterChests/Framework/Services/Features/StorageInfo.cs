@@ -38,7 +38,6 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     public StorageInfo(
@@ -46,10 +45,9 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
         IEventManager eventManager,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
-        IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         this.containerFactory = containerFactory;
         this.iconRegistry = iconRegistry;

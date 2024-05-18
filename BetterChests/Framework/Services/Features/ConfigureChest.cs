@@ -36,7 +36,6 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public ConfigureChest(
         ConfigManager configManager,
@@ -48,9 +47,8 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
-        IManifest manifest,
         IReflectionHelper reflectionHelper)
-        : base(eventManager, manifest, configManager)
+        : base(eventManager, configManager)
     {
         this.configManager = configManager;
         this.containerFactory = containerFactory;

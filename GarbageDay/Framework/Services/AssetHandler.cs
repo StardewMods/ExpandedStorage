@@ -12,7 +12,7 @@ using xTile;
 using xTile.Dimensions;
 
 /// <summary>Handles modification and manipulation of assets in the game.</summary>
-internal sealed class AssetHandler : BaseService
+internal sealed class AssetHandler
 {
     /// <summary>The game path where the big craftable data is stored.</summary>
     private const string BigCraftablePath = "Data/BigCraftables";
@@ -30,20 +30,17 @@ internal sealed class AssetHandler : BaseService
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="foundGarbageCans">The discovered garbage cans.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     public AssetHandler(
         IEventManager eventManager,
         Dictionary<string, FoundGarbageCan> foundGarbageCans,
-        IManifest manifest,
         IModConfig modConfig,
         IModContentHelper modContentHelper)
-        : base(manifest)
     {
         // Init
-        this.IconTexturePath = this.ModId + "/Icons";
-        this.itemId = this.ModId + "/GarbageCan";
+        this.IconTexturePath = Mod.Id + "/Icons";
+        this.itemId = Mod.Id + "/GarbageCan";
         this.qualifiedItemId = "(BC)" + this.itemId;
         this.foundGarbageCans = foundGarbageCans;
         this.modConfig = modConfig;
@@ -187,7 +184,7 @@ internal sealed class AssetHandler : BaseService
             return false;
         }
 
-        if (!this.modConfig.OnByDefault && garbageCanData.CustomFields?.GetBool(this.ModId + "/Enabled") != true)
+        if (!this.modConfig.OnByDefault && garbageCanData.CustomFields?.GetBool(Mod.Id + "/Enabled") != true)
         {
             return false;
         }

@@ -16,7 +16,7 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Responsible for handling containers.</summary>
-internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
+internal sealed class ContainerHandler : BaseService<ContainerHandler>
 {
     private static ContainerHandler instance = null!;
 
@@ -24,7 +24,6 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
     private readonly ContainerFactory containerFactory;
     private readonly IEventManager eventManager;
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
-    private readonly IManifest manifest;
     private readonly IReflectionHelper reflectionHelper;
 
     /// <summary>Initializes a new instance of the <see cref="ContainerHandler" /> class.</summary>
@@ -32,7 +31,6 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public ContainerHandler(
@@ -40,17 +38,14 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
         ContainerFactory containerFactory,
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
-        IManifest manifest,
         IPatchManager patchManager,
         IReflectionHelper reflectionHelper)
-        : base(manifest)
     {
         ContainerHandler.instance = this;
         this.configManager = configManager;
         this.containerFactory = containerFactory;
         this.eventManager = eventManager;
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
-        this.manifest = manifest;
         this.reflectionHelper = reflectionHelper;
 
         // Patches
@@ -132,17 +127,17 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
         var parentOptions = container.GetParentOptions();
         this.genericModConfigMenuIntegration.Register(() => new DefaultStorageOptions().CopyTo(options), Save);
 
-        gmcm.AddSectionTitle(this.manifest, () => container.DisplayName, container.ToString);
+        gmcm.AddSectionTitle(Mod.Manifest, () => container.DisplayName, container.ToString);
 
         gmcm.AddTextOption(
-            this.manifest,
+            Mod.Manifest,
             () => options.StorageName,
             value => options.StorageName = value,
             I18n.Config_StorageName_Name,
             I18n.Config_StorageName_Tooltip);
 
         gmcm.AddTextOption(
-            this.manifest,
+            Mod.Manifest,
             () => options.StorageIcon,
             value => options.StorageIcon = value,
             I18n.Config_StorageIcon_Name,
@@ -152,7 +147,7 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
         if (container.AccessChest is not RangeOption.Disabled)
         {
             gmcm.AddNumberOption(
-                this.manifest,
+                Mod.Manifest,
                 () => options.AccessChestPriority,
                 value => options.AccessChestPriority = value,
                 I18n.Config_AccessChestPriority_Name,
@@ -163,7 +158,7 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
         if (container.StashToChest is not RangeOption.Disabled)
         {
             gmcm.AddNumberOption(
-                this.manifest,
+                Mod.Manifest,
                 () => (int)options.StashToChestPriority,
                 value => options.StashToChestPriority = (StashPriority)value,
                 I18n.Config_StashToChestPriority_Name,
@@ -178,14 +173,14 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
         if (container.CategorizeChest is not FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                this.manifest,
+                Mod.Manifest,
                 () => options.CategorizeChestSearchTerm,
                 value => options.CategorizeChestSearchTerm = value,
                 I18n.Config_CategorizeChestSearchTerm_Name,
                 I18n.Config_CategorizeChestSearchTerm_Tooltip);
 
             gmcm.AddTextOption(
-                this.manifest,
+                Mod.Manifest,
                 () => options.CategorizeChestIncludeStacks.ToStringFast(),
                 value => options.CategorizeChestIncludeStacks = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -196,15 +191,15 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
                 Localized.FormatOption(parentOptions?.CategorizeChestIncludeStacks));
         }
 
-        gmcm.AddPageLink(this.manifest, "Main", I18n.Section_Main_Name, I18n.Section_Main_Description);
+        gmcm.AddPageLink(Mod.Manifest, "Main", I18n.Section_Main_Name, I18n.Section_Main_Description);
         this.configManager.AddMainOption(
-            this.manifest,
+            Mod.Manifest,
             "Main",
             I18n.Section_Main_Name,
             options,
             parentOptions: parentOptions);
 
-        gmcm.OpenModMenu(this.manifest);
+        gmcm.OpenModMenu(Mod.Manifest);
         return;
 
         void Save()

@@ -8,11 +8,8 @@ internal sealed class EventManager : BaseEventManager
     private readonly IModEvents? modEvents;
 
     /// <summary>Initializes a new instance of the <see cref="EventManager" /> class.</summary>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modEvents">Dependency used for managing access to SMAPI events.</param>
-    public EventManager(IManifest manifest, IModEvents modEvents)
-        : base(manifest) =>
-        this.modEvents = modEvents;
+    public EventManager(IModEvents modEvents) => this.modEvents = modEvents;
 
     /// <inheritdoc />
     public override void Subscribe<TEventArgs>(Action<TEventArgs> handler)

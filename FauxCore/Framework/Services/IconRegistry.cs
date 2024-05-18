@@ -9,7 +9,7 @@ using StardewMods.FauxCore.Framework.Models;
 using StardewValley.Menus;
 
 /// <inheritdoc cref="StardewMods.Common.Services.Integrations.FauxCore.IIconRegistry" />
-internal sealed class IconRegistry : BaseService, IIconRegistry
+internal sealed class IconRegistry : IIconRegistry
 {
     private static readonly Dictionary<string, Icon> Icons = new();
 
@@ -17,10 +17,7 @@ internal sealed class IconRegistry : BaseService, IIconRegistry
 
     /// <summary>Initializes a new instance of the <see cref="IconRegistry" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public IconRegistry(IAssetHandler assetHandler, IManifest manifest)
-        : base(manifest) =>
-        this.assetHandler = assetHandler;
+    public IconRegistry(IAssetHandler assetHandler) => this.assetHandler = assetHandler;
 
     /// <summary>Adds an icon to the icon registry.</summary>
     /// <param name="id">The unique identifier of the icon.</param>
@@ -43,9 +40,9 @@ internal sealed class IconRegistry : BaseService, IIconRegistry
     /// <inheritdoc />
     public void AddIcon(string id, string path, Rectangle area)
     {
-        if (!IconRegistry.Icons.TryGetValue($"{this.ModId}/{id}", out var icon))
+        if (!IconRegistry.Icons.TryGetValue($"{Mod.Id}/{id}", out var icon))
         {
-            icon = this.Add($"{this.ModId}/{id}", path, area);
+            icon = this.Add($"{Mod.Id}/{id}", path, area);
         }
 
         icon.Path = path;
@@ -73,7 +70,7 @@ internal sealed class IconRegistry : BaseService, IIconRegistry
     public bool TryGetIcon(string id, [NotNullWhen(true)] out IIcon? icon)
     {
         icon = null;
-        if (IconRegistry.Icons.TryGetValue($"{this.ModId}/{id}", out var value)
+        if (IconRegistry.Icons.TryGetValue($"{Mod.Id}/{id}", out var value)
             || IconRegistry.Icons.TryGetValue(id, out value))
         {
             icon = value;

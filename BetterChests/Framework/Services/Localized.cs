@@ -3,21 +3,17 @@ namespace StardewMods.BetterChests.Framework.Services;
 using System.Globalization;
 using System.Text;
 using StardewMods.Common.Enums;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewValley.Menus;
 
 /// <summary>Helper methods to convert between different text formats.</summary>
-internal sealed class Localized : BaseService
+internal sealed class Localized
 {
     private readonly ITranslationHelper translations;
 
     /// <summary>Initializes a new instance of the <see cref="Localized" /> class.</summary>
     /// <param name="translations">Dependency used for accessing translations.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public Localized(IManifest manifest, ITranslationHelper translations)
-        : base(manifest) =>
-        this.translations = translations;
+    public Localized(ITranslationHelper translations) => this.translations = translations;
 
     /// <summary>Formats item attribute using localized text when available.</summary>
     /// <param name="value">The value for item attribute to format.</param>

@@ -12,6 +12,7 @@ using StardewMods.ToolbarIcons.Framework.Services;
 using StardewMods.ToolbarIcons.Framework.Services.Factory;
 using StardewMods.ToolbarIcons.Framework.Services.Integrations.Modded;
 using StardewMods.ToolbarIcons.Framework.Services.Integrations.Vanilla;
+using Mod = StardewModdingAPI.Mod;
 
 /// <inheritdoc />
 public sealed class ModEntry : Mod
@@ -49,6 +50,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<ConfigManager, ConfigManager>();
         this.container.RegisterSingleton<IntegrationManager>();
         this.container.RegisterSingleton<Log>();
+        this.container.RegisterSingleton<Common.Services.Mod>();
         this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
         this.container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
         this.container.RegisterSingleton<ToolbarManager>();

@@ -10,6 +10,7 @@ using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.ExpandedStorage.Framework.Interfaces;
 using StardewMods.ExpandedStorage.Framework.Services;
+using Mod = StardewModdingAPI.Mod;
 
 /// <inheritdoc />
 public sealed class ModEntry : Mod
@@ -43,6 +44,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.container.RegisterSingleton<Log>();
+        this.container.RegisterSingleton<Common.Services.Mod>();
         this.container.RegisterSingleton<ModPatches>();
         this.container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
         this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();

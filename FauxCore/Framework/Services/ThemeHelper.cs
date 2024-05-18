@@ -9,7 +9,7 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Models;
 
 /// <inheritdoc cref="IThemeHelper" />
-internal sealed class ThemeHelper : BaseService, IThemeHelper
+internal sealed class ThemeHelper : IThemeHelper
 {
     private readonly Dictionary<IAssetName, IRawTextureData> cachedTextureData = new();
     private readonly Dictionary<IAssetName, Texture2D?> cachedTextures = new();
@@ -44,9 +44,7 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
     /// <summary>Initializes a new instance of the <see cref="ThemeHelper" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public ThemeHelper(IEventManager eventManager, IGameContentHelper gameContentHelper, IManifest manifest)
-        : base(manifest)
+    public ThemeHelper(IEventManager eventManager, IGameContentHelper gameContentHelper)
     {
         this.gameContentHelper = gameContentHelper;
         eventManager.Subscribe<AssetReadyEventArgs>(this.OnAssetReady);

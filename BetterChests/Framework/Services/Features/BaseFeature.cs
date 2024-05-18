@@ -7,17 +7,15 @@ using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
 
 /// <inheritdoc cref="StardewMods.BetterChests.Framework.Interfaces.IFeature" />
-internal abstract class BaseFeature<TFeature> : GenericBaseService<TFeature>, IFeature
+internal abstract class BaseFeature<TFeature> : BaseService<TFeature>, IFeature
     where TFeature : class, IFeature
 {
     private bool isActivated;
 
     /// <summary>Initializes a new instance of the <see cref="BaseFeature{TFeature}" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
-    protected BaseFeature(IEventManager eventManager, IManifest manifest, IModConfig modConfig)
-        : base(manifest)
+    protected BaseFeature(IEventManager eventManager, IModConfig modConfig)
     {
         this.Config = modConfig;
         this.Events = eventManager;

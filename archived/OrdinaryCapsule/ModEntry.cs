@@ -9,7 +9,7 @@ using StardewMods.OrdinaryCapsule.Framework;
 using StardewMods.OrdinaryCapsule.Framework.Models;
 
 /// <inheritdoc />
-public sealed class ModEntry : Mod
+public sealed class ModEntry : StardewModdingAPI.Mod
 {
     private ModConfig? config;
 

@@ -31,7 +31,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\HSLColor.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Range.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\BaseEventManager.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)Services\BaseService.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\CacheManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\Enums\FilterMethod.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\Enums\StashPriority.cs"/>
@@ -59,7 +58,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\ISavedPatch.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\GenericModConfigMenu\BaseComplexOption.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\GenericModConfigMenu\IComplexOption.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)Services\GenericBaseService.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\BaseService.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\ConfigManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\Enums\ChestMenuOption.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\Enums\FeatureOption.cs"/>
@@ -93,6 +92,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ToolbarIcons\ToolbarIconsIntegration.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\EventManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Log.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Mod.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\BaseComponent.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\TextField.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\VerticalScrollBar.cs"/>

@@ -18,7 +18,7 @@ using StardewValley.GameData.Buildings;
 using StardewValley.GameData.Locations;
 
 /// <summary>Responsible for handling assets provided by this mod.</summary>
-internal sealed class AssetHandler : BaseService
+internal sealed class AssetHandler
 {
     private readonly IGameContentHelper gameContentHelper;
     private readonly string hslTexturePath;
@@ -32,7 +32,6 @@ internal sealed class AssetHandler : BaseService
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
@@ -40,20 +39,18 @@ internal sealed class AssetHandler : BaseService
         IEventManager eventManager,
         IGameContentHelper gameContentHelper,
         IIconRegistry iconRegistry,
-        IManifest manifest,
         IModConfig modConfig,
         IModContentHelper modContentHelper,
         IThemeHelper themeHelper)
-        : base(manifest)
     {
         // Init
         this.gameContentHelper = gameContentHelper;
         this.iconRegistry = iconRegistry;
         this.modConfig = modConfig;
-        this.hslTexturePath = this.ModId + "/HueBar";
+        this.hslTexturePath = Mod.Id + "/HueBar";
 
         var data = modContentHelper.Load<IRawTextureData>("assets/icons.png");
-        themeHelper.AddAsset(this.ModId + "/UI", data);
+        themeHelper.AddAsset(Mod.Id + "/UI", data);
 
         // Events
         eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
@@ -194,7 +191,7 @@ internal sealed class AssetHandler : BaseService
         {
             this.iconRegistry.AddIcon(
                 icons[index].ToStringFast(),
-                $"{this.ModId}/UI",
+                $"{Mod.Id}/UI",
                 new Rectangle(16 * (index % 5), 16 * (int)(index / 5f), 16, 16));
         }
     }

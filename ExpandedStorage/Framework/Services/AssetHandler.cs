@@ -11,7 +11,7 @@ using StardewMods.ExpandedStorage.Framework.Models;
 using StardewValley.GameData.BigCraftables;
 
 /// <summary>Responsible for managing expanded storage objects.</summary>
-internal sealed class AssetHandler : BaseService
+internal sealed class AssetHandler
 {
     private const string AssetPath = "Data/BigCraftables";
 
@@ -19,9 +19,7 @@ internal sealed class AssetHandler : BaseService
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public AssetHandler(IEventManager eventManager, IManifest manifest)
-        : base(manifest)
+    public AssetHandler(IEventManager eventManager)
     {
         eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
         eventManager.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
@@ -44,7 +42,7 @@ internal sealed class AssetHandler : BaseService
 
         // Check if enabled
         if (ItemRegistry.GetData(item.QualifiedItemId)?.RawData is not BigCraftableData bigCraftableData
-            || bigCraftableData.CustomFields?.GetBool(this.ModId + "/Enabled") != true)
+            || bigCraftableData.CustomFields?.GetBool(Mod.Id + "/Enabled") != true)
         {
             storageData = null;
             return false;
@@ -59,7 +57,7 @@ internal sealed class AssetHandler : BaseService
         {
             var keyParts = customFieldKey.Split('/');
             if (keyParts.Length != 2
-                || !keyParts[0].Equals(this.ModId, StringComparison.OrdinalIgnoreCase)
+                || !keyParts[0].Equals(Mod.Id, StringComparison.OrdinalIgnoreCase)
                 || !CustomFieldKeysExtensions.TryParse(keyParts[1], out var storageAttribute))
             {
                 continue;

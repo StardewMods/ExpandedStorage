@@ -17,7 +17,7 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Harmony Patches for Expanded Storage.</summary>
-internal sealed class ModPatches : BaseService
+internal sealed class ModPatches
 {
     private const string ChestOpenSound = "openChest";
     private const string LidCloseSound = "doorCreakReverse";
@@ -32,15 +32,9 @@ internal sealed class ModPatches : BaseService
 
     /// <summary>Initializes a new instance of the <see cref="ModPatches" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="assetHandler">Dependency used to handle the objects which should be managed by Expanded Storages.</param>
-    public ModPatches(
-        IEventManager eventManager,
-        IManifest manifest,
-        IPatchManager patchManager,
-        AssetHandler assetHandler)
-        : base(manifest)
+    public ModPatches(IEventManager eventManager, IPatchManager patchManager, AssetHandler assetHandler)
     {
         // Init
         ModPatches.instance = this;
@@ -407,7 +401,7 @@ internal sealed class ModPatches : BaseService
 
         // Patches
         this.patchManager.Add(
-            this.ModId,
+            Mod.Id,
             new SavedPatch(
                 AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.checkForAction)),
                 AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_checkForAction_transpiler)),
@@ -503,6 +497,6 @@ internal sealed class ModPatches : BaseService
                 AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Object_placementAction_postfix)),
                 PatchType.Postfix));
 
-        this.patchManager.Patch(this.ModId);
+        this.patchManager.Patch(Mod.Id);
     }
 }

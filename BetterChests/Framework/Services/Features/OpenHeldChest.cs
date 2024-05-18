@@ -42,7 +42,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
         IModConfig modConfig,
         IPatchManager patchManager,
         ProxyChestFactory proxyChestFactory)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         this.containerFactory = containerFactory;
         this.inputHelper = inputHelper;

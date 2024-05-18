@@ -5,14 +5,10 @@ internal sealed class GenericModConfigMenuIntegration : ModIntegration<IGenericM
 {
     private const string ModUniqueId = "spacechase0.GenericModConfigMenu";
 
-    private readonly IManifest manifest;
-
     /// <summary>Initializes a new instance of the <see cref="GenericModConfigMenuIntegration" /> class.</summary>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modRegistry">Dependency used for fetching metadata about loaded mods.</param>
-    public GenericModConfigMenuIntegration(IManifest manifest, IModRegistry modRegistry)
-        : base(modRegistry, GenericModConfigMenuIntegration.ModUniqueId) =>
-        this.manifest = manifest;
+    public GenericModConfigMenuIntegration(IModRegistry modRegistry)
+        : base(modRegistry, GenericModConfigMenuIntegration.ModUniqueId) { }
 
     /// <summary>Gets a value indicating whether the mod is already registered with GMCM.</summary>
     public bool IsRegistered { get; private set; }
@@ -24,7 +20,7 @@ internal sealed class GenericModConfigMenuIntegration : ModIntegration<IGenericM
     public void Register(Action reset, Action save, bool titleScreenOnly = false)
     {
         this.Unregister();
-        this.Api?.Register(this.manifest, reset, save, titleScreenOnly);
+        this.Api?.Register(Mod.Manifest, reset, save, titleScreenOnly);
         this.IsRegistered = true;
     }
 
@@ -36,7 +32,7 @@ internal sealed class GenericModConfigMenuIntegration : ModIntegration<IGenericM
             return;
         }
 
-        this.Api?.Unregister(this.manifest);
+        this.Api?.Unregister(Mod.Manifest);
         this.IsRegistered = false;
     }
 
@@ -44,7 +40,7 @@ internal sealed class GenericModConfigMenuIntegration : ModIntegration<IGenericM
     /// <param name="complexOption">The option to add.</param>
     public void AddComplexOption(IComplexOption complexOption) =>
         this.Api?.AddComplexOption(
-            this.manifest,
+            Mod.Manifest,
             () => complexOption.Name,
             complexOption.Draw,
             () => complexOption.Tooltip,

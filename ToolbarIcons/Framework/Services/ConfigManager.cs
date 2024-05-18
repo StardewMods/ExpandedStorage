@@ -16,7 +16,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     private readonly ComplexOptionFactory complexOptionFactory;
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
     private readonly Dictionary<string, string?> icons;
-    private readonly IManifest manifest;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigManager" /> class.</summary>
     /// <param name="complexOptionFactory">Dependency used for creating complex options.</param>
@@ -34,12 +33,10 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
         Dictionary<string, string?> icons,
-        IManifest manifest,
         IModHelper modHelper)
         : base(contentPatcherIntegration, dataHelper, eventManager, modHelper)
     {
         this.complexOptionFactory = complexOptionFactory;
-        this.manifest = manifest;
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
         this.icons = icons;
 
@@ -79,7 +76,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         this.genericModConfigMenuIntegration.Register(this.Reset, () => this.Save(config));
 
-        gmcm.AddSectionTitle(this.manifest, I18n.Config_CustomizeToolbar_Name, I18n.Config_CustomizeToolbar_Tooltip);
+        gmcm.AddSectionTitle(Mod.Manifest, I18n.Config_CustomizeToolbar_Name, I18n.Config_CustomizeToolbar_Tooltip);
         var total = config.Icons.Count;
 
         for (var index = 0; index < config.Icons.Count; index++)

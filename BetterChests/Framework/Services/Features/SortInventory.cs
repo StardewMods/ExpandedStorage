@@ -38,7 +38,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
         IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         this.containerHandler = containerHandler;
         this.expressionHandler = expressionHandler;

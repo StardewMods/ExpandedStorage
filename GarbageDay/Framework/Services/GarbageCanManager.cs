@@ -14,7 +14,7 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Represents a manager for managing garbage cans in a game.</summary>
-internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
+internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
 {
     private readonly AssetHandler assetHandler;
     private readonly PerScreen<NPC?> currentNpc = new();
@@ -32,7 +32,6 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="foundGarbageCans">The discovered garbage cans.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
@@ -41,11 +40,9 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
         IEventManager eventManager,
         Dictionary<string, FoundGarbageCan> foundGarbageCans,
         IInputHelper inputHelper,
-        IManifest manifest,
         IModConfig modConfig,
         IReflectionHelper reflectionHelper,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(manifest)
     {
         // Init
         this.assetHandler = assetHandler;
@@ -69,7 +66,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
             || !e.Button.IsActionButton()
             || !Game1.currentLocation.Objects.TryGetValue(e.Cursor.GrabTile, out var obj)
             || obj is not Chest chest
-            || !chest.modData.TryGetValue(this.ModId + "/WhichCan", out var whichCan)
+            || !chest.modData.TryGetValue(Mod.Id + "/WhichCan", out var whichCan)
             || !this.garbageCans.TryGetValue(whichCan, out var garbageCan))
         {
             return;
@@ -193,7 +190,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
         {
             if (Game1.currentLocation.Objects.TryGetValue(pos, out var obj)
                 && obj is Chest chest
-                && chest.modData.TryGetValue(this.ModId + "/WhichCan", out var whichCan)
+                && chest.modData.TryGetValue(Mod.Id + "/WhichCan", out var whichCan)
                 && this.garbageCans.TryGetValue(whichCan, out var garbageCan))
             {
                 garbageCan.AddLoot(ItemRegistry.Create("(H)66"));
@@ -236,7 +233,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
 
         // Remove existing garbage can
         if (location.Objects.TryGetValue(foundGarbageCan.TilePosition, out var obj)
-            && obj.modData.ContainsKey(this.ModId + "/WhichCan"))
+            && obj.modData.ContainsKey(Mod.Id + "/WhichCan"))
         {
             location.Objects.Remove(foundGarbageCan.TilePosition);
         }
@@ -263,9 +260,9 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
         }
 
         // Update chest
-        chest.GlobalInventoryId = this.ModId + "-" + foundGarbageCan.WhichCan;
+        chest.GlobalInventoryId = Mod.Id + "-" + foundGarbageCan.WhichCan;
         chest.playerChoiceColor.Value = Color.DarkGray;
-        chest.modData[this.ModId + "/WhichCan"] = foundGarbageCan.WhichCan;
+        chest.modData[Mod.Id + "/WhichCan"] = foundGarbageCan.WhichCan;
         chest.modData["Pathoschild.ChestsAnywhere/IsIgnored"] = "true";
         chest.modData["furyx639.BetterChests/StorageName"] = $"{I18n.GarbageCan_Name()} {foundGarbageCan.WhichCan}";
 

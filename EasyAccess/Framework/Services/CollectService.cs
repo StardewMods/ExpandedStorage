@@ -9,7 +9,7 @@ using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.EasyAccess.Framework.Interfaces;
 
 /// <summary>Handles collecting items.</summary>
-internal sealed class CollectService : GenericBaseService<CollectService>
+internal sealed class CollectService : BaseService<CollectService>
 {
     private readonly AssetHandler assetHandler;
     private readonly IInputHelper inputHelper;
@@ -20,17 +20,14 @@ internal sealed class CollectService : GenericBaseService<CollectService>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public CollectService(
         AssetHandler assetHandler,
         IEventManager eventManager,
         IInputHelper inputHelper,
-        IManifest manifest,
         IModConfig modConfig,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(manifest)
     {
         // Init
         this.assetHandler = assetHandler;

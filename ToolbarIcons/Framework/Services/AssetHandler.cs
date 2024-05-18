@@ -10,7 +10,7 @@ using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Models;
 
 /// <summary>Responsible for handling assets provided by this mod.</summary>
-internal sealed class AssetHandler : GenericBaseService<AssetHandler>
+internal sealed class AssetHandler : BaseService<AssetHandler>
 {
     private readonly string dataPath;
     private readonly IGameContentHelper gameContentHelper;
@@ -22,7 +22,6 @@ internal sealed class AssetHandler : GenericBaseService<AssetHandler>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="integrationManager">Dependency used for managing integrations.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public AssetHandler(
@@ -30,19 +29,17 @@ internal sealed class AssetHandler : GenericBaseService<AssetHandler>
         IGameContentHelper gameContentHelper,
         IIconRegistry iconRegistry,
         IntegrationManager integrationManager,
-        IManifest manifest,
         IModContentHelper modContentHelper,
         IThemeHelper themeHelper)
-        : base(manifest)
     {
         // Init
         this.gameContentHelper = gameContentHelper;
         this.iconRegistry = iconRegistry;
         this.integrationManager = integrationManager;
-        this.dataPath = this.ModId + "/Data";
+        this.dataPath = Mod.Id + "/Data";
 
-        themeHelper.AddAsset(this.ModId + "/Arrows", modContentHelper.Load<IRawTextureData>("assets/arrows.png"));
-        themeHelper.AddAsset(this.ModId + "/Icons", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
+        themeHelper.AddAsset(Mod.Id + "/Arrows", modContentHelper.Load<IRawTextureData>("assets/arrows.png"));
+        themeHelper.AddAsset(Mod.Id + "/Icons", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
 
         // Events
         eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
@@ -84,7 +81,7 @@ internal sealed class AssetHandler : GenericBaseService<AssetHandler>
         {
             this.iconRegistry.AddIcon(
                 icons[index].ToStringFast(),
-                $"{this.ModId}/Icons",
+                $"{Mod.Id}/Icons",
                 new Rectangle(16 * (index % 5), 16 * (int)(index / 5f), 16, 16));
         }
     }

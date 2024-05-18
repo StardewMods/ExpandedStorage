@@ -22,7 +22,7 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Handles changes to the active menu.</summary>
-internal sealed class MenuHandler : GenericBaseService<MenuHandler>
+internal sealed class MenuHandler : BaseService<MenuHandler>
 {
     private static MenuHandler instance = null!;
     private readonly PerScreen<MenuManager> bottomMenu;
@@ -41,7 +41,6 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="modEvents">Dependency used for managing access to SMAPI events.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
@@ -50,11 +49,9 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
         IEventManager eventManager,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
-        IManifest manifest,
         IModConfig modConfig,
         IModEvents modEvents,
         IPatchManager patchManager)
-        : base(manifest)
     {
         // Init
         MenuHandler.instance = this;
@@ -63,10 +60,10 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
         this.inputHelper = inputHelper;
 
         this.topMenu = new PerScreen<MenuManager>(
-            () => new MenuManager(eventManager, iconRegistry, inputHelper, manifest, this, modConfig));
+            () => new MenuManager(eventManager, iconRegistry, inputHelper, this, modConfig));
 
         this.bottomMenu = new PerScreen<MenuManager>(
-            () => new MenuManager(eventManager, iconRegistry, inputHelper, manifest, this, modConfig));
+            () => new MenuManager(eventManager, iconRegistry, inputHelper, this, modConfig));
 
         // Events
         eventManager.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);

@@ -10,7 +10,7 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Models.Expressions;
 
 /// <summary>Responsible for handling parsed expressions.</summary>
-internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>, IExpressionHandler
+internal sealed class ExpressionHandler : BaseService<ExpressionHandler>, IExpressionHandler
 {
     private static readonly IExpression DefaultExpression = new RootExpression();
     private static readonly Parser<char, IExpression> RootParser;
@@ -117,9 +117,7 @@ internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>,
 
     /// <summary>Initializes a new instance of the <see cref="ExpressionHandler" /> class.</summary>
     /// <param name="cacheManager">Dependency used for managing cache tables.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public ExpressionHandler(CacheManager cacheManager, IManifest manifest)
-        : base(manifest) =>
+    public ExpressionHandler(CacheManager cacheManager) =>
         this.cachedSearches = cacheManager.GetCacheTable<IExpression?>();
 
     /// <inheritdoc cref="IExpressionHandler" />

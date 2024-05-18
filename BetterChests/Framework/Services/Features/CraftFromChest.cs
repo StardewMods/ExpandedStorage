@@ -47,7 +47,7 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
         IManifest manifest,
         IModConfig modConfig,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         CraftFromChest.instance = this;
         this.betterCraftingIntegration = betterCraftingIntegration;

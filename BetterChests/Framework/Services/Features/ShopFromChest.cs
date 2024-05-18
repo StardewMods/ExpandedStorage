@@ -34,7 +34,7 @@ internal sealed class ShopFromChest : BaseFeature<ShopFromChest>
         IManifest manifest,
         IModConfig modConfig,
         IPatchManager patchManager)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         ShopFromChest.instance = this;
         this.containerFactory = containerFactory;

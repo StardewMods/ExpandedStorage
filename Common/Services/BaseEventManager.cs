@@ -6,14 +6,9 @@ using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
 
 /// <summary>Represents a base event manager service.</summary>
-internal class BaseEventManager : BaseService, IEventManager
+internal class BaseEventManager : IEventManager
 {
     private static readonly ReverseComparer<int> ReverseComparer = new();
-
-    /// <summary>Initializes a new instance of the <see cref="BaseEventManager" /> class.</summary>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public BaseEventManager(IManifest manifest)
-        : base(manifest) { }
 
     /// <summary>Gets the subscribers.</summary>
     protected Dictionary<Type, SortedList<int, List<Delegate>>> Subscribers { get; } = new();

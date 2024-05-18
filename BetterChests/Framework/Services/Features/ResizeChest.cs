@@ -30,7 +30,7 @@ internal sealed class ResizeChest : BaseFeature<ResizeChest>
         IManifest manifest,
         IModConfig modConfig,
         IPatchManager patchManager)
-        : base(eventManager, manifest, modConfig)
+        : base(eventManager, modConfig)
     {
         ResizeChest.instance = this;
         this.containerFactory = containerFactory;

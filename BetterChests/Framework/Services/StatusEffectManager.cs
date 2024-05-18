@@ -6,16 +6,13 @@ using StardewMods.Common.Services;
 using StardewValley.Buffs;
 
 /// <summary>Responsible for adding or removing custom buffs.</summary>
-internal sealed class StatusEffectManager : GenericBaseService<StatusEffectManager>
+internal sealed class StatusEffectManager : BaseService<StatusEffectManager>
 {
     private readonly IModConfig modConfig;
 
     /// <summary>Initializes a new instance of the <see cref="StatusEffectManager" /> class.</summary>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
-    public StatusEffectManager(IManifest manifest, IModConfig modConfig)
-        : base(manifest) =>
-        this.modConfig = modConfig;
+    public StatusEffectManager(IModConfig modConfig) => this.modConfig = modConfig;
 
     /// <summary>Adds a custom status effect to the player.</summary>
     /// <param name="statusEffect">The status effect to add.</param>

@@ -8,6 +8,7 @@ using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.CustomBush.Framework;
 using StardewMods.CustomBush.Framework.Services;
+using Mod = StardewModdingAPI.Mod;
 
 /// <inheritdoc />
 public sealed class ModEntry : Mod
@@ -39,6 +40,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<IEventManager, EventManager>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<Log>();
+        this.container.RegisterSingleton<Common.Services.Mod>();
         this.container.RegisterSingleton<ModPatches>();
         this.container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
         this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();

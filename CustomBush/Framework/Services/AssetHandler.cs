@@ -7,7 +7,7 @@ using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.CustomBush.Framework.Models;
 
 /// <summary>Responsible for handling assets provided by this mod.</summary>
-internal sealed class AssetHandler : BaseService
+internal sealed class AssetHandler
 {
     private readonly string dataPath;
     private readonly IGameContentHelper gameContentHelper;
@@ -17,12 +17,10 @@ internal sealed class AssetHandler : BaseService
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public AssetHandler(IGameContentHelper gameContentHelper, IEventManager eventManager, IManifest manifest)
-        : base(manifest)
+    public AssetHandler(IGameContentHelper gameContentHelper, IEventManager eventManager)
     {
         this.gameContentHelper = gameContentHelper;
-        this.dataPath = this.ModId + "/Data";
+        this.dataPath = Mod.Id + "/Data";
         eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
         eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
         eventManager.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);

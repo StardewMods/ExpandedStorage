@@ -15,7 +15,7 @@ using StardewValley.Menus;
 // TODO: Center Toolbar Icons
 
 /// <summary>Service for handling the toolbar icons on the screen.</summary>
-internal sealed class ToolbarManager : BaseService
+internal sealed class ToolbarManager
 {
     private readonly ConfigManager configManager;
     private readonly IEventManager eventManager;
@@ -33,7 +33,6 @@ internal sealed class ToolbarManager : BaseService
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="icons">Dictionary containing all added icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public ToolbarManager(
         ConfigManager configManager,
@@ -41,9 +40,7 @@ internal sealed class ToolbarManager : BaseService
         IIconRegistry iconRegistry,
         Dictionary<string, string?> icons,
         IInputHelper inputHelper,
-        IManifest manifest,
         IReflectionHelper reflectionHelper)
-        : base(manifest)
     {
         // Init
         this.configManager = configManager;
