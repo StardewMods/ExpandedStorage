@@ -3,12 +3,13 @@ namespace StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 /// <inheritdoc />
 internal sealed class GenericModConfigMenuIntegration : ModIntegration<IGenericModConfigMenuApi>
 {
-    private const string ModUniqueId = "spacechase0.GenericModConfigMenu";
-
     /// <summary>Initializes a new instance of the <see cref="GenericModConfigMenuIntegration" /> class.</summary>
     /// <param name="modRegistry">Dependency used for fetching metadata about loaded mods.</param>
     public GenericModConfigMenuIntegration(IModRegistry modRegistry)
-        : base(modRegistry, GenericModConfigMenuIntegration.ModUniqueId) { }
+        : base(modRegistry) { }
+
+    /// <inheritdoc />
+    public override string UniqueId => "spacechase0.GenericModConfigMenu";
 
     /// <summary>Gets a value indicating whether the mod is already registered with GMCM.</summary>
     public bool IsRegistered { get; private set; }

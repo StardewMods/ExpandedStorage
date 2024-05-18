@@ -9,7 +9,6 @@ using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.FauxCore.Framework;
 using StardewMods.FauxCore.Framework.Interfaces;
 using StardewMods.FauxCore.Framework.Services;
-using Mod = StardewModdingAPI.Mod;
 
 /// <inheritdoc />
 public sealed class ModEntry : Mod
@@ -17,7 +16,16 @@ public sealed class ModEntry : Mod
     private Container container = null!;
 
     /// <inheritdoc />
-    public override void Entry(IModHelper helper)
+    public override object GetApi(IModInfo mod) =>
+        new FauxCoreApi(
+            mod,
+            this.container.GetInstance<IAssetHandler>(),
+            this.container.GetInstance<IExpressionHandler>(),
+            this.container.GetInstance<Func<IModConfig>>(),
+            this.container.GetInstance<IThemeHelper>());
+
+    /// <inheritdoc />
+    protected override void Init()
     {
         // Init
         I18n.Init(this.Helper.Translation);
@@ -45,7 +53,6 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<IExpressionHandler, ExpressionHandler>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.container.RegisterSingleton<Log>();
-        this.container.RegisterSingleton<Common.Services.Mod>();
         this.container.RegisterSingleton<ISimpleLogging, SimpleLogging>();
         this.container.RegisterSingleton<ThemeHelper>();
         this.container.RegisterSingleton<IThemeHelper, ThemeHelper>();
@@ -55,15 +62,6 @@ public sealed class ModEntry : Mod
         // Verify
         this.container.Verify();
     }
-
-    /// <inheritdoc />
-    public override object GetApi(IModInfo mod) =>
-        new FauxCoreApi(
-            mod,
-            this.container.GetInstance<IAssetHandler>(),
-            this.container.GetInstance<IExpressionHandler>(),
-            this.container.GetInstance<Func<IModConfig>>(),
-            this.container.GetInstance<IThemeHelper>());
 
     private IModConfig GetConfig() => this.container.GetInstance<IModConfig>();
 }

@@ -7,5 +7,5 @@ using StardewMods.ExpandedStorage.Framework.Interfaces;
 internal sealed class DefaultConfig : IModConfig
 {
     /// <inheritdoc />
-    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions { get; set; } = [];
+    public Dictionary<string, DefaultStorageOptions> StorageOptions { get; set; } = [];
 }

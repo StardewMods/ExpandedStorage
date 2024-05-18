@@ -6,5 +6,5 @@ using StardewMods.Common.Models;
 internal interface IModConfig
 {
     /// <summary>Gets the default options for different storage types.</summary>
-    public Dictionary<string, Dictionary<string, DefaultStorageOptions>> StorageOptions { get; }
+    public Dictionary<string, DefaultStorageOptions> StorageOptions { get; }
 }

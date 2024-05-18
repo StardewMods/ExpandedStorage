@@ -8,7 +8,6 @@ using StardewModdingAPI.Events;
 internal sealed class FauxCoreIntegration
     : ModIntegration<IFauxCoreApi>, IExpressionHandler, IIconRegistry, ISimpleLogging, IPatchManager, IThemeHelper
 {
-    private const string ModUniqueId = "furyx639.FauxCore";
     private readonly Queue<Action> deferred = [];
     private readonly Lazy<IExpressionHandler>? expressionHandler;
     private readonly Lazy<IIconRegistry>? iconRegistry;
@@ -24,7 +23,7 @@ internal sealed class FauxCoreIntegration
     /// <param name="modRegistry">Dependency used for fetching metadata about loaded mods.</param>
     /// <param name="monitor">Dependency used for monitoring and logging.</param>
     public FauxCoreIntegration(IModEvents modEvents, IModRegistry modRegistry, IMonitor monitor)
-        : base(modRegistry, FauxCoreIntegration.ModUniqueId)
+        : base(modRegistry)
     {
         this.monitor = monitor;
         if (!this.IsLoaded)
@@ -40,6 +39,9 @@ internal sealed class FauxCoreIntegration
 
         modEvents.GameLoop.GameLaunched += this.OnGameLaunched;
     }
+
+    /// <inheritdoc />
+    public override string UniqueId => "furyx639.FauxCore";
 
     /// <inheritdoc />
     public void Add(string id, params ISavedPatch[] patches)

@@ -9,7 +9,6 @@ using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.EasyAccess.Framework.Interfaces;
 using StardewMods.EasyAccess.Framework.Services;
-using Mod = StardewModdingAPI.Mod;
 
 /// <inheritdoc />
 public sealed class ModEntry : Mod
@@ -17,7 +16,7 @@ public sealed class ModEntry : Mod
     private Container container = null!;
 
     /// <inheritdoc />
-    public override void Entry(IModHelper helper)
+    protected override void Init()
     {
         // Init
         I18n.Init(this.Helper.Translation);
@@ -45,7 +44,6 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.container.RegisterSingleton<Log>();
-        this.container.RegisterSingleton<Common.Services.Mod>();
         this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
         this.container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
         this.container.RegisterSingleton<ToolbarIconsIntegration>();

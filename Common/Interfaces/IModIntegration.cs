@@ -13,5 +13,5 @@ public interface IModIntegration
     protected internal string UniqueId { get; }
 
     /// <summary>Gets the minimum supported version for this mod.</summary>
-    protected internal string? Version { get; }
+    protected internal ISemanticVersion? Version { get; }
 }

@@ -14,7 +14,6 @@ using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
-using Mod = StardewModdingAPI.Mod;
 
 /// <inheritdoc />
 public sealed class ModEntry : Mod
@@ -22,7 +21,15 @@ public sealed class ModEntry : Mod
     private Container container = null!;
 
     /// <inheritdoc />
-    public override void Entry(IModHelper helper)
+    public override object GetApi(IModInfo mod) =>
+        new BetterChestsApi(
+            mod,
+            this.container.GetInstance<ConfigManager>(),
+            this.container.GetInstance<ContainerHandler>(),
+            this.container.GetInstance<ContainerFactory>());
+
+    /// <inheritdoc />
+    protected override void Init()
     {
         // Init
         I18n.Init(this.Helper.Translation);
@@ -31,7 +38,6 @@ public sealed class ModEntry : Mod
         // Configuration
         this.container.RegisterSingleton(() => new Harmony(this.ModManifest.UniqueID));
         this.container.RegisterInstance(this.Helper);
-        this.container.RegisterInstance(this.ModManifest);
         this.container.RegisterInstance(this.Monitor);
         this.container.RegisterInstance(this.Helper.ConsoleCommands);
         this.container.RegisterInstance(this.Helper.Data);
@@ -58,7 +64,6 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<MenuHandler>();
         this.container.RegisterSingleton<Localized>();
         this.container.RegisterSingleton<Log>();
-        this.container.RegisterSingleton<Common.Services.Mod>();
         this.container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
         this.container.RegisterSingleton<ProxyChestFactory>();
         this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
@@ -96,12 +101,4 @@ public sealed class ModEntry : Mod
         // Verify
         this.container.Verify();
     }
-
-    /// <inheritdoc />
-    public override object GetApi(IModInfo mod) =>
-        new BetterChestsApi(
-            mod,
-            this.container.GetInstance<ConfigManager>(),
-            this.container.GetInstance<ContainerHandler>(),
-            this.container.GetInstance<ContainerFactory>());
 }

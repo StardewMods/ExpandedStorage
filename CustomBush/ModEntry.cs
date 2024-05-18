@@ -8,7 +8,6 @@ using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.CustomBush.Framework;
 using StardewMods.CustomBush.Framework.Services;
-using Mod = StardewModdingAPI.Mod;
 
 /// <inheritdoc />
 public sealed class ModEntry : Mod
@@ -16,7 +15,15 @@ public sealed class ModEntry : Mod
     private Container container = null!;
 
     /// <inheritdoc />
-    public override void Entry(IModHelper helper)
+    public override object GetApi(IModInfo mod) =>
+        new CustomBushApi(
+            this.container.GetInstance<AssetHandler>(),
+            this.container.GetInstance<ModPatches>(),
+            mod,
+            this.container.GetInstance<ISimpleLogging>());
+
+    /// <inheritdoc />
+    protected override void Init()
     {
         // Init
         I18n.Init(this.Helper.Translation);
@@ -40,7 +47,6 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<IEventManager, EventManager>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<Log>();
-        this.container.RegisterSingleton<Common.Services.Mod>();
         this.container.RegisterSingleton<ModPatches>();
         this.container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
         this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
@@ -48,12 +54,4 @@ public sealed class ModEntry : Mod
         // Verify
         this.container.Verify();
     }
-
-    /// <inheritdoc />
-    public override object GetApi(IModInfo mod) =>
-        new CustomBushApi(
-            this.container.GetInstance<AssetHandler>(),
-            this.container.GetInstance<ModPatches>(),
-            mod,
-            this.container.GetInstance<ISimpleLogging>());
 }
