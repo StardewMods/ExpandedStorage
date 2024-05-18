@@ -32,7 +32,6 @@ internal sealed class AssetHandler : BaseService
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
@@ -41,12 +40,11 @@ internal sealed class AssetHandler : BaseService
         IEventManager eventManager,
         IGameContentHelper gameContentHelper,
         IIconRegistry iconRegistry,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig,
         IModContentHelper modContentHelper,
         IThemeHelper themeHelper)
-        : base(log, manifest)
+        : base(manifest)
     {
         // Init
         this.gameContentHelper = gameContentHelper;

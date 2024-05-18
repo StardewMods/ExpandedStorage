@@ -4,8 +4,8 @@ using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
-using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 /// <summary>Automatically organizes items between chests during sleep.</summary>
@@ -18,17 +18,15 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     public AutoOrganize(
         ContainerFactory containerFactory,
         ContainerHandler containerHandler,
         IEventManager eventManager,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         this.containerHandler = containerHandler;
         this.containerFactory = containerFactory;
@@ -90,7 +88,7 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
                         {
                             if (amount > 0)
                             {
-                                this.Log.Info(
+                                Log.Info(
                                     "{0}: {{ Item: {1}, Quantity: {2}, From: {3}, To: {4} }}",
                                     this.Id,
                                     name,

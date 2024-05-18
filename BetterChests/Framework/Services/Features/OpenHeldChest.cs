@@ -9,6 +9,7 @@ using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
@@ -29,7 +30,6 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="proxyChestFactory">Dependency used for creating virtualized chests.</param>
@@ -37,13 +37,12 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
         ContainerFactory containerFactory,
         IEventManager eventManager,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig,
         IPatchManager patchManager,
         ProxyChestFactory proxyChestFactory)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         this.containerFactory = containerFactory;
         this.inputHelper = inputHelper;
@@ -114,7 +113,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
             return;
         }
 
-        this.Log.Info("{0}: Opening held chest {1}", this.Id, container);
+        Log.Info("{0}: Opening held chest {1}", this.Id, container);
         this.inputHelper.Suppress(e.Button);
         container.Mutex?.RequestLock(
             () =>

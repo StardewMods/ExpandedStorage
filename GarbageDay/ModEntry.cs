@@ -7,6 +7,7 @@ using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.GarbageDay.Framework.Interfaces;
+using StardewMods.GarbageDay.Framework.Models;
 using StardewMods.GarbageDay.Framework.Services;
 
 /// <inheritdoc />
@@ -33,14 +34,18 @@ public sealed class ModEntry : Mod
         this.container.RegisterInstance(this.Helper.ModRegistry);
         this.container.RegisterInstance(this.Helper.Reflection);
         this.container.RegisterInstance(this.Helper.Translation);
+
         this.container.RegisterSingleton<AssetHandler>();
         this.container.RegisterSingleton<IModConfig, ConfigManager>();
         this.container.RegisterSingleton<ContentPatcherIntegration>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
         this.container.RegisterSingleton<GarbageCanManager>();
-        this.container.RegisterSingleton<ILog, FauxCoreIntegration>();
+        this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
+        this.container.RegisterSingleton<Log>();
         this.container.RegisterSingleton<ToolbarIconsIntegration>();
+
+        this.container.RegisterInstance(new Dictionary<string, FoundGarbageCan>());
 
         // Verify
         this.container.Verify();

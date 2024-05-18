@@ -20,16 +20,16 @@ using StardewValley.TokenizableStrings;
 internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 {
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
-    private readonly ILog log;
     private readonly IManifest manifest;
     private readonly IModRegistry modRegistry;
+    private readonly ISimpleLogging simpleLogging;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigManager" /> class.</summary>
     /// <param name="contentPatcherIntegration">Dependency for Content Patcher integration.</param>
     /// <param name="dataHelper">Dependency used for storing and retrieving data.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
+    /// <param name="simpleLogging">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modHelper">Dependency for events, input, and content.</param>
     /// <param name="modRegistry">Dependency used for fetching metadata about loaded mods.</param>
@@ -38,14 +38,14 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         IDataHelper dataHelper,
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
-        ILog log,
+        ISimpleLogging simpleLogging,
         IManifest manifest,
         IModHelper modHelper,
         IModRegistry modRegistry)
         : base(contentPatcherIntegration, dataHelper, eventManager, modHelper)
     {
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
-        this.log = log;
+        this.simpleLogging = simpleLogging;
         this.manifest = manifest;
         this.modRegistry = modRegistry;
 
@@ -1280,7 +1280,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     {
         this.InitializeDefaultOptions(this.Config.DefaultOptions);
         this.InitializeStorageTypes(this.Config);
-        this.log.Trace("Config changed:\n{0}", e.Config);
+        this.simpleLogging.Trace("Config changed:\n{0}", e.Config);
     }
 
     private void OnGameLaunched(GameLaunchedEventArgs e)

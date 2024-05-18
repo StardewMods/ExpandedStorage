@@ -42,7 +42,6 @@ internal sealed class ModPatches : BaseService
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
@@ -50,11 +49,10 @@ internal sealed class ModPatches : BaseService
         AssetHandler assetHandler,
         IEventManager eventManager,
         IGameContentHelper gameContentHelper,
-        ILog log,
         IManifest manifest,
         IPatchManager patchManager,
         IReflectionHelper reflectionHelper)
-        : base(log, manifest)
+        : base(manifest)
     {
         // Init
         ModPatches.instance = this;
@@ -219,7 +217,7 @@ internal sealed class ModPatches : BaseService
         // Fails basic conditions
         if (age < bushModel.AgeToProduce || dayOfMonth < bushModel.DayToBeginProducing)
         {
-            ModPatches.instance.Log.Trace(
+            Log.Trace(
                 "{0} will not produce. Age: {1} < {2} , Day: {3} < {4}",
                 id,
                 age.ToString(CultureInfo.InvariantCulture),
@@ -231,7 +229,7 @@ internal sealed class ModPatches : BaseService
             return;
         }
 
-        ModPatches.instance.Log.Trace(
+        Log.Trace(
             "{0} passed basic conditions. Age: {1} >= {2} , Day: {3} >= {4}",
             id,
             age.ToString(CultureInfo.InvariantCulture),
@@ -242,10 +240,7 @@ internal sealed class ModPatches : BaseService
         // Fails default season conditions
         if (!bushModel.Seasons.Any() && season == Season.Winter && !__instance.IsSheltered())
         {
-            ModPatches.instance.Log.Trace(
-                "{0} will not produce. Season: {1} and plant is outdoors.",
-                id,
-                season.ToString());
+            Log.Trace("{0} will not produce. Season: {1} and plant is outdoors.", id, season.ToString());
 
             __result = false;
             return;
@@ -253,16 +248,13 @@ internal sealed class ModPatches : BaseService
 
         if (!bushModel.Seasons.Any())
         {
-            ModPatches.instance.Log.Trace(
-                "{0} passed default season condition. Season: {1} or plant is indoors.",
-                id,
-                season.ToString());
+            Log.Trace("{0} passed default season condition. Season: {1} or plant is indoors.", id, season.ToString());
         }
 
         // Fails custom season conditions
         if (bushModel.Seasons.Any() && !bushModel.Seasons.Contains(season) && !__instance.IsSheltered())
         {
-            ModPatches.instance.Log.Trace(
+            Log.Trace(
                 "{0} will not produce. Season: {1} not in {2} and plant is outdoors.",
                 id,
                 season.ToString(),
@@ -274,7 +266,7 @@ internal sealed class ModPatches : BaseService
 
         if (bushModel.Seasons.Any())
         {
-            ModPatches.instance.Log.Trace(
+            Log.Trace(
                 "{0} passed custom season conditions. Season: {1} in {2} or plant is indoors.",
                 id,
                 season.ToString(),
@@ -282,15 +274,15 @@ internal sealed class ModPatches : BaseService
         }
 
         // Try to produce item
-        ModPatches.instance.Log.Trace("{0} attempting to produce random item.", id);
+        Log.Trace("{0} attempting to produce random item.", id);
         if (!ModPatches.instance.TryToProduceRandomItem(__instance, bushModel, out var item))
         {
-            ModPatches.instance.Log.Trace("{0} will not produce. No item was produced.", id);
+            Log.Trace("{0} will not produce. No item was produced.", id);
             __result = false;
             return;
         }
 
-        ModPatches.instance.Log.Trace(
+        Log.Trace(
             "{0} selected {1} to grow with quality {2} and quantity {3}.",
             id,
             item.QualifiedItemId,
@@ -689,7 +681,7 @@ internal sealed class ModPatches : BaseService
                 null,
                 bush.Location.SeedsIgnoreSeasonsHere() ? GameStateQuery.SeasonQueryKeys : null))
         {
-            ModPatches.instance.Log.Trace(
+            Log.Trace(
                 "{0} did not select {1}. Failed: {2}",
                 bush.modData[ModPatches.instance.modDataId],
                 drop.Id,
@@ -702,7 +694,7 @@ internal sealed class ModPatches : BaseService
             && bush.Location.SeedsIgnoreSeasonsHere()
             && drop.Season != Game1.GetSeasonForLocation(bush.Location))
         {
-            ModPatches.instance.Log.Trace(
+            Log.Trace(
                 "{0} did not select {1}. Failed: {2}",
                 bush.modData[ModPatches.instance.modDataId],
                 drop.Id,
@@ -720,7 +712,7 @@ internal sealed class ModPatches : BaseService
             null,
             delegate(string query, string error)
             {
-                this.Log.Error(
+                Log.Error(
                     "{0} failed parsing item query {1} for item {2}: {3}",
                     bush.modData[ModPatches.instance.modDataId],
                     query,

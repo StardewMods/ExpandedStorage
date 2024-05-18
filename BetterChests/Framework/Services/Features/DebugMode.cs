@@ -30,7 +30,6 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
@@ -43,12 +42,11 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         IExpressionHandler expressionHandler,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig,
         IReflectionHelper reflectionHelper,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         // Init
         this.containerFactory = containerFactory;
@@ -117,7 +115,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (Game1.activeClickableMenu?.readyToClose() == false)
+        if (e.Id != this.Id || Game1.activeClickableMenu?.readyToClose() == false)
         {
             return;
         }

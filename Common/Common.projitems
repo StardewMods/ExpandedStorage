@@ -51,7 +51,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\IManagedTexture.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Services\IExpressionHandler.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Services\IIconRegistry.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Services\ILog.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Services\ISimpleLogging.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Services\IPatchManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Services\IThemeHelper.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FindAnything\ISearchResult.cs"/>
@@ -92,7 +92,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ToolbarIcons\IToolbarIconsApi.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ToolbarIcons\ToolbarIconsIntegration.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\EventManager.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)Services\UiManager.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Log.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\BaseComponent.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\TextField.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\VerticalScrollBar.cs"/>

@@ -17,10 +17,9 @@ internal sealed class IconRegistry : BaseService, IIconRegistry
 
     /// <summary>Initializes a new instance of the <see cref="IconRegistry" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public IconRegistry(IAssetHandler assetHandler, ILog log, IManifest manifest)
-        : base(log, manifest) =>
+    public IconRegistry(IAssetHandler assetHandler, IManifest manifest)
+        : base(manifest) =>
         this.assetHandler = assetHandler;
 
     /// <summary>Adds an icon to the icon registry.</summary>

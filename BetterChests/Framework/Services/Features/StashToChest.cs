@@ -8,6 +8,7 @@ using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
@@ -33,7 +34,6 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
@@ -45,11 +45,10 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         this.assetHandler = assetHandler;
         this.containerFactory = containerFactory;
@@ -106,13 +105,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         {
             if (amount > 0)
             {
-                this.Log.Trace(
-                    "{0}: {{ Item: {1}, Quantity: {2}, From: {3}, To: {4} }}",
-                    this.Id,
-                    name,
-                    amount,
-                    from,
-                    to);
+                Log.Trace("{0}: {{ Item: {1}, Quantity: {2}, From: {3}, To: {4} }}", this.Id, name, amount, from, to);
             }
         }
     }
@@ -267,7 +260,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
 
         if (!stashedAny)
         {
-            this.Log.Alert(I18n.Alert_StashToChest_NoEligible());
+            Log.Alert(I18n.Alert_StashToChest_NoEligible());
             return;
         }
 

@@ -13,10 +13,9 @@ internal sealed class PatchManager : GenericBaseService<PatchManager>, IPatchMan
     private readonly Dictionary<string, List<ISavedPatch>> savedPatches = new();
 
     /// <summary>Initializes a new instance of the <see cref="PatchManager" /> class.</summary>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public PatchManager(ILog log, IManifest manifest)
-        : base(log, manifest) =>
+    public PatchManager(IManifest manifest)
+        : base(manifest) =>
         this.harmony = new Lazy<Harmony>(() => new Harmony(this.ModId));
 
     /// <inheritdoc />
@@ -44,7 +43,7 @@ internal sealed class PatchManager : GenericBaseService<PatchManager>, IPatchMan
         {
             try
             {
-                this.Log.Trace(
+                Log.Trace(
                     "Patching {0}.{1} with {2}.{3} {4}.",
                     patch.Original.DeclaringType!.Name,
                     patch.Original.Name,
@@ -70,7 +69,7 @@ internal sealed class PatchManager : GenericBaseService<PatchManager>, IPatchMan
             }
             catch (Exception e)
             {
-                this.Log.Warn(
+                Log.Warn(
                     "Patching {0} failed with.\nError: {1}",
                     patch.LogId ?? $"{patch.Original.DeclaringType!.Name}.{patch.Original.Name}",
                     e.Message);
@@ -89,7 +88,7 @@ internal sealed class PatchManager : GenericBaseService<PatchManager>, IPatchMan
         this.appliedPatches.Remove(id);
         foreach (var patch in patches)
         {
-            this.Log.Trace("Unpatching {0} with {1}.", patch.Original.Name, patch.Patch.Name);
+            Log.Trace("Unpatching {0} with {1}.", patch.Original.Name, patch.Patch.Name);
             this.harmony.Value.Unpatch(patch.Original, patch.Patch);
         }
     }

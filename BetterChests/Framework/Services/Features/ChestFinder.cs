@@ -9,6 +9,7 @@ using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.BetterChests.Framework.UI.Overlays;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
@@ -32,7 +33,6 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
@@ -44,12 +44,11 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         IExpressionHandler expressionHandler,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         this.containerFactory = containerFactory;
         this.expressionHandler = expressionHandler;
@@ -178,7 +177,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
             {
                 if (!string.IsNullOrWhiteSpace(value))
                 {
-                    this.Log.Trace("{0}: Searching for {1}", this.Id, value);
+                    Log.Trace("{0}: Searching for {1}", this.Id, value);
                 }
 
                 if (this.searchText.Value == value)
@@ -216,7 +215,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
 
         var containers = this.containerFactory.GetAll(Game1.player.currentLocation, this.Predicate);
         this.pointers.Value.AddRange(containers.Select(container => new Pointer(container)));
-        this.Log.Info("{0}: Found {1} chests", this.Id, this.pointers.Value.Count);
+        Log.Info("{0}: Found {1} chests", this.Id, this.pointers.Value.Count);
         this.currentIndex.Value = 0;
     }
 }

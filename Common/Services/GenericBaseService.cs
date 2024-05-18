@@ -1,16 +1,13 @@
 namespace StardewMods.Common.Services;
 
-using StardewMods.Common.Services.Integrations.FauxCore;
-
 /// <inheritdoc />
 internal abstract class GenericBaseService<TService> : BaseService
     where TService : class
 {
     /// <summary>Initializes a new instance of the <see cref="GenericBaseService{TService}" /> class.</summary>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    protected GenericBaseService(ILog log, IManifest manifest)
-        : base(log, manifest)
+    protected GenericBaseService(IManifest manifest)
+        : base(manifest)
     {
         this.Id = typeof(TService).Name;
         this.UniqueId = this.ModId + "/" + this.Id;

@@ -21,18 +21,16 @@ internal sealed class ResizeChest : BaseFeature<ResizeChest>
     /// <summary>Initializes a new instance of the <see cref="ResizeChest" /> class.</summary>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     public ResizeChest(
         ContainerFactory containerFactory,
         IEventManager eventManager,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig,
         IPatchManager patchManager)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         ResizeChest.instance = this;
         this.containerFactory = containerFactory;

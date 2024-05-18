@@ -5,7 +5,6 @@ using StardewMods.BetterChests.Framework.Models;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.FauxCore;
 
 /// <inheritdoc cref="StardewMods.BetterChests.Framework.Interfaces.IFeature" />
 internal abstract class BaseFeature<TFeature> : GenericBaseService<TFeature>, IFeature
@@ -15,11 +14,10 @@ internal abstract class BaseFeature<TFeature> : GenericBaseService<TFeature>, IF
 
     /// <summary>Initializes a new instance of the <see cref="BaseFeature{TFeature}" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
-    protected BaseFeature(IEventManager eventManager, ILog log, IManifest manifest, IModConfig modConfig)
-        : base(log, manifest)
+    protected BaseFeature(IEventManager eventManager, IManifest manifest, IModConfig modConfig)
+        : base(manifest)
     {
         this.Config = modConfig;
         this.Events = eventManager;
@@ -51,12 +49,12 @@ internal abstract class BaseFeature<TFeature> : GenericBaseService<TFeature>, IF
         this.isActivated = this.ShouldBeActive;
         if (this.isActivated)
         {
-            this.Log.Trace("Activating feature {0}", this.Id);
+            Log.Trace("Activating feature {0}", this.Id);
             this.Activate();
             return;
         }
 
-        this.Log.Trace("Deactivating feature {0}", this.Id);
+        Log.Trace("Deactivating feature {0}", this.Id);
         this.Deactivate();
     }
 }

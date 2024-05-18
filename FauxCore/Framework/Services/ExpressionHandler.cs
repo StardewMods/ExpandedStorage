@@ -117,10 +117,9 @@ internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>,
 
     /// <summary>Initializes a new instance of the <see cref="ExpressionHandler" /> class.</summary>
     /// <param name="cacheManager">Dependency used for managing cache tables.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public ExpressionHandler(CacheManager cacheManager, ILog log, IManifest manifest)
-        : base(log, manifest) =>
+    public ExpressionHandler(CacheManager cacheManager, IManifest manifest)
+        : base(manifest) =>
         this.cachedSearches = cacheManager.GetCacheTable<IExpression?>();
 
     /// <inheritdoc cref="IExpressionHandler" />
@@ -207,7 +206,7 @@ internal sealed class ExpressionHandler : GenericBaseService<ExpressionHandler>,
         }
         catch (ParseException ex)
         {
-            this.Log.TraceOnce("Failed to parse search expression {0}.\n{1}", expression, ex);
+            Log.TraceOnce("Failed to parse search expression {0}.\n{1}", expression, ex);
             parsedExpression = ExpressionHandler.DefaultExpression;
         }
 

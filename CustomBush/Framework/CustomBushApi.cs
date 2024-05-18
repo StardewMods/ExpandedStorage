@@ -9,21 +9,25 @@ using StardewValley.TerrainFeatures;
 public sealed class CustomBushApi : ICustomBushApi
 {
     private readonly AssetHandler assetHandler;
-    private readonly ILog log;
     private readonly IModInfo modInfo;
     private readonly ModPatches modPatches;
+    private readonly ISimpleLogging simpleLogging;
 
     /// <summary>Initializes a new instance of the <see cref="CustomBushApi" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="modPatches">Dependency for managing custom bushes.</param>
     /// <param name="modInfo">Mod info from the calling mod.</param>
-    /// <param name="log">Dependency used for monitoring and logging.</param>
-    internal CustomBushApi(AssetHandler assetHandler, ModPatches modPatches, IModInfo modInfo, ILog log)
+    /// <param name="simpleLogging">Dependency used for monitoring and logging.</param>
+    internal CustomBushApi(
+        AssetHandler assetHandler,
+        ModPatches modPatches,
+        IModInfo modInfo,
+        ISimpleLogging simpleLogging)
     {
         this.assetHandler = assetHandler;
         this.modPatches = modPatches;
         this.modInfo = modInfo;
-        this.log = log;
+        this.simpleLogging = simpleLogging;
     }
 
     /// <inheritdoc />

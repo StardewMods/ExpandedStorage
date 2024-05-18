@@ -40,7 +40,6 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     public AccessChest(
@@ -49,10 +48,9 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         this.containerFactory = containerFactory;
         this.iconRegistry = iconRegistry;

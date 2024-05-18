@@ -13,7 +13,6 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
 {
     private readonly BaseEventManager eventManager;
     private readonly IIconRegistry iconRegistry;
-    private readonly ILog log;
     private readonly IModInfo modInfo;
     private readonly string prefix;
     private readonly ToolbarManager toolbarManager;
@@ -24,22 +23,19 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
     /// <param name="modInfo">Mod info from the calling mod.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="log">Dependency used for monitoring and logging.</param>
     /// <param name="toolbarManager">Dependency used for adding or removing icons on the toolbar.</param>
     internal ToolbarIconsApi(
         IModInfo modInfo,
         IEventManager eventManager,
         IIconRegistry iconRegistry,
-        ILog log,
         ToolbarManager toolbarManager)
     {
         // Init
         this.modInfo = modInfo;
         this.iconRegistry = iconRegistry;
-        this.log = log;
         this.toolbarManager = toolbarManager;
         this.prefix = this.modInfo.Manifest.UniqueID + "/";
-        this.eventManager = new BaseEventManager(log, modInfo.Manifest);
+        this.eventManager = new BaseEventManager(modInfo.Manifest);
 
         // Events
         eventManager.Subscribe<IIconPressedEventArgs>(this.OnIconPressed);
@@ -50,7 +46,7 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
     {
         add
         {
-            this.log.WarnOnce(
+            Log.WarnOnce(
                 "{0} uses deprecated code. {1} event is deprecated. Please subscribe to the {2} event instead.",
                 this.modInfo.Manifest.Name,
                 nameof(this.ToolbarIconPressed),
@@ -106,7 +102,7 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
             }
             catch (Exception ex)
             {
-                this.log.Error(
+                Log.Error(
                     "{0} failed in {1}: {2}",
                     this.modInfo.Manifest.Name,
                     nameof(this.ToolbarIconPressed),

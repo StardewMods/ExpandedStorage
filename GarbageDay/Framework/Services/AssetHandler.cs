@@ -5,7 +5,6 @@ using StardewModdingAPI.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.GarbageDay.Framework.Interfaces;
 using StardewMods.GarbageDay.Framework.Models;
 using StardewValley.GameData.BigCraftables;
@@ -21,7 +20,8 @@ internal sealed class AssetHandler : BaseService
     /// <summary>The game path where the garbage can data is stored.</summary>
     private const string GarbageCanPath = "Data/GarbageCans";
 
-    private readonly HashSet<string> invalidGarbageCans = [];
+    private readonly Dictionary<string, FoundGarbageCan> foundGarbageCans;
+
     private readonly string itemId;
     private readonly IModConfig modConfig;
     private readonly IModContentHelper modContentHelper;
@@ -29,22 +29,23 @@ internal sealed class AssetHandler : BaseService
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
+    /// <param name="foundGarbageCans">The discovered garbage cans.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     public AssetHandler(
         IEventManager eventManager,
-        ILog log,
+        Dictionary<string, FoundGarbageCan> foundGarbageCans,
         IManifest manifest,
         IModConfig modConfig,
         IModContentHelper modContentHelper)
-        : base(log, manifest)
+        : base(manifest)
     {
         // Init
         this.IconTexturePath = this.ModId + "/Icons";
         this.itemId = this.ModId + "/GarbageCan";
         this.qualifiedItemId = "(BC)" + this.itemId;
+        this.foundGarbageCans = foundGarbageCans;
         this.modConfig = modConfig;
         this.modContentHelper = modContentHelper;
 
@@ -53,18 +54,11 @@ internal sealed class AssetHandler : BaseService
         eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
     }
 
-    /// <summary>Gets the found garbage cans.</summary>
-    public Dictionary<string, FoundGarbageCan> FoundGarbageCans { get; } = [];
-
     /// <summary>Gets a new Garbage Can instance.</summary>
     public SObject GarbageCan => (SObject)ItemRegistry.Create(this.qualifiedItemId);
 
     /// <summary>Gets the icon texture path.</summary>
     public string IconTexturePath { get; }
-
-    /// <summary>Invalidates a garbage can.</summary>
-    /// <param name="whichCan">The name of the garbage can to invalidate.</param>
-    public void InvalidateGarbageCan(string whichCan) => this.invalidGarbageCans.Add(whichCan);
 
     private void OnAssetRequested(AssetRequestedEventArgs e)
     {
@@ -153,7 +147,7 @@ internal sealed class AssetHandler : BaseService
                             continue;
                         }
 
-                        this.Log.Trace("Garbage Can found on map: {0}", parts[1]);
+                        Log.Trace("Garbage Can found on map: {0}", parts[1]);
 
                         // Remove base tile
                         layer.Tiles[x, y] = null;
@@ -177,20 +171,15 @@ internal sealed class AssetHandler : BaseService
     {
         if (e.Names.Any(assetName => assetName.IsEquivalentTo(AssetHandler.GarbageCanPath)))
         {
-            this.FoundGarbageCans.Clear();
+            this.foundGarbageCans.Clear();
         }
     }
 
     private bool TryAddFound(string whichCan, IAssetName assetName, int x, int y)
     {
-        if (this.FoundGarbageCans.ContainsKey(whichCan))
+        if (this.foundGarbageCans.ContainsKey(whichCan))
         {
             return true;
-        }
-
-        if (this.invalidGarbageCans.Contains(whichCan))
-        {
-            return false;
         }
 
         if (!DataLoader.GarbageCans(Game1.content).GarbageCans.TryGetValue(whichCan, out var garbageCanData))
@@ -203,7 +192,7 @@ internal sealed class AssetHandler : BaseService
             return false;
         }
 
-        this.FoundGarbageCans.Add(whichCan, new FoundGarbageCan(whichCan, assetName, x, y));
+        this.foundGarbageCans.Add(whichCan, new FoundGarbageCan(whichCan, assetName, x, y));
         return true;
     }
 }

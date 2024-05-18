@@ -44,10 +44,9 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
     /// <summary>Initializes a new instance of the <see cref="ThemeHelper" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public ThemeHelper(IEventManager eventManager, IGameContentHelper gameContentHelper, ILog log, IManifest manifest)
-        : base(log, manifest)
+    public ThemeHelper(IEventManager eventManager, IGameContentHelper gameContentHelper, IManifest manifest)
+        : base(manifest)
     {
         this.gameContentHelper = gameContentHelper;
         eventManager.Subscribe<AssetReadyEventArgs>(this.OnAssetReady);
@@ -65,7 +64,7 @@ internal sealed class ThemeHelper : BaseService, IThemeHelper
         var assetName = this.gameContentHelper.ParseAssetName(path);
         if (this.trackedAssets.ContainsKey(assetName))
         {
-            this.Log.Trace("Error, conflicting key {0} found in ThemeHelper. Asset not added.", assetName.Name);
+            Log.Trace("Error, conflicting key {0} found in ThemeHelper. Asset not added.", assetName.Name);
         }
 
         var managedTexture = new ManagedTexture(this.gameContentHelper, path, data);

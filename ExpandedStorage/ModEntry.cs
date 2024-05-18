@@ -41,10 +41,11 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<ContentPatcherIntegration>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
-        this.container.RegisterSingleton<ILog, FauxCoreIntegration>();
+        this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
+        this.container.RegisterSingleton<Log>();
         this.container.RegisterSingleton<ModPatches>();
         this.container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
-        this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
+        this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
         this.container.RegisterSingleton<ToolbarIconsIntegration>();
 
         // Verify

@@ -5,6 +5,7 @@ using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Components;
@@ -25,7 +26,6 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
@@ -33,11 +33,10 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         this.expressionHandler = expressionHandler;
         this.inputHelper = inputHelper;
@@ -210,7 +209,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             {
                 if (!string.IsNullOrWhiteSpace(value))
                 {
-                    this.Log.Trace("{0}: Searching for {1}", this.Id, value);
+                    Log.Trace("{0}: Searching for {1}", this.Id, value);
                 }
 
                 if (this.searchText.Value == value)

@@ -13,7 +13,7 @@ public interface IFauxCoreApi
     public IMonitor? Monitor { get; set; }
 
     /// <summary>Gets an instance of the log service.</summary>
-    public ILog Log { get; }
+    public ISimpleLogging SimpleLogging { get; }
 
     /// <summary>Gets an instance of the patch manager service.</summary>
     public IPatchManager PatchManager { get; }

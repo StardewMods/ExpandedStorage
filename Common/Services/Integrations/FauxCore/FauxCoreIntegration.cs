@@ -6,13 +6,13 @@ using StardewModdingAPI.Events;
 /// <inheritdoc cref="StardewMods.Common.Services.Integrations.ModIntegration{T}" />
 [SuppressMessage("StyleCop", "SA1124", Justification = "Reviewed")]
 internal sealed class FauxCoreIntegration
-    : ModIntegration<IFauxCoreApi>, IExpressionHandler, IIconRegistry, ILog, IPatchManager, IThemeHelper
+    : ModIntegration<IFauxCoreApi>, IExpressionHandler, IIconRegistry, ISimpleLogging, IPatchManager, IThemeHelper
 {
     private const string ModUniqueId = "furyx639.FauxCore";
     private readonly Queue<Action> deferred = [];
     private readonly Lazy<IExpressionHandler>? expressionHandler;
     private readonly Lazy<IIconRegistry>? iconRegistry;
-    private readonly Lazy<ILog>? log;
+    private readonly Lazy<ISimpleLogging>? log;
     private readonly IMonitor monitor;
     private readonly Lazy<IPatchManager>? patchManager;
     private readonly Lazy<IThemeHelper>? themeHelper;
@@ -34,7 +34,7 @@ internal sealed class FauxCoreIntegration
 
         this.expressionHandler = new Lazy<IExpressionHandler>(() => this.Api.ExpressionHandler);
         this.iconRegistry = new Lazy<IIconRegistry>(() => this.Api.IconRegistry);
-        this.log = new Lazy<ILog>(() => this.Api.Log);
+        this.log = new Lazy<ISimpleLogging>(() => this.Api.SimpleLogging);
         this.patchManager = new Lazy<IPatchManager>(() => this.Api.PatchManager);
         this.themeHelper = new Lazy<IThemeHelper>(() => this.Api.ThemeHelper);
 

@@ -41,7 +41,6 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="modEvents">Dependency used for managing access to SMAPI events.</param>
@@ -51,12 +50,11 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
         IEventManager eventManager,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig,
         IModEvents modEvents,
         IPatchManager patchManager)
-        : base(log, manifest)
+        : base(manifest)
     {
         // Init
         MenuHandler.instance = this;
@@ -65,10 +63,10 @@ internal sealed class MenuHandler : GenericBaseService<MenuHandler>
         this.inputHelper = inputHelper;
 
         this.topMenu = new PerScreen<MenuManager>(
-            () => new MenuManager(eventManager, iconRegistry, inputHelper, log, manifest, this, modConfig));
+            () => new MenuManager(eventManager, iconRegistry, inputHelper, manifest, this, modConfig));
 
         this.bottomMenu = new PerScreen<MenuManager>(
-            () => new MenuManager(eventManager, iconRegistry, inputHelper, log, manifest, this, modConfig));
+            () => new MenuManager(eventManager, iconRegistry, inputHelper, manifest, this, modConfig));
 
         // Events
         eventManager.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);

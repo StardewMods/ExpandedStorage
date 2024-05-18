@@ -12,7 +12,7 @@ public sealed class FauxCoreApi : IFauxCoreApi
     private readonly IModInfo modInfo;
 
     private IIconRegistry? iconRegistry;
-    private ILog? log;
+    private ISimpleLogging? log;
     private IPatchManager? patchManager;
 
     /// <summary>Initializes a new instance of the <see cref="FauxCoreApi" /> class.</summary>
@@ -40,22 +40,16 @@ public sealed class FauxCoreApi : IFauxCoreApi
 
     /// <inheritdoc />
     public IIconRegistry IconRegistry =>
-        this.iconRegistry ??= new IconRegistry(
-            this.assetHandler,
-            this.Log ?? throw new InvalidOperationException("Log is not set."),
-            this.modInfo.Manifest);
+        this.iconRegistry ??= new IconRegistry(this.assetHandler, this.modInfo.Manifest);
 
     /// <inheritdoc />
-    public ILog Log =>
-        this.log ??= new Log(
+    public IPatchManager PatchManager => this.patchManager ??= new PatchManager(this.modInfo.Manifest);
+
+    /// <inheritdoc />
+    public ISimpleLogging SimpleLogging =>
+        this.log ??= new SimpleLogging(
             this.getConfig,
             this.Monitor ?? throw new InvalidOperationException("Monitor is not set."));
-
-    /// <inheritdoc />
-    public IPatchManager PatchManager =>
-        this.patchManager ??= new PatchManager(
-            this.Log ?? throw new InvalidOperationException("Log is not set."),
-            this.modInfo.Manifest);
 
     /// <inheritdoc />
     public IThemeHelper ThemeHelper { get; }

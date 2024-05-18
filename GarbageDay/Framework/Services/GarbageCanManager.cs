@@ -6,7 +6,6 @@ using StardewModdingAPI.Utilities;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.GarbageDay.Framework.Interfaces;
 using StardewMods.GarbageDay.Framework.Models;
@@ -19,6 +18,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
 {
     private readonly AssetHandler assetHandler;
     private readonly PerScreen<NPC?> currentNpc = new();
+    private readonly Dictionary<string, FoundGarbageCan> foundGarbageCans;
     private readonly Dictionary<string, GameLocation?> foundLocations = [];
     private readonly PerScreen<GarbageCan?> garbageCanOpened = new();
     private readonly Dictionary<string, GarbageCan> garbageCans = [];
@@ -30,8 +30,8 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
     /// <summary>Initializes a new instance of the <see cref="GarbageCanManager" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="foundGarbageCans">The discovered garbage cans.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
@@ -39,16 +39,17 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
     public GarbageCanManager(
         AssetHandler assetHandler,
         IEventManager eventManager,
+        Dictionary<string, FoundGarbageCan> foundGarbageCans,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig,
         IReflectionHelper reflectionHelper,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(log, manifest)
+        : base(manifest)
     {
         // Init
         this.assetHandler = assetHandler;
+        this.foundGarbageCans = foundGarbageCans;
         this.inputHelper = inputHelper;
         this.modConfig = modConfig;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
@@ -136,7 +137,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
     private void OnDayStarted(DayStartedEventArgs e)
     {
         // Add garbage cans
-        foreach (var (whichCan, foundGarbageCan) in this.assetHandler.FoundGarbageCans)
+        foreach (var (whichCan, foundGarbageCan) in this.foundGarbageCans)
         {
             if (this.garbageCans.ContainsKey(whichCan))
             {
@@ -145,7 +146,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
 
             if (!this.TryCreateGarbageCan(foundGarbageCan, out var garbageCan))
             {
-                this.assetHandler.InvalidateGarbageCan(whichCan);
+                foundGarbageCan.IsValid = false;
                 continue;
             }
 
@@ -160,7 +161,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
                 garbageCan.EmptyTrash();
             }
 
-            garbageCan.AddLoot(this.Log);
+            garbageCan.AddLoot();
         }
     }
 
@@ -195,7 +196,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
                 && chest.modData.TryGetValue(this.ModId + "/WhichCan", out var whichCan)
                 && this.garbageCans.TryGetValue(whichCan, out var garbageCan))
             {
-                garbageCan.AddLoot(this.Log, ItemRegistry.Create("(H)66"));
+                garbageCan.AddLoot(ItemRegistry.Create("(H)66"));
             }
         }
     }
@@ -228,7 +229,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
 
         if (location is null)
         {
-            this.Log.Trace("Unable to find location for Garbage Can {0}", foundGarbageCan.WhichCan);
+            Log.Trace("Unable to find location for Garbage Can {0}", foundGarbageCan.WhichCan);
             garbageCan = null;
             return false;
         }
@@ -242,7 +243,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
 
         // Attempt to place item
         var item = this.assetHandler.GarbageCan;
-        this.Log.Trace(
+        Log.Trace(
             "Placing Garbage Can {0} at {1} ({2})",
             foundGarbageCan.WhichCan,
             location.Name,
@@ -256,7 +257,7 @@ internal sealed class GarbageCanManager : GenericBaseService<GarbageCanManager>
             || !location.Objects.TryGetValue(foundGarbageCan.TilePosition, out obj)
             || obj is not Chest chest)
         {
-            this.Log.Trace("Unable to place Garbage Can");
+            Log.Trace("Unable to place Garbage Can");
             garbageCan = null;
             return false;
         }

@@ -25,7 +25,6 @@ internal sealed class ToolbarManager : BaseService
     private readonly PerScreen<ComponentArea> lastArea = new(() => ComponentArea.Custom);
     private readonly PerScreen<ClickableComponent?> lastButton = new();
     private readonly PerScreen<Toolbar?> lastToolbar = new();
-    private readonly ILog log;
     private readonly IReflectionHelper reflectionHelper;
 
     /// <summary>Initializes a new instance of the <see cref="ToolbarManager" /> class.</summary>
@@ -34,7 +33,6 @@ internal sealed class ToolbarManager : BaseService
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="icons">Dictionary containing all added icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for monitoring and logging.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public ToolbarManager(
@@ -43,10 +41,9 @@ internal sealed class ToolbarManager : BaseService
         IIconRegistry iconRegistry,
         Dictionary<string, string?> icons,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         IReflectionHelper reflectionHelper)
-        : base(log, manifest)
+        : base(manifest)
     {
         // Init
         this.configManager = configManager;
@@ -54,7 +51,6 @@ internal sealed class ToolbarManager : BaseService
         this.iconRegistry = iconRegistry;
         this.icons = icons;
         this.inputHelper = inputHelper;
-        this.log = log;
         this.reflectionHelper = reflectionHelper;
 
         // Events
@@ -65,6 +61,12 @@ internal sealed class ToolbarManager : BaseService
         eventManager.Subscribe<ReturnedToTitleEventArgs>(this.OnReturnedToTitle);
         eventManager.Subscribe<SaveLoadedEventArgs>(this.OnSaveLoaded);
     }
+
+    private ClickableTextureComponent? ActiveComponent =>
+        this
+            .Toolbar?.allClickableComponents?.OfType<ClickableTextureComponent>()
+            .FirstOrDefault(
+                component => component.bounds.Contains(this.inputHelper.GetCursorPosition().GetScaledScreenPixels()));
 
     private ClickableComponent? Button
     {
@@ -103,8 +105,12 @@ internal sealed class ToolbarManager : BaseService
     /// <param name="hoverText">Text to appear when hovering over the icon.</param>
     public void AddIcon(string id, string? hoverText)
     {
-        this.log.Trace("Adding icon: {0}", id);
-        this.icons.Add(id, hoverText);
+        if (!this.icons.TryAdd(id, hoverText))
+        {
+            return;
+        }
+
+        Log.Trace("Adding icon: {0}", id);
         this.eventManager.Publish(new IconsChangedEventArgs([id], []));
         this.RefreshComponents(true);
     }
@@ -118,7 +124,7 @@ internal sealed class ToolbarManager : BaseService
             return;
         }
 
-        this.log.Trace("Removing icon: {0}", id);
+        Log.Trace("Removing icon: {0}", id);
         this.icons.Remove(id);
         this.eventManager.Publish(new IconsChangedEventArgs([], [id]));
         this.RefreshComponents(true);
@@ -136,19 +142,14 @@ internal sealed class ToolbarManager : BaseService
             return;
         }
 
-        var cursorPos = e.Cursor.GetScaledScreenPixels().ToPoint();
-        var component =
-            this.Toolbar.allClickableComponents.FirstOrDefault(
-                component => component.containsPoint(cursorPos.X, cursorPos.Y));
-
-        if (component is null)
+        if (this.ActiveComponent is null)
         {
             return;
         }
 
         Game1.playSound("drumkit6");
         this.eventManager.Publish<IIconPressedEventArgs, IconPressedEventArgs>(
-            new IconPressedEventArgs(component.name, e.Button));
+            new IconPressedEventArgs(this.ActiveComponent.name, e.Button));
 
         this.inputHelper.Suppress(e.Button);
     }
@@ -162,15 +163,9 @@ internal sealed class ToolbarManager : BaseService
             return;
         }
 
-        var cursorPos = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
-        var component =
-            this
-                .Toolbar.allClickableComponents.OfType<ClickableTextureComponent>()
-                .FirstOrDefault(component => component.containsPoint(cursorPos.X, cursorPos.Y));
-
-        if (component is not null && !string.IsNullOrWhiteSpace(component.hoverText))
+        if (this.ActiveComponent is not null && !string.IsNullOrWhiteSpace(this.ActiveComponent.hoverText))
         {
-            IClickableMenu.drawHoverText(e.SpriteBatch, component.hoverText, Game1.smallFont);
+            IClickableMenu.drawHoverText(e.SpriteBatch, this.ActiveComponent.hoverText, Game1.smallFont);
         }
     }
 
@@ -202,7 +197,6 @@ internal sealed class ToolbarManager : BaseService
             return;
         }
 
-        this.Toolbar.allClickableComponents ??= [];
         this.RefreshComponents();
     }
 
@@ -254,20 +248,17 @@ internal sealed class ToolbarManager : BaseService
         }
 
         this.lastArea.Value = area;
-        this.Toolbar.allClickableComponents ??= [];
-        this.Toolbar.allClickableComponents.Clear();
-        foreach (var toolbarIcon in this.configManager.Icons)
+        this.Toolbar.allClickableComponents = [];
+        foreach (var id in this.configManager.Icons.Where(icon => icon.Enabled).Select(icon => icon.Id).Distinct())
         {
-            if (!this.icons.TryGetValue(toolbarIcon.Id, out var hoverText)
-                || !this.iconRegistry.TryGetIcon(toolbarIcon.Id, out var icon))
+            if (!this.icons.TryGetValue(id, out var hoverText) || !this.iconRegistry.TryGetIcon(id, out var icon))
             {
                 continue;
             }
 
             var component = icon.GetComponent(IconStyle.Button, x, y, 2f);
-            component.name = toolbarIcon.Id;
+            component.name = id;
             component.hoverText = hoverText;
-            component.visible = toolbarIcon.Enabled;
             this.Toolbar.allClickableComponents.Add(component);
 
             switch (area)

@@ -1,7 +1,7 @@
 namespace StardewMods.Common.Services.Integrations.FauxCore;
 
 /// <summary>Handles logging debug information to the console.</summary>
-public interface ILog
+public interface ISimpleLogging
 {
     /// <summary>Logs a trace message to the console.</summary>
     /// <param name="message">The message to send.</param>

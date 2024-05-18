@@ -36,7 +36,6 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
@@ -47,12 +46,11 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig,
         IPatchManager patchManager,
         IReflectionHelper reflectionHelper)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         HslColorPicker.instance = this;
         this.assetHandler = assetHandler;

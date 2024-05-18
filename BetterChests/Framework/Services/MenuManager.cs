@@ -31,7 +31,6 @@ internal sealed class MenuManager : BaseService
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
@@ -39,11 +38,10 @@ internal sealed class MenuManager : BaseService
         IEventManager eventManager,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig)
-        : base(log, manifest)
+        : base(manifest)
     {
         // Init
         this.eventManager = eventManager;

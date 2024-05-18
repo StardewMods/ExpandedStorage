@@ -48,7 +48,8 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<IModConfig, ConfigManager>();
         this.container.RegisterSingleton<ConfigManager, ConfigManager>();
         this.container.RegisterSingleton<IntegrationManager>();
-        this.container.RegisterSingleton<ILog, FauxCoreIntegration>();
+        this.container.RegisterSingleton<Log>();
+        this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
         this.container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
         this.container.RegisterSingleton<ToolbarManager>();
 
@@ -75,6 +76,5 @@ public sealed class ModEntry : Mod
             mod,
             this.container.GetInstance<IEventManager>(),
             this.container.GetInstance<IIconRegistry>(),
-            this.container.GetInstance<ILog>(),
             this.container.GetInstance<ToolbarManager>());
 }

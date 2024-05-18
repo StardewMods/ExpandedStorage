@@ -5,7 +5,6 @@ using StardewModdingAPI.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.EasyAccess.Framework.Interfaces;
 
@@ -21,7 +20,6 @@ internal sealed class DispenseService : GenericBaseService<DispenseService>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
@@ -29,11 +27,10 @@ internal sealed class DispenseService : GenericBaseService<DispenseService>
         AssetHandler assetHandler,
         IEventManager eventManager,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(log, manifest)
+        : base(manifest)
     {
         // Init
         this.assetHandler = assetHandler;
@@ -62,7 +59,7 @@ internal sealed class DispenseService : GenericBaseService<DispenseService>
                 continue;
             }
 
-            this.Log.Info("Dispensed {0} into producer {1}.", Game1.player.CurrentItem.DisplayName, obj.DisplayName);
+            Log.Info("Dispensed {0} into producer {1}.", Game1.player.CurrentItem.DisplayName, obj.DisplayName);
         }
     }
 

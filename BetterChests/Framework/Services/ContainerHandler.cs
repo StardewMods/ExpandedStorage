@@ -32,7 +32,6 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="genericModConfigMenuIntegration">Dependency for Generic Mod Config Menu integration.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
@@ -41,11 +40,10 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
         ContainerFactory containerFactory,
         IEventManager eventManager,
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
-        ILog log,
         IManifest manifest,
         IPatchManager patchManager,
         IReflectionHelper reflectionHelper)
-        : base(log, manifest)
+        : base(manifest)
     {
         ContainerHandler.instance = this;
         this.configManager = configManager;
@@ -126,7 +124,7 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
             return;
         }
 
-        this.Log.Info("{0}: Configuring {1}", this.Id, container);
+        Log.Info("{0}: Configuring {1}", this.Id, container);
 
         var gmcm = this.genericModConfigMenuIntegration.Api;
         var options = new DefaultStorageOptions();
@@ -211,7 +209,7 @@ internal sealed class ContainerHandler : GenericBaseService<ContainerHandler>
 
         void Save()
         {
-            this.Log.Trace("Config changed: {0}\n{1}", container, options);
+            Log.Trace("Config changed: {0}\n{1}", container, options);
             options.CopyTo(container);
 
             if (container is ChestContainer chestContainer)

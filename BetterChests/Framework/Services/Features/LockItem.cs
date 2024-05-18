@@ -8,8 +8,8 @@ using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
-using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 /// <summary>Locks items in inventory so they cannot be stashed.</summary>
@@ -22,17 +22,15 @@ internal sealed class LockItem : BaseFeature<LockItem>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     public LockItem(
         IEventManager eventManager,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
@@ -191,12 +189,12 @@ internal sealed class LockItem : BaseFeature<LockItem>
     {
         if (this.IsUnlocked(item))
         {
-            this.Log.Info("{0}: Locking item {1}", this.Id, item.DisplayName);
+            Log.Info("{0}: Locking item {1}", this.Id, item.DisplayName);
             item.modData[this.UniqueId] = "Locked";
         }
         else
         {
-            this.Log.Info("{0}: Unlocking item {1}", this.Id, item.DisplayName);
+            Log.Info("{0}: Unlocking item {1}", this.Id, item.DisplayName);
             item.modData.Remove(this.UniqueId);
         }
     }

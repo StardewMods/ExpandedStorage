@@ -8,6 +8,7 @@ using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
@@ -26,7 +27,6 @@ internal sealed class CollectItems : BaseFeature<CollectItems>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
@@ -34,11 +34,10 @@ internal sealed class CollectItems : BaseFeature<CollectItems>
         ContainerFactory containerFactory,
         IEventManager eventManager,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig,
         IPatchManager patchManager)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         CollectItems.instance = this;
         this.containerFactory = containerFactory;
@@ -133,12 +132,12 @@ internal sealed class CollectItems : BaseFeature<CollectItems>
             if (disable)
             {
                 Game1.player.modData.Remove(key);
-                this.Log.Info("{0}: Set collect items on", this.Id);
+                Log.Info("{0}: Set collect items on", this.Id);
                 return;
             }
 
             Game1.player.modData[key] = "true";
-            this.Log.Info("{0}: Set collect items off", this.Id);
+            Log.Info("{0}: Set collect items off", this.Id);
         }
     }
 

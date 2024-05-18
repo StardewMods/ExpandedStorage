@@ -3,7 +3,6 @@ namespace StardewMods.ExpandedStorage.Framework;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
-using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.ExpandedStorage.Framework.Models;
 using StardewMods.ExpandedStorage.Framework.Services;
 
@@ -16,15 +15,14 @@ public sealed class ExpandedStorageApi : IExpandedStorageApi
 
     /// <summary>Initializes a new instance of the <see cref="ExpandedStorageApi" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="log">Dependency used for monitoring and logging.</param>
     /// <param name="modInfo">Mod info from the calling mod.</param>
     /// <param name="assetHandler">Dependency for managing expanded storage chests.</param>
-    internal ExpandedStorageApi(IEventManager eventManager, ILog log, IModInfo modInfo, AssetHandler assetHandler)
+    internal ExpandedStorageApi(IEventManager eventManager, IModInfo modInfo, AssetHandler assetHandler)
     {
         // Init
         this.modInfo = modInfo;
         this.assetHandler = assetHandler;
-        this.eventManager = new BaseEventManager(log, modInfo.Manifest);
+        this.eventManager = new BaseEventManager(modInfo.Manifest);
 
         // Events
         eventManager.Subscribe<ChestCreatedEventArgs>(this.OnChestCreated);

@@ -4,7 +4,6 @@ using System.Reflection;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Interfaces;
@@ -22,7 +21,6 @@ internal sealed class IntegrationManager : BaseService
     private readonly ToolbarManager toolbarManager;
 
     /// <summary>Initializes a new instance of the <see cref="IntegrationManager" /> class.</summary>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="customIntegrations">Integrations directly supported by the mod.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
@@ -30,14 +28,13 @@ internal sealed class IntegrationManager : BaseService
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="toolbarManager">Dependency used for adding or removing icons on the toolbar.</param>
     public IntegrationManager(
-        ILog log,
         IEnumerable<ICustomIntegration> customIntegrations,
         IEventManager eventManager,
         IManifest manifest,
         IModRegistry modRegistry,
         IReflectionHelper reflectionHelper,
         ToolbarManager toolbarManager)
-        : base(log, manifest)
+        : base(manifest)
     {
         // Init
         this.customIntegrations = customIntegrations;

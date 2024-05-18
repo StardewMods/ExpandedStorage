@@ -38,9 +38,10 @@ public sealed class ModEntry : Mod
         this.container.RegisterSingleton<ContentPatcherIntegration>();
         this.container.RegisterSingleton<IEventManager, EventManager>();
         this.container.RegisterSingleton<FauxCoreIntegration>();
-        this.container.RegisterSingleton<ILog, FauxCoreIntegration>();
+        this.container.RegisterSingleton<Log>();
         this.container.RegisterSingleton<ModPatches>();
         this.container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
+        this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
 
         // Verify
         this.container.Verify();
@@ -52,5 +53,5 @@ public sealed class ModEntry : Mod
             this.container.GetInstance<AssetHandler>(),
             this.container.GetInstance<ModPatches>(),
             mod,
-            this.container.GetInstance<ILog>());
+            this.container.GetInstance<ISimpleLogging>());
 }

@@ -1,7 +1,6 @@
 namespace StardewMods.Common.Services;
 
 using StardewModdingAPI.Events;
-using StardewMods.Common.Services.Integrations.FauxCore;
 
 /// <inheritdoc />
 internal sealed class EventManager : BaseEventManager
@@ -9,11 +8,10 @@ internal sealed class EventManager : BaseEventManager
     private readonly IModEvents? modEvents;
 
     /// <summary>Initializes a new instance of the <see cref="EventManager" /> class.</summary>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modEvents">Dependency used for managing access to SMAPI events.</param>
-    public EventManager(ILog log, IManifest manifest, IModEvents modEvents)
-        : base(log, manifest) =>
+    public EventManager(IManifest manifest, IModEvents modEvents)
+        : base(manifest) =>
         this.modEvents = modEvents;
 
     /// <inheritdoc />

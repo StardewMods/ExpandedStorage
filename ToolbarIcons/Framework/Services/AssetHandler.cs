@@ -22,7 +22,6 @@ internal sealed class AssetHandler : GenericBaseService<AssetHandler>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="integrationManager">Dependency used for managing integrations.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
@@ -31,11 +30,10 @@ internal sealed class AssetHandler : GenericBaseService<AssetHandler>
         IGameContentHelper gameContentHelper,
         IIconRegistry iconRegistry,
         IntegrationManager integrationManager,
-        ILog log,
         IManifest manifest,
         IModContentHelper modContentHelper,
         IThemeHelper themeHelper)
-        : base(log, manifest)
+        : base(manifest)
     {
         // Init
         this.gameContentHelper = gameContentHelper;

@@ -6,7 +6,6 @@ using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
-using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.ExpandedStorage.Framework.Enums;
 using StardewMods.ExpandedStorage.Framework.Models;
 using StardewValley.GameData.BigCraftables;
@@ -20,10 +19,9 @@ internal sealed class AssetHandler : BaseService
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public AssetHandler(IEventManager eventManager, ILog log, IManifest manifest)
-        : base(log, manifest)
+    public AssetHandler(IEventManager eventManager, IManifest manifest)
+        : base(manifest)
     {
         eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
         eventManager.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
@@ -53,7 +51,7 @@ internal sealed class AssetHandler : BaseService
         }
 
         // Load storage data
-        this.Log.Trace("Loading managed storage: {0}", item.QualifiedItemId);
+        Log.Trace("Loading managed storage: {0}", item.QualifiedItemId);
         storageData = new StorageData();
         this.data.Add(item.QualifiedItemId, storageData);
 
@@ -94,7 +92,7 @@ internal sealed class AssetHandler : BaseService
                     storageData.PlayerColor = customFieldValue.GetBool();
                     break;
                 default:
-                    this.Log.Warn("{0} is not a supported attribute", keyParts[2]);
+                    Log.Warn("{0} is not a supported attribute", keyParts[2]);
                     break;
             }
         }

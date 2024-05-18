@@ -6,17 +6,17 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Interfaces;
 
 /// <inheritdoc />
-internal sealed class Log : ILog
+internal sealed class SimpleLogging : ISimpleLogging
 {
     private readonly Lazy<IModConfig> modConfig;
     private readonly IMonitor monitor;
 
     private string lastMessage = string.Empty;
 
-    /// <summary>Initializes a new instance of the <see cref="Log" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="SimpleLogging" /> class.</summary>
     /// <param name="getConfig">Dependency used for managing config data.</param>
     /// <param name="monitor">Dependency used for monitoring and logging.</param>
-    public Log(Func<IModConfig> getConfig, IMonitor monitor)
+    public SimpleLogging(Func<IModConfig> getConfig, IMonitor monitor)
     {
         this.modConfig = new Lazy<IModConfig>(getConfig);
         this.monitor = monitor;

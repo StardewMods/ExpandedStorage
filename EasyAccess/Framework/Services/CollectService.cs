@@ -5,7 +5,6 @@ using StardewModdingAPI.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.EasyAccess.Framework.Interfaces;
 
@@ -21,7 +20,6 @@ internal sealed class CollectService : GenericBaseService<CollectService>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
@@ -29,11 +27,10 @@ internal sealed class CollectService : GenericBaseService<CollectService>
         AssetHandler assetHandler,
         IEventManager eventManager,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         IModConfig modConfig,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(log, manifest)
+        : base(manifest)
     {
         // Init
         this.assetHandler = assetHandler;
@@ -110,7 +107,7 @@ internal sealed class CollectService : GenericBaseService<CollectService>
 
                     Game1.createItemDebris(obj, Game1.tileSize * pos, direction, Game1.currentLocation);
                     Game1.currentLocation.Objects.Remove(pos);
-                    this.Log.Info("Dropped {0} from forage.", obj.DisplayName);
+                    Log.Info("Dropped {0} from forage.", obj.DisplayName);
                     continue;
                 }
 
@@ -119,7 +116,7 @@ internal sealed class CollectService : GenericBaseService<CollectService>
                     var item = obj.heldObject.Value;
                     if (item is not null && obj.checkForAction(Game1.player))
                     {
-                        this.Log.Info("Collected {0} from producer {1}.", item.DisplayName, obj.DisplayName);
+                        Log.Info("Collected {0} from producer {1}.", item.DisplayName, obj.DisplayName);
                     }
                 }
             }

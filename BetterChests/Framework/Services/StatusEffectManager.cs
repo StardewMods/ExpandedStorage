@@ -3,7 +3,6 @@ namespace StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Buffs;
 
 /// <summary>Responsible for adding or removing custom buffs.</summary>
@@ -12,11 +11,10 @@ internal sealed class StatusEffectManager : GenericBaseService<StatusEffectManag
     private readonly IModConfig modConfig;
 
     /// <summary>Initializes a new instance of the <see cref="StatusEffectManager" /> class.</summary>
-    /// <param name="log">Dependency used for monitoring and logging.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
-    public StatusEffectManager(ILog log, IManifest manifest, IModConfig modConfig)
-        : base(log, manifest) =>
+    public StatusEffectManager(IManifest manifest, IModConfig modConfig)
+        : base(manifest) =>
         this.modConfig = modConfig;
 
     /// <summary>Adds a custom status effect to the player.</summary>
@@ -29,7 +27,7 @@ internal sealed class StatusEffectManager : GenericBaseService<StatusEffectManag
             return;
         }
 
-        this.Log.Trace("Adding effect {0}", statusEffect.ToStringFast());
+        Log.Trace("Adding effect {0}", statusEffect.ToStringFast());
         Game1.player.buffs.Apply(buff);
     }
 
@@ -52,7 +50,7 @@ internal sealed class StatusEffectManager : GenericBaseService<StatusEffectManag
             return;
         }
 
-        this.Log.Trace("Removing effect {0}", statusEffect.ToStringFast());
+        Log.Trace("Removing effect {0}", statusEffect.ToStringFast());
         Game1.player.buffs.Remove(id);
     }
 

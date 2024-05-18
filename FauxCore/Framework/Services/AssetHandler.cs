@@ -53,22 +53,20 @@ internal sealed class AssetHandler : BaseService, IAssetHandler
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public AssetHandler(
         IEventManager eventManager,
         IGameContentHelper gameContentHelper,
-        ILog log,
         IManifest manifest,
         IModContentHelper modContentHelper,
         ThemeHelper themeHelper)
-        : base(log, manifest)
+        : base(manifest)
     {
         this.gameContentHelper = gameContentHelper;
         this.themeHelper = themeHelper;
-        this.iconRegistry = new IconRegistry(this, log, manifest);
+        this.iconRegistry = new IconRegistry(this, manifest);
 
         themeHelper.AddAsset(this.ModId + "/UI", modContentHelper.Load<IRawTextureData>("assets/ui.png"));
 

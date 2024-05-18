@@ -11,6 +11,7 @@ using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
@@ -37,7 +38,6 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="log">Dependency used for logging information to the console.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
@@ -46,11 +46,10 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
         IEventManager eventManager,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
-        ILog log,
         IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig)
-        : base(eventManager, log, manifest, modConfig)
+        : base(eventManager, manifest, modConfig)
     {
         this.containerFactory = containerFactory;
         this.iconRegistry = iconRegistry;
@@ -92,7 +91,7 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
 
         this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.ToggleInfo);
         this.isActive.Value = !this.isActive.Value;
-        this.Log.Info("{0}: Toggled chest info to {1}", this.Id, this.isActive.Value);
+        Log.Info("{0}: Toggled chest info to {1}", this.Id, this.isActive.Value);
     }
 
     private void OnInventoryChanged(InventoryChangedEventArgs e) => this.resetCache.Value = true;
