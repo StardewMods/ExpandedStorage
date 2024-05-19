@@ -1,0 +1,9 @@
+{
+  "config.log-level.title": "Niveau de consignation",
+  "config.log-level.description": "Le niveau d’information de débogage qui sera enregistré dans la console.",
+  "config.log-level.options.none": "Aucun",
+  "config.log-level.options.less": "Peu",
+  "config.log-level.options.more": "Plus",
+  "config.section.general.title": "Général",
+  "config.section.general.description": "Paramètres généraux pour ce mod"
+}
