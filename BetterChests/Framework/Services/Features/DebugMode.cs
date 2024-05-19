@@ -30,7 +30,6 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
@@ -42,7 +41,6 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         IExpressionHandler expressionHandler,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
-        IManifest manifest,
         IModConfig modConfig,
         IReflectionHelper reflectionHelper,
         ToolbarIconsIntegration toolbarIconsIntegration)

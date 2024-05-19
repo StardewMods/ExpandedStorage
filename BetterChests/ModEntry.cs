@@ -2,7 +2,6 @@ namespace StardewMods.BetterChests;
 
 using HarmonyLib;
 using SimpleInjector;
-using StardewMods.BetterChests.Framework;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.Services.Factory;
@@ -21,12 +20,7 @@ public sealed class ModEntry : Mod
     private Container container = null!;
 
     /// <inheritdoc />
-    public override object GetApi(IModInfo mod) =>
-        new BetterChestsApi(
-            mod,
-            this.container.GetInstance<ConfigManager>(),
-            this.container.GetInstance<ContainerHandler>(),
-            this.container.GetInstance<ContainerFactory>());
+    public override object GetApi(IModInfo mod) => this.container.GetInstance<ApiFactory>().CreateApi(mod);
 
     /// <inheritdoc />
     protected override void Init()
@@ -49,6 +43,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterInstance(this.Helper.Reflection);
         this.container.RegisterInstance(this.Helper.Translation);
 
+        this.container.RegisterSingleton<ApiFactory>();
         this.container.RegisterSingleton<AssetHandler>();
         this.container.RegisterSingleton<BetterCraftingIntegration>();
         this.container.RegisterSingleton<BetterCraftingInventoryProvider>();

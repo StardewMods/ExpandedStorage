@@ -8,7 +8,7 @@ using StardewMods.FauxCore.Framework.Services;
 public sealed class FauxCoreApi : IFauxCoreApi
 {
     private readonly IAssetHandler assetHandler;
-    private readonly Func<IModConfig> getConfig;
+    private readonly IModConfig modConfig;
     private readonly IModInfo modInfo;
 
     private IIconRegistry? iconRegistry;
@@ -19,19 +19,19 @@ public sealed class FauxCoreApi : IFauxCoreApi
     /// <param name="modInfo">Dependency used for accessing mod info.</param>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
-    /// <param name="getConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public FauxCoreApi(
         IModInfo modInfo,
         IAssetHandler assetHandler,
         IExpressionHandler expressionHandler,
-        Func<IModConfig> getConfig,
+        IModConfig modConfig,
         IThemeHelper themeHelper)
     {
         this.modInfo = modInfo;
         this.assetHandler = assetHandler;
         this.ExpressionHandler = expressionHandler;
-        this.getConfig = getConfig;
+        this.modConfig = modConfig;
         this.ThemeHelper = themeHelper;
     }
 
@@ -47,7 +47,7 @@ public sealed class FauxCoreApi : IFauxCoreApi
     /// <inheritdoc />
     public ISimpleLogging SimpleLogging =>
         this.log ??= new SimpleLogging(
-            this.getConfig,
+            this.modConfig,
             this.Monitor ?? throw new InvalidOperationException("Monitor is not set."));
 
     /// <inheritdoc />

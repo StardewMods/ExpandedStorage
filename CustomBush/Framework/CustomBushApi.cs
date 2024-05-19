@@ -1,7 +1,6 @@
 namespace StardewMods.CustomBush.Framework;
 
 using StardewMods.Common.Services.Integrations.CustomBush;
-using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.CustomBush.Framework.Services;
 using StardewValley.TerrainFeatures;
 
@@ -11,23 +10,16 @@ public sealed class CustomBushApi : ICustomBushApi
     private readonly AssetHandler assetHandler;
     private readonly IModInfo modInfo;
     private readonly ModPatches modPatches;
-    private readonly ISimpleLogging simpleLogging;
 
     /// <summary>Initializes a new instance of the <see cref="CustomBushApi" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
-    /// <param name="modPatches">Dependency for managing custom bushes.</param>
     /// <param name="modInfo">Mod info from the calling mod.</param>
-    /// <param name="simpleLogging">Dependency used for monitoring and logging.</param>
-    internal CustomBushApi(
-        AssetHandler assetHandler,
-        ModPatches modPatches,
-        IModInfo modInfo,
-        ISimpleLogging simpleLogging)
+    /// <param name="modPatches">Dependency for managing custom bushes.</param>
+    internal CustomBushApi(AssetHandler assetHandler, IModInfo modInfo, ModPatches modPatches)
     {
         this.assetHandler = assetHandler;
-        this.modPatches = modPatches;
         this.modInfo = modInfo;
-        this.simpleLogging = simpleLogging;
+        this.modPatches = modPatches;
     }
 
     /// <inheritdoc />

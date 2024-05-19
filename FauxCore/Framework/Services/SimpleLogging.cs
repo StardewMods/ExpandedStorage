@@ -8,17 +8,17 @@ using StardewMods.FauxCore.Framework.Interfaces;
 /// <inheritdoc />
 internal sealed class SimpleLogging : ISimpleLogging
 {
-    private readonly Lazy<IModConfig> modConfig;
+    private readonly IModConfig modConfig;
     private readonly IMonitor monitor;
 
     private string lastMessage = string.Empty;
 
     /// <summary>Initializes a new instance of the <see cref="SimpleLogging" /> class.</summary>
-    /// <param name="getConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="monitor">Dependency used for monitoring and logging.</param>
-    public SimpleLogging(Func<IModConfig> getConfig, IMonitor monitor)
+    public SimpleLogging(IModConfig modConfig, IMonitor monitor)
     {
-        this.modConfig = new Lazy<IModConfig>(getConfig);
+        this.modConfig = modConfig;
         this.monitor = monitor;
     }
 
@@ -62,10 +62,10 @@ internal sealed class SimpleLogging : ISimpleLogging
         this.lastMessage = message;
         switch (level)
         {
-            case LogLevel.Trace when this.modConfig.Value.LogLevel == SimpleLogLevel.More:
-            case LogLevel.Debug when this.modConfig.Value.LogLevel == SimpleLogLevel.More:
-            case LogLevel.Info when this.modConfig.Value.LogLevel >= SimpleLogLevel.Less:
-            case LogLevel.Warn when this.modConfig.Value.LogLevel >= SimpleLogLevel.Less:
+            case LogLevel.Trace when this.modConfig.LogLevel == SimpleLogLevel.More:
+            case LogLevel.Debug when this.modConfig.LogLevel == SimpleLogLevel.More:
+            case LogLevel.Info when this.modConfig.LogLevel >= SimpleLogLevel.Less:
+            case LogLevel.Warn when this.modConfig.LogLevel >= SimpleLogLevel.Less:
             case LogLevel.Error:
             case LogLevel.Alert:
                 if (once)
@@ -82,7 +82,7 @@ internal sealed class SimpleLogging : ISimpleLogging
                 return;
         }
 
-        if (level == LogLevel.Alert && this.modConfig.Value.LogLevel == SimpleLogLevel.More)
+        if (level == LogLevel.Alert && this.modConfig.LogLevel == SimpleLogLevel.More)
         {
             Game1.showRedMessage(message);
         }

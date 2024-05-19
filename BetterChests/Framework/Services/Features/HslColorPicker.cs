@@ -36,7 +36,6 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
@@ -46,7 +45,6 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
-        IManifest manifest,
         IModConfig modConfig,
         IPatchManager patchManager,
         IReflectionHelper reflectionHelper)

@@ -26,14 +26,12 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     public SearchItems(
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
         IInputHelper inputHelper,
-        IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig)
         : base(eventManager, modConfig)

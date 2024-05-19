@@ -6,7 +6,6 @@ using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
-using StardewMods.ToolbarIcons.Framework;
 using StardewMods.ToolbarIcons.Framework.Interfaces;
 using StardewMods.ToolbarIcons.Framework.Services;
 using StardewMods.ToolbarIcons.Framework.Services.Factory;
@@ -19,12 +18,7 @@ public sealed class ModEntry : Mod
     private Container container = null!;
 
     /// <inheritdoc />
-    public override object GetApi(IModInfo mod) =>
-        new ToolbarIconsApi(
-            mod,
-            this.container.GetInstance<IEventManager>(),
-            this.container.GetInstance<IIconRegistry>(),
-            this.container.GetInstance<ToolbarManager>());
+    public override object GetApi(IModInfo mod) => this.container.GetInstance<ApiFactory>().CreateApi(mod);
 
     /// <inheritdoc />
     protected override void Init()
@@ -45,6 +39,7 @@ public sealed class ModEntry : Mod
         this.container.RegisterInstance(this.Helper.Reflection);
         this.container.RegisterInstance(this.Helper.Translation);
 
+        this.container.RegisterSingleton<ApiFactory>();
         this.container.RegisterSingleton<AssetHandler>();
         this.container.RegisterSingleton<ComplexOptionFactory>();
         this.container.RegisterSingleton<ContentPatcherIntegration>();

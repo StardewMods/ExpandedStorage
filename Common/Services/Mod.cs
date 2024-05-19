@@ -1,5 +1,7 @@
 namespace StardewMods.Common.Services;
 
+/// <inheritdoc />
+[SuppressMessage("Naming", "CA1716", Justification = "Reviewed")]
 public abstract class Mod : StardewModdingAPI.Mod
 {
     private static Mod instance = null!;
@@ -17,5 +19,6 @@ public abstract class Mod : StardewModdingAPI.Mod
         this.Init();
     }
 
+    /// <summary>Initialize the mod.</summary>
     protected abstract void Init();
 }

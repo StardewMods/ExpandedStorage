@@ -25,7 +25,6 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
     public InventoryTabs(
@@ -33,7 +32,6 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
         IExpressionHandler expressionHandler,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
-        IManifest manifest,
         MenuHandler menuHandler,
         IModConfig modConfig)
         : base(eventManager, modConfig)
