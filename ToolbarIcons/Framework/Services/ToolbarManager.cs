@@ -1,8 +1,8 @@
 namespace StardewMods.ToolbarIcons.Framework.Services;
 
+using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
-using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
@@ -12,8 +12,6 @@ using StardewMods.ToolbarIcons.Framework.Models;
 using StardewMods.ToolbarIcons.Framework.Models.Events;
 using StardewValley.Menus;
 
-// TODO: Center Toolbar Icons
-
 /// <summary>Service for handling the toolbar icons on the screen.</summary>
 internal sealed class ToolbarManager
 {
@@ -22,10 +20,11 @@ internal sealed class ToolbarManager
     private readonly IIconRegistry iconRegistry;
     private readonly Dictionary<string, string?> icons;
     private readonly IInputHelper inputHelper;
-    private readonly PerScreen<ComponentArea> lastArea = new(() => ComponentArea.Custom);
     private readonly PerScreen<ClickableComponent?> lastButton = new();
     private readonly PerScreen<Toolbar?> lastToolbar = new();
     private readonly IReflectionHelper reflectionHelper;
+
+    private Vector2 lastOrigin = Vector2.Zero;
 
     /// <summary>Initializes a new instance of the <see cref="ToolbarManager" /> class.</summary>
     /// <param name="configManager">Dependency used for managing config data.</param>
@@ -151,7 +150,7 @@ internal sealed class ToolbarManager
         this.inputHelper.Suppress(e.Button);
     }
 
-    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) => this.RefreshComponents(true);
+    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) => this.RefreshComponents();
 
     private void OnRenderedHud(RenderedHudEventArgs e)
     {
@@ -168,11 +167,12 @@ internal sealed class ToolbarManager
 
     private void OnRenderingHud(RenderingHudEventArgs e)
     {
-        if (!this.ShowToolbar)
+        if (this.Toolbar is null)
         {
             return;
         }
 
+        this.RefreshComponents();
         var cursorPos = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
         foreach (var component in this.Toolbar.allClickableComponents.OfType<ClickableTextureComponent>())
         {
@@ -194,7 +194,7 @@ internal sealed class ToolbarManager
             return;
         }
 
-        this.RefreshComponents();
+        this.RefreshComponents(true);
     }
 
     private void RefreshComponents(bool force = false)
@@ -207,44 +207,21 @@ internal sealed class ToolbarManager
         // Calculate top-left
         var xAlign = this.Button.bounds.X * (1f / Game1.options.zoomLevel) < Game1.viewport.Width / 2f;
         var yAlign = this.Button.bounds.Y * (1f / Game1.options.zoomLevel) < Game1.viewport.Height / 2f;
-        ComponentArea area;
-        int x;
-        int y;
-        if (this.Toolbar.width > this.Toolbar.height)
-        {
-            x = this.Button.bounds.Left;
-            if (yAlign)
-            {
-                area = ComponentArea.Top;
-                y = this.Button.bounds.Bottom + 20;
-            }
-            else
-            {
-                area = ComponentArea.Bottom;
-                y = this.Button.bounds.Top - 52;
-            }
-        }
-        else
-        {
-            y = this.Button.bounds.Top;
-            if (xAlign)
-            {
-                area = ComponentArea.Left;
-                x = this.Button.bounds.Right + 20;
-            }
-            else
-            {
-                area = ComponentArea.Right;
-                x = this.Button.bounds.Left - 52;
-            }
-        }
+        var origin = this.Toolbar.width > this.Toolbar.height
+            ? new Vector2(
+                this.Button.bounds.Left,
+                yAlign ? this.Button.bounds.Bottom + 20 : this.Button.bounds.Top - 52)
+            : new Vector2(
+                xAlign ? this.Button.bounds.Right + 20 : this.Button.bounds.Left - 52,
+                this.Button.bounds.Top);
 
-        if (!force && this.lastArea.Value == area)
+        if (!force && this.lastOrigin.Equals(origin))
         {
             return;
         }
 
-        this.lastArea.Value = area;
+        this.lastOrigin = new Vector2(origin.X, origin.Y);
+        var delta = this.Toolbar.width > this.Toolbar.height ? new Vector2(36, 0) : new Vector2(0, 36);
         this.Toolbar.allClickableComponents = [];
         foreach (var id in this.configManager.Icons.Where(icon => icon.Enabled).Select(icon => icon.Id).Distinct())
         {
@@ -253,22 +230,11 @@ internal sealed class ToolbarManager
                 continue;
             }
 
-            var component = icon.GetComponent(IconStyle.Button, x, y, 2f);
+            var component = icon.GetComponent(IconStyle.Button, (int)origin.X, (int)origin.Y, 2f);
             component.name = id;
             component.hoverText = hoverText;
             this.Toolbar.allClickableComponents.Add(component);
-
-            switch (area)
-            {
-                case ComponentArea.Top:
-                case ComponentArea.Bottom:
-                    x += component.bounds.Width + 4;
-                    break;
-                case ComponentArea.Right:
-                case ComponentArea.Left:
-                    y += component.bounds.Height + 4;
-                    break;
-            }
+            origin += delta;
         }
     }
 }

@@ -23,11 +23,7 @@ internal sealed class LockItem : BaseFeature<LockItem>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for managing config data.</param>
-    public LockItem(
-        IEventManager eventManager,
-        IInputHelper inputHelper,
-        MenuHandler menuHandler,
-        IModConfig modConfig)
+    public LockItem(IEventManager eventManager, IInputHelper inputHelper, MenuHandler menuHandler, IModConfig modConfig)
         : base(eventManager, modConfig)
     {
         this.inputHelper = inputHelper;
