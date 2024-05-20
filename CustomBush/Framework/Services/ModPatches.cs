@@ -520,9 +520,10 @@ internal sealed class ModPatches
                 },
             };
 
+            __instance.bush.Value.inPot.Value = true;
+
             if (!__instance.Location.IsOutdoors)
             {
-                __instance.bush.Value.inPot.Value = true;
                 __instance.bush.Value.loadSprite();
                 Game1.playSound("coin");
             }
