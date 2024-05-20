@@ -5,6 +5,7 @@ using StardewModdingAPI.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Assets;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.GarbageDay.Framework.Interfaces;
 using StardewMods.GarbageDay.Framework.Models;
@@ -13,8 +14,8 @@ using xTile;
 using xTile.Dimensions;
 using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
-/// <summary>Handles modification and manipulation of assets in the game.</summary>
-internal sealed class AssetHandler : Mod.BaseAssetHandler
+/// <inheritdoc />
+internal sealed class AssetHandler : BaseAssetHandler
 {
     private readonly Dictionary<string, FoundGarbageCan> foundGarbageCans;
     private readonly IModConfig modConfig;
@@ -39,10 +40,10 @@ internal sealed class AssetHandler : Mod.BaseAssetHandler
         this.foundGarbageCans = foundGarbageCans;
         this.modConfig = modConfig;
 
-        this.AddAsset($"{Mod.Mod.Id}/Icons", new ModAsset<Texture2D>("assets/icons.png", AssetLoadPriority.Exclusive));
+        this.AddAsset($"{Mod.Id}/Icons", new ModAsset<Texture2D>("assets/icons.png", AssetLoadPriority.Exclusive));
         this.AddAsset("Data/BigCraftables", new AssetEditor(this.LoadGarbageCan, AssetEditPriority.Default));
 
-        iconRegistry.AddIcon("GarbageCan", $"{Mod.Mod.Id}/Icons", new Rectangle(0, 0, 16, 16));
+        iconRegistry.AddIcon("GarbageCan", $"{Mod.Id}/Icons", new Rectangle(0, 0, 16, 16));
 
         // Events
         eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
@@ -90,7 +91,7 @@ internal sealed class AssetHandler : Mod.BaseAssetHandler
             },
         };
 
-        data.Add($"{Mod.Mod.Id}/GarbageCan", bigCraftableData);
+        data.Add($"{Mod.Id}/GarbageCan", bigCraftableData);
     }
 
     private void OnAssetRequested(AssetRequestedEventArgs e)
@@ -126,7 +127,7 @@ internal sealed class AssetHandler : Mod.BaseAssetHandler
                             continue;
                         }
 
-                        Mod.Log.Trace("Garbage Can found on map: {0}", parts[1]);
+                        Log.Trace("Garbage Can found on map: {0}", parts[1]);
 
                         // Remove base tile
                         layer.Tiles[x, y] = null;
@@ -166,7 +167,7 @@ internal sealed class AssetHandler : Mod.BaseAssetHandler
             return false;
         }
 
-        if (!this.modConfig.OnByDefault && garbageCanData.CustomFields?.GetBool($"{Mod.Mod.Id}/Enabled") != true)
+        if (!this.modConfig.OnByDefault && garbageCanData.CustomFields?.GetBool($"{Mod.Id}/Enabled") != true)
         {
             return false;
         }

@@ -3,6 +3,7 @@ namespace StardewMods.ExpandedStorage.Framework.Services.Factory;
 using System.Runtime.CompilerServices;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Models.Data;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
 using StardewMods.ExpandedStorage.Framework.Models;
 
@@ -29,7 +30,7 @@ internal sealed class StorageDataFactory
         if (!this.cachedTypes.TryGetValue(item.ItemId, out var typeData))
         {
             var customFields = GetCustomFields();
-            if (customFields?.GetBool(Mod.Mod.Id + "/Enabled") != true)
+            if (customFields?.GetBool(Mod.Id + "/Enabled") != true)
             {
                 this.cachedTypes[item.ItemId] = null;
                 return false;

@@ -9,6 +9,7 @@ using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
@@ -110,7 +111,7 @@ internal sealed class OpenHeldChest : BaseFeature<OpenHeldChest>
             return;
         }
 
-        Mod.Log.Info("{0}: Opening held chest {1}", this.Id, container);
+        Log.Info("{0}: Opening held chest {1}", this.Id, container);
         this.inputHelper.Suppress(e.Button);
         container.Mutex?.RequestLock(
             () =>

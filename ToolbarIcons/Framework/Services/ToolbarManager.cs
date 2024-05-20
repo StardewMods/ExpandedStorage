@@ -5,6 +5,7 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Events;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.ToolbarIcons.Framework.Models;
@@ -107,7 +108,7 @@ internal sealed class ToolbarManager
             return;
         }
 
-        Mod.Log.Trace("Adding icon: {0}", id);
+        Log.Trace("Adding icon: {0}", id);
         this.eventManager.Publish(new IconsChangedEventArgs([id], []));
         this.RefreshComponents(true);
     }
@@ -121,7 +122,7 @@ internal sealed class ToolbarManager
             return;
         }
 
-        Mod.Log.Trace("Removing icon: {0}", id);
+        Log.Trace("Removing icon: {0}", id);
         this.icons.Remove(id);
         this.eventManager.Publish(new IconsChangedEventArgs([], [id]));
         this.RefreshComponents(true);

@@ -7,4 +7,7 @@ internal sealed class DefaultConfig : IModConfig
 {
     /// <inheritdoc />
     public int GemCost { get; set; } = 1;
+
+    /// <inheritdoc />
+    public string Sound { get; set; } = "wand";
 }

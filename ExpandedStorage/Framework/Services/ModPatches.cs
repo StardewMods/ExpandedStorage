@@ -9,6 +9,7 @@ using StardewModdingAPI.Events;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.ExpandedStorage.Framework.Models;
 using StardewMods.ExpandedStorage.Framework.Services.Factory;
@@ -24,18 +25,25 @@ internal sealed class ModPatches
     private const string LidOpenSound = "doorCreak";
     private const string MiniShippingBinOpenSound = "shwip";
 
+    private static AssetHandler assetHandler = null!;
     private static IEventManager eventManager = null!;
     private static StorageDataFactory storageDataFactory = null!;
 
     private readonly IPatchManager patchManager;
 
     /// <summary>Initializes a new instance of the <see cref="ModPatches" /> class.</summary>
+    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     /// <param name="storageDataFactory">Dependency used for managing storage data.</param>
-    public ModPatches(IEventManager eventManager, IPatchManager patchManager, StorageDataFactory storageDataFactory)
+    public ModPatches(
+        AssetHandler assetHandler,
+        IEventManager eventManager,
+        IPatchManager patchManager,
+        StorageDataFactory storageDataFactory)
     {
         // Init
+        ModPatches.assetHandler = assetHandler;
         ModPatches.eventManager = eventManager;
         ModPatches.storageDataFactory = storageDataFactory;
         this.patchManager = patchManager;
@@ -50,7 +58,7 @@ internal sealed class ModPatches
 
         // Patches
         this.patchManager.Add(
-            Mod.Mod.Id,
+            Mod.Id,
             new SavedPatch(
                 AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.checkForAction)),
                 AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_checkForAction_transpiler)),
@@ -212,11 +220,18 @@ internal sealed class ModPatches
             drawY -= (float)Math.Sin(__instance.kickProgress * Math.PI) * 0.5f;
         }
 
-        var colored = storage.PlayerColor && !__instance.playerChoiceColor.Value.Equals(Color.Black);
-        var color = colored ? __instance.playerChoiceColor.Value : __instance.Tint;
+        var playerChoiceColor = storage.TintOverride.Equals(Color.Black)
+            ? __instance.playerChoiceColor.Value
+            : storage.TintOverride;
+
+        var colored = storage.PlayerColor && !playerChoiceColor.Equals(Color.Black);
+        var color = colored ? playerChoiceColor : __instance.Tint;
 
         var data = ItemRegistry.GetDataOrErrorItem(__instance.QualifiedItemId);
-        var texture = data.GetTexture();
+        var texture = string.IsNullOrWhiteSpace(storage.TextureOverride)
+            ? data.GetTexture()
+            : ModPatches.assetHandler.RequireAsset<Texture2D>(storage.TextureOverride);
+
         var pos = Game1.GlobalToLocal(Game1.viewport, new Vector2(drawX, drawY - 1f) * Game1.tileSize);
         var startingLidFrame = __instance.startingLidFrame.Value;
         var lastLidFrame = __instance.getLastLidFrame();
@@ -279,7 +294,10 @@ internal sealed class ModPatches
         var color = colored ? __instance.playerChoiceColor.Value : __instance.Tint;
 
         var data = ItemRegistry.GetDataOrErrorItem(__instance.QualifiedItemId);
-        var texture = data.GetTexture();
+        var texture = string.IsNullOrWhiteSpace(storage.TextureOverride)
+            ? data.GetTexture()
+            : ModPatches.assetHandler.RequireAsset<Texture2D>(storage.TextureOverride);
+
         var pos = local
             ? new Vector2(x, y - 64)
             : Game1.GlobalToLocal(Game1.viewport, new Vector2(x, y - 1) * Game1.tileSize);
@@ -471,6 +489,14 @@ internal sealed class ModPatches
                 storage.OpenNearby ? Chest.SpecialChestTypes.MiniShippingBin : Chest.SpecialChestTypes.None,
         };
 
+        if (storage.ModData?.Any() == true)
+        {
+            foreach (var (key, value) in storage.ModData)
+            {
+                chest.modData[key] = value;
+            }
+        }
+
         location.Objects[tile] = chest;
         location.playSound(storage.PlaceSound);
         __result = true;
@@ -495,5 +521,5 @@ internal sealed class ModPatches
         itemGrabMenu.RepositionSideButtons();
     }
 
-    private void OnGameLaunched(GameLaunchedEventArgs e) => this.patchManager.Patch(Mod.Mod.Id);
+    private void OnGameLaunched(GameLaunchedEventArgs e) => this.patchManager.Patch(Mod.Id);
 }

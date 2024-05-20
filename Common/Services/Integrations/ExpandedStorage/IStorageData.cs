@@ -1,5 +1,7 @@
 namespace StardewMods.Common.Services.Integrations.ExpandedStorage;
 
+using Microsoft.Xna.Framework;
+
 /// <summary>Data for an Expanded Storage chest.</summary>
 public interface IStorageData
 {
@@ -14,6 +16,9 @@ public interface IStorageData
 
     /// <summary>Gets or sets a value indicating whether the storage is a fridge.</summary>
     public bool IsFridge { get; set; }
+
+    /// <summary>Gets or sets any mod data that should be added to the chest on creation.</summary>
+    public Dictionary<string, string>? ModData { get; set; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the storage will play it's lid opening animation when the player is
@@ -32,4 +37,10 @@ public interface IStorageData
 
     /// <summary>Gets or sets a value indicating whether player color is enabled.</summary>
     public bool PlayerColor { get; set; }
+
+    /// <summary>Gets or sets a value to override the texture.</summary>
+    public string TextureOverride { get; set; }
+
+    /// <summary>Gets or sets a color to apply to the tinted layer.</summary>
+    public Color TintOverride { get; set; }
 }

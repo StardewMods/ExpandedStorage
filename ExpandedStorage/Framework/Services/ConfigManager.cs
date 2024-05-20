@@ -4,6 +4,7 @@ using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
 using StardewMods.Common.Models.Events;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
@@ -11,7 +12,7 @@ using StardewMods.ExpandedStorage.Framework.Interfaces;
 using StardewMods.ExpandedStorage.Framework.Models;
 
 /// <summary>Handles the config menu.</summary>
-internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConfig
+internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 {
     private readonly BetterChestsIntegration betterChestsIntegration;
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
@@ -70,7 +71,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
         // Register storage options
         foreach (var (id, options) in config.StorageOptions)
         {
-            this.betterChestsIntegration.Api.AddConfigOptions(Mod.Mod.Manifest, null, null, options);
+            this.betterChestsIntegration.Api.AddConfigOptions(Mod.Manifest, null, null, options);
         }
     }
 }

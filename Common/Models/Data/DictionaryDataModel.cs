@@ -1,6 +1,7 @@
 namespace StardewMods.Common.Models.Data;
 
 using System.Globalization;
+using Microsoft.Xna.Framework;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Cache;
 
@@ -23,13 +24,25 @@ internal abstract class DictionaryDataModel
 
     /// <summary>Serialize a bool to a string.</summary>
     /// <param name="value">The bool value to serialize.</param>
-    /// <returns>The bool value, or the default value if the value is not a valid bool.</returns>
+    /// <returns>The string value of the bool if true; otherwise, an empty string.</returns>
     protected static string BoolToString(bool value) =>
         value ? value.ToString(CultureInfo.InvariantCulture) : string.Empty;
 
+    /// <summary>Serialize a color to a string.</summary>
+    /// <param name="value">The color value to serialize.</param>
+    /// <returns>The string value of the color if true; otherwise, an empty string.</returns>
+    protected static string ColorToString(Color value) =>
+        value.Equals(Color.Black) ? string.Empty : value.PackedValue.ToString(CultureInfo.InvariantCulture);
+
+    /// <summary>Serialize a dictionary of string key-value-pairs to a string.</summary>
+    /// <param name="value">The dictionary value to serialize.</param>
+    /// <returns>The string value of the dictionary if it is not empty; otherwise, an empty string.</returns>
+    protected static string DictToString(Dictionary<string, string>? value) =>
+        value?.Any() == true ? string.Join(',', value.Select(pair => $"{pair.Key}={pair.Value}")) : string.Empty;
+
     /// <summary>Serialize an int to a string.</summary>
     /// <param name="value">The int value to serialize.</param>
-    /// <returns>The integer value, or the default value if the value is not a valid integer.</returns>
+    /// <returns>The string value of the int if it is not zero; otherwise, an empty string.</returns>
     protected static string IntToString(int value) =>
         value == 0 ? string.Empty : value.ToString(CultureInfo.InvariantCulture);
 
@@ -38,6 +51,29 @@ internal abstract class DictionaryDataModel
     /// <returns>The bool value, or <c>false</c> if the value is not a valid bool.</returns>
     protected static bool StringToBool(string value) =>
         !string.IsNullOrWhiteSpace(value) && bool.TryParse(value, out var boolValue) && boolValue;
+
+    /// <summary>Deserialize a string to a color.</summary>
+    /// <param name="value">The string value to parse.</param>
+    /// <returns>The color value, or Black if the value is not a valid color.</returns>
+    protected static Color StringToColor(string value)
+    {
+        if (string.IsNullOrWhiteSpace(value) || !uint.TryParse(value, out var intValue))
+        {
+            return Color.Black;
+        }
+
+        var color = Color.Black;
+        color.PackedValue = intValue;
+        return color;
+    }
+
+    /// <summary>Deserialize a string to a dictionary of string key-value-pairs.</summary>
+    /// <param name="value">The string value to parse.</param>
+    /// <returns>The dictionary value, or an empty dictionary if the value is not valid.</returns>
+    protected static Dictionary<string, string> StringToDict(string value) =>
+        !string.IsNullOrWhiteSpace(value)
+            ? value.Split(',').Select(part => part.Split('=')).ToDictionary(part => part[0], part => part[1])
+            : new Dictionary<string, string>();
 
     /// <summary>Deserialize a string to an int.</summary>
     /// <param name="value">The string value to parse.</param>

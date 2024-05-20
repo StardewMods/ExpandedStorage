@@ -3,13 +3,14 @@ namespace StardewMods.EasyAccess.Framework.Services;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.EasyAccess.Framework.Enums;
 using StardewMods.EasyAccess.Framework.Interfaces;
 
 /// <summary>Handles collecting items.</summary>
-internal sealed class CollectService : Mod.BaseService<CollectService>
+internal sealed class CollectService : BaseService<CollectService>
 {
     private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
@@ -104,7 +105,7 @@ internal sealed class CollectService : Mod.BaseService<CollectService>
 
                     Game1.createItemDebris(obj, Game1.tileSize * pos, direction, Game1.currentLocation);
                     Game1.currentLocation.Objects.Remove(pos);
-                    Mod.Log.Info("Dropped {0} from forage.", obj.DisplayName);
+                    Log.Info("Dropped {0} from forage.", obj.DisplayName);
                     continue;
                 }
 
@@ -113,7 +114,7 @@ internal sealed class CollectService : Mod.BaseService<CollectService>
                     var item = obj.heldObject.Value;
                     if (item is not null && obj.checkForAction(Game1.player))
                     {
-                        Mod.Log.Info("Collected {0} from producer {1}.", item.DisplayName, obj.DisplayName);
+                        Log.Info("Collected {0} from producer {1}.", item.DisplayName, obj.DisplayName);
                     }
                 }
             }

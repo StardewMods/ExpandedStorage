@@ -8,6 +8,7 @@ using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
 using StardewMods.Common.Models.Events;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -16,7 +17,7 @@ using StardewValley.Menus;
 using StardewValley.TokenizableStrings;
 
 /// <inheritdoc cref="StardewMods.BetterChests.Framework.Interfaces.IModConfig" />
-internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConfig
+internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 {
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
     private readonly IModRegistry modRegistry;
@@ -556,33 +557,33 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         this.genericModConfigMenuIntegration.Register(this.Reset, () => this.Save(config));
 
-        gmcm.AddPageLink(Mod.Mod.Manifest, "Main", I18n.Section_Main_Name);
-        gmcm.AddParagraph(Mod.Mod.Manifest, I18n.Section_Main_Description);
+        gmcm.AddPageLink(Mod.Manifest, "Main", I18n.Section_Main_Name);
+        gmcm.AddParagraph(Mod.Manifest, I18n.Section_Main_Description);
 
-        gmcm.AddPageLink(Mod.Mod.Manifest, "Controls", I18n.Section_Controls_Name);
-        gmcm.AddParagraph(Mod.Mod.Manifest, I18n.Section_Controls_Description);
+        gmcm.AddPageLink(Mod.Manifest, "Controls", I18n.Section_Controls_Name);
+        gmcm.AddParagraph(Mod.Manifest, I18n.Section_Controls_Description);
 
-        gmcm.AddPageLink(Mod.Mod.Manifest, "Tweaks", I18n.Section_Tweaks_Name);
-        gmcm.AddParagraph(Mod.Mod.Manifest, I18n.Section_Tweaks_Description);
+        gmcm.AddPageLink(Mod.Manifest, "Tweaks", I18n.Section_Tweaks_Name);
+        gmcm.AddParagraph(Mod.Manifest, I18n.Section_Tweaks_Description);
 
-        gmcm.AddSectionTitle(Mod.Mod.Manifest, I18n.Section_Storages_Name);
-        gmcm.AddParagraph(Mod.Mod.Manifest, I18n.Section_Storages_Description);
+        gmcm.AddSectionTitle(Mod.Manifest, I18n.Section_Storages_Name);
+        gmcm.AddParagraph(Mod.Manifest, I18n.Section_Storages_Description);
 
-        gmcm.AddPageLink(Mod.Mod.Manifest, "BigCraftables", I18n.Section_BigCraftables_Name);
-        gmcm.AddParagraph(Mod.Mod.Manifest, I18n.Section_BigCraftables_Description);
+        gmcm.AddPageLink(Mod.Manifest, "BigCraftables", I18n.Section_BigCraftables_Name);
+        gmcm.AddParagraph(Mod.Manifest, I18n.Section_BigCraftables_Description);
 
-        gmcm.AddPageLink(Mod.Mod.Manifest, "Furniture", I18n.Section_Furniture_Name);
-        gmcm.AddParagraph(Mod.Mod.Manifest, I18n.Section_Furniture_Description);
+        gmcm.AddPageLink(Mod.Manifest, "Furniture", I18n.Section_Furniture_Name);
+        gmcm.AddParagraph(Mod.Manifest, I18n.Section_Furniture_Description);
 
-        gmcm.AddPageLink(Mod.Mod.Manifest, "Other", I18n.Section_Other_Name);
-        gmcm.AddParagraph(Mod.Mod.Manifest, I18n.Section_Other_Description);
+        gmcm.AddPageLink(Mod.Manifest, "Other", I18n.Section_Other_Name);
+        gmcm.AddParagraph(Mod.Manifest, I18n.Section_Other_Description);
 
         var pages = new List<(string Id, string Title, string Description, IStorageOptions Options)>();
         var furnitureData = ItemRegistry.RequireTypeDefinition("(F)");
         foreach (var (dataType, storageTypes) in config.StorageOptions)
         {
             gmcm.AddPage(
-                Mod.Mod.Manifest,
+                Mod.Manifest,
                 dataType switch { "BigCraftables" or "Furniture" => dataType, _ => "Other" },
                 dataType switch
                 {
@@ -636,23 +637,23 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
             foreach (var (id, title, description, _) in subPages.OrderBy(page => page.Title))
             {
-                gmcm.AddPageLink(Mod.Mod.Manifest, id, () => title, () => description);
+                gmcm.AddPageLink(Mod.Manifest, id, () => title, () => description);
             }
 
             pages.AddRange(subPages);
         }
 
-        this.AddMainOption(Mod.Mod.Manifest, "Main", I18n.Section_Main_Name, config.DefaultOptions, true);
+        this.AddMainOption(Mod.Manifest, "Main", I18n.Section_Main_Name, config.DefaultOptions, true);
 
-        gmcm.AddPage(Mod.Mod.Manifest, "Controls", I18n.Section_Controls_Name);
+        gmcm.AddPage(Mod.Manifest, "Controls", I18n.Section_Controls_Name);
         this.AddControls(config.Controls);
 
-        gmcm.AddPage(Mod.Mod.Manifest, "Tweaks", I18n.Section_Tweaks_Name);
+        gmcm.AddPage(Mod.Manifest, "Tweaks", I18n.Section_Tweaks_Name);
         this.AddTweaks(config);
 
         foreach (var (id, title, _, options) in pages)
         {
-            this.AddMainOption(Mod.Mod.Manifest, id, () => title, options, true, config.DefaultOptions);
+            this.AddMainOption(Mod.Manifest, id, () => title, options, true, config.DefaultOptions);
         }
     }
 
@@ -667,7 +668,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Access Chests
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.AccessChests,
             value => controls.AccessChests = value,
             I18n.Controls_AccessChests_Name,
@@ -675,7 +676,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Access Previous Chest
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.AccessPreviousChest,
             value => controls.AccessPreviousChest = value,
             I18n.Controls_AccessPreviousChest_Name,
@@ -683,7 +684,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Access Next Chest
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.AccessNextChest,
             value => controls.AccessNextChest = value,
             I18n.Controls_AccessNextChest_Name,
@@ -691,7 +692,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Clear Search
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.ClearSearch,
             value => controls.ClearSearch = value,
             I18n.Controls_ClearSearch_Name,
@@ -699,7 +700,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Configure Chest
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.ConfigureChest,
             value => controls.ConfigureChest = value,
             I18n.Controls_ConfigureChest_Name,
@@ -707,7 +708,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Chest Finder
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.OpenFoundChest,
             value => controls.OpenFoundChest = value,
             I18n.Controls_OpenFoundChest_Name,
@@ -715,7 +716,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Craft from Chest
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.OpenCrafting,
             value => controls.OpenCrafting = value,
             I18n.Controls_OpenCrafting_Name,
@@ -723,7 +724,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Stash to Chest
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.StashItems,
             value => controls.StashItems = value,
             I18n.Controls_StashItems_Name,
@@ -731,21 +732,21 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Resize Chest
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.ScrollUp,
             value => controls.ScrollUp = value,
             I18n.Controls_ScrollUp_Name,
             I18n.Controls_ScrollUp_Tooltip);
 
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.ScrollDown,
             value => controls.ScrollDown = value,
             I18n.Controls_ScrollDown_Name,
             I18n.Controls_ScrollDown_Tooltip);
 
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.ScrollPage,
             value => controls.ScrollPage = value,
             I18n.Controls_ScrollPage_Name,
@@ -753,7 +754,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Lock Items
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.LockSlot,
             value => controls.LockSlot = value,
             I18n.Controls_LockItem_Name,
@@ -761,7 +762,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Chest Info
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.ToggleInfo,
             value => controls.ToggleInfo = value,
             I18n.Controls_ToggleInfo_Name,
@@ -769,7 +770,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Collect Items
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.ToggleCollectItems,
             value => controls.ToggleCollectItems = value,
             I18n.Controls_ToggleCollectItems_Name,
@@ -777,7 +778,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Search Items
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.ToggleSearch,
             value => controls.ToggleSearch = value,
             I18n.Controls_ToggleSearch_Name,
@@ -785,14 +786,14 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Transfer Items
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.TransferItems,
             value => controls.TransferItems = value,
             I18n.Controls_TransferItems_Name,
             I18n.Controls_TransferItems_Tooltip);
 
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.TransferItemsReverse,
             value => controls.TransferItemsReverse = value,
             I18n.Controls_TransferItemsReverse_Name,
@@ -800,7 +801,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Copy
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.Copy,
             value => controls.Copy = value,
             I18n.Controls_Copy_Name,
@@ -808,7 +809,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Paste
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => controls.Paste,
             value => controls.Paste = value,
             I18n.Controls_Paste_Name,
@@ -826,7 +827,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Access Chest Show Arrows
         gmcm.AddBoolOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.AccessChestsShowArrows,
             value => config.AccessChestsShowArrows = value,
             I18n.Config_AccessChestsShowArrows_Name,
@@ -834,7 +835,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Carry Chest Limit
         gmcm.AddNumberOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.CarryChestLimit,
             value => config.CarryChestLimit = value,
             I18n.Config_CarryChestLimit_Name,
@@ -845,7 +846,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
             Localized.CarryChestLimit);
 
         gmcm.AddNumberOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.CarryChestSlowAmount,
             value => config.CarryChestSlowAmount = value,
             I18n.Config_CarryChestSlowAmount_Name,
@@ -853,7 +854,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Carry Chest Slow Limit
         gmcm.AddNumberOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.CarryChestSlowLimit,
             value => config.CarryChestSlowLimit = value,
             I18n.Config_CarryChestSlowLimit_Name,
@@ -865,7 +866,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Hsl Color Picker Steps
         gmcm.AddNumberOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.HslColorPickerHueSteps,
             value => config.HslColorPickerHueSteps = value,
             I18n.Config_HslColorPickerHueSteps_Name,
@@ -875,7 +876,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
             1);
 
         gmcm.AddNumberOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.HslColorPickerSaturationSteps,
             value => config.HslColorPickerSaturationSteps = value,
             I18n.Config_HslColorPickerSaturationSteps_Name,
@@ -885,7 +886,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
             1);
 
         gmcm.AddNumberOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.HslColorPickerLightnessSteps,
             value => config.HslColorPickerLightnessSteps = value,
             I18n.Config_HslColorPickerLightnessSteps_Name,
@@ -901,7 +902,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
         var high = Math.Max(left, right);
 
         gmcm.AddNumberOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => (int)config.HslColorPickerPlacement,
             value => config.HslColorPickerPlacement = (InventoryMenu.BorderSide)value,
             I18n.Config_HslColorPickerPlacement_Name,
@@ -913,7 +914,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Lock Item
         gmcm.AddTextOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.LockItem.ToStringFast(),
             value => config.LockItem =
                 FeatureOptionExtensions.TryParse(value, out var option) ? option : FeatureOption.Default,
@@ -924,7 +925,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Lock Item Hold
         gmcm.AddBoolOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.LockItemHold,
             value => config.LockItemHold = value,
             I18n.Config_LockItemHold_Name,
@@ -932,7 +933,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Search Items Method
         gmcm.AddTextOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.SearchItemsMethod.ToStringFast(),
             value => config.SearchItemsMethod =
                 FilterMethodExtensions.TryParse(value, out var method) ? method : FilterMethod.Default,
@@ -943,7 +944,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Storage Info Hover Items
         gmcm.AddTextOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => string.Join(',', config.StorageInfoHoverItems.Select(item => item.ToStringFast())),
             value => config.StorageInfoHoverItems = [..GetStorageInfoItems(value)],
             I18n.Config_StorageInfoHoverItems_Name,
@@ -951,7 +952,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Storage Info Menu Items
         gmcm.AddTextOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => string.Join(',', config.StorageInfoMenuItems.Select(item => item.ToStringFast())),
             value => config.StorageInfoMenuItems = [..GetStorageInfoItems(value)],
             I18n.Config_StorageInfoMenuItems_Name,

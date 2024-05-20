@@ -2,13 +2,14 @@ namespace StardewMods.EasyAccess.Framework.Services;
 
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.EasyAccess.Framework.Interfaces;
 using StardewMods.EasyAccess.Framework.Models;
 
 /// <inheritdoc cref="StardewMods.EasyAccess.Framework.Interfaces.IModConfig" />
-internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConfig
+internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 {
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
 
@@ -74,7 +75,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Collect Items
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.ControlScheme.CollectItems,
             value => config.ControlScheme.CollectItems = value,
             I18n.Config_CollectItems_Name,
@@ -83,7 +84,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Dispense Items
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.ControlScheme.DispenseItems,
             value => config.ControlScheme.DispenseItems = value,
             I18n.Config_DispenseItems_Name,
@@ -92,7 +93,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Collect Output Distance
         gmcm.AddNumberOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.CollectOutputDistance,
             value => config.CollectOutputDistance = value,
             I18n.Config_CollectOutputsDistance_Name,
@@ -104,7 +105,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Dispense Input Distance
         gmcm.AddNumberOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.DispenseInputDistance,
             value => config.DispenseInputDistance = value,
             I18n.Config_DispenseInputsDistance_Name,
@@ -116,7 +117,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Do Dig Spots
         gmcm.AddBoolOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.DoDigSpots,
             value => config.DoDigSpots = value,
             I18n.Config_DoDigSpots_Name,
@@ -125,7 +126,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Do Forage
         gmcm.AddBoolOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.DoForage,
             value => config.DoForage = value,
             I18n.Config_DoForage_Name,
@@ -134,7 +135,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Do Machines
         gmcm.AddBoolOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.DoMachines,
             value => config.DoMachines = value,
             I18n.Config_DoMachines_Name,
@@ -143,7 +144,7 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
 
         // Do Terrain
         gmcm.AddBoolOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.DoTerrain,
             value => config.DoTerrain = value,
             I18n.Config_DoTerrain_Name,

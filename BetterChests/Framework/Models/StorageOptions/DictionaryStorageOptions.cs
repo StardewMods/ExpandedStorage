@@ -2,6 +2,7 @@ namespace StardewMods.BetterChests.Framework.Models.StorageOptions;
 
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Data;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 
 /// <inheritdoc cref="StardewMods.Common.Services.Integrations.BetterChests.IStorageOptions" />
@@ -242,7 +243,7 @@ internal sealed class DictionaryStorageOptions : DictionaryDataModel, IStorageOp
     }
 
     /// <inheritdoc />
-    protected override string Prefix => Mod.Mod.Prefix;
+    protected override string Prefix => Mod.Prefix;
 
     private static string ChestMenuOptionToString(ChestMenuOption value) => value.ToStringFast();
 

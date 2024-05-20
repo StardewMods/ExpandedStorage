@@ -3,13 +3,14 @@ namespace StardewMods.FauxCore.Framework.Services;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.FauxCore.Framework.Interfaces;
 using StardewMods.FauxCore.Framework.Models;
 
 /// <summary>Handles the config menu.</summary>
-internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConfig
+internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 {
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
 
@@ -61,13 +62,10 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
         this.genericModConfigMenuIntegration.Register(this.Reset, () => this.Save(config));
 
         // general options
-        gmcm.AddSectionTitle(
-            Mod.Mod.Manifest,
-            I18n.Config_Section_General_Title,
-            I18n.Config_Section_General_Description);
+        gmcm.AddSectionTitle(Mod.Manifest, I18n.Config_Section_General_Title, I18n.Config_Section_General_Description);
 
         gmcm.AddTextOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.LogLevel.ToStringFast(),
             value => config.LogLevel = SimpleLogLevelExtensions.TryParse(value, out var logLevel)
                 ? logLevel

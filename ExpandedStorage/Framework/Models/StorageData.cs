@@ -1,5 +1,6 @@
 ﻿namespace StardewMods.ExpandedStorage.Framework.Models;
 
+using Microsoft.Xna.Framework;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
 
 /// <inheritdoc />
@@ -45,6 +46,12 @@ internal sealed class StorageData : IStorageData
         set => this.chestData.IsFridge = value;
     }
 
+    public Dictionary<string, string>? ModData
+    {
+        get => this.Get(nameof(this.ModData), data => data.ModData, null);
+        set => this.chestData.ModData = value;
+    }
+
     /// <inheritdoc />
     public bool OpenNearby
     {
@@ -78,6 +85,20 @@ internal sealed class StorageData : IStorageData
     {
         get => this.Get(nameof(this.PlayerColor), data => data.PlayerColor, false);
         set => this.chestData.PlayerColor = value;
+    }
+
+    /// <inheritdoc />
+    public string TextureOverride
+    {
+        get => this.Get(nameof(this.TextureOverride), data => data.TextureOverride, string.Empty);
+        set => this.chestData.TextureOverride = value;
+    }
+
+    /// <inheritdoc />
+    public Color TintOverride
+    {
+        get => this.Get(nameof(this.TintOverride), data => data.TintOverride, Color.Black);
+        set => this.chestData.TintOverride = value;
     }
 
     private TValue Get<TValue>(string id, Func<IStorageData, TValue> getMethod, TValue defaultValue) =>

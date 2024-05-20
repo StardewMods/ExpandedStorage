@@ -1,6 +1,7 @@
 namespace StardewMods.GarbageDay;
 
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
@@ -9,7 +10,7 @@ using StardewMods.GarbageDay.Framework.Models;
 using StardewMods.GarbageDay.Framework.Services;
 
 /// <inheritdoc />
-public sealed class ModEntry : Mod.Mod
+public sealed class ModEntry : Mod
 {
     /// <inheritdoc />
     protected override void Init()
@@ -19,12 +20,12 @@ public sealed class ModEntry : Mod.Mod
         this.Container.RegisterSingleton<AssetHandler>();
         this.Container.RegisterSingleton<IModConfig, ConfigManager>();
         this.Container.RegisterSingleton<ContentPatcherIntegration>();
-        this.Container.RegisterSingleton<IEventManager, Mod.EventManager>();
+        this.Container.RegisterSingleton<IEventManager, EventManager>();
         this.Container.RegisterSingleton<FauxCoreIntegration>();
         this.Container.RegisterSingleton<GarbageCanManager>();
         this.Container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
         this.Container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
-        this.Container.RegisterSingleton<Mod.Log>();
+        this.Container.RegisterSingleton<Log>();
         this.Container.RegisterSingleton<ToolbarIconsIntegration>();
     }
 }

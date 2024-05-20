@@ -3,13 +3,14 @@ namespace StardewMods.EasyAccess.Framework.Services;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.EasyAccess.Framework.Enums;
 using StardewMods.EasyAccess.Framework.Interfaces;
 
 /// <summary>Handles dispensing items.</summary>
-internal sealed class DispenseService : Mod.BaseService<DispenseService>
+internal sealed class DispenseService : BaseService<DispenseService>
 {
     private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
@@ -56,7 +57,7 @@ internal sealed class DispenseService : Mod.BaseService<DispenseService>
                 continue;
             }
 
-            Mod.Log.Info("Dispensed {0} into producer {1}.", Game1.player.CurrentItem.DisplayName, obj.DisplayName);
+            Log.Info("Dispensed {0} into producer {1}.", Game1.player.CurrentItem.DisplayName, obj.DisplayName);
         }
     }
 

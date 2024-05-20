@@ -4,9 +4,10 @@ using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Events;
+using StardewMods.Common.Services;
 
 /// <inheritdoc cref="StardewMods.BetterChests.Framework.Interfaces.IFeature" />
-internal abstract class BaseFeature<TFeature> : Mod.BaseService<TFeature>, IFeature
+internal abstract class BaseFeature<TFeature> : BaseService<TFeature>, IFeature
     where TFeature : class, IFeature
 {
     private bool isActivated;
@@ -46,12 +47,12 @@ internal abstract class BaseFeature<TFeature> : Mod.BaseService<TFeature>, IFeat
         this.isActivated = this.ShouldBeActive;
         if (this.isActivated)
         {
-            Mod.Log.Trace("Activating feature {0}", this.Id);
+            Log.Trace("Activating feature {0}", this.Id);
             this.Activate();
             return;
         }
 
-        Mod.Log.Trace("Deactivating feature {0}", this.Id);
+        Log.Trace("Deactivating feature {0}", this.Id);
         this.Deactivate();
     }
 }

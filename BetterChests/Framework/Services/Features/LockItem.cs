@@ -8,6 +8,7 @@ using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewValley.Menus;
 
@@ -182,12 +183,12 @@ internal sealed class LockItem : BaseFeature<LockItem>
     {
         if (this.IsUnlocked(item))
         {
-            Mod.Log.Info("{0}: Locking item {1}", this.Id, item.DisplayName);
+            Log.Info("{0}: Locking item {1}", this.Id, item.DisplayName);
             item.modData[this.UniqueId] = "Locked";
         }
         else
         {
-            Mod.Log.Info("{0}: Unlocking item {1}", this.Id, item.DisplayName);
+            Log.Info("{0}: Unlocking item {1}", this.Id, item.DisplayName);
             item.modData.Remove(this.UniqueId);
         }
     }

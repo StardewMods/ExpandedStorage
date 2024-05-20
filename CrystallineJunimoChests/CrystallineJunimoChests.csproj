@@ -3,7 +3,6 @@
     <Name>Crystalline Junimo Chests</Name>
     <Description>Adds enhanced Junimo Chests which can access multiple inventories depending on their color.</Description>
     <Version>1.1.0</Version>
-    <EnableHarmony>true</EnableHarmony>
     <RootNamespace>StardewMods.CrystallineJunimoChests</RootNamespace>
     <UniqueId>furyx639.CrystallineJunimoChests</UniqueId>
     <UpdateKeys>Nexus:20658</UpdateKeys>
@@ -15,13 +14,11 @@
       <Version>5.4.2</Version>
       <Private>false</Private>
     </PackageReference>
-    <Reference Include="HarmonyLib">
-      <HintPath>$(GamePath)\smapi-internal\0Harmony.dll</HintPath>
-      <Private>false</Private>
-    </Reference>
   </ItemGroup>
   <ItemGroup>
     <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.0" required="true"/>
+    <SMAPIDependency Include="furyx639.ExpandedStorage" Version="3.1.0" required="true"/>
+    <SMAPIDependency Include="furyx639.BetterChests" Version="2.19.0" required="false"/>
     <SMAPIDependency Include="spacechase0.GenericModConfigMenu" Version="1.12.0" required="false"/>
   </ItemGroup>
 </Project>

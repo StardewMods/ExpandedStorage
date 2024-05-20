@@ -3,10 +3,11 @@ namespace StardewMods.CustomBush.Framework.Services;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Assets;
+using StardewMods.Common.Services;
 using StardewMods.CustomBush.Framework.Models;
 
-/// <summary>Responsible for handling assets provided by this mod.</summary>
-internal sealed class AssetHandler : Mod.BaseAssetHandler
+/// <inheritdoc />
+internal sealed class AssetHandler : BaseAssetHandler
 {
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// ///
@@ -19,7 +20,7 @@ internal sealed class AssetHandler : Mod.BaseAssetHandler
         IModContentHelper modContentHelper)
         : base(eventManager, gameContentHelper, modContentHelper) =>
         this.AddAsset(
-            $"{Mod.Mod.Id}/Data",
+            $"{Mod.Id}/Data",
             new ModAsset<Dictionary<string, CustomBush>>(
                 static () => new Dictionary<string, CustomBush>(StringComparer.OrdinalIgnoreCase),
                 AssetLoadPriority.Exclusive));
@@ -29,7 +30,7 @@ internal sealed class AssetHandler : Mod.BaseAssetHandler
     {
         get
         {
-            var data = this.RequireAsset<Dictionary<string, CustomBush>>($"{Mod.Mod.Id}/Data");
+            var data = this.RequireAsset<Dictionary<string, CustomBush>>($"{Mod.Id}/Data");
             foreach (var (id, customBush) in data)
             {
                 customBush.Id = id;

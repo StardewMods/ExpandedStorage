@@ -13,13 +13,14 @@ using StardewMods.Common.Models;
 using StardewMods.Common.Models.Assets;
 using StardewMods.Common.Models.Data;
 using StardewMods.Common.Models.Events;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.GameData.BigCraftables;
 using StardewValley.GameData.Buildings;
 using StardewValley.GameData.Locations;
 
-/// <summary>Responsible for handling assets provided by this mod.</summary>
-internal sealed class AssetHandler : Mod.BaseAssetHandler
+/// <inheritdoc />
+internal sealed class AssetHandler : BaseAssetHandler
 {
     private static readonly InternalIcon[] Icons =
     [
@@ -67,7 +68,7 @@ internal sealed class AssetHandler : Mod.BaseAssetHandler
     {
         this.modConfig = modConfig;
 
-        this.AddAsset($"{Mod.Mod.Id}/HueBar", new ModAsset<Texture2D>("assets/hue.png", AssetLoadPriority.Exclusive));
+        this.AddAsset($"{Mod.Id}/HueBar", new ModAsset<Texture2D>("assets/hue.png", AssetLoadPriority.Exclusive));
         this.AddAsset(
             "Data/BigCraftables",
             new AssetEditor(
@@ -92,13 +93,13 @@ internal sealed class AssetHandler : Mod.BaseAssetHandler
                     data => data.CustomFields ??= new Dictionary<string, string>()),
                 AssetEditPriority.Default));
 
-        themeHelper.AddAsset(Mod.Mod.Id + "/UI", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
+        themeHelper.AddAsset(Mod.Id + "/UI", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
 
         for (var index = 0; index < AssetHandler.Icons.Length; index++)
         {
             iconRegistry.AddIcon(
                 AssetHandler.Icons[index].ToStringFast(),
-                $"{Mod.Mod.Id}/UI",
+                $"{Mod.Id}/UI",
                 new Rectangle(16 * (index % 5), 16 * (int)(index / 5f), 16, 16));
         }
 
@@ -111,7 +112,7 @@ internal sealed class AssetHandler : Mod.BaseAssetHandler
         this.hslColors ??= this.HslTextureData.Select(HslColor.FromColor).Distinct().ToArray();
 
     /// <summary>Gets the hsl texture.</summary>
-    public Texture2D HslTexture => this.RequireAsset<Texture2D>($"{Mod.Mod.Id}/HueBar");
+    public Texture2D HslTexture => this.RequireAsset<Texture2D>($"{Mod.Id}/HueBar");
 
     private IEnumerable<Color> HslTextureData
     {

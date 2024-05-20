@@ -7,6 +7,7 @@ using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.BetterCrafting;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -186,7 +187,7 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
     {
         if (!this.betterCraftingIntegration.IsLoaded)
         {
-            Mod.Log.Warn("Better Crafting is not loaded. CraftFromChest will not be active.");
+            Log.Warn("Better Crafting is not loaded. CraftFromChest will not be active.");
         }
     }
 

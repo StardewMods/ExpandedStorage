@@ -9,6 +9,7 @@ using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Locations;
@@ -168,7 +169,7 @@ internal sealed class CarryChest : BaseFeature<CarryChest>
         }
 
         // Remove chest from world
-        Mod.Log.Info(
+        Log.Info(
             "{0}: Grabbed chest from {1} at ({2}, {3})",
             this.Id,
             Game1.currentLocation.Name,

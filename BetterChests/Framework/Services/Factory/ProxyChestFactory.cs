@@ -6,10 +6,11 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Models;
 using StardewMods.Common.Helpers;
+using StardewMods.Common.Services;
 using StardewValley.Objects;
 
 /// <summary>Manages the global inventories and chest/item creation and retrieval operations.</summary>
-internal sealed class ProxyChestFactory : Mod.BaseService<ProxyChestFactory>
+internal sealed class ProxyChestFactory : BaseService<ProxyChestFactory>
 {
     private const string AlphaNumeric = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private const string ColorKey = "PlayerChoiceColor";

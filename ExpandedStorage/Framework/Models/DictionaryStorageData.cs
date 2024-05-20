@@ -1,7 +1,9 @@
 namespace StardewMods.ExpandedStorage.Framework.Models;
 
+using Microsoft.Xna.Framework;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Data;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
 
 /// <inheritdoc cref="StardewMods.Common.Services.Integrations.ExpandedStorage.IStorageData" />
@@ -29,8 +31,8 @@ internal sealed class DictionaryStorageData : DictionaryDataModel, IStorageData
     /// <inheritdoc />
     public string? GlobalInventoryId
     {
-        get => this.Get(nameof(this.CloseNearbySound));
-        set => this.Set(nameof(this.CloseNearbySound), value ?? string.Empty);
+        get => this.Get(nameof(this.GlobalInventoryId));
+        set => this.Set(nameof(this.GlobalInventoryId), value ?? string.Empty);
     }
 
     /// <inheritdoc />
@@ -38,6 +40,13 @@ internal sealed class DictionaryStorageData : DictionaryDataModel, IStorageData
     {
         get => this.Get(nameof(this.IsFridge), DictionaryDataModel.StringToBool);
         set => this.Set(nameof(this.IsFridge), value, DictionaryDataModel.BoolToString);
+    }
+
+    /// <inheritdoc />
+    public Dictionary<string, string>? ModData
+    {
+        get => this.Get(nameof(this.ModData), DictionaryDataModel.StringToDict);
+        set => this.Set(nameof(this.ModData), value, DictionaryDataModel.DictToString);
     }
 
     /// <inheritdoc />
@@ -76,5 +85,19 @@ internal sealed class DictionaryStorageData : DictionaryDataModel, IStorageData
     }
 
     /// <inheritdoc />
-    protected override string Prefix => Mod.Mod.Prefix;
+    public string TextureOverride
+    {
+        get => this.Get(nameof(this.TextureOverride));
+        set => this.Set(nameof(this.TextureOverride), value);
+    }
+
+    /// <inheritdoc />
+    public Color TintOverride
+    {
+        get => this.Get(nameof(this.TintOverride), DictionaryDataModel.StringToColor);
+        set => this.Set(nameof(this.TintOverride), value, DictionaryDataModel.ColorToString);
+    }
+
+    /// <inheritdoc />
+    protected override string Prefix => Mod.Prefix;
 }

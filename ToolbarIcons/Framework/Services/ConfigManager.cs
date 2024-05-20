@@ -3,6 +3,7 @@
 using StardewModdingAPI.Utilities;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Events;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.ToolbarIcons.Framework.Interfaces;
@@ -11,7 +12,7 @@ using StardewMods.ToolbarIcons.Framework.Models.Events;
 using StardewMods.ToolbarIcons.Framework.Services.Factory;
 
 /// <summary>Handles generic mod config menu.</summary>
-internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConfig
+internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 {
     private readonly ComplexOptionFactory complexOptionFactory;
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
@@ -82,20 +83,20 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
         this.genericModConfigMenuIntegration.Register(this.Reset, () => this.Save(config));
 
         gmcm.AddKeybindList(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.ToggleKey,
             value => config.ToggleKey = value,
             I18n.Config_ToggleKey_Name,
             I18n.Config_ToggleKey_Tooltip);
 
         gmcm.AddBoolOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.Visible,
             value => config.Visible = value,
             I18n.Config_Visible_Name,
             I18n.Config_Visible_Tooltip);
 
-        gmcm.AddSectionTitle(Mod.Mod.Manifest, I18n.Config_CustomizeToolbar_Name, I18n.Config_CustomizeToolbar_Tooltip);
+        gmcm.AddSectionTitle(Mod.Manifest, I18n.Config_CustomizeToolbar_Name, I18n.Config_CustomizeToolbar_Tooltip);
         var total = config.Icons.Count;
 
         for (var index = 0; index < config.Icons.Count; index++)

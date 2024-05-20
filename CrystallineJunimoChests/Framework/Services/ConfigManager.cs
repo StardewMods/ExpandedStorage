@@ -2,13 +2,14 @@ namespace StardewMods.CrystallineJunimoChests.Framework.Services;
 
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.CrystallineJunimoChests.Framework.Interfaces;
 using StardewMods.CrystallineJunimoChests.Framework.Models;
 
 /// <inheritdoc cref="StardewMods.CrystallineJunimoChests.Framework.Interfaces.IModConfig" />
-internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConfig
+internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 {
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
 
@@ -33,6 +34,9 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
     /// <inheritdoc />
     public int GemCost => this.Config.GemCost;
 
+    /// <inheritdoc />
+    public string Sound => this.Config.Sound;
+
     private void OnGameLaunched(GameLaunchedEventArgs e)
     {
         if (this.genericModConfigMenuIntegration.IsLoaded)
@@ -55,10 +59,17 @@ internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConf
         this.genericModConfigMenuIntegration.Register(this.Reset, () => this.Save(config));
 
         gmcm.AddNumberOption(
-            Mod.Mod.Manifest,
+            Mod.Manifest,
             () => config.GemCost,
             value => config.GemCost = value,
             I18n.Config_GemCost_Name,
             I18n.Config_GemCost_Tooltip);
+
+        gmcm.AddTextOption(
+            Mod.Manifest,
+            () => config.Sound,
+            value => config.Sound = value,
+            I18n.Config_Sound_Name,
+            I18n.Config_Sound_Tooltip);
     }
 }
