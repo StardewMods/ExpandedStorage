@@ -25,6 +25,7 @@ public sealed class ModEntry : Mod
         this.Container.RegisterSingleton<IEventManager, EventManager>();
         this.Container.RegisterSingleton<FauxCoreIntegration>();
         this.Container.RegisterSingleton<GenericModConfigMenuIntegration>();
+        this.Container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
         this.Container.RegisterSingleton<Log>();
         this.Container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
         this.Container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();

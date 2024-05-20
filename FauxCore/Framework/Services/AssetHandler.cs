@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models.Assets;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -12,7 +13,7 @@ using StardewMods.FauxCore.Framework.Models;
 using StardewValley.Menus;
 
 /// <inheritdoc cref="StardewMods.FauxCore.Framework.Interfaces.IAssetHandler" />
-internal sealed class AssetHandler : IAssetHandler
+internal sealed class AssetHandler : BaseAssetHandler, IAssetHandler
 {
     private static readonly Dictionary<VanillaIcon, Rectangle> VanillaIcons = new()
     {
@@ -46,7 +47,6 @@ internal sealed class AssetHandler : IAssetHandler
     };
 
     private readonly Dictionary<string, Texture2D> cachedTextures = new();
-    private readonly IGameContentHelper gameContentHelper;
     private readonly IconRegistry iconRegistry;
     private readonly ThemeHelper themeHelper;
 
@@ -60,18 +60,27 @@ internal sealed class AssetHandler : IAssetHandler
         IGameContentHelper gameContentHelper,
         IModContentHelper modContentHelper,
         ThemeHelper themeHelper)
+        : base(eventManager, gameContentHelper, modContentHelper)
     {
-        this.gameContentHelper = gameContentHelper;
         this.themeHelper = themeHelper;
-        this.iconRegistry = new IconRegistry(this);
+        this.iconRegistry = new IconRegistry(this, Mod.Manifest);
+
+        this.AddAsset(
+            $"{Mod.Id}/Icons",
+            new ModAsset<Dictionary<string, IconData>>(
+                () => new Dictionary<string, IconData>(),
+                AssetLoadPriority.Exclusive));
 
         themeHelper.AddAsset(Mod.Id + "/UI", modContentHelper.Load<IRawTextureData>("assets/ui.png"));
 
+        foreach (var (key, area) in AssetHandler.VanillaIcons)
+        {
+            this.iconRegistry.Add(key.ToStringFast(), "LooseSprites/Cursors", area);
+        }
+
         // Events
-        eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
         eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
         eventManager.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
-        eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
     }
 
     /// <inheritdoc />
@@ -138,25 +147,7 @@ internal sealed class AssetHandler : IAssetHandler
     }
 
     /// <inheritdoc />
-    public Texture2D GetTexture(IIcon icon)
-    {
-        if (this.cachedTextures.TryGetValue(icon.Path, out var texture))
-        {
-            return texture;
-        }
-
-        texture = this.gameContentHelper.Load<Texture2D>(icon.Path);
-        this.cachedTextures.Add(icon.Path, texture);
-        return texture;
-    }
-
-    private void OnAssetRequested(AssetRequestedEventArgs e)
-    {
-        if (e.Name.IsEquivalentTo($"{Mod.Id}/Icons"))
-        {
-            e.LoadFrom(() => new Dictionary<string, IconData>(), AssetLoadPriority.Exclusive);
-        }
-    }
+    public Texture2D GetTexture(IIcon icon) => this.RequireAsset<Texture2D>(icon.Path);
 
     private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
     {
@@ -168,17 +159,9 @@ internal sealed class AssetHandler : IAssetHandler
 
     private void OnConditionsApiReady(ConditionsApiReadyEventArgs e) => this.RefreshIcons();
 
-    private void OnGameLaunched(GameLaunchedEventArgs e)
-    {
-        foreach (var (key, area) in AssetHandler.VanillaIcons)
-        {
-            this.iconRegistry.Add(key.ToStringFast(), "LooseSprites/Cursors", area);
-        }
-    }
-
     private void RefreshIcons()
     {
-        var icons = this.gameContentHelper.Load<Dictionary<string, IconData>>($"{Mod.Id}/Icons");
+        var icons = this.GameContentHelper.Load<Dictionary<string, IconData>>($"{Mod.Id}/Icons");
         foreach (var (key, icon) in icons)
         {
             this.iconRegistry.Add(key, icon.Path, icon.Area);

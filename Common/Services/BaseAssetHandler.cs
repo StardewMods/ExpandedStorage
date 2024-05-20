@@ -9,8 +9,6 @@ internal abstract class BaseAssetHandler
 {
     private readonly Dictionary<IAssetName, ICachedAsset> cachedAssets = new();
     private readonly IEventManager eventManager;
-    private readonly IGameContentHelper gameContentHelper;
-    private readonly IModContentHelper modContentHelper;
     private readonly Dictionary<IAssetName, List<ITrackedAsset>> trackedAssets = new();
 
     /// <summary>Initializes a new instance of the <see cref="BaseAssetHandler" /> class.</summary>
@@ -23,14 +21,20 @@ internal abstract class BaseAssetHandler
         IModContentHelper modContentHelper)
     {
         this.eventManager = eventManager;
-        this.gameContentHelper = gameContentHelper;
-        this.modContentHelper = modContentHelper;
+        this.GameContentHelper = gameContentHelper;
+        this.ModContentHelper = modContentHelper;
 
         // Events
         eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
         eventManager.Subscribe<AssetReadyEventArgs>(this.OnAssetReady);
         eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
     }
+
+    /// <summary>Gets the game content helper.</summary>
+    protected IGameContentHelper GameContentHelper { get; }
+
+    /// <summary>Gets the mod content helper.</summary>
+    protected IModContentHelper ModContentHelper { get; }
 
     /// <summary>Retrieves the specified asset by name and ensures that it is not null.</summary>
     /// <typeparam name="TAssetType">The type of the asset.</typeparam>
@@ -56,10 +60,10 @@ internal abstract class BaseAssetHandler
     public bool TryGetAsset<TAssetType>(string name, [NotNullWhen(true)] out TAssetType? asset)
         where TAssetType : notnull
     {
-        var assetName = this.gameContentHelper.ParseAssetName(name);
+        var assetName = this.GameContentHelper.ParseAssetName(name);
         if (!this.cachedAssets.TryGetValue(assetName, out var cachedAsset))
         {
-            cachedAsset = new CachedAsset<TAssetType>(() => this.gameContentHelper.Load<TAssetType>(name));
+            cachedAsset = new CachedAsset<TAssetType>(() => this.GameContentHelper.Load<TAssetType>(name));
             this.cachedAssets.Add(assetName, cachedAsset);
         }
 
@@ -78,7 +82,7 @@ internal abstract class BaseAssetHandler
     /// <param name="asset">The asset.</param>
     protected void AddAsset(string name, ITrackedAsset asset)
     {
-        var assetName = this.gameContentHelper.ParseAssetName(name);
+        var assetName = this.GameContentHelper.ParseAssetName(name);
         if (!this.trackedAssets.TryGetValue(assetName, out var assets))
         {
             assets = new List<ITrackedAsset>();

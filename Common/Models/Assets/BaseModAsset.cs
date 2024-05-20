@@ -7,16 +7,8 @@ using StardewMods.Common.Interfaces;
 internal abstract class BaseModAsset : ITrackedAsset
 {
     /// <summary>Initializes a new instance of the <see cref="BaseModAsset" /> class.</summary>
-    /// <param name="path">The asset path.</param>
     /// <param name="priority">The load priority.</param>
-    protected BaseModAsset(string path, AssetLoadPriority priority)
-    {
-        this.Path = path;
-        this.Priority = priority;
-    }
-
-    /// <summary>Gets the path to the asset.</summary>
-    public string Path { get; }
+    protected BaseModAsset(AssetLoadPriority priority) => this.Priority = priority;
 
     /// <summary>Gets the priority for loading the asset.</summary>
     public AssetLoadPriority Priority { get; }

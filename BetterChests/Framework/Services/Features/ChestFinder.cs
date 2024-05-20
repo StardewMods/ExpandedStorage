@@ -70,13 +70,15 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         this.Events.Subscribe<WarpedEventArgs>(this.OnWarped);
 
         // Integrations
-        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon(InternalIcon.Search, out var icon))
+        if (!this.toolbarIconsIntegration.IsLoaded)
         {
             return;
         }
 
-        this.toolbarIconsIntegration.Api.AddToolbarIcon(this.Id, icon.Path, icon.Area, I18n.Button_FindChest_Name());
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(
+            this.iconRegistry.RequireIcon(InternalIcon.Search),
+            I18n.Button_FindChest_Name());
     }
 
     /// <inheritdoc />
@@ -95,8 +97,8 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
             return;
         }
 
-        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.Id);
         this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
+        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.RequireIcon(InternalIcon.Search));
     }
 
     private void OnButtonsChanged(ButtonsChangedEventArgs e)
@@ -142,7 +144,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (e.Id == this.Id)
+        if (e.Id == this.iconRegistry.RequireIcon(InternalIcon.Search).Id)
         {
             this.OpenSearchBar();
         }

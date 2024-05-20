@@ -150,7 +150,7 @@ internal sealed class ToolbarManager
         this.inputHelper.Suppress(e.Button);
     }
 
-    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) => this.RefreshComponents();
+    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) => this.RefreshComponents(true);
 
     private void OnRenderedHud(RenderedHudEventArgs e)
     {

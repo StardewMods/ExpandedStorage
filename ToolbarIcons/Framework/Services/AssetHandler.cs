@@ -3,6 +3,7 @@ namespace StardewMods.ToolbarIcons.Framework.Services;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models.Assets;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -10,11 +11,19 @@ using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Models;
 
 /// <summary>Responsible for handling assets provided by this mod.</summary>
-internal sealed class AssetHandler : BaseService<AssetHandler>
+internal sealed class AssetHandler : BaseAssetHandler
 {
-    private readonly string dataPath;
-    private readonly IGameContentHelper gameContentHelper;
-    private readonly IIconRegistry iconRegistry;
+    private static readonly InternalIcon[] Icons =
+    [
+        InternalIcon.StardewAquarium,
+        InternalIcon.GenericModConfigMenu,
+        InternalIcon.AlwaysScrollMap,
+        InternalIcon.ToDew,
+        InternalIcon.SpecialOrders,
+        InternalIcon.DailyQuests,
+        InternalIcon.ToggleCollision,
+    ];
+
     private readonly IntegrationManager integrationManager;
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
@@ -31,58 +40,39 @@ internal sealed class AssetHandler : BaseService<AssetHandler>
         IntegrationManager integrationManager,
         IModContentHelper modContentHelper,
         IThemeHelper themeHelper)
+        : base(eventManager, gameContentHelper, modContentHelper)
     {
         // Init
-        this.gameContentHelper = gameContentHelper;
-        this.iconRegistry = iconRegistry;
         this.integrationManager = integrationManager;
-        this.dataPath = Mod.Id + "/Data";
+        this.AddAsset(
+            $"{Mod.Id}/Data",
+            new ModAsset<Dictionary<string, IntegrationData>>(
+                static () => new Dictionary<string, IntegrationData>(),
+                AssetLoadPriority.Exclusive));
 
-        themeHelper.AddAsset(Mod.Id + "/Arrows", modContentHelper.Load<IRawTextureData>("assets/arrows.png"));
-        themeHelper.AddAsset(Mod.Id + "/Icons", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
+        themeHelper.AddAsset($"{Mod.Id}/Arrows", modContentHelper.Load<IRawTextureData>("assets/arrows.png"));
+        themeHelper.AddAsset($"{Mod.Id}/Icons", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
+
+        for (var index = 0; index < AssetHandler.Icons.Length; index++)
+        {
+            iconRegistry.AddIcon(
+                AssetHandler.Icons[index].ToStringFast(),
+                $"{Mod.Id}/Icons",
+                new Rectangle(16 * (index % 5), 16 * (int)(index / 5f), 16, 16));
+        }
 
         // Events
-        eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
         eventManager.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
-        eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
     }
 
-    private void OnAssetRequested(AssetRequestedEventArgs e)
-    {
-        if (e.Name.IsEquivalentTo(this.dataPath))
-        {
-            e.LoadFrom(static () => new Dictionary<string, IntegrationData>(), AssetLoadPriority.Exclusive);
-        }
-    }
+    private Dictionary<string, IntegrationData> Data =>
+        this.RequireAsset<Dictionary<string, IntegrationData>>($"{Mod.Id}/Data");
 
     private void OnConditionsApiReady(ConditionsApiReadyEventArgs e)
     {
-        var data = this.gameContentHelper.Load<Dictionary<string, IntegrationData>>(this.dataPath);
-        foreach (var (id, integrationData) in data)
+        foreach (var (id, integrationData) in this.Data)
         {
             this.integrationManager.AddIcon(id, integrationData);
-        }
-    }
-
-    private void OnGameLaunched(GameLaunchedEventArgs e)
-    {
-        var icons = new[]
-        {
-            InternalIcon.StardewAquarium,
-            InternalIcon.GenericModConfigMenu,
-            InternalIcon.AlwaysScrollMap,
-            InternalIcon.ToDew,
-            InternalIcon.SpecialOrders,
-            InternalIcon.DailyQuests,
-            InternalIcon.ToggleCollision,
-        };
-
-        for (var index = 0; index < icons.Length; index++)
-        {
-            this.iconRegistry.AddIcon(
-                icons[index].ToStringFast(),
-                $"{Mod.Id}/Icons",
-                new Rectangle(16 * (index % 5), 16 * (int)(index / 5f), 16, 16));
         }
     }
 }

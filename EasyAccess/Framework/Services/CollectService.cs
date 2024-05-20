@@ -1,36 +1,37 @@
 namespace StardewMods.EasyAccess.Framework.Services;
 
-using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
+using StardewMods.EasyAccess.Framework.Enums;
 using StardewMods.EasyAccess.Framework.Interfaces;
 
 /// <summary>Handles collecting items.</summary>
 internal sealed class CollectService : BaseService<CollectService>
 {
-    private readonly AssetHandler assetHandler;
+    private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly IModConfig modConfig;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="CollectService" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public CollectService(
-        AssetHandler assetHandler,
         IEventManager eventManager,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         IModConfig modConfig,
         ToolbarIconsIntegration toolbarIconsIntegration)
     {
         // Init
-        this.assetHandler = assetHandler;
+        this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.modConfig = modConfig;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
@@ -154,9 +155,7 @@ internal sealed class CollectService : BaseService<CollectService>
         }
 
         this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.UniqueId,
-            this.assetHandler.Icon.Name.BaseName,
-            new Rectangle(0, 0, 16, 16),
+            this.iconRegistry.RequireIcon(InternalIcon.Collect),
             I18n.Button_CollectOutputs_Name());
 
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
@@ -164,7 +163,7 @@ internal sealed class CollectService : BaseService<CollectService>
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (e.Id == this.UniqueId)
+        if (e.Id == this.iconRegistry.RequireIcon(InternalIcon.Collect).Id)
         {
             this.CollectItems();
         }

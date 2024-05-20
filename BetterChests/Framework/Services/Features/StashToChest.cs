@@ -74,9 +74,10 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
             return;
         }
 
-        this.toolbarIconsIntegration.Api.AddToolbarIcon(this.Id, icon.Path, icon.Area, I18n.Button_StashToChest_Name());
-
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(
+            this.iconRegistry.RequireIcon(InternalIcon.Stash),
+            I18n.Button_StashToChest_Name());
     }
 
     /// <inheritdoc />
@@ -93,8 +94,8 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
             return;
         }
 
-        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.Id);
         this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
+        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.RequireIcon(InternalIcon.Stash));
     }
 
     private void LogTransfer(IStorageContainer from, IStorageContainer to, Dictionary<string, int> amounts)
@@ -174,7 +175,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (e.Id == this.Id)
+        if (e.Id == this.iconRegistry.RequireIcon(InternalIcon.Stash).Id)
         {
             this.StashIntoAll();
         }

@@ -2,7 +2,6 @@ namespace StardewMods.FauxCore.Framework.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Interfaces;
 using StardewMods.FauxCore.Framework.Models;
@@ -14,10 +13,17 @@ internal sealed class IconRegistry : IIconRegistry
     private static readonly Dictionary<string, Icon> Icons = new();
 
     private readonly IAssetHandler assetHandler;
+    private readonly Dictionary<string, string> ids = [];
+    private readonly IManifest manifest;
 
     /// <summary>Initializes a new instance of the <see cref="IconRegistry" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
-    public IconRegistry(IAssetHandler assetHandler) => this.assetHandler = assetHandler;
+    /// <param name="manifest">Dependency for accessing mod manifest.</param>
+    public IconRegistry(IAssetHandler assetHandler, IManifest manifest)
+    {
+        this.assetHandler = assetHandler;
+        this.manifest = manifest;
+    }
 
     /// <summary>Adds an icon to the icon registry.</summary>
     /// <param name="id">The unique identifier of the icon.</param>
@@ -40,11 +46,13 @@ internal sealed class IconRegistry : IIconRegistry
     /// <inheritdoc />
     public void AddIcon(string id, string path, Rectangle area)
     {
-        if (!IconRegistry.Icons.TryGetValue($"{Mod.Id}/{id}", out var icon))
+        var uniqueId = $"{this.manifest.UniqueID}/{id}";
+        if (!IconRegistry.Icons.TryGetValue(uniqueId, out var icon))
         {
-            icon = this.Add($"{Mod.Id}/{id}", path, area);
+            icon = this.Add(uniqueId, path, area);
         }
 
+        this.ids.TryAdd(id, uniqueId);
         icon.Path = path;
         icon.Area = area;
     }
@@ -70,7 +78,7 @@ internal sealed class IconRegistry : IIconRegistry
     public bool TryGetIcon(string id, [NotNullWhen(true)] out IIcon? icon)
     {
         icon = null;
-        if (IconRegistry.Icons.TryGetValue($"{Mod.Id}/{id}", out var value)
+        if ((this.ids.TryGetValue(id, out var uniqueId) && IconRegistry.Icons.TryGetValue(uniqueId, out var value))
             || IconRegistry.Icons.TryGetValue(id, out value))
         {
             icon = value;

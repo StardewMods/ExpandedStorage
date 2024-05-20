@@ -13,6 +13,7 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
 {
     private readonly BaseEventManager eventManager;
     private readonly IIconRegistry iconRegistry;
+    private readonly Dictionary<string, string> ids = [];
     private readonly IModInfo modInfo;
     private readonly string prefix;
     private readonly ToolbarManager toolbarManager;
@@ -60,18 +61,33 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
     /// <inheritdoc />
     public void AddToolbarIcon(string id, string texturePath, Rectangle? sourceRect, string? hoverText)
     {
-        this.iconRegistry.AddIcon($"{this.prefix}{id}", texturePath, sourceRect ?? new Rectangle(0, 0, 16, 16));
-        this.toolbarManager.AddIcon($"{this.prefix}{id}", hoverText);
+        var uniqueId = $"{this.prefix}{id}";
+        this.ids.Add(uniqueId, id);
+        this.iconRegistry.AddIcon(uniqueId, texturePath, sourceRect ?? new Rectangle(0, 0, 16, 16));
+        this.toolbarManager.AddIcon(uniqueId, hoverText);
     }
 
     /// <inheritdoc />
-    public void AddToolbarIcon(IIcon icon, string? hoverText) => this.toolbarManager.AddIcon(icon.Id, hoverText);
+    public void AddToolbarIcon(IIcon icon, string? hoverText)
+    {
+        this.ids.Add(icon.Id, icon.Id);
+        this.toolbarManager.AddIcon(icon.Id, hoverText);
+    }
 
     /// <inheritdoc />
-    public void RemoveToolbarIcon(string id) => this.toolbarManager.RemoveIcon($"{this.prefix}{id}");
+    public void RemoveToolbarIcon(string id)
+    {
+        var uniqueId = $"{this.prefix}{id}";
+        this.ids.Remove(uniqueId);
+        this.toolbarManager.RemoveIcon(uniqueId);
+    }
 
     /// <inheritdoc />
-    public void RemoveToolbarIcon(IIcon icon) => this.toolbarManager.RemoveIcon(icon.Id);
+    public void RemoveToolbarIcon(IIcon icon)
+    {
+        this.ids.Remove(icon.Id);
+        this.toolbarManager.RemoveIcon(icon.Id);
+    }
 
     /// <inheritdoc />
     public void Subscribe(Action<IIconPressedEventArgs> handler) => this.eventManager.Subscribe(handler);
@@ -81,12 +97,11 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (!e.Id.StartsWith(this.prefix, StringComparison.OrdinalIgnoreCase))
+        if (!this.ids.TryGetValue(e.Id, out var id))
         {
             return;
         }
 
-        var id = e.Id[this.prefix.Length..];
         this.eventManager.Publish<IIconPressedEventArgs, IconPressedEventArgs>(new IconPressedEventArgs(id, e.Button));
 
         if (this.toolbarIconPressed is null)

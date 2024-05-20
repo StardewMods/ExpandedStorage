@@ -4,115 +4,98 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models.Assets;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.GarbageDay.Framework.Interfaces;
 using StardewMods.GarbageDay.Framework.Models;
 using StardewValley.GameData.BigCraftables;
 using xTile;
 using xTile.Dimensions;
+using Rectangle = Microsoft.Xna.Framework.Rectangle;
 
 /// <summary>Handles modification and manipulation of assets in the game.</summary>
-internal sealed class AssetHandler
+internal sealed class AssetHandler : BaseAssetHandler
 {
-    /// <summary>The game path where the big craftable data is stored.</summary>
-    private const string BigCraftablePath = "Data/BigCraftables";
-
-    /// <summary>The game path where the garbage can data is stored.</summary>
-    private const string GarbageCanPath = "Data/GarbageCans";
-
     private readonly Dictionary<string, FoundGarbageCan> foundGarbageCans;
-
-    private readonly string itemId;
     private readonly IModConfig modConfig;
-    private readonly IModContentHelper modContentHelper;
-    private readonly string qualifiedItemId;
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="foundGarbageCans">The discovered garbage cans.</param>
+    /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     public AssetHandler(
         IEventManager eventManager,
         Dictionary<string, FoundGarbageCan> foundGarbageCans,
+        IGameContentHelper gameContentHelper,
+        IIconRegistry iconRegistry,
         IModConfig modConfig,
         IModContentHelper modContentHelper)
+        : base(eventManager, gameContentHelper, modContentHelper)
     {
         // Init
-        this.IconTexturePath = Mod.Id + "/Icons";
-        this.itemId = Mod.Id + "/GarbageCan";
-        this.qualifiedItemId = "(BC)" + this.itemId;
         this.foundGarbageCans = foundGarbageCans;
         this.modConfig = modConfig;
-        this.modContentHelper = modContentHelper;
+
+        this.AddAsset($"{Mod.Id}/Icons", new ModAsset<Texture2D>("assets/icons.png", AssetLoadPriority.Exclusive));
+        this.AddAsset("Data/BigCraftables", new AssetEditor(this.LoadGarbageCan, AssetEditPriority.Default));
+
+        iconRegistry.AddIcon("GarbageCan", $"{Mod.Id}/Icons", new Rectangle(0, 0, 16, 16));
 
         // Events
         eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
         eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
     }
 
-    /// <summary>Gets a new Garbage Can instance.</summary>
-    public SObject GarbageCan => (SObject)ItemRegistry.Create(this.qualifiedItemId);
+    private void LoadGarbageCan(IAssetData asset)
+    {
+        const string BetterChestsPrefix = "furyx639.BetterChests/";
+        const string ExpandedStoragePrefix = "furyx639.ExpandedStorage/";
 
-    /// <summary>Gets the icon texture path.</summary>
-    public string IconTexturePath { get; }
+        var data = asset.AsDictionary<string, BigCraftableData>().Data;
+        var bigCraftableData = new BigCraftableData
+        {
+            Name = "Garbage Can",
+            DisplayName = I18n.GarbageCan_Name(),
+            Description = I18n.GarbageCan_Description(),
+            Fragility = 2,
+            IsLamp = false,
+            Texture = this.ModContentHelper.GetInternalAssetName("assets/GarbageCan.png").Name,
+            CustomFields = new Dictionary<string, string>
+            {
+                { $"{BetterChestsPrefix}AutoOrganize", "Disabled" },
+                { $"{BetterChestsPrefix}CarryChest", "Disabled" },
+                { $"{BetterChestsPrefix}CategorizeChest", "Disabled" },
+                { $"{BetterChestsPrefix}CollectItems", "Disabled" },
+                { $"{BetterChestsPrefix}ConfigureChest", "Disabled" },
+                { $"{BetterChestsPrefix}CookFromChest", "Disabled" },
+                { $"{BetterChestsPrefix}CraftFromChest", "Disabled" },
+                { $"{BetterChestsPrefix}HslColorPicker", "Disabled" },
+                { $"{BetterChestsPrefix}InventoryTabs", "Disabled" },
+                { $"{BetterChestsPrefix}OpenHeldChest", "Disabled" },
+                { $"{BetterChestsPrefix}ResizeChest", "Small" },
+                { $"{BetterChestsPrefix}ResizeChestCapacity", "9" },
+                { $"{BetterChestsPrefix}SearchItems", "Disabled" },
+                { $"{BetterChestsPrefix}StashToChest", "Disabled" },
+                { $"{BetterChestsPrefix}StorageInfo", "Disabled" },
+                { $"{ExpandedStoragePrefix}Enabled", "true" },
+                { $"{ExpandedStoragePrefix}Frames", "3" },
+                { $"{ExpandedStoragePrefix}CloseNearbySound", "trashcanlid" },
+                { $"{ExpandedStoragePrefix}OpenNearby", "true" },
+                { $"{ExpandedStoragePrefix}OpenNearbySound", "trashcanlid" },
+                { $"{ExpandedStoragePrefix}OpenSound", "trashcan" },
+                { $"{ExpandedStoragePrefix}PlayerColor", "true" },
+            },
+        };
+
+        data.Add($"{Mod.Id}/GarbageCan", bigCraftableData);
+    }
 
     private void OnAssetRequested(AssetRequestedEventArgs e)
     {
-        if (e.Name.IsEquivalentTo(this.IconTexturePath))
-        {
-            e.LoadFromModFile<Texture2D>("assets/icons.png", AssetLoadPriority.Exclusive);
-            return;
-        }
-
-        // Load Garbage Can Object
-        if (e.NameWithoutLocale.IsEquivalentTo(AssetHandler.BigCraftablePath))
-        {
-            e.Edit(
-                asset =>
-                {
-                    var data = asset.AsDictionary<string, BigCraftableData>().Data;
-                    var bigCraftableData = new BigCraftableData
-                    {
-                        Name = "Garbage Can",
-                        DisplayName = I18n.GarbageCan_Name(),
-                        Description = I18n.GarbageCan_Description(),
-                        Fragility = 2,
-                        IsLamp = false,
-                        Texture = this.modContentHelper.GetInternalAssetName("assets/GarbageCan.png").Name,
-                        CustomFields = new Dictionary<string, string>
-                        {
-                            { "furyx639.ExpandedStorage/Enabled", "true" },
-                            { "furyx639.ExpandedStorage/Frames", "3" },
-                            { "furyx639.ExpandedStorage/CloseNearbySound", "trashcanlid" },
-                            { "furyx639.ExpandedStorage/OpenNearby", "true" },
-                            { "furyx639.ExpandedStorage/OpenNearbySound", "trashcanlid" },
-                            { "furyx639.ExpandedStorage/OpenSound", "trashcan" },
-                            { "furyx639.ExpandedStorage/PlayerColor", "true" },
-                            { "furyx639.BetterChests/AutoOrganize", "Disabled" },
-                            { "furyx639.BetterChests/CarryChest", "Disabled" },
-                            { "furyx639.BetterChests/CategorizeChest", "Disabled" },
-                            { "furyx639.BetterChests/CollectItems", "Disabled" },
-                            { "furyx639.BetterChests/ConfigureChest", "Disabled" },
-                            { "furyx639.BetterChests/CookFromChest", "Disabled" },
-                            { "furyx639.BetterChests/CraftFromChest", "Disabled" },
-                            { "furyx639.BetterChests/HslColorPicker", "Disabled" },
-                            { "furyx639.BetterChests/InventoryTabs", "Disabled" },
-                            { "furyx639.BetterChests/OpenHeldChest", "Disabled" },
-                            { "furyx639.BetterChests/ResizeChest", "Small" },
-                            { "furyx639.BetterChests/ResizeChestCapacity", "9" },
-                            { "furyx639.BetterChests/SearchItems", "Disabled" },
-                            { "furyx639.BetterChests/StashToChest", "Disabled" },
-                            { "furyx639.BetterChests/StorageInfo", "Disabled" },
-                        },
-                    };
-
-                    data.Add(this.itemId, bigCraftableData);
-                });
-
-            return;
-        }
-
         if (e.DataType != typeof(Map))
         {
             return;
@@ -166,7 +149,7 @@ internal sealed class AssetHandler
 
     private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
     {
-        if (e.Names.Any(assetName => assetName.IsEquivalentTo(AssetHandler.GarbageCanPath)))
+        if (e.Names.Any(assetName => assetName.IsEquivalentTo("Data/GarbageCans")))
         {
             this.foundGarbageCans.Clear();
         }
@@ -184,7 +167,7 @@ internal sealed class AssetHandler
             return false;
         }
 
-        if (!this.modConfig.OnByDefault && garbageCanData.CustomFields?.GetBool(Mod.Id + "/Enabled") != true)
+        if (!this.modConfig.OnByDefault && garbageCanData.CustomFields?.GetBool($"{Mod.Id}/Enabled") != true)
         {
             return false;
         }

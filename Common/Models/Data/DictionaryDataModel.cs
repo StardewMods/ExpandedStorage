@@ -2,6 +2,7 @@ namespace StardewMods.Common.Models.Data;
 
 using System.Globalization;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models.Cache;
 
 internal abstract class DictionaryDataModel
 {
@@ -105,23 +106,5 @@ internal abstract class DictionaryDataModel
         var stringValue = serializer(value);
         this.cachedValues[id] = new CachedValue<TValue>(stringValue, value);
         this.dictionaryModel.SetValue(key, stringValue);
-    }
-
-    private readonly struct CachedValue<T> : ICachedValue
-    {
-        public CachedValue(string originalValue, T cachedValue)
-        {
-            this.OriginalValue = originalValue;
-            this.Value = cachedValue;
-        }
-
-        public string OriginalValue { get; }
-
-        public T Value { get; }
-    }
-
-    private interface ICachedValue
-    {
-        string OriginalValue { get; }
     }
 }

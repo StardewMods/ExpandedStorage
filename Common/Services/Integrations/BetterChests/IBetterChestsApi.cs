@@ -7,7 +7,7 @@ using StardewValley.Menus;
 public interface IBetterChestsApi
 {
     /// <summary>Adds config options for the storage type.</summary>
-    /// <param name="manifest">The mod manifest.</param>
+    /// <param name="manifest">Dependency for accessing mod manifest.</param>
     /// <param name="pageId">The page id if a new page should be added, or null.</param>
     /// <param name="getTitle">A function to return the page title, or null.</param>
     /// <param name="options">The options to configure.</param>

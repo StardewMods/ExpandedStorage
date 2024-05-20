@@ -207,10 +207,9 @@ internal sealed class FauxCoreIntegration
 
         this.initialized = true;
         this.Api.Monitor = this.monitor;
-
-        while (this.deferred.TryDequeue(out var delayedPatch))
+        while (this.deferred.TryDequeue(out var deferredAction))
         {
-            delayedPatch.Invoke();
+            deferredAction.Invoke();
         }
     }
 }

@@ -39,7 +39,8 @@ public sealed class FauxCoreApi : IFauxCoreApi
     public IExpressionHandler ExpressionHandler { get; }
 
     /// <inheritdoc />
-    public IIconRegistry IconRegistry => this.iconRegistry ??= new IconRegistry(this.assetHandler);
+    public IIconRegistry IconRegistry =>
+        this.iconRegistry ??= new IconRegistry(this.assetHandler, this.modInfo.Manifest);
 
     /// <inheritdoc />
     public IPatchManager PatchManager => this.patchManager ??= new PatchManager();

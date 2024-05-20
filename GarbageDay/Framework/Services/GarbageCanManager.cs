@@ -6,6 +6,7 @@ using StardewModdingAPI.Utilities;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.GarbageDay.Framework.Interfaces;
 using StardewMods.GarbageDay.Framework.Models;
@@ -16,37 +17,37 @@ using StardewValley.Objects;
 /// <summary>Represents a manager for managing garbage cans in a game.</summary>
 internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
 {
-    private readonly AssetHandler assetHandler;
     private readonly PerScreen<NPC?> currentNpc = new();
     private readonly Dictionary<string, FoundGarbageCan> foundGarbageCans;
     private readonly Dictionary<string, GameLocation?> foundLocations = [];
     private readonly PerScreen<GarbageCan?> garbageCanOpened = new();
     private readonly Dictionary<string, GarbageCan> garbageCans = [];
+    private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly IModConfig modConfig;
     private readonly IReflectedField<Multiplayer> multiplayer;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="GarbageCanManager" /> class.</summary>
-    /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="foundGarbageCans">The discovered garbage cans.</param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public GarbageCanManager(
-        AssetHandler assetHandler,
         IEventManager eventManager,
         Dictionary<string, FoundGarbageCan> foundGarbageCans,
+        IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         IModConfig modConfig,
         IReflectionHelper reflectionHelper,
         ToolbarIconsIntegration toolbarIconsIntegration)
     {
         // Init
-        this.assetHandler = assetHandler;
         this.foundGarbageCans = foundGarbageCans;
+        this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.modConfig = modConfig;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
@@ -171,9 +172,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
         }
 
         this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.Id,
-            this.assetHandler.IconTexturePath,
-            new Rectangle(0, 0, 16, 16),
+            this.iconRegistry.RequireIcon("GarbageCan"),
             I18n.Button_GarbageFill_Name());
 
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
@@ -181,7 +180,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (e.Id != this.Id)
+        if (e.Id != this.iconRegistry.RequireIcon("GarbageCan").Id)
         {
             return;
         }
@@ -239,7 +238,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
         }
 
         // Attempt to place item
-        var item = this.assetHandler.GarbageCan;
+        var item = (SObject)ItemRegistry.Create($"(BC){Mod.Id}/GarbageCan");
         Log.Trace(
             "Placing Garbage Can {0} at {1} ({2})",
             foundGarbageCan.WhichCan,

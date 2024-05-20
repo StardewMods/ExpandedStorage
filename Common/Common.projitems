@@ -18,6 +18,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Helpers\ReverseComparer.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IApiFactory.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\ICachedAsset.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\ICachedValue.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\ICustomComponent.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IDictionaryModel.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IEventManager.cs"/>
@@ -32,6 +33,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\Cache\BaseCachedObject.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Cache\BaseCacheTable.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Cache\CachedObject.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Cache\CachedValue.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Cache\CacheTable.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Data\DictionaryModel.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Data\DictionaryDataModel.cs"/>

@@ -65,81 +65,84 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
     /// <inheritdoc />
     protected override void Activate()
     {
-        // Events
-        this.Events.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
-
-        // Integrations
-        if (this.betterCraftingIntegration.IsLoaded)
-        {
-            this.betterCraftingIntegration.Api.RegisterInventoryProvider(
-                typeof(BuildingContainer),
-                this.betterCraftingInventoryProvider);
-
-            this.betterCraftingIntegration.Api.RegisterInventoryProvider(
-                typeof(ChestContainer),
-                this.betterCraftingInventoryProvider);
-
-            this.betterCraftingIntegration.Api.RegisterInventoryProvider(
-                typeof(FarmerContainer),
-                this.betterCraftingInventoryProvider);
-
-            this.betterCraftingIntegration.Api.RegisterInventoryProvider(
-                typeof(FridgeContainer),
-                this.betterCraftingInventoryProvider);
-
-            this.betterCraftingIntegration.Api.RegisterInventoryProvider(
-                typeof(FurnitureContainer),
-                this.betterCraftingInventoryProvider);
-
-            this.betterCraftingIntegration.Api.RegisterInventoryProvider(
-                typeof(NpcContainer),
-                this.betterCraftingInventoryProvider);
-
-            this.betterCraftingIntegration.Api.RegisterInventoryProvider(
-                typeof(ObjectContainer),
-                this.betterCraftingInventoryProvider);
-
-            this.betterCraftingIntegration.Api.MenuPopulateContainers += this.OnMenuPopulateContainers;
-        }
-
-        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon(InternalIcon.Craft, out var icon))
+        if (!this.betterCraftingIntegration.IsLoaded)
         {
             return;
         }
 
-        this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.Id,
-            icon.Path,
-            icon.Area,
-            I18n.Button_CraftFromChest_Name());
+        // Events
+        this.Events.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
+
+        this.betterCraftingIntegration.Api.RegisterInventoryProvider(
+            typeof(BuildingContainer),
+            this.betterCraftingInventoryProvider);
+
+        this.betterCraftingIntegration.Api.RegisterInventoryProvider(
+            typeof(ChestContainer),
+            this.betterCraftingInventoryProvider);
+
+        this.betterCraftingIntegration.Api.RegisterInventoryProvider(
+            typeof(FarmerContainer),
+            this.betterCraftingInventoryProvider);
+
+        this.betterCraftingIntegration.Api.RegisterInventoryProvider(
+            typeof(FridgeContainer),
+            this.betterCraftingInventoryProvider);
+
+        this.betterCraftingIntegration.Api.RegisterInventoryProvider(
+            typeof(FurnitureContainer),
+            this.betterCraftingInventoryProvider);
+
+        this.betterCraftingIntegration.Api.RegisterInventoryProvider(
+            typeof(NpcContainer),
+            this.betterCraftingInventoryProvider);
+
+        this.betterCraftingIntegration.Api.RegisterInventoryProvider(
+            typeof(ObjectContainer),
+            this.betterCraftingInventoryProvider);
+
+        this.betterCraftingIntegration.Api.MenuPopulateContainers += this.OnMenuPopulateContainers;
+
+        // Integrations
+        if (!this.toolbarIconsIntegration.IsLoaded)
+        {
+            return;
+        }
 
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(
+            this.iconRegistry.RequireIcon(InternalIcon.Craft),
+            I18n.Button_CraftFromChest_Name());
     }
 
     /// <inheritdoc />
     protected override void Deactivate()
     {
+        if (!this.betterCraftingIntegration.IsLoaded)
+        {
+            return;
+        }
+
         // Events
         this.Events.Unsubscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
 
         // Integrations
-        if (this.betterCraftingIntegration.IsLoaded)
+        this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(BuildingContainer));
+        this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(ChestContainer));
+        this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(FarmerContainer));
+        this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(FridgeContainer));
+        this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(FurnitureContainer));
+        this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(NpcContainer));
+        this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(ObjectContainer));
+        this.betterCraftingIntegration.Api.MenuPopulateContainers -= this.OnMenuPopulateContainers;
+
+        if (!this.toolbarIconsIntegration.IsLoaded)
         {
-            this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(BuildingContainer));
-            this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(ChestContainer));
-            this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(FarmerContainer));
-            this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(FridgeContainer));
-            this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(FurnitureContainer));
-            this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(NpcContainer));
-            this.betterCraftingIntegration.Api.UnregisterInventoryProvider(typeof(ObjectContainer));
-            this.betterCraftingIntegration.Api.MenuPopulateContainers -= this.OnMenuPopulateContainers;
+            return;
         }
 
-        if (this.toolbarIconsIntegration.IsLoaded)
-        {
-            this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.Id);
-            this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
-        }
+        this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
+        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.RequireIcon(InternalIcon.Craft));
     }
 
     private static bool CookingPredicate(IStorageContainer container) =>
@@ -190,7 +193,7 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (e.Id == this.Id)
+        if (e.Id == this.iconRegistry.RequireIcon(InternalIcon.Craft).Id)
         {
             this.betterCraftingIntegration.Api!.OpenCraftingMenu(
                 false,

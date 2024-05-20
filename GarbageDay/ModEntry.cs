@@ -24,6 +24,7 @@ public sealed class ModEntry : Mod
         this.Container.RegisterSingleton<FauxCoreIntegration>();
         this.Container.RegisterSingleton<GarbageCanManager>();
         this.Container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
+        this.Container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
         this.Container.RegisterSingleton<Log>();
         this.Container.RegisterSingleton<ToolbarIconsIntegration>();
     }
