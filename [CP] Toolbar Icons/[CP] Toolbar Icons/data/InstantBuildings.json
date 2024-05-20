@@ -1,0 +1,36 @@
+{
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "furyx639.ToolbarIcons/Data",
+      "Entries": {
+        "furyx639.ToolbarIconsCP/InstantBuildings.Build": {
+          "ModId": "BitwiseJonMods.InstantBuildings",
+          "Type": "Method",
+          "ExtraData": "HandleInstantBuildButtonClick",
+          "HoverText": "{{i18n: button.InstantBuildings.Build}}"
+        },
+        "furyx639.ToolbarIconsCP/InstantBuildings.Upgrade": {
+          "ModId": "BitwiseJonMods.InstantBuildings",
+          "Type": "Method",
+          "ExtraData": "HandleInstantUpgradeButtonClick",
+          "HoverText": "{{i18n: button.InstantBuildings.Upgrade}}"
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "furyx639.FauxCore/Icons",
+      "Entries": {
+        "furyx639.ToolbarIconsCP/InstantBuildings.Build": {
+          "Area": { "X": 16, "Y": 16, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        },
+        "furyx639.ToolbarIconsCP/InstantBuildings.Upgrade": {
+          "Area": { "X": 32, "Y": 16, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        }
+      }
+    }
+  ]
+}

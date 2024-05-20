@@ -2,7 +2,6 @@
 
 using HarmonyLib;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -13,7 +12,7 @@ using StardewMods.ExpandedStorage.Framework.Services;
 using StardewMods.ExpandedStorage.Framework.Services.Factory;
 
 /// <inheritdoc />
-public sealed class ModEntry : Mod
+public sealed class ModEntry : Mod.Mod
 {
     /// <inheritdoc />
     protected override void Init()
@@ -23,10 +22,10 @@ public sealed class ModEntry : Mod
         this.Container.RegisterSingleton<BetterChestsIntegration>();
         this.Container.RegisterSingleton<IModConfig, ConfigManager>();
         this.Container.RegisterSingleton<ContentPatcherIntegration>();
-        this.Container.RegisterSingleton<IEventManager, EventManager>();
+        this.Container.RegisterSingleton<IEventManager, Mod.EventManager>();
         this.Container.RegisterSingleton<FauxCoreIntegration>();
         this.Container.RegisterSingleton<GenericModConfigMenuIntegration>();
-        this.Container.RegisterSingleton<Log>();
+        this.Container.RegisterSingleton<Mod.Log>();
         this.Container.RegisterSingleton<ModPatches>();
         this.Container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
         this.Container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();

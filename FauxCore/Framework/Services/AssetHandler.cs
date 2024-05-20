@@ -5,7 +5,6 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Assets;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Interfaces;
@@ -13,7 +12,7 @@ using StardewMods.FauxCore.Framework.Models;
 using StardewValley.Menus;
 
 /// <inheritdoc cref="StardewMods.FauxCore.Framework.Interfaces.IAssetHandler" />
-internal sealed class AssetHandler : BaseAssetHandler, IAssetHandler
+internal sealed class AssetHandler : Mod.BaseAssetHandler, IAssetHandler
 {
     private static readonly Dictionary<VanillaIcon, Rectangle> VanillaIcons = new()
     {
@@ -63,15 +62,15 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandler
         : base(eventManager, gameContentHelper, modContentHelper)
     {
         this.themeHelper = themeHelper;
-        this.iconRegistry = new IconRegistry(this, Mod.Manifest);
+        this.iconRegistry = new IconRegistry(this, Mod.Mod.Manifest);
 
         this.AddAsset(
-            $"{Mod.Id}/Icons",
+            $"{Mod.Mod.Id}/Icons",
             new ModAsset<Dictionary<string, IconData>>(
-                () => new Dictionary<string, IconData>(),
+                static () => new Dictionary<string, IconData>(StringComparer.OrdinalIgnoreCase),
                 AssetLoadPriority.Exclusive));
 
-        themeHelper.AddAsset(Mod.Id + "/UI", modContentHelper.Load<IRawTextureData>("assets/ui.png"));
+        themeHelper.AddAsset(Mod.Mod.Id + "/UI", modContentHelper.Load<IRawTextureData>("assets/ui.png"));
 
         foreach (var (key, area) in AssetHandler.VanillaIcons)
         {
@@ -86,7 +85,7 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandler
     /// <inheritdoc />
     public Texture2D CreateButtonTexture(IIcon icon)
     {
-        if (this.cachedTextures.TryGetValue($"{Mod.Id}/Buttons/{icon.Id}", out var texture))
+        if (this.cachedTextures.TryGetValue($"{Mod.Mod.Id}/Buttons/{icon.Id}", out var texture))
         {
             return texture;
         }
@@ -98,7 +97,7 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandler
         }
 
         // Get button texture
-        if (!this.themeHelper.TryGetRawTextureData(Mod.Id + "/UI", out var baseTexture))
+        if (!this.themeHelper.TryGetRawTextureData(Mod.Mod.Id + "/UI", out var baseTexture))
         {
             throw new InvalidOperationException("The ui texture is missing.");
         }
@@ -142,7 +141,7 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandler
         // Create texture
         texture = new Texture2D(Game1.spriteBatch.GraphicsDevice, length, length);
         texture.SetData(colors);
-        this.cachedTextures.Add($"{Mod.Id}/Buttons/{icon.Id}", texture);
+        this.cachedTextures.Add($"{Mod.Mod.Id}/Buttons/{icon.Id}", texture);
         return texture;
     }
 
@@ -151,7 +150,7 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandler
 
     private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
     {
-        if (e.Names.Any(name => name.IsEquivalentTo($"{Mod.Id}/Icons")))
+        if (e.Names.Any(name => name.IsEquivalentTo($"{Mod.Mod.Id}/Icons")))
         {
             this.RefreshIcons();
         }
@@ -161,7 +160,7 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandler
 
     private void RefreshIcons()
     {
-        var icons = this.GameContentHelper.Load<Dictionary<string, IconData>>($"{Mod.Id}/Icons");
+        var icons = this.GameContentHelper.Load<Dictionary<string, IconData>>($"{Mod.Mod.Id}/Icons");
         foreach (var (key, icon) in icons)
         {
             this.iconRegistry.Add(key, icon.Path, icon.Area);

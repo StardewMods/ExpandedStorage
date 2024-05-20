@@ -9,7 +9,6 @@ using StardewModdingAPI.Events;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.ExpandedStorage.Framework.Models;
 using StardewMods.ExpandedStorage.Framework.Services.Factory;
@@ -51,7 +50,7 @@ internal sealed class ModPatches
 
         // Patches
         this.patchManager.Add(
-            Mod.Id,
+            Mod.Mod.Id,
             new SavedPatch(
                 AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.checkForAction)),
                 AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_checkForAction_transpiler)),
@@ -496,5 +495,5 @@ internal sealed class ModPatches
         itemGrabMenu.RepositionSideButtons();
     }
 
-    private void OnGameLaunched(GameLaunchedEventArgs e) => this.patchManager.Patch(Mod.Id);
+    private void OnGameLaunched(GameLaunchedEventArgs e) => this.patchManager.Patch(Mod.Mod.Id);
 }

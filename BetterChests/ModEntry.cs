@@ -7,7 +7,6 @@ using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.BetterChests.Framework.Services.Features;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterCrafting;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -15,7 +14,7 @@ using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 
 /// <inheritdoc />
-public sealed class ModEntry : Mod
+public sealed class ModEntry : Mod.Mod
 {
     /// <inheritdoc />
     public override object GetApi(IModInfo mod) => this.Container.GetInstance<ApiFactory>().CreateApi(mod);
@@ -34,13 +33,13 @@ public sealed class ModEntry : Mod
         this.Container.RegisterSingleton<ContainerFactory>();
         this.Container.RegisterSingleton<ContainerHandler>();
         this.Container.RegisterSingleton<ContentPatcherIntegration>();
-        this.Container.RegisterSingleton<IEventManager, EventManager>();
+        this.Container.RegisterSingleton<IEventManager, Mod.EventManager>();
         this.Container.RegisterSingleton<IExpressionHandler, FauxCoreIntegration>();
         this.Container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
         this.Container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.Container.RegisterSingleton<MenuHandler>();
         this.Container.RegisterSingleton<Localized>();
-        this.Container.RegisterSingleton<Log>();
+        this.Container.RegisterSingleton<Mod.Log>();
         this.Container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
         this.Container.RegisterSingleton<ProxyChestFactory>();
         this.Container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();

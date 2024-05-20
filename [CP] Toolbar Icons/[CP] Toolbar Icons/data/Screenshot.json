@@ -1,0 +1,26 @@
+{
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "furyx639.ToolbarIcons/Data",
+      "Entries": {
+        "furyx639.ToolbarIconsCP/Screenshot.Take": {
+          "ModId": "aedenthorn.Screenshot",
+          "Type": "Keybind",
+          "ExtraData": "{{ScreenshotHotkey}}",
+          "HoverText": "{{i18n: button.Screenshot}}"
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "furyx639.FauxCore/Icons",
+      "Entries": {
+        "furyx639.ToolbarIconsCP/Screenshot.Take": {
+          "Area": { "X": 0, "Y": 32, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        }
+      }
+    }
+  ]
+}

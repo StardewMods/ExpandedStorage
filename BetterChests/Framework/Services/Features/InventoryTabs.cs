@@ -6,7 +6,6 @@ using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
@@ -55,7 +54,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
 
     private void OnClicked(object? sender, TabData tabData)
     {
-        Log.Trace("{0}: Switching tab to {1}.", this.Id, tabData.Label);
+        Mod.Log.Trace("{0}: Switching tab to {1}.", this.Id, tabData.Label);
         this.expressionHandler.TryParseExpression(tabData.SearchTerm, out var expression);
         this.Events.Publish(new SearchChangedEventArgs(tabData.SearchTerm, expression));
     }

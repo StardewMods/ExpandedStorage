@@ -1,0 +1,26 @@
+{
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "furyx639.ToolbarIcons/Data",
+      "Entries": {
+        "furyx639.ToolbarIconsCP/EventLookup.Lookup": {
+          "ModId": "shekurika.EventLookup",
+          "Type": "Keybind",
+          "ExtraData": "{{EventLookupHotkey}}",
+          "HoverText": "{{i18n: button.EventLookup}}"
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "furyx639.FauxCore/Icons",
+      "Entries": {
+        "furyx639.ToolbarIconsCP/EventLookup.Lookup": {
+          "Area": { "X": 48, "Y": 0, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        }
+      }
+    }
+  ]
+}

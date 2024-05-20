@@ -1,7 +1,6 @@
 namespace StardewMods.ExpandedStorage.Framework;
 
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
 using StardewMods.ExpandedStorage.Framework.Models;
 using StardewMods.ExpandedStorage.Framework.Services.Factory;
@@ -9,7 +8,7 @@ using StardewMods.ExpandedStorage.Framework.Services.Factory;
 /// <inheritdoc />
 public sealed class ExpandedStorageApi : IExpandedStorageApi
 {
-    private readonly BaseEventManager eventManager;
+    private readonly Mod.BaseEventManager eventManager;
     private readonly IModInfo modInfo;
     private readonly StorageDataFactory storageDataFactory;
 
@@ -22,7 +21,7 @@ public sealed class ExpandedStorageApi : IExpandedStorageApi
         // Init
         this.modInfo = modInfo;
         this.storageDataFactory = storageDataFactory;
-        this.eventManager = new BaseEventManager();
+        this.eventManager = new Mod.BaseEventManager();
 
         // Events
         eventManager.Subscribe<ChestCreatedEventArgs>(this.OnChestCreated);

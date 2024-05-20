@@ -1,7 +1,6 @@
 namespace StardewMods.GarbageDay.Framework.Models;
 
 using Microsoft.Xna.Framework;
-using StardewMods.Common.Services;
 using StardewValley.Inventories;
 using StardewValley.Mods;
 using StardewValley.Objects;
@@ -45,11 +44,11 @@ internal sealed class GarbageCan
             return;
         }
 
-        Log.Trace("Adding loot item to garbage can {0}.", whichCan);
+        Mod.Log.Trace("Adding loot item to garbage can {0}.", whichCan);
 
         if (overrideItem is not null)
         {
-            Log.Trace("Special loot item selected {0}", overrideItem.Name);
+            Mod.Log.Trace("Special loot item selected {0}", overrideItem.Name);
             this.specialItem = overrideItem;
             return;
         }
@@ -63,13 +62,13 @@ internal sealed class GarbageCan
 
         if (selected is null)
         {
-            Log.Trace("No loot item selected");
+            Mod.Log.Trace("No loot item selected");
             return;
         }
 
         if (selected.ItemId == "(O)890")
         {
-            Log.Trace("Special loot item selected {0}", item.Name);
+            Mod.Log.Trace("Special loot item selected {0}", item.Name);
             this.dropQiBeans = true;
             this.specialItem = item;
             return;
@@ -79,13 +78,13 @@ internal sealed class GarbageCan
         this.mega = !this.doubleMega && selected.IsMegaSuccess;
         if (selected.AddToInventoryDirectly)
         {
-            Log.Trace("Special loot item selected {0}", item.Name);
+            Mod.Log.Trace("Special loot item selected {0}", item.Name);
             this.specialItem = item;
             return;
         }
 
         // Add item
-        Log.Trace("Regular loot item selected {0}", item.Name);
+        Mod.Log.Trace("Regular loot item selected {0}", item.Name);
         this.chest.addItem(item);
 
         // Update color

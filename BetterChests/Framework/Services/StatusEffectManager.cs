@@ -2,11 +2,10 @@ namespace StardewMods.BetterChests.Framework.Services;
 
 using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
-using StardewMods.Common.Services;
 using StardewValley.Buffs;
 
 /// <summary>Responsible for adding or removing custom buffs.</summary>
-internal sealed class StatusEffectManager : BaseService<StatusEffectManager>
+internal sealed class StatusEffectManager : Mod.BaseService<StatusEffectManager>
 {
     private readonly IModConfig modConfig;
 
@@ -24,7 +23,7 @@ internal sealed class StatusEffectManager : BaseService<StatusEffectManager>
             return;
         }
 
-        Log.Trace("Adding effect {0}", statusEffect.ToStringFast());
+        Mod.Log.Trace("Adding effect {0}", statusEffect.ToStringFast());
         Game1.player.buffs.Apply(buff);
     }
 
@@ -47,7 +46,7 @@ internal sealed class StatusEffectManager : BaseService<StatusEffectManager>
             return;
         }
 
-        Log.Trace("Removing effect {0}", statusEffect.ToStringFast());
+        Mod.Log.Trace("Removing effect {0}", statusEffect.ToStringFast());
         Game1.player.buffs.Remove(id);
     }
 

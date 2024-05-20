@@ -7,7 +7,6 @@ using StardewModdingAPI.Events;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 using StardewValley.Objects;
@@ -34,7 +33,7 @@ internal sealed class ModPatches
 
         // Patches
         this.patchManager.Add(
-            Mod.Id,
+            Mod.Mod.Id,
             new SavedPatch(
                 AccessTools.DeclaredMethod(
                     typeof(Chest),
@@ -262,5 +261,5 @@ internal sealed class ModPatches
         __result = 9;
     }
 
-    private void OnGameLaunched(GameLaunchedEventArgs e) => this.patchManager.Patch(Mod.Id);
+    private void OnGameLaunched(GameLaunchedEventArgs e) => this.patchManager.Patch(Mod.Mod.Id);
 }

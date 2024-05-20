@@ -16,218 +16,78 @@
   },
   "Changes": [
     {
-      "Action": "Load",
-      "Target": "furyx639.ToolbarIconsCP/Icons",
-      "FromFile": "assets/icons.png"
-    },
-    {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/ChestsAnywhere.OpenMenu": {
-          "ModId": "Pathoschild.ChestsAnywhere",
-          "Type": "Method",
-          "ExtraData": "OpenMenu",
-          "HoverText": "{{i18n: button.ChestsAnywhere}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 0
-        }
-      },
+      "Action": "Include",
+      "FromFile": "data/ChestsAnywhere.json",
       "When": {
         "HasMod": "Pathoschild.ChestsAnywhere"
       }
     },
     {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/DataLayers.Toggle": {
-          "ModId": "Pathoschild.DataLayers",
-          "Type": "Method",
-          "ExtraData": "ToggleLayers",
-          "HoverText": "{{i18n: button.DataLayers}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 1
-        }
-      },
+      "Action": "Include",
+      "FromFile": "data/DataLayers.json",
       "When": {
         "HasMod": "Pathoschild.DataLayers"
       }
     },
     {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/DebugMode.Toggle": {
-          "ModId": "Pathoschild.DebugMode",
-          "Type": "Method",
-          "ExtraData": "ToggleDebugMenu",
-          "HoverText": "{{i18n: button.DebugMode}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 2
-        }
-      },
+      "Action": "Include",
+      "FromFile": "data/DebugMode.json",
       "When": {
         "HasMod": "Pathoschild.DebugMode"
       }
     },
     {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/EventLookup.Lookup": {
-          "ModId": "shekurika.EventLookup",
-          "Type": "Keybind",
-          "ExtraData": "{{EventLookupHotkey}}",
-          "HoverText": "{{i18n: button.EventLookup}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 3
-        }
-      },
+      "Action": "Include",
+      "FromFile": "data/EventLookup.json",
       "When": {
         "HasMod": "shekurika.EventLookup"
       }
     },
     {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/FashionSense.ShowMenu": {
-          "ModId": "PeacefulEnd.FashionSense",
-          "Type": "Menu",
-          "ExtraData": "FashionSense.Framework.UI.HandMirrorMenu, FashionSense",
-          "HoverText": "{{i18n: button.FashionSense}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 4
-        }
-      },
+      "Action": "Include",
+      "FromFile": "data/FashionSense.json",
       "When": {
         "HasMod": "PeacefulEnd.FashionSense"
       }
     },
     {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/HorseFluteAnywhere.SummonHorse": {
-          "ModId": "Pathoschild.HorseFluteAnywhere",
-          "Type": "Method",
-          "ExtraData": "TryUseHorseFlute",
-          "HoverText": "{{i18n: button.HorseFluteAnywhere}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 5
-        }
-      },
+      "Action": "Include",
+      "FromFile": "data/HorseFluteAnywhere.json",
       "When": {
         "HasMod": "Pathoschild.HorseFluteAnywhere"
       }
     },
     {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/InstantBuildings.Build": {
-          "ModId": "BitwiseJonMods.InstantBuildings",
-          "Type": "Method",
-          "ExtraData": "HandleInstantBuildButtonClick",
-          "HoverText": "{{i18n: button.InstantBuildings.Build}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 6
-        },
-        "furyx639.ToolbarIconsCP/InstantBuildings.Upgrade": {
-          "ModId": "BitwiseJonMods.InstantBuildings",
-          "Type": "Method",
-          "ExtraData": "HandleInstantUpgradeButtonClick",
-          "HoverText": "{{i18n: button.InstantBuildings.Upgrade}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 7
-        }
-      },
+      "Action": "Include",
+      "FromFile": "data/InstantBuildings.json",
       "When": {
         "HasMod": "BitwiseJonMods.InstantBuildings"
       }
     },
     {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/LookupAnything.Search": {
-          "ModId": "Pathoschild.LookupAnything",
-          "Type": "Method",
-          "ExtraData": "TryToggleSearch",
-          "HoverText": "{{i18n: button.LookupAnything}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 8
-        }
-      },
+      "Action": "Include",
+      "FromFile": "data/LookupAnything.json",
       "When": {
         "HasMod": "Pathoschild.LookupAnything"
       }
     },
     {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/Magic.ShowMenu": {
-          "ModId": "spacechase0.Magic",
-          "Type": "Menu",
-          "ExtraData": "Magic.Framework.Game.Interface.MagicMenu, Magic",
-          "HoverText": "{{i18n: button.Magic}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 9
-        }
-      },
-      "When": {
-        "HasMod": "spacechase0.Magic"
-      }
-    },
-    {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/ResetTerrainFeatures.Reset": {
-          "ModId": "MabelSyrup.ResetTerrainFeatures",
-          "Type": "Keybind",
-          "ExtraData": "{{ResetTerrainFeaturesHotkey}}",
-          "HoverText": "{{i18n: button.ResetTerrainFeatures}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 10
-        }
-      },
+      "Action": "Include",
+      "FromFile": "data/ResetTerrainFeatures.json",
       "When": {
         "HasMod": "MabelSyrup.ResetTerrainFeatures"
       }
     },
     {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/Screenshot.Take": {
-          "ModId": "aedenthorn.Screenshot",
-          "Type": "Keybind",
-          "ExtraData": "{{ScreenshotHotkey}}",
-          "HoverText": "{{i18n: button.Screenshot}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 11
-        }
-      },
+      "Action": "Include",
+      "FromFile": "data/Screenshot.json",
       "When": {
         "HasMod": "aedenthorn.Screenshot"
       }
     },
     {
-      "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
-      "Entries": {
-        "furyx639.ToolbarIconsCP/TractorMod.SummonTractor": {
-          "ModId": "Pathoschild.TractorMod",
-          "Type": "Method",
-          "ExtraData": "SummonTractor",
-          "HoverText": "{{i18n: button.TractorMod}}",
-          "Texture": "furyx639.ToolbarIconsCP/Icons",
-          "Index": 12
-        }
-      },
+      "Action": "Include",
+      "FromFile": "data/TractorMod.json",
       "When": {
         "HasMod": "Pathoschild.TractorMod"
       }

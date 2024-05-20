@@ -3,7 +3,6 @@ namespace StardewMods.CrystallineJunimoChests.Framework.Services;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.CrystallineJunimoChests.Framework.Interfaces;
 using StardewMods.CrystallineJunimoChests.Framework.Models;
 using StardewValley.ItemTypeDefinitions;
@@ -55,7 +54,7 @@ internal sealed class ChestHandler
 
             Game1.playSound(data.Sound);
             who.Items.ReduceId(item.QualifiedItemId, this.modConfig.GemCost);
-            chest.GlobalInventoryId = $"{Mod.Id}-{data.Colors[selection - 1].Name}";
+            chest.GlobalInventoryId = $"{Mod.Mod.Id}-{data.Colors[selection - 1].Name}";
             chest.playerChoiceColor.Value = DiscreteColorPicker.getColorFromSelection(selection);
             chest.Location.temporarySprites.Add(
                 new TemporaryAnimatedSprite(
@@ -121,7 +120,7 @@ internal sealed class ChestHandler
         {
             Game1.activeClickableMenu.exitThisMenuNoSound();
             Game1.playSound(data.Sound);
-            chest.GlobalInventoryId = $"{Mod.Id}-{data.Colors[selection - 1].Name}";
+            chest.GlobalInventoryId = $"{Mod.Mod.Id}-{data.Colors[selection - 1].Name}";
             chest.playerChoiceColor.Value = DiscreteColorPicker.getColorFromSelection(selection);
             chest.Location.temporarySprites.Add(
                 new TemporaryAnimatedSprite(

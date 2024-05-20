@@ -13,7 +13,6 @@ using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Menus;
@@ -22,7 +21,7 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Handles changes to the active menu.</summary>
-internal sealed class MenuHandler : BaseService<MenuHandler>
+internal sealed class MenuHandler : Mod.BaseService<MenuHandler>
 {
     private static MenuHandler instance = null!;
     private readonly PerScreen<MenuManager> bottomMenu;

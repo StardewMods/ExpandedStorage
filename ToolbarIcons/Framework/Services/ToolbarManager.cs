@@ -5,7 +5,6 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Events;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.ToolbarIcons.Framework.Models;
@@ -51,6 +50,7 @@ internal sealed class ToolbarManager
 
         // Events
         eventManager.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
+        eventManager.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
         eventManager.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
         eventManager.Subscribe<RenderedHudEventArgs>(this.OnRenderedHud);
         eventManager.Subscribe<RenderingHudEventArgs>(this.OnRenderingHud);
@@ -87,7 +87,8 @@ internal sealed class ToolbarManager
 
     [MemberNotNullWhen(true, nameof(ToolbarManager.Toolbar))]
     private bool ShowToolbar =>
-        Context.IsPlayerFree
+        this.configManager.Visible
+        && Context.IsPlayerFree
         && !Game1.eventUp
         && Game1.farmEvent == null
         && Game1.displayHUD
@@ -106,7 +107,7 @@ internal sealed class ToolbarManager
             return;
         }
 
-        Log.Trace("Adding icon: {0}", id);
+        Mod.Log.Trace("Adding icon: {0}", id);
         this.eventManager.Publish(new IconsChangedEventArgs([id], []));
         this.RefreshComponents(true);
     }
@@ -120,7 +121,7 @@ internal sealed class ToolbarManager
             return;
         }
 
-        Log.Trace("Removing icon: {0}", id);
+        Mod.Log.Trace("Removing icon: {0}", id);
         this.icons.Remove(id);
         this.eventManager.Publish(new IconsChangedEventArgs([], [id]));
         this.RefreshComponents(true);
@@ -148,6 +149,18 @@ internal sealed class ToolbarManager
             new IconPressedEventArgs(this.ActiveComponent.name, e.Button));
 
         this.inputHelper.Suppress(e.Button);
+    }
+
+    private void OnButtonsChanged(ButtonsChangedEventArgs e)
+    {
+        if (!this.configManager.ToggleKey.JustPressed())
+        {
+            return;
+        }
+
+        var config = this.configManager.GetNew();
+        config.Visible = !config.Visible;
+        this.configManager.Save(config);
     }
 
     private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) => this.RefreshComponents(true);

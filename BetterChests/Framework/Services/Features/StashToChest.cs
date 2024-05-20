@@ -8,7 +8,6 @@ using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
@@ -104,7 +103,13 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         {
             if (amount > 0)
             {
-                Log.Trace("{0}: {{ Item: {1}, Quantity: {2}, From: {3}, To: {4} }}", this.Id, name, amount, from, to);
+                Mod.Log.Trace(
+                    "{0}: {{ Item: {1}, Quantity: {2}, From: {3}, To: {4} }}",
+                    this.Id,
+                    name,
+                    amount,
+                    from,
+                    to);
             }
         }
     }
@@ -259,7 +264,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
 
         if (!stashedAny)
         {
-            Log.Alert(I18n.Alert_StashToChest_NoEligible());
+            Mod.Log.Alert(I18n.Alert_StashToChest_NoEligible());
             return;
         }
 

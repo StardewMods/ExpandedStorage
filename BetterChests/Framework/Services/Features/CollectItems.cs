@@ -8,7 +8,6 @@ using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
@@ -130,12 +129,12 @@ internal sealed class CollectItems : BaseFeature<CollectItems>
             if (disable)
             {
                 Game1.player.modData.Remove(key);
-                Log.Info("{0}: Set collect items on", this.Id);
+                Mod.Log.Info("{0}: Set collect items on", this.Id);
                 return;
             }
 
             Game1.player.modData[key] = "true";
-            Log.Info("{0}: Set collect items off", this.Id);
+            Mod.Log.Info("{0}: Set collect items off", this.Id);
         }
     }
 

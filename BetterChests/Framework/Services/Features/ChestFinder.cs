@@ -9,7 +9,6 @@ using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.BetterChests.Framework.UI.Overlays;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
@@ -177,7 +176,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
             {
                 if (!string.IsNullOrWhiteSpace(value))
                 {
-                    Log.Trace("{0}: Searching for {1}", this.Id, value);
+                    Mod.Log.Trace("{0}: Searching for {1}", this.Id, value);
                 }
 
                 if (this.searchText.Value == value)
@@ -215,7 +214,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
 
         var containers = this.containerFactory.GetAll(Game1.player.currentLocation, this.Predicate);
         this.pointers.Value.AddRange(containers.Select(container => new Pointer(container)));
-        Log.Info("{0}: Found {1} chests", this.Id, this.pointers.Value.Count);
+        Mod.Log.Info("{0}: Found {1} chests", this.Id, this.pointers.Value.Count);
         this.currentIndex.Value = 0;
     }
 }

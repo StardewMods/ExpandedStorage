@@ -4,12 +4,11 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Assets;
-using StardewMods.Common.Services;
 using StardewMods.CrystallineJunimoChests.Framework.Models;
 using StardewValley.GameData.BigCraftables;
 
 /// <summary>Handles modification and manipulation of assets in the game.</summary>
-internal sealed class AssetHandler : BaseAssetHandler
+internal sealed class AssetHandler : Mod.BaseAssetHandler
 {
     private const string BetterChestPrefix = "furyx639.BetterChests/";
 
@@ -31,16 +30,19 @@ internal sealed class AssetHandler : BaseAssetHandler
         IModContentHelper modContentHelper)
         : base(eventManager, gameContentHelper, modContentHelper)
     {
-        this.AddAsset($"{Mod.Id}/Data", new ModAsset<DataModel>("assets/data.json", AssetLoadPriority.Exclusive));
-        this.AddAsset($"{Mod.Id}/Texture", new ModAsset<Texture2D>("assets/texture.png", AssetLoadPriority.Exclusive));
-        this.AddAsset("Data/BigCraftables", new AssetEditor(this.EditBigCraftables, AssetEditPriority.Late));
+        this.AddAsset($"{Mod.Mod.Id}/Data", new ModAsset<DataModel>("assets/data.json", AssetLoadPriority.Exclusive));
+        this.AddAsset(
+            $"{Mod.Mod.Id}/Texture",
+            new ModAsset<Texture2D>("assets/texture.png", AssetLoadPriority.Exclusive));
+
+        this.AddAsset("Data/BigCraftables", new AssetEditor(this.EditBigCraftables, AssetEditPriority.Early));
     }
 
     /// <summary>Gets the data model.</summary>
-    public DataModel Data => this.RequireAsset<DataModel>($"{Mod.Id}/Data");
+    public DataModel Data => this.RequireAsset<DataModel>($"{Mod.Mod.Id}/Data");
 
     /// <summary>Gets the texture.</summary>
-    public Texture2D Texture => this.RequireAsset<Texture2D>($"{Mod.Id}/Texture");
+    public Texture2D Texture => this.RequireAsset<Texture2D>($"{Mod.Mod.Id}/Texture");
 
     private void EditBigCraftables(IAssetData asset)
     {

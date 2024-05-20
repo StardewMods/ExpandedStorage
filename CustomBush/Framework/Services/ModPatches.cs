@@ -11,7 +11,6 @@ using StardewModdingAPI.Events;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.CustomBush;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.CustomBush.Framework.Models;
@@ -52,11 +51,11 @@ internal sealed class ModPatches
     {
         // Init
         ModPatches.instance = this;
-        this.modDataId = Mod.Id + "/Id";
-        this.modDataItem = Mod.Id + "/ShakeOff";
-        this.modDataQuality = Mod.Id + "/Quality";
-        this.modDataStack = Mod.Id + "/Stack";
-        this.modDataTexture = Mod.Id + "/Texture";
+        this.modDataId = Mod.Mod.Id + "/Id";
+        this.modDataItem = Mod.Mod.Id + "/ShakeOff";
+        this.modDataQuality = Mod.Mod.Id + "/Quality";
+        this.modDataStack = Mod.Mod.Id + "/Stack";
+        this.modDataTexture = Mod.Mod.Id + "/Texture";
         this.assetHandler = assetHandler;
         this.gameContentHelper = gameContentHelper;
         this.patchManager = patchManager;
@@ -212,7 +211,7 @@ internal sealed class ModPatches
         // Fails basic conditions
         if (age < bushModel.AgeToProduce || dayOfMonth < bushModel.DayToBeginProducing)
         {
-            Log.Trace(
+            Mod.Log.Trace(
                 "{0} will not produce. Age: {1} < {2} , Day: {3} < {4}",
                 id,
                 age.ToString(CultureInfo.InvariantCulture),
@@ -224,7 +223,7 @@ internal sealed class ModPatches
             return;
         }
 
-        Log.Trace(
+        Mod.Log.Trace(
             "{0} passed basic conditions. Age: {1} >= {2} , Day: {3} >= {4}",
             id,
             age.ToString(CultureInfo.InvariantCulture),
@@ -235,7 +234,7 @@ internal sealed class ModPatches
         // Fails default season conditions
         if (!bushModel.Seasons.Any() && season == Season.Winter && !__instance.IsSheltered())
         {
-            Log.Trace("{0} will not produce. Season: {1} and plant is outdoors.", id, season.ToString());
+            Mod.Log.Trace("{0} will not produce. Season: {1} and plant is outdoors.", id, season.ToString());
 
             __result = false;
             return;
@@ -243,13 +242,16 @@ internal sealed class ModPatches
 
         if (!bushModel.Seasons.Any())
         {
-            Log.Trace("{0} passed default season condition. Season: {1} or plant is indoors.", id, season.ToString());
+            Mod.Log.Trace(
+                "{0} passed default season condition. Season: {1} or plant is indoors.",
+                id,
+                season.ToString());
         }
 
         // Fails custom season conditions
         if (bushModel.Seasons.Any() && !bushModel.Seasons.Contains(season) && !__instance.IsSheltered())
         {
-            Log.Trace(
+            Mod.Log.Trace(
                 "{0} will not produce. Season: {1} not in {2} and plant is outdoors.",
                 id,
                 season.ToString(),
@@ -261,7 +263,7 @@ internal sealed class ModPatches
 
         if (bushModel.Seasons.Any())
         {
-            Log.Trace(
+            Mod.Log.Trace(
                 "{0} passed custom season conditions. Season: {1} in {2} or plant is indoors.",
                 id,
                 season.ToString(),
@@ -269,15 +271,15 @@ internal sealed class ModPatches
         }
 
         // Try to produce item
-        Log.Trace("{0} attempting to produce random item.", id);
+        Mod.Log.Trace("{0} attempting to produce random item.", id);
         if (!ModPatches.instance.TryToProduceRandomItem(__instance, bushModel, out var item))
         {
-            Log.Trace("{0} will not produce. No item was produced.", id);
+            Mod.Log.Trace("{0} will not produce. No item was produced.", id);
             __result = false;
             return;
         }
 
-        Log.Trace(
+        Mod.Log.Trace(
             "{0} selected {1} to grow with quality {2} and quantity {3}.",
             id,
             item.QualifiedItemId,
@@ -581,7 +583,7 @@ internal sealed class ModPatches
     {
         // Patches
         this.patchManager.Add(
-            Mod.Id,
+            Mod.Mod.Id,
             new SavedPatch(
                 AccessTools.DeclaredMethod(typeof(Bush), nameof(Bush.draw), [typeof(SpriteBatch)]),
                 AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Bush_draw_prefix)),
@@ -647,7 +649,7 @@ internal sealed class ModPatches
             if (methodGetOutput is not null)
             {
                 this.patchManager.Add(
-                    Mod.Id,
+                    Mod.Mod.Id,
                     new SavedPatch(
                         methodGetOutput,
                         AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Automate_GetOutput_postfix)),
@@ -655,7 +657,7 @@ internal sealed class ModPatches
             }
         }
 
-        this.patchManager.Patch(Mod.Id);
+        this.patchManager.Patch(Mod.Mod.Id);
     }
 
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
@@ -676,7 +678,7 @@ internal sealed class ModPatches
                 null,
                 bush.Location.SeedsIgnoreSeasonsHere() ? GameStateQuery.SeasonQueryKeys : null))
         {
-            Log.Trace(
+            Mod.Log.Trace(
                 "{0} did not select {1}. Failed: {2}",
                 bush.modData[ModPatches.instance.modDataId],
                 drop.Id,
@@ -689,7 +691,7 @@ internal sealed class ModPatches
             && bush.Location.SeedsIgnoreSeasonsHere()
             && drop.Season != Game1.GetSeasonForLocation(bush.Location))
         {
-            Log.Trace(
+            Mod.Log.Trace(
                 "{0} did not select {1}. Failed: {2}",
                 bush.modData[ModPatches.instance.modDataId],
                 drop.Id,
@@ -707,7 +709,7 @@ internal sealed class ModPatches
             null,
             delegate(string query, string error)
             {
-                Log.Error(
+                Mod.Log.Error(
                     "{0} failed parsing item query {1} for item {2}: {3}",
                     bush.modData[ModPatches.instance.modDataId],
                     query,

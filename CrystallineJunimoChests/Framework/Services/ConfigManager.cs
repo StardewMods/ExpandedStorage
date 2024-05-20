@@ -2,14 +2,13 @@ namespace StardewMods.CrystallineJunimoChests.Framework.Services;
 
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.CrystallineJunimoChests.Framework.Interfaces;
 using StardewMods.CrystallineJunimoChests.Framework.Models;
 
 /// <inheritdoc cref="StardewMods.CrystallineJunimoChests.Framework.Interfaces.IModConfig" />
-internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
+internal sealed class ConfigManager : Mod.ConfigManager<DefaultConfig>, IModConfig
 {
     private readonly GenericModConfigMenuIntegration genericModConfigMenuIntegration;
 
@@ -56,7 +55,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         this.genericModConfigMenuIntegration.Register(this.Reset, () => this.Save(config));
 
         gmcm.AddNumberOption(
-            Mod.Manifest,
+            Mod.Mod.Manifest,
             () => config.GemCost,
             value => config.GemCost = value,
             I18n.Config_GemCost_Name,

@@ -5,12 +5,11 @@ using Force.DeepCloner;
 using Pidgin;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Models.Cache;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Models.Expressions;
 
 /// <summary>Responsible for handling parsed expressions.</summary>
-internal sealed class ExpressionHandler : BaseService<ExpressionHandler>, IExpressionHandler
+internal sealed class ExpressionHandler : Mod.BaseService<ExpressionHandler>, IExpressionHandler
 {
     private static readonly IExpression DefaultExpression = new RootExpression();
     private static readonly Parser<char, IExpression> RootParser;
@@ -117,7 +116,7 @@ internal sealed class ExpressionHandler : BaseService<ExpressionHandler>, IExpre
 
     /// <summary>Initializes a new instance of the <see cref="ExpressionHandler" /> class.</summary>
     /// <param name="cacheManager">Dependency used for managing cache tables.</param>
-    public ExpressionHandler(CacheManager cacheManager) =>
+    public ExpressionHandler(Mod.CacheManager cacheManager) =>
         this.cachedSearches = cacheManager.GetCacheTable<IExpression?>();
 
     /// <inheritdoc cref="IExpressionHandler" />
@@ -204,7 +203,7 @@ internal sealed class ExpressionHandler : BaseService<ExpressionHandler>, IExpre
         }
         catch (ParseException ex)
         {
-            Log.TraceOnce("Failed to parse search expression {0}.\n{1}", expression, ex);
+            Mod.Log.TraceOnce("Failed to parse search expression {0}.\n{1}", expression, ex);
             parsedExpression = ExpressionHandler.DefaultExpression;
         }
 

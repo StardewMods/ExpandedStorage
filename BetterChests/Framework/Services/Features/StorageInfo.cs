@@ -11,7 +11,6 @@ using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
@@ -89,7 +88,7 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
 
         this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.ToggleInfo);
         this.isActive.Value = !this.isActive.Value;
-        Log.Info("{0}: Toggled chest info to {1}", this.Id, this.isActive.Value);
+        Mod.Log.Info("{0}: Toggled chest info to {1}", this.Id, this.isActive.Value);
     }
 
     private void OnInventoryChanged(InventoryChangedEventArgs e) => this.resetCache.Value = true;

@@ -5,7 +5,6 @@ using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.GarbageDay.Framework.Interfaces;
@@ -15,7 +14,7 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Represents a manager for managing garbage cans in a game.</summary>
-internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
+internal sealed class GarbageCanManager : Mod.BaseService<GarbageCanManager>
 {
     private readonly PerScreen<NPC?> currentNpc = new();
     private readonly Dictionary<string, FoundGarbageCan> foundGarbageCans;
@@ -67,7 +66,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
             || !e.Button.IsActionButton()
             || !Game1.currentLocation.Objects.TryGetValue(e.Cursor.GrabTile, out var obj)
             || obj is not Chest chest
-            || !chest.modData.TryGetValue(Mod.Id + "/WhichCan", out var whichCan)
+            || !chest.modData.TryGetValue(Mod.Mod.Id + "/WhichCan", out var whichCan)
             || !this.garbageCans.TryGetValue(whichCan, out var garbageCan))
         {
             return;
@@ -189,7 +188,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
         {
             if (Game1.currentLocation.Objects.TryGetValue(pos, out var obj)
                 && obj is Chest chest
-                && chest.modData.TryGetValue(Mod.Id + "/WhichCan", out var whichCan)
+                && chest.modData.TryGetValue(Mod.Mod.Id + "/WhichCan", out var whichCan)
                 && this.garbageCans.TryGetValue(whichCan, out var garbageCan))
             {
                 garbageCan.AddLoot(ItemRegistry.Create("(H)66"));
@@ -225,21 +224,21 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
 
         if (location is null)
         {
-            Log.Trace("Unable to find location for Garbage Can {0}", foundGarbageCan.WhichCan);
+            Mod.Log.Trace("Unable to find location for Garbage Can {0}", foundGarbageCan.WhichCan);
             garbageCan = null;
             return false;
         }
 
         // Remove existing garbage can
         if (location.Objects.TryGetValue(foundGarbageCan.TilePosition, out var obj)
-            && obj.modData.ContainsKey(Mod.Id + "/WhichCan"))
+            && obj.modData.ContainsKey(Mod.Mod.Id + "/WhichCan"))
         {
             location.Objects.Remove(foundGarbageCan.TilePosition);
         }
 
         // Attempt to place item
-        var item = (SObject)ItemRegistry.Create($"(BC){Mod.Id}/GarbageCan");
-        Log.Trace(
+        var item = (SObject)ItemRegistry.Create($"(BC){Mod.Mod.Id}/GarbageCan");
+        Mod.Log.Trace(
             "Placing Garbage Can {0} at {1} ({2})",
             foundGarbageCan.WhichCan,
             location.Name,
@@ -253,15 +252,15 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
             || !location.Objects.TryGetValue(foundGarbageCan.TilePosition, out obj)
             || obj is not Chest chest)
         {
-            Log.Trace("Unable to place Garbage Can");
+            Mod.Log.Trace("Unable to place Garbage Can");
             garbageCan = null;
             return false;
         }
 
         // Update chest
-        chest.GlobalInventoryId = Mod.Id + "-" + foundGarbageCan.WhichCan;
+        chest.GlobalInventoryId = Mod.Mod.Id + "-" + foundGarbageCan.WhichCan;
         chest.playerChoiceColor.Value = Color.DarkGray;
-        chest.modData[Mod.Id + "/WhichCan"] = foundGarbageCan.WhichCan;
+        chest.modData[Mod.Mod.Id + "/WhichCan"] = foundGarbageCan.WhichCan;
         chest.modData["Pathoschild.ChestsAnywhere/IsIgnored"] = "true";
         chest.modData["furyx639.BetterChests/StorageName"] = $"{I18n.GarbageCan_Name()} {foundGarbageCan.WhichCan}";
 

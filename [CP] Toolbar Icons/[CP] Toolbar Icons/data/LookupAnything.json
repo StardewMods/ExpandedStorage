@@ -1,0 +1,26 @@
+{
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "furyx639.ToolbarIcons/Data",
+      "Entries": {
+        "furyx639.ToolbarIconsCP/LookupAnything.Search": {
+          "ModId": "Pathoschild.LookupAnything",
+          "Type": "Method",
+          "ExtraData": "TryToggleSearch",
+          "HoverText": "{{i18n: button.LookupAnything}}"
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "furyx639.FauxCore/Icons",
+      "Entries": {
+        "furyx639.ToolbarIconsCP/LookupAnything.Search": {
+          "Area": { "X": 48, "Y": 16, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        }
+      }
+    }
+  ]
+}

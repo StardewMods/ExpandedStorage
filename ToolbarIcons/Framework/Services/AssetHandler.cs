@@ -4,14 +4,13 @@ using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Assets;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Models;
 
 /// <summary>Responsible for handling assets provided by this mod.</summary>
-internal sealed class AssetHandler : BaseAssetHandler
+internal sealed class AssetHandler : Mod.BaseAssetHandler
 {
     private static readonly InternalIcon[] Icons =
     [
@@ -22,6 +21,7 @@ internal sealed class AssetHandler : BaseAssetHandler
         InternalIcon.SpecialOrders,
         InternalIcon.DailyQuests,
         InternalIcon.ToggleCollision,
+        InternalIcon.Calendar,
     ];
 
     private readonly IntegrationManager integrationManager;
@@ -45,19 +45,19 @@ internal sealed class AssetHandler : BaseAssetHandler
         // Init
         this.integrationManager = integrationManager;
         this.AddAsset(
-            $"{Mod.Id}/Data",
+            $"{Mod.Mod.Id}/Data",
             new ModAsset<Dictionary<string, IntegrationData>>(
-                static () => new Dictionary<string, IntegrationData>(),
+                static () => new Dictionary<string, IntegrationData>(StringComparer.OrdinalIgnoreCase),
                 AssetLoadPriority.Exclusive));
 
-        themeHelper.AddAsset($"{Mod.Id}/Arrows", modContentHelper.Load<IRawTextureData>("assets/arrows.png"));
-        themeHelper.AddAsset($"{Mod.Id}/Icons", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
+        themeHelper.AddAsset($"{Mod.Mod.Id}/Arrows", modContentHelper.Load<IRawTextureData>("assets/arrows.png"));
+        themeHelper.AddAsset($"{Mod.Mod.Id}/Icons", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
 
         for (var index = 0; index < AssetHandler.Icons.Length; index++)
         {
             iconRegistry.AddIcon(
                 AssetHandler.Icons[index].ToStringFast(),
-                $"{Mod.Id}/Icons",
+                $"{Mod.Mod.Id}/Icons",
                 new Rectangle(16 * (index % 5), 16 * (int)(index / 5f), 16, 16));
         }
 
@@ -66,7 +66,7 @@ internal sealed class AssetHandler : BaseAssetHandler
     }
 
     private Dictionary<string, IntegrationData> Data =>
-        this.RequireAsset<Dictionary<string, IntegrationData>>($"{Mod.Id}/Data");
+        this.RequireAsset<Dictionary<string, IntegrationData>>($"{Mod.Mod.Id}/Data");
 
     private void OnConditionsApiReady(ConditionsApiReadyEventArgs e)
     {

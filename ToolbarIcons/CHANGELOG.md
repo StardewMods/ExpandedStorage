@@ -2,6 +2,11 @@
 
 ## 2.8.0 (Unreleased)
 
+### Added
+
+* Added icon for showing the calendar.
+* Added hotkey for toggling all icons on/off.
+
 ### Changed
 
 * Updated for FauxCore 1.2.0.

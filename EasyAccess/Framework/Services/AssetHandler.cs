@@ -1,7 +1,6 @@
 namespace StardewMods.EasyAccess.Framework.Services;
 
 using Microsoft.Xna.Framework;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.EasyAccess.Framework.Enums;
 
@@ -16,13 +15,13 @@ internal sealed class AssetHandler
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public AssetHandler(IIconRegistry iconRegistry, IModContentHelper modContentHelper, IThemeHelper themeHelper)
     {
-        themeHelper.AddAsset(Mod.Id + "/Icons", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
+        themeHelper.AddAsset($"{Mod.Mod.Id}/Icons", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
 
         for (var index = 0; index < AssetHandler.Icons.Length; index++)
         {
             iconRegistry.AddIcon(
                 AssetHandler.Icons[index].ToStringFast(),
-                $"{Mod.Id}/Icons",
+                $"{Mod.Mod.Id}/Icons",
                 new Rectangle(16 * (index % 5), 16 * (int)(index / 5f), 16, 16));
         }
     }

@@ -1,5 +1,11 @@
 ﻿# Toolbar Icons Content Pack Change Log
 
+## 2.8.0 (Unreleased)
+
+### Changed
+
+* Updated for Toolbar Icons 2.8.0.
+
 ## 2.5.0 (September 17, 2022)
 
 ### Changed

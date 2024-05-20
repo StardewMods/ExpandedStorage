@@ -5,7 +5,6 @@ using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Components;
@@ -207,7 +206,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             {
                 if (!string.IsNullOrWhiteSpace(value))
                 {
-                    Log.Trace("{0}: Searching for {1}", this.Id, value);
+                    Mod.Log.Trace("{0}: Searching for {1}", this.Id, value);
                 }
 
                 if (this.searchText.Value == value)

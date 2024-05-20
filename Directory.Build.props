@@ -38,6 +38,8 @@
     <Using Include="StardewValley"/>
     <Using Include="StardewModdingAPI"/>
     <Using Include="System.Diagnostics.CodeAnalysis"/>
+    <Using Alias="Container" Include="SimpleInjector.Container" />
+    <Using Alias="Mod" Include="StardewMods.Common.Services" />
     <Using Alias="Object" Include="System.Object"/>
     <Using Alias="SObject" Include="StardewValley.Object"/>
   </ItemGroup>

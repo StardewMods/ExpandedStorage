@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Models;
 
@@ -62,7 +61,7 @@ internal sealed class ThemeHelper : IThemeHelper
         var assetName = this.gameContentHelper.ParseAssetName(path);
         if (this.trackedAssets.ContainsKey(assetName))
         {
-            Log.Trace("Error, conflicting key {0} found in ThemeHelper. Asset not added.", assetName.Name);
+            Mod.Log.Trace("Error, conflicting key {0} found in ThemeHelper. Asset not added.", assetName.Name);
         }
 
         var managedTexture = new ManagedTexture(this.gameContentHelper, path, data);

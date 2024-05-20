@@ -8,7 +8,6 @@ using StardewMods.Common.Enums;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
@@ -16,7 +15,7 @@ using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Responsible for handling containers.</summary>
-internal sealed class ContainerHandler : BaseService<ContainerHandler>
+internal sealed class ContainerHandler : Mod.BaseService<ContainerHandler>
 {
     private static ContainerHandler instance = null!;
 
@@ -119,7 +118,7 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
             return;
         }
 
-        Log.Info("{0}: Configuring {1}", this.Id, container);
+        Mod.Log.Info("{0}: Configuring {1}", this.Id, container);
 
         var gmcm = this.genericModConfigMenuIntegration.Api;
         var options = new DefaultStorageOptions();
@@ -127,17 +126,17 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
         var parentOptions = container.GetParentOptions();
         this.genericModConfigMenuIntegration.Register(() => new DefaultStorageOptions().CopyTo(options), Save);
 
-        gmcm.AddSectionTitle(Mod.Manifest, () => container.DisplayName, container.ToString);
+        gmcm.AddSectionTitle(Mod.Mod.Manifest, () => container.DisplayName, container.ToString);
 
         gmcm.AddTextOption(
-            Mod.Manifest,
+            Mod.Mod.Manifest,
             () => options.StorageName,
             value => options.StorageName = value,
             I18n.Config_StorageName_Name,
             I18n.Config_StorageName_Tooltip);
 
         gmcm.AddTextOption(
-            Mod.Manifest,
+            Mod.Mod.Manifest,
             () => options.StorageIcon,
             value => options.StorageIcon = value,
             I18n.Config_StorageIcon_Name,
@@ -147,7 +146,7 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
         if (container.AccessChest is not RangeOption.Disabled)
         {
             gmcm.AddNumberOption(
-                Mod.Manifest,
+                Mod.Mod.Manifest,
                 () => options.AccessChestPriority,
                 value => options.AccessChestPriority = value,
                 I18n.Config_AccessChestPriority_Name,
@@ -158,7 +157,7 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
         if (container.StashToChest is not RangeOption.Disabled)
         {
             gmcm.AddNumberOption(
-                Mod.Manifest,
+                Mod.Mod.Manifest,
                 () => (int)options.StashToChestPriority,
                 value => options.StashToChestPriority = (StashPriority)value,
                 I18n.Config_StashToChestPriority_Name,
@@ -173,14 +172,14 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
         if (container.CategorizeChest is not FeatureOption.Disabled)
         {
             gmcm.AddTextOption(
-                Mod.Manifest,
+                Mod.Mod.Manifest,
                 () => options.CategorizeChestSearchTerm,
                 value => options.CategorizeChestSearchTerm = value,
                 I18n.Config_CategorizeChestSearchTerm_Name,
                 I18n.Config_CategorizeChestSearchTerm_Tooltip);
 
             gmcm.AddTextOption(
-                Mod.Manifest,
+                Mod.Mod.Manifest,
                 () => options.CategorizeChestIncludeStacks.ToStringFast(),
                 value => options.CategorizeChestIncludeStacks = FeatureOptionExtensions.TryParse(value, out var option)
                     ? option
@@ -191,20 +190,20 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
                 Localized.FormatOption(parentOptions?.CategorizeChestIncludeStacks));
         }
 
-        gmcm.AddPageLink(Mod.Manifest, "Main", I18n.Section_Main_Name, I18n.Section_Main_Description);
+        gmcm.AddPageLink(Mod.Mod.Manifest, "Main", I18n.Section_Main_Name, I18n.Section_Main_Description);
         this.configManager.AddMainOption(
-            Mod.Manifest,
+            Mod.Mod.Manifest,
             "Main",
             I18n.Section_Main_Name,
             options,
             parentOptions: parentOptions);
 
-        gmcm.OpenModMenu(Mod.Manifest);
+        gmcm.OpenModMenu(Mod.Mod.Manifest);
         return;
 
         void Save()
         {
-            Log.Trace("Config changed: {0}\n{1}", container, options);
+            Mod.Log.Trace("Config changed: {0}\n{1}", container, options);
             options.CopyTo(container);
 
             if (container is ChestContainer chestContainer)

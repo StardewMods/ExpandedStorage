@@ -4,7 +4,6 @@ using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewValley.Menus;
 
@@ -86,7 +85,7 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
                         {
                             if (amount > 0)
                             {
-                                Log.Info(
+                                Mod.Log.Info(
                                     "{0}: {{ Item: {1}, Quantity: {2}, From: {3}, To: {4} }}",
                                     this.Id,
                                     name,

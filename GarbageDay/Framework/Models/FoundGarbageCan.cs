@@ -1,7 +1,6 @@
 namespace StardewMods.GarbageDay.Framework.Models;
 
 using Microsoft.Xna.Framework;
-using StardewMods.Common.Services;
 
 /// <summary>Represents a pending garbage can object on a map.</summary>
 internal sealed class FoundGarbageCan
@@ -37,7 +36,7 @@ internal sealed class FoundGarbageCan
         {
             if (this.isValid && !value)
             {
-                Log.Trace("Failed to create garbage can: {0}", this.WhichCan);
+                Mod.Log.Trace("Failed to create garbage can: {0}", this.WhichCan);
             }
 
             this.isValid = value;

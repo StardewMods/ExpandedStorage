@@ -2,7 +2,6 @@ namespace StardewMods.ToolbarIcons.Framework;
 
 using Microsoft.Xna.Framework;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.ToolbarIcons.Framework.Models.Events;
@@ -11,7 +10,7 @@ using StardewMods.ToolbarIcons.Framework.Services;
 /// <inheritdoc />
 public sealed class ToolbarIconsApi : IToolbarIconsApi
 {
-    private readonly BaseEventManager eventManager;
+    private readonly Mod.BaseEventManager eventManager;
     private readonly IIconRegistry iconRegistry;
     private readonly Dictionary<string, string> ids = [];
     private readonly IModInfo modInfo;
@@ -36,7 +35,7 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
         this.iconRegistry = iconRegistry;
         this.toolbarManager = toolbarManager;
         this.prefix = this.modInfo.Manifest.UniqueID + "/";
-        this.eventManager = new BaseEventManager();
+        this.eventManager = new Mod.BaseEventManager();
 
         // Events
         eventManager.Subscribe<IIconPressedEventArgs>(this.OnIconPressed);
@@ -47,7 +46,7 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
     {
         add
         {
-            Log.WarnOnce(
+            Mod.Log.WarnOnce(
                 "{0} uses deprecated code. {1} event is deprecated. Please subscribe to the {2} event instead.",
                 this.modInfo.Manifest.Name,
                 nameof(this.ToolbarIconPressed),
@@ -117,7 +116,7 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
             }
             catch (Exception ex)
             {
-                Log.Error(
+                Mod.Log.Error(
                     "{0} failed in {1}: {2}",
                     this.modInfo.Manifest.Name,
                     nameof(this.ToolbarIconPressed),

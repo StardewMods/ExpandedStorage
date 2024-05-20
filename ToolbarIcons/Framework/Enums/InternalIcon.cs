@@ -9,6 +9,9 @@ public enum InternalIcon
     /// <summary>Toggle always scroll map.</summary>
     AlwaysScrollMap,
 
+    /// <summary>Show the calendar.</summary>
+    Calendar,
+
     /// <summary>Show Daily Quests.</summary>
     DailyQuests,
 

@@ -2,18 +2,17 @@ namespace StardewMods.FauxCore.Framework.Services;
 
 using HarmonyLib;
 using StardewMods.Common.Enums;
-using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 
 /// <inheritdoc cref="IPatchManager" />
-internal sealed class PatchManager : BaseService<PatchManager>, IPatchManager
+internal sealed class PatchManager : Mod.BaseService<PatchManager>, IPatchManager
 {
     private readonly HashSet<string> appliedPatches = [];
     private readonly Lazy<Harmony> harmony;
     private readonly Dictionary<string, List<ISavedPatch>> savedPatches = new();
 
     /// <summary>Initializes a new instance of the <see cref="PatchManager" /> class.</summary>
-    public PatchManager() => this.harmony = new Lazy<Harmony>(() => new Harmony(Mod.Id));
+    public PatchManager() => this.harmony = new Lazy<Harmony>(() => new Harmony(Mod.Mod.Id));
 
     /// <inheritdoc />
     public void Add(string id, params ISavedPatch[] patches)
@@ -40,7 +39,7 @@ internal sealed class PatchManager : BaseService<PatchManager>, IPatchManager
         {
             try
             {
-                Log.Trace(
+                Mod.Log.Trace(
                     "Patching {0}.{1} with {2}.{3} {4}.",
                     patch.Original.DeclaringType!.Name,
                     patch.Original.Name,
@@ -66,7 +65,7 @@ internal sealed class PatchManager : BaseService<PatchManager>, IPatchManager
             }
             catch (Exception e)
             {
-                Log.Warn(
+                Mod.Log.Warn(
                     "Patching {0} failed with.\nError: {1}",
                     patch.LogId ?? $"{patch.Original.DeclaringType!.Name}.{patch.Original.Name}",
                     e.Message);
@@ -85,7 +84,7 @@ internal sealed class PatchManager : BaseService<PatchManager>, IPatchManager
         this.appliedPatches.Remove(id);
         foreach (var patch in patches)
         {
-            Log.Trace("Unpatching {0} with {1}.", patch.Original.Name, patch.Patch.Name);
+            Mod.Log.Trace("Unpatching {0} with {1}.", patch.Original.Name, patch.Patch.Name);
             this.harmony.Value.Unpatch(patch.Original, patch.Patch);
         }
     }

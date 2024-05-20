@@ -1,0 +1,26 @@
+{
+  "Changes": [
+    {
+      "Action": "EditData",
+      "Target": "furyx639.ToolbarIcons/Data",
+      "Entries": {
+        "furyx639.ToolbarIconsCP/FashionSense.ShowMenu": {
+          "ModId": "PeacefulEnd.FashionSense",
+          "Type": "Menu",
+          "ExtraData": "FashionSense.Framework.UI.HandMirrorMenu",
+          "HoverText": "{{i18n: button.FashionSense}}"
+        }
+      }
+    },
+    {
+      "Action": "EditData",
+      "Target": "furyx639.FauxCore/Icons",
+      "Entries": {
+        "furyx639.ToolbarIconsCP/FashionSense.ShowMenu": {
+          "Area": { "X": 64, "Y": 0, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        }
+      }
+    }
+  ]
+}
