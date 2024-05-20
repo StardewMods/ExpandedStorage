@@ -3,28 +3,16 @@ namespace StardewMods.CrystallineJunimoChests.Framework.Services;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Assets;
+using StardewMods.Common.Models.Data;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.BetterChests;
+using StardewMods.Common.Services.Integrations.ExpandedStorage;
 using StardewMods.CrystallineJunimoChests.Framework.Models;
 using StardewValley.GameData.BigCraftables;
 
 /// <inheritdoc />
 internal sealed class AssetHandler : BaseAssetHandler
 {
-    private const string BetterChestPrefix = "furyx639.BetterChests/";
-    private const string ExpandedStoragePrefix = "furyx639.ExpandedStorage/";
-
-    private readonly IReadOnlyDictionary<string, string> customFieldData = new Dictionary<string, string>
-    {
-        { $"{AssetHandler.BetterChestPrefix}HslColorPicker", "Disabled" },
-        { $"{AssetHandler.BetterChestPrefix}InventoryTabs", "Disabled" },
-        { $"{AssetHandler.BetterChestPrefix}ResizeChest", "Disabled" },
-        { $"{AssetHandler.BetterChestPrefix}ResizeChestCapacity", "Disabled" },
-        { $"{AssetHandler.ExpandedStoragePrefix}Enabled", "true" },
-        { $"{AssetHandler.ExpandedStoragePrefix}Frames", "5" },
-        { $"{AssetHandler.ExpandedStoragePrefix}GlobalInventoryId", "JunimoChest" },
-        { $"{AssetHandler.ExpandedStoragePrefix}PlayerColor", "true" },
-    };
-
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
@@ -53,9 +41,18 @@ internal sealed class AssetHandler : BaseAssetHandler
         bigCraftableData.SpriteIndex = 0;
         bigCraftableData.Texture = this.ModContentHelper.GetInternalAssetName("assets/Default.png").Name;
         bigCraftableData.CustomFields ??= [];
-        foreach (var (key, value) in this.customFieldData)
-        {
-            bigCraftableData.CustomFields[key] = value;
-        }
+        bigCraftableData.CustomFields["furyx639.ExpandedStorage/Enabled"] = "true";
+
+        var typeModel = new DictionaryModel(() => bigCraftableData.CustomFields);
+        var storageData = new StorageData(typeModel);
+        storageData.Frames = 5;
+        storageData.GlobalInventoryId = "JunimoChest";
+        storageData.PlayerColor = true;
+
+        var storageOptions = new StorageOptions(typeModel);
+        storageOptions.HslColorPicker = FeatureOption.Disabled;
+        storageOptions.InventoryTabs = FeatureOption.Disabled;
+        storageOptions.ResizeChest = ChestMenuOption.Disabled;
+        storageOptions.ResizeChestCapacity = 0;
     }
 }

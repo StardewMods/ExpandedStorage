@@ -4,7 +4,7 @@ using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
 using StardewMods.ExpandedStorage.Framework.Models;
-using StardewMods.ExpandedStorage.Framework.Services.Factory;
+using StardewMods.ExpandedStorage.Framework.Services;
 
 /// <inheritdoc />
 public sealed class ExpandedStorageApi : IExpandedStorageApi

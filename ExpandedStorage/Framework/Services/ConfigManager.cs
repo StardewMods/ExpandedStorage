@@ -1,15 +1,17 @@
 namespace StardewMods.ExpandedStorage.Framework.Services;
 
 using StardewModdingAPI.Events;
+using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.ExpandedStorage.Framework.Interfaces;
 using StardewMods.ExpandedStorage.Framework.Models;
+using StardewValley.Extensions;
+using StardewValley.TokenizableStrings;
 
 /// <summary>Handles the config menu.</summary>
 internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
@@ -38,14 +40,20 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
         this.modHelper = modHelper;
 
+        eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
         eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
-        eventManager.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
     }
 
     /// <inheritdoc />
     public Dictionary<string, DefaultStorageOptions> StorageOptions => this.Config.StorageOptions;
 
-    private void OnConfigChanged(ConfigChangedEventArgs<DefaultConfig> e) { }
+    private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
+    {
+        if (e.Names.Any(name => name.IsEquivalentTo("Data/BigCraftables")))
+        {
+            this.SetupModConfigMenu();
+        }
+    }
 
     private void OnGameLaunched(GameLaunchedEventArgs e)
     {
@@ -68,10 +76,36 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         // Register mod configuration
         this.genericModConfigMenuIntegration.Register(this.Reset, () => this.Save(config));
 
-        // Register storage options
+        var storages =
+            Game1
+                .bigCraftableData.Where(kvp => kvp.Value.CustomFields?.GetBool($"{Mod.Id}/Enabled") == true)
+                .ToDictionary(kvp => kvp.Key, kvp => kvp.Value);
+
+        foreach (var (id, data) in storages)
+        {
+            gmcm.AddPageLink(
+                Mod.Manifest,
+                id,
+                () => TokenParser.ParseText(data.Name),
+                () => TokenParser.ParseText(data.Description));
+
+            config.StorageOptions.TryAdd(id, new DefaultStorageOptions());
+        }
+
+        config.StorageOptions.RemoveWhere(option => !storages.ContainsKey(option.Key));
+
         foreach (var (id, options) in config.StorageOptions)
         {
-            this.betterChestsIntegration.Api.AddConfigOptions(Mod.Manifest, null, null, options);
+            if (!storages.TryGetValue(id, out var bigCraftableData))
+            {
+                continue;
+            }
+
+            this.betterChestsIntegration.Api.AddConfigOptions(
+                Mod.Manifest,
+                id,
+                () => TokenParser.ParseText(bigCraftableData.DisplayName),
+                options);
         }
     }
 }

@@ -5,7 +5,10 @@ using StardewModdingAPI.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Assets;
+using StardewMods.Common.Models.Data;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.BetterChests;
+using StardewMods.Common.Services.Integrations.ExpandedStorage;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.GarbageDay.Framework.Interfaces;
 using StardewMods.GarbageDay.Framework.Models;
@@ -52,9 +55,6 @@ internal sealed class AssetHandler : BaseAssetHandler
 
     private void LoadGarbageCan(IAssetData asset)
     {
-        const string BetterChestsPrefix = "furyx639.BetterChests/";
-        const string ExpandedStoragePrefix = "furyx639.ExpandedStorage/";
-
         var data = asset.AsDictionary<string, BigCraftableData>().Data;
         var bigCraftableData = new BigCraftableData
         {
@@ -66,30 +66,35 @@ internal sealed class AssetHandler : BaseAssetHandler
             Texture = this.ModContentHelper.GetInternalAssetName("assets/GarbageCan.png").Name,
             CustomFields = new Dictionary<string, string>
             {
-                { $"{BetterChestsPrefix}AutoOrganize", "Disabled" },
-                { $"{BetterChestsPrefix}CarryChest", "Disabled" },
-                { $"{BetterChestsPrefix}CategorizeChest", "Disabled" },
-                { $"{BetterChestsPrefix}CollectItems", "Disabled" },
-                { $"{BetterChestsPrefix}ConfigureChest", "Disabled" },
-                { $"{BetterChestsPrefix}CookFromChest", "Disabled" },
-                { $"{BetterChestsPrefix}CraftFromChest", "Disabled" },
-                { $"{BetterChestsPrefix}HslColorPicker", "Disabled" },
-                { $"{BetterChestsPrefix}InventoryTabs", "Disabled" },
-                { $"{BetterChestsPrefix}OpenHeldChest", "Disabled" },
-                { $"{BetterChestsPrefix}ResizeChest", "Small" },
-                { $"{BetterChestsPrefix}ResizeChestCapacity", "9" },
-                { $"{BetterChestsPrefix}SearchItems", "Disabled" },
-                { $"{BetterChestsPrefix}StashToChest", "Disabled" },
-                { $"{BetterChestsPrefix}StorageInfo", "Disabled" },
-                { $"{ExpandedStoragePrefix}Enabled", "true" },
-                { $"{ExpandedStoragePrefix}Frames", "3" },
-                { $"{ExpandedStoragePrefix}CloseNearbySound", "trashcanlid" },
-                { $"{ExpandedStoragePrefix}OpenNearby", "true" },
-                { $"{ExpandedStoragePrefix}OpenNearbySound", "trashcanlid" },
-                { $"{ExpandedStoragePrefix}OpenSound", "trashcan" },
-                { $"{ExpandedStoragePrefix}PlayerColor", "true" },
+                { "furyx639.ExpandedStorage/Enabled", "true" },
             },
         };
+
+        var typeModel = new DictionaryModel(() => bigCraftableData.CustomFields);
+        var storageData = new StorageData(typeModel);
+        storageData.Frames = 3;
+        storageData.CloseNearbySound = "trashcanlid";
+        storageData.OpenNearby = true;
+        storageData.OpenNearbySound = "trashcanlid";
+        storageData.OpenSound = "trashcan";
+        storageData.PlayerColor = true;
+
+        var storageOptions = new StorageOptions(typeModel);
+        storageOptions.AutoOrganize = FeatureOption.Disabled;
+        storageOptions.CarryChest = FeatureOption.Disabled;
+        storageOptions.CategorizeChest = FeatureOption.Disabled;
+        storageOptions.CollectItems = FeatureOption.Disabled;
+        storageOptions.ConfigureChest = FeatureOption.Disabled;
+        storageOptions.CookFromChest = RangeOption.Disabled;
+        storageOptions.CraftFromChest = RangeOption.Disabled;
+        storageOptions.HslColorPicker = FeatureOption.Disabled;
+        storageOptions.InventoryTabs = FeatureOption.Disabled;
+        storageOptions.OpenHeldChest = FeatureOption.Disabled;
+        storageOptions.ResizeChest = ChestMenuOption.Small;
+        storageOptions.ResizeChestCapacity = 9;
+        storageOptions.SearchItems = FeatureOption.Disabled;
+        storageOptions.StashToChest = RangeOption.Disabled;
+        storageOptions.StorageInfo = FeatureOption.Disabled;
 
         data.Add($"{Mod.Id}/GarbageCan", bigCraftableData);
     }

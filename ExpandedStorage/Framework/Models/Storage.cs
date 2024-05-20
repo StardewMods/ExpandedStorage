@@ -4,15 +4,15 @@ using Microsoft.Xna.Framework;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
 
 /// <inheritdoc />
-internal sealed class StorageData : IStorageData
+internal sealed class Storage : IStorageData
 {
-    private readonly DictionaryStorageData chestData;
-    private readonly DictionaryStorageData typeData;
+    private readonly StorageData chestData;
+    private readonly StorageData typeData;
 
-    /// <summary>Initializes a new instance of the <see cref="StorageData" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="Storage" /> class.</summary>
     /// <param name="typeData">The default data for all chests of the given type.</param>
     /// <param name="chestData">The individual data for the chest.</param>
-    public StorageData(DictionaryStorageData typeData, DictionaryStorageData chestData)
+    public Storage(StorageData typeData, StorageData chestData)
     {
         this.typeData = typeData;
         this.chestData = chestData;
@@ -46,6 +46,7 @@ internal sealed class StorageData : IStorageData
         set => this.chestData.IsFridge = value;
     }
 
+    /// <inheritdoc />
     public Dictionary<string, string>? ModData
     {
         get => this.Get(nameof(this.ModData), data => data.ModData, null);

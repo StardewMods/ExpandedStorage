@@ -39,6 +39,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\Data\DictionaryDataModel.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Data\ModDataModel.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\DefaultStorageOptions.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Events\AssetInvalidatedEventArgs.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\SavedPatch.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\PriorityAttribute.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Events\ConfigChangedEventArgs.cs"/>
@@ -46,6 +47,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Models\Range.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\BaseAssetHandler.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\BaseEventManager.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\Models\StorageOptions.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ExpandedStorage\Models\StorageData.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Mod.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\CacheManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\BetterChestsIntegration.cs"/>

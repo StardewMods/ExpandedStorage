@@ -10,7 +10,6 @@ using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.ExpandedStorage.Framework.Interfaces;
 using StardewMods.ExpandedStorage.Framework.Services;
-using StardewMods.ExpandedStorage.Framework.Services.Factory;
 
 /// <inheritdoc />
 public sealed class ModEntry : Mod

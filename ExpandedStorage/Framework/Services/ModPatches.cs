@@ -12,7 +12,6 @@ using StardewMods.Common.Models;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.ExpandedStorage.Framework.Models;
-using StardewMods.ExpandedStorage.Framework.Services.Factory;
 using StardewValley.Locations;
 using StardewValley.Menus;
 using StardewValley.Objects;

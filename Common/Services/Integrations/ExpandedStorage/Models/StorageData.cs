@@ -1,17 +1,15 @@
-namespace StardewMods.ExpandedStorage.Framework.Models;
+namespace StardewMods.Common.Services.Integrations.ExpandedStorage;
 
 using Microsoft.Xna.Framework;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Data;
-using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.ExpandedStorage;
 
 /// <inheritdoc cref="StardewMods.Common.Services.Integrations.ExpandedStorage.IStorageData" />
-internal sealed class DictionaryStorageData : DictionaryDataModel, IStorageData
+internal class StorageData : DictionaryDataModel, IStorageData
 {
-    /// <summary>Initializes a new instance of the <see cref="DictionaryStorageData" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="StorageData" /> class.</summary>
     /// <param name="dictionaryModel">The backing dictionary.</param>
-    public DictionaryStorageData(IDictionaryModel dictionaryModel)
+    public StorageData(IDictionaryModel dictionaryModel)
         : base(dictionaryModel) { }
 
     /// <inheritdoc />
@@ -99,5 +97,5 @@ internal sealed class DictionaryStorageData : DictionaryDataModel, IStorageData
     }
 
     /// <inheritdoc />
-    protected override string Prefix => Mod.Prefix;
+    protected override string Prefix => "furyx639.ExpandedStorage/";
 }

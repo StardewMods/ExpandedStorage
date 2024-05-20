@@ -3,6 +3,7 @@ namespace StardewMods.Common.Services;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Assets;
+using StardewMods.Common.Models.Events;
 
 /// <summary>Handles modification and manipulation of assets in the game.</summary>
 internal abstract class BaseAssetHandler
@@ -114,6 +115,7 @@ internal abstract class BaseAssetHandler
             if (this.cachedAssets.TryGetValue(name, out var cachedAsset))
             {
                 cachedAsset.ClearCache();
+                this.eventManager.Publish(new AssetInvalidatedEventArgs(name));
             }
         }
     }

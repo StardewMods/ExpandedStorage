@@ -4,8 +4,9 @@
 
 ### Added
 
-* Added config options for each storage type.
+* Added support for better chest config options.
 * Added support for global inventory id.
+* Added texture and tint override to data model.
 
 ### Changed
 
