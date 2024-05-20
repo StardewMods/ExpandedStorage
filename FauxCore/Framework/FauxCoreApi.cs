@@ -19,7 +19,7 @@ public sealed class FauxCoreApi : IFauxCoreApi
     /// <param name="modInfo">Dependency used for accessing mod info.</param>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public FauxCoreApi(
         IModInfo modInfo,

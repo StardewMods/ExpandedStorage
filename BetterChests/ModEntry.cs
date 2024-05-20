@@ -17,58 +17,38 @@ using StardewMods.Common.Services.Integrations.ToolbarIcons;
 /// <inheritdoc />
 public sealed class ModEntry : Mod
 {
-    private Container container = null!;
-
     /// <inheritdoc />
-    public override object GetApi(IModInfo mod) => this.container.GetInstance<ApiFactory>().CreateApi(mod);
+    public override object GetApi(IModInfo mod) => this.Container.GetInstance<ApiFactory>().CreateApi(mod);
 
     /// <inheritdoc />
     protected override void Init()
     {
-        // Init
         I18n.Init(this.Helper.Translation);
-        this.container = new Container();
-
-        // Configuration
-        this.container.RegisterSingleton(() => new Harmony(this.ModManifest.UniqueID));
-        this.container.RegisterInstance(this.Helper);
-        this.container.RegisterInstance(this.Monitor);
-        this.container.RegisterInstance(this.Helper.ConsoleCommands);
-        this.container.RegisterInstance(this.Helper.Data);
-        this.container.RegisterInstance(this.Helper.Events);
-        this.container.RegisterInstance(this.Helper.GameContent);
-        this.container.RegisterInstance(this.Helper.Input);
-        this.container.RegisterInstance(this.Helper.ModContent);
-        this.container.RegisterInstance(this.Helper.ModRegistry);
-        this.container.RegisterInstance(this.Helper.Reflection);
-        this.container.RegisterInstance(this.Helper.Translation);
-
-        this.container.RegisterSingleton<ApiFactory>();
-        this.container.RegisterSingleton<AssetHandler>();
-        this.container.RegisterSingleton<BetterCraftingIntegration>();
-        this.container.RegisterSingleton<BetterCraftingInventoryProvider>();
-        this.container.RegisterSingleton<IModConfig, ConfigManager>();
-        this.container.RegisterSingleton<ConfigManager, ConfigManager>();
-        this.container.RegisterSingleton<ContainerFactory>();
-        this.container.RegisterSingleton<ContainerHandler>();
-        this.container.RegisterSingleton<ContentPatcherIntegration>();
-        this.container.RegisterSingleton<IEventManager, EventManager>();
-        this.container.RegisterSingleton<IExpressionHandler, FauxCoreIntegration>();
-        this.container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
-        this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
-        this.container.RegisterSingleton<MenuHandler>();
-        this.container.RegisterSingleton<Localized>();
-        this.container.RegisterSingleton<Log>();
-        this.container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
-        this.container.RegisterSingleton<ProxyChestFactory>();
-        this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
-        this.container.RegisterSingleton<StatusEffectManager>();
-        this.container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
-        this.container.RegisterSingleton<ToolbarIconsIntegration>();
-
-        this.container.RegisterInstance<Func<IModConfig>>(this.container.GetInstance<IModConfig>);
-
-        this.container.Collection.Register<IFeature>(
+        this.Container.RegisterSingleton(() => new Harmony(this.ModManifest.UniqueID));
+        this.Container.RegisterSingleton<ApiFactory>();
+        this.Container.RegisterSingleton<AssetHandler>();
+        this.Container.RegisterSingleton<BetterCraftingIntegration>();
+        this.Container.RegisterSingleton<BetterCraftingInventoryProvider>();
+        this.Container.RegisterSingleton<IModConfig, ConfigManager>();
+        this.Container.RegisterSingleton<ConfigManager, ConfigManager>();
+        this.Container.RegisterSingleton<ContainerFactory>();
+        this.Container.RegisterSingleton<ContainerHandler>();
+        this.Container.RegisterSingleton<ContentPatcherIntegration>();
+        this.Container.RegisterSingleton<IEventManager, EventManager>();
+        this.Container.RegisterSingleton<IExpressionHandler, FauxCoreIntegration>();
+        this.Container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
+        this.Container.RegisterSingleton<GenericModConfigMenuIntegration>();
+        this.Container.RegisterSingleton<MenuHandler>();
+        this.Container.RegisterSingleton<Localized>();
+        this.Container.RegisterSingleton<Log>();
+        this.Container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
+        this.Container.RegisterSingleton<ProxyChestFactory>();
+        this.Container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
+        this.Container.RegisterSingleton<StatusEffectManager>();
+        this.Container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
+        this.Container.RegisterSingleton<ToolbarIconsIntegration>();
+        this.Container.RegisterInstance<Func<IModConfig>>(this.Container.GetInstance<IModConfig>);
+        this.Container.Collection.Register<IFeature>(
             new[]
             {
                 typeof(AccessChest),
@@ -92,8 +72,5 @@ public sealed class ModEntry : Mod
                 typeof(StorageInfo),
             },
             Lifestyle.Singleton);
-
-        // Verify
-        this.container.Verify();
     }
 }

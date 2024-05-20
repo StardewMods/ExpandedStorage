@@ -1,32 +1,33 @@
 namespace StardewMods.BetterChests.Framework.Models.StorageOptions;
 
 using StardewMods.Common.Services.Integrations.BetterChests;
-using StardewValley.ItemTypeDefinitions;
-using StardewValley.TokenizableStrings;
 
 /// <inheritdoc />
-internal sealed class FurnitureStorageOptions : IStorageOptions
+public class ConfigStorageOptions : IStorageOptions
 {
+    private readonly Func<string> getDescription;
+    private readonly Func<string> getDisplayName;
     private readonly Func<IStorageOptions> getOptions;
-    private readonly string itemId;
 
-    /// <summary>Initializes a new instance of the <see cref="FurnitureStorageOptions" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="ConfigStorageOptions" /> class.</summary>
     /// <param name="getOptions">Get the storage options.</param>
-    /// <param name="itemId">Get the furniture item id.</param>
-    public FurnitureStorageOptions(Func<IStorageOptions> getOptions, string itemId)
+    /// <param name="getDescription">Get method for the description.</param>
+    /// <param name="getDisplayName">Get method for the display name.</param>
+    public ConfigStorageOptions(
+        Func<IStorageOptions> getOptions,
+        Func<string> getDescription,
+        Func<string> getDisplayName)
     {
         this.getOptions = getOptions;
-        this.itemId = itemId;
+        this.getDescription = getDescription;
+        this.getDisplayName = getDisplayName;
     }
 
-    /// <summary>Gets the item data.</summary>
-    public ParsedItemData Data => ItemRegistry.RequireTypeDefinition("(F)").GetData(this.itemId);
+    /// <inheritdoc />
+    public string Description => this.getDescription();
 
     /// <inheritdoc />
-    public string Description => TokenParser.ParseText(this.Data.Description);
-
-    /// <inheritdoc />
-    public string DisplayName => TokenParser.ParseText(this.Data.DisplayName);
+    public string DisplayName => this.getDisplayName();
 
     /// <inheritdoc />
     public RangeOption AccessChest

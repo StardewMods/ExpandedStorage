@@ -5,6 +5,7 @@
 ### Added
 
 * Added config options for each storage type.
+* Added support for global inventory id.
 
 ### Changed
 

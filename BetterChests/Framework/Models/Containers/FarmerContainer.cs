@@ -43,6 +43,28 @@ internal sealed class FarmerContainer : BaseContainer<Farmer>
     public override Vector2 TileLocation => this.Farmer.Tile;
 
     /// <inheritdoc />
+    public override int ResizeChestCapacity
+    {
+        get => this.Farmer.MaxItems;
+        set
+        {
+            this.Farmer.MaxItems = value;
+            this.Farmer.Items.RemoveEmptySlots();
+            while (this.Farmer.Items.Count < this.Farmer.MaxItems)
+            {
+                this.Farmer.Items.Add(null);
+            }
+        }
+    }
+
+    /// <inheritdoc />
+    public override string StorageName
+    {
+        get => this.Farmer.Name;
+        set { }
+    }
+
+    /// <inheritdoc />
     public override void ShowMenu(bool playSound = false) =>
         Game1.activeClickableMenu = new GameMenu(playOpeningSound: playSound);
 

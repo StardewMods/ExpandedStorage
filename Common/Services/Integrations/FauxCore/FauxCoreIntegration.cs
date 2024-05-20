@@ -43,6 +43,9 @@ internal sealed class FauxCoreIntegration
     /// <inheritdoc />
     public override string UniqueId => "furyx639.FauxCore";
 
+    /// <inheritdoc/>
+    public override ISemanticVersion Version { get; } = new SemanticVersion(1, 2, 0);
+
     /// <inheritdoc />
     public void Add(string id, params ISavedPatch[] patches)
     {

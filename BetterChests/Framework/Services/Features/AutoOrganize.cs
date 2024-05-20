@@ -18,7 +18,7 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     public AutoOrganize(
         ContainerFactory containerFactory,
         ContainerHandler containerHandler,

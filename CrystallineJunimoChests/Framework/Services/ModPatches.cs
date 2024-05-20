@@ -1,62 +1,63 @@
-namespace StardewMods.CrystallineJunimoChests;
+namespace StardewMods.CrystallineJunimoChests.Framework.Services;
 
 using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewMods.CrystallineJunimoChests.Models;
+using StardewModdingAPI.Events;
+using StardewMods.Common.Enums;
+using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models;
+using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 using StardewValley.Objects;
 
 /// <summary>Harmony Patches for Enhanced Junimo Chests.</summary>
 internal sealed class ModPatches
 {
-    private static IModContentHelper modContentHelper = null!;
-    private static string modId = null!;
-    private static Texture2D texture = null!;
+    private static AssetHandler assetHandler = null!;
+
+    private readonly IPatchManager patchManager;
 
     /// <summary>Initializes a new instance of the <see cref="ModPatches" /> class.</summary>
-    /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
-    /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    /// <param name="texture">The texture to use for colored Junimo chests.</param>
-    public ModPatches(IModContentHelper modContentHelper, IManifest manifest, Texture2D texture)
+    /// <param name="assetHandler">Dependency used for handling assets.</param>
+    /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="patchManager">Dependency used for managing patches.</param>
+    public ModPatches(AssetHandler assetHandler, IEventManager eventManager, IPatchManager patchManager)
     {
-        ModPatches.modContentHelper = modContentHelper;
-        ModPatches.modId = manifest.UniqueID;
-        ModPatches.texture = texture;
+        // Init
+        ModPatches.assetHandler = assetHandler;
+        this.patchManager = patchManager;
+
+        // Events
+        eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
 
         // Patches
-        var harmony = new Harmony(ModPatches.modId);
-
-        harmony.Patch(
-            AccessTools.DeclaredMethod(
-                typeof(Chest),
-                nameof(Chest.draw),
-                [typeof(SpriteBatch), typeof(int), typeof(int), typeof(float)]),
-            new HarmonyMethod(typeof(ModPatches), nameof(ModPatches.Draw)));
-
-        harmony.Patch(
-            AccessTools.DeclaredMethod(
-                typeof(Chest),
-                nameof(Chest.draw),
-                [typeof(SpriteBatch), typeof(int), typeof(int), typeof(float), typeof(bool)]),
-            new HarmonyMethod(typeof(ModPatches), nameof(ModPatches.DrawLocal)));
-
-        harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.GetActualCapacity)),
-            postfix: new HarmonyMethod(typeof(ModPatches), nameof(ModPatches.GetActualCapacity)));
-
-        harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.getLastLidFrame)),
-            postfix: new HarmonyMethod(typeof(ModPatches), nameof(ModPatches.GetLastLidFrame)));
-
-        harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.placementAction)),
-            postfix: new HarmonyMethod(typeof(ModPatches), nameof(ModPatches.PlacementAction)));
+        this.patchManager.Add(
+            Mod.Id,
+            new SavedPatch(
+                AccessTools.DeclaredMethod(
+                    typeof(Chest),
+                    nameof(Chest.draw),
+                    [typeof(SpriteBatch), typeof(int), typeof(int), typeof(float)]),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_draw_prefix)),
+                PatchType.Prefix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(
+                    typeof(Chest),
+                    nameof(Chest.draw),
+                    [typeof(SpriteBatch), typeof(int), typeof(int), typeof(float), typeof(bool)]),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_drawLocal_prefix)),
+                PatchType.Prefix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Chest), nameof(Chest.GetActualCapacity)),
+                AccessTools.DeclaredMethod(typeof(ModPatches), nameof(ModPatches.Chest_GetActualCapacity_postfix)),
+                PatchType.Postfix));
     }
 
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
-    private static bool Draw(
+    private static bool Chest_draw_prefix(
         Chest __instance,
         ref int ___currentLidFrame,
         SpriteBatch spriteBatch,
@@ -107,7 +108,7 @@ internal sealed class ModPatches
         if (__instance.playerChoiceColor.Value.Equals(Color.Black))
         {
             spriteBatch.Draw(
-                ModPatches.texture,
+                ModPatches.assetHandler.Texture,
                 pos + (__instance.shakeTimer > 0 ? new Vector2(Game1.random.Next(-1, 2), 0) : Vector2.Zero),
                 frame,
                 Color.White * alpha,
@@ -121,7 +122,7 @@ internal sealed class ModPatches
         }
 
         spriteBatch.Draw(
-            ModPatches.texture,
+            ModPatches.assetHandler.Texture,
             pos + (__instance.shakeTimer > 0 ? new Vector2(Game1.random.Next(-1, 2), 0) : Vector2.Zero),
             frame with { Y = 32 },
             Color.White * alpha,
@@ -132,7 +133,7 @@ internal sealed class ModPatches
             baseSortOrder);
 
         var selection = DiscreteColorPicker.getSelectionFromColor(__instance.playerChoiceColor.Value) - 1;
-        var data = ModPatches.modContentHelper.Load<DataModel>("assets/data.json");
+        var data = ModPatches.assetHandler.Data;
         var color = __instance.playerChoiceColor.Value;
         if (selection >= 0 && selection < data.Colors.Length)
         {
@@ -140,7 +141,7 @@ internal sealed class ModPatches
         }
 
         spriteBatch.Draw(
-            ModPatches.texture,
+            ModPatches.assetHandler.Texture,
             pos + (__instance.shakeTimer > 0 ? new Vector2(Game1.random.Next(-1, 2), 0) : Vector2.Zero),
             frame with { Y = 64 },
             color * alpha,
@@ -156,7 +157,7 @@ internal sealed class ModPatches
         }
 
         spriteBatch.Draw(
-            ModPatches.texture,
+            ModPatches.assetHandler.Texture,
             pos + (__instance.shakeTimer > 0 ? new Vector2(Game1.random.Next(-1, 2), 0) : Vector2.Zero),
             frame with { Y = (selection * 32) + 96 },
             Color.White * alpha,
@@ -171,7 +172,13 @@ internal sealed class ModPatches
 
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
-    private static bool DrawLocal(Chest __instance, SpriteBatch spriteBatch, int x, int y, float alpha, bool local)
+    private static bool Chest_drawLocal_prefix(
+        Chest __instance,
+        SpriteBatch spriteBatch,
+        int x,
+        int y,
+        float alpha,
+        bool local)
     {
         if (!__instance.playerChest.Value || __instance.QualifiedItemId != "(BC)256")
         {
@@ -188,7 +195,7 @@ internal sealed class ModPatches
         if (__instance.playerChoiceColor.Value.Equals(Color.Black))
         {
             spriteBatch.Draw(
-                ModPatches.texture,
+                ModPatches.assetHandler.Texture,
                 pos + (__instance.shakeTimer > 0 ? new Vector2(Game1.random.Next(-1, 2), 0) : Vector2.Zero),
                 frame,
                 Color.White * alpha,
@@ -202,7 +209,7 @@ internal sealed class ModPatches
         }
 
         spriteBatch.Draw(
-            ModPatches.texture,
+            ModPatches.assetHandler.Texture,
             pos + (__instance.shakeTimer > 0 ? new Vector2(Game1.random.Next(-1, 2), 0) : Vector2.Zero),
             frame with { Y = 32 },
             Color.White * alpha,
@@ -213,7 +220,7 @@ internal sealed class ModPatches
             baseSortOrder);
 
         spriteBatch.Draw(
-            ModPatches.texture,
+            ModPatches.assetHandler.Texture,
             pos + (__instance.shakeTimer > 0 ? new Vector2(Game1.random.Next(-1, 2), 0) : Vector2.Zero),
             frame with { Y = 64 },
             __instance.playerChoiceColor.Value * alpha,
@@ -230,7 +237,7 @@ internal sealed class ModPatches
         }
 
         spriteBatch.Draw(
-            ModPatches.texture,
+            ModPatches.assetHandler.Texture,
             pos + (__instance.shakeTimer > 0 ? new Vector2(Game1.random.Next(-1, 2), 0) : Vector2.Zero),
             frame with { Y = (32 * selection) + 96 },
             Color.White * alpha,
@@ -245,7 +252,7 @@ internal sealed class ModPatches
 
     [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
-    private static void GetActualCapacity(Chest __instance, ref int __result)
+    private static void Chest_GetActualCapacity_postfix(Chest __instance, ref int __result)
     {
         if (!__instance.playerChest.Value || __instance.QualifiedItemId != "(BC)256")
         {
@@ -255,46 +262,5 @@ internal sealed class ModPatches
         __result = 9;
     }
 
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
-    [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
-    private static void GetLastLidFrame(Chest __instance, ref int __result)
-    {
-        if (!__instance.playerChest.Value || __instance.QualifiedItemId != "(BC)256")
-        {
-            return;
-        }
-
-        __result = __instance.startingLidFrame.Value + 4;
-    }
-
-    [SuppressMessage("ReSharper", "InconsistentNaming", Justification = "Harmony")]
-    [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
-    [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
-    [HarmonyBefore("furyx639.BetterChests")]
-    private static void PlacementAction(SObject __instance, ref bool __result, GameLocation location, int x, int y)
-    {
-        if (!__result)
-        {
-            return;
-        }
-
-        var tile = new Vector2((int)(x / (float)Game1.tileSize), (int)(y / (float)Game1.tileSize));
-        if (!location.Objects.TryGetValue(tile, out var obj)
-            || obj is not Chest
-            {
-                SpecialChestType: Chest.SpecialChestTypes.JunimoChest,
-            } chest)
-        {
-            return;
-        }
-
-        // Change special chest type to none so that it can be colorable
-        chest.SpecialChestType = Chest.SpecialChestTypes.None;
-        chest.GlobalInventoryId = "JunimoChests";
-
-        // Disable some BetterChests features
-        chest.modData["furyx639.BetterChests/HslColorPicker"] = "Disabled";
-        chest.modData["furyx639.BetterChests/InventoryTabs"] = "Disabled";
-        chest.modData["furyx639.BetterChests/ResizeChest"] = "Disabled";
-    }
+    private void OnGameLaunched(GameLaunchedEventArgs e) => this.patchManager.Patch(Mod.Id);
 }

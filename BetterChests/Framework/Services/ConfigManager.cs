@@ -612,6 +612,10 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                         name = TokenParser.ParseText(buildingData.Name);
                         description = TokenParser.ParseText(buildingData.Description);
                         break;
+                    case "Character" when storageId == "Farmer":
+                        name = I18n.Storage_Backpack_Name();
+                        description = I18n.Storage_Backpack_Tooltip();
+                        break;
                     case "Furniture":
                         var data = furnitureData.GetData(storageId);
                         name = TokenParser.ParseText(data.DisplayName);
@@ -1008,6 +1012,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         // Initialize Data Types
         config.StorageOptions.TryAdd("BigCraftables", []);
         config.StorageOptions.TryAdd("Buildings", []);
+        config.StorageOptions.TryAdd("Characters", []);
         config.StorageOptions.TryAdd("Furniture", []);
         config.StorageOptions.TryAdd("Locations", []);
 
@@ -1222,6 +1227,9 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                         HslColorPicker = FeatureOption.Disabled,
                     });
         }
+
+        // Initialize Backpack
+        config.StorageOptions["Characters"].TryAdd("Farmer", new DefaultStorageOptions());
 
         // Initialize Dressers
         config.StorageOptions["Furniture"].TryAdd("704", new DefaultStorageOptions());

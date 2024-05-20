@@ -34,7 +34,7 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public CraftFromChest(
         BetterCraftingIntegration betterCraftingIntegration,

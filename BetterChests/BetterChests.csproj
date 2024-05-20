@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Name>Better Chests</Name>
     <Description>Framework that adds new features to chests.</Description>
-    <Version>2.19.0-beta.3</Version>
+    <Version>2.19.0</Version>
     <EnableHarmony>true</EnableHarmony>
     <RootNamespace>StardewMods.BetterChests</RootNamespace>
     <UniqueId>furyx639.BetterChests</UniqueId>
@@ -26,10 +26,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <SMAPIDependency Include="furyx639.FauxCore" Version="1.1.1" required="true"/>
-    <SMAPIDependency Include="furyx639.ToolbarIcons" required="false"/>
+    <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.0" required="true"/>
+    <SMAPIDependency Include="furyx639.ToolbarIcons" Version="2.8.0" required="false"/>
     <SMAPIDependency Include="leclair.bettercrafting" Version="2.1.0" required="false"/>
-    <SMAPIDependency Include="spacechase0.GenericModConfigMenu" Version="1.8.2" required="false"/>
-    <SMAPIDependency Include="Pathoschild.Automate" required="false"/>
+    <SMAPIDependency Include="spacechase0.GenericModConfigMenu" Version="1.12.0" required="false"/>
+    <SMAPIDependency Include="Pathoschild.Automate" Version="2.0.7" required="false"/>
   </ItemGroup>
 </Project>

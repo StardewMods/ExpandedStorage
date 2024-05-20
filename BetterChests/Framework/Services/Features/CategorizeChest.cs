@@ -20,7 +20,7 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     public CategorizeChest(
         IEventManager eventManager,
         IExpressionHandler expressionHandler,

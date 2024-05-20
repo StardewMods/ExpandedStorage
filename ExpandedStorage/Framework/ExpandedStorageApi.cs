@@ -4,24 +4,24 @@ using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
 using StardewMods.ExpandedStorage.Framework.Models;
-using StardewMods.ExpandedStorage.Framework.Services;
+using StardewMods.ExpandedStorage.Framework.Services.Factory;
 
 /// <inheritdoc />
 public sealed class ExpandedStorageApi : IExpandedStorageApi
 {
-    private readonly AssetHandler assetHandler;
     private readonly BaseEventManager eventManager;
     private readonly IModInfo modInfo;
+    private readonly StorageDataFactory storageDataFactory;
 
     /// <summary>Initializes a new instance of the <see cref="ExpandedStorageApi" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="modInfo">Mod info from the calling mod.</param>
-    /// <param name="assetHandler">Dependency for managing expanded storage chests.</param>
-    internal ExpandedStorageApi(IEventManager eventManager, IModInfo modInfo, AssetHandler assetHandler)
+    /// <param name="storageDataFactory">Dependency used for managing storage data.</param>
+    internal ExpandedStorageApi(IEventManager eventManager, IModInfo modInfo, StorageDataFactory storageDataFactory)
     {
         // Init
         this.modInfo = modInfo;
-        this.assetHandler = assetHandler;
+        this.storageDataFactory = storageDataFactory;
         this.eventManager = new BaseEventManager();
 
         // Events
@@ -33,7 +33,7 @@ public sealed class ExpandedStorageApi : IExpandedStorageApi
 
     /// <inheritdoc />
     public bool TryGetData(Item item, [NotNullWhen(true)] out IStorageData? storageData) =>
-        this.assetHandler.TryGetData(item, out storageData);
+        this.storageDataFactory.TryGetData(item, out storageData);
 
     /// <inheritdoc />
     public void Unsubscribe<TEventArgs>(Action<TEventArgs> handler) => this.eventManager.Unsubscribe(handler);

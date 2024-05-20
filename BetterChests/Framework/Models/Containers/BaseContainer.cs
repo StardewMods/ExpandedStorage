@@ -4,7 +4,6 @@ using System.Globalization;
 using System.Text;
 using Microsoft.Xna.Framework;
 using StardewMods.BetterChests.Framework.Interfaces;
-using StardewMods.BetterChests.Framework.Models.StorageOptions;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.BetterChests;
@@ -17,7 +16,7 @@ using StardewValley.Network;
 internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     where TSource : class
 {
-    private readonly SortedList<StorageOption, Func<IStorageOptions>> storageOptions = [];
+    private readonly SortedList<StorageOption, IStorageOptions> storageOptions = [];
 
     private WeakReference<IStorageContainer?>? parent;
 
@@ -27,7 +26,7 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
 
     /// <inheritdoc />
     public IStorageOptions ActualOptions =>
-        this.storageOptions.TryGetValue(StorageOption.Individual, out var getOptions) ? getOptions() : this;
+        this.storageOptions.TryGetValue(StorageOption.Individual, out var options) ? options : this;
 
     /// <inheritdoc />
     public abstract int Capacity { get; }
@@ -41,7 +40,7 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
                 || this.storageOptions.TryGetValue(StorageOption.Individual, out storageOption)
                 || this.storageOptions.TryGetValue(StorageOption.Global, out storageOption))
             {
-                return storageOption().Description;
+                return storageOption.Description;
             }
 
             return string.Empty;
@@ -57,7 +56,7 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
                 || this.storageOptions.TryGetValue(StorageOption.Individual, out storageOption)
                 || this.storageOptions.TryGetValue(StorageOption.Global, out storageOption))
             {
-                return storageOption().DisplayName;
+                return storageOption.DisplayName;
             }
 
             return string.Empty;
@@ -258,7 +257,7 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     }
 
     /// <inheritdoc />
-    public int ResizeChestCapacity
+    public virtual int ResizeChestCapacity
     {
         get => this.Get(options => options.ResizeChestCapacity);
         set =>
@@ -357,15 +356,15 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     }
 
     /// <inheritdoc />
-    public string StorageName
+    public virtual string StorageName
     {
         get => this.Get(storage => storage.StorageName);
         set => this.Set(options => options.StorageName, (options, newValue) => options.StorageName = newValue, value);
     }
 
     /// <inheritdoc />
-    public void AddOptions(StorageOption storageOption, Func<IStorageOptions> getOptions) =>
-        this.storageOptions.Add(storageOption, getOptions);
+    public void AddOptions(StorageOption storageOption, IStorageOptions options) =>
+        this.storageOptions.Add(storageOption, options);
 
     /// <inheritdoc />
     public void ForEachItem(Func<Item, bool> action)
@@ -390,13 +389,12 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
         var currentOptions = new DefaultStorageOptions();
         foreach (var storageOption in StorageOptionExtensions.GetValues().Except(new[] { StorageOption.Individual }))
         {
-            if (!this.storageOptions.TryGetValue(storageOption, out var getOptions))
+            if (!this.storageOptions.TryGetValue(storageOption, out var options))
             {
                 continue;
             }
 
-            var parentOptions = getOptions();
-            parentOptions.ForEachOption(
+            options.ForEachOption(
                 (name, option) =>
                 {
                     switch (option)
@@ -592,9 +590,6 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     /// <summary>Initialize the individual mod data storage options for this container.</summary>
     protected virtual void InitOptions()
     {
-        var modDataOptions = new ModDataStorageOptions(this.ModData);
-        this.AddOptions(StorageOption.Individual, () => modDataOptions);
-
         // Initialize Storage Name
         if (string.IsNullOrWhiteSpace(this.StorageName)
             && this.ModData.TryGetValue("Pathoschild.ChestsAnywhere/Name", out var chestsAnywhereName)
@@ -610,12 +605,11 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     {
         foreach (var option in StorageOptionExtensions.GetValues())
         {
-            if (!this.storageOptions.TryGetValue(option, out var getOptions))
+            if (!this.storageOptions.TryGetValue(option, out var options))
             {
                 continue;
             }
 
-            var options = getOptions();
             var effectiveValue = getter(options);
             if (!string.IsNullOrWhiteSpace(effectiveValue))
             {
@@ -631,12 +625,11 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     {
         foreach (var option in StorageOptionExtensions.GetValues())
         {
-            if (!this.storageOptions.TryGetValue(option, out var getOptions))
+            if (!this.storageOptions.TryGetValue(option, out var options))
             {
                 continue;
             }
 
-            var options = getOptions();
             var value = getter(options);
             if (!EqualityComparer<TOption>.Default.Equals(value, default(TOption)))
             {
@@ -647,17 +640,21 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
         return default(TOption);
     }
 
-    private void Set(Func<IStorageOptions, string> getter, Action<IStorageOptions, string> setter, string value)
+    private void Set(Func<IStorageOptions, string> getMethod, Action<IStorageOptions, string> setMethod, string value)
     {
-        foreach (var option in StorageOptionExtensions.GetValues().Except(new[] { StorageOption.Individual }))
+        if (!this.storageOptions.TryGetValue(StorageOption.Individual, out var individualOptions))
         {
-            if (!this.storageOptions.TryGetValue(option, out var getOptions))
+            return;
+        }
+
+        foreach (var optionType in StorageOptionExtensions.GetValues())
+        {
+            if (optionType is StorageOption.Individual || !this.storageOptions.TryGetValue(optionType, out var options))
             {
                 continue;
             }
 
-            var options = getOptions();
-            var effectiveValue = getter(options);
+            var effectiveValue = getMethod(options);
             if (string.IsNullOrWhiteSpace(effectiveValue))
             {
                 continue;
@@ -665,32 +662,36 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
 
             if (value.Equals(effectiveValue, StringComparison.OrdinalIgnoreCase))
             {
-                setter(this.ActualOptions, string.Empty);
+                setMethod(individualOptions, string.Empty);
                 return;
             }
 
             break;
         }
 
-        setter(this.ActualOptions, value);
+        setMethod(individualOptions, value);
     }
 
     private void Set<TOption>(
-        Func<IStorageOptions, TOption> getter,
-        Action<IStorageOptions, TOption> setter,
+        Func<IStorageOptions, TOption> getMethod,
+        Action<IStorageOptions, TOption> setMethod,
         TOption value)
         where TOption : struct
     {
         var defaultValue = default(TOption);
-        foreach (var option in StorageOptionExtensions.GetValues().Except(new[] { StorageOption.Individual }))
+        if (!this.storageOptions.TryGetValue(StorageOption.Individual, out var individualOptions))
         {
-            if (!this.storageOptions.TryGetValue(option, out var getOptions))
+            return;
+        }
+
+        foreach (var optionType in StorageOptionExtensions.GetValues())
+        {
+            if (optionType is StorageOption.Individual || !this.storageOptions.TryGetValue(optionType, out var options))
             {
                 continue;
             }
 
-            var options = getOptions();
-            var effectiveValue = getter(options);
+            var effectiveValue = getMethod(options);
             if (EqualityComparer<TOption>.Default.Equals(effectiveValue, defaultValue))
             {
                 continue;
@@ -698,13 +699,13 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
 
             if (value.Equals(effectiveValue))
             {
-                setter(this.ActualOptions, defaultValue);
+                setMethod(individualOptions, defaultValue);
                 return;
             }
 
             break;
         }
 
-        setter(this.ActualOptions, value);
+        setMethod(individualOptions, value);
     }
 }

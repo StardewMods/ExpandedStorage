@@ -41,7 +41,7 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="modEvents">Dependency used for managing access to SMAPI events.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     public MenuHandler(

@@ -28,7 +28,6 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         : base(contentPatcherIntegration, dataHelper, eventManager, modHelper)
     {
         this.genericModConfigMenuIntegration = genericModConfigMenuIntegration;
-
         eventManager.Subscribe<GameLaunchedEventArgs>(this.OnGameLaunched);
     }
 

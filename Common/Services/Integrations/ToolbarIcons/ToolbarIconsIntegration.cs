@@ -13,4 +13,7 @@ internal sealed class ToolbarIconsIntegration : ModIntegration<IToolbarIconsApi>
 
     /// <inheritdoc />
     public override string UniqueId => "furyx639.ToolbarIcons";
+
+    /// <inheritdoc/>
+    public override ISemanticVersion Version { get; } = new SemanticVersion(2, 8, 0);
 }

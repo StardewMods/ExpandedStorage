@@ -27,7 +27,7 @@ internal sealed class CollectItems : BaseFeature<CollectItems>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="patchManager">Dependency used for managing patches.</param>
     public CollectItems(
         ContainerFactory containerFactory,

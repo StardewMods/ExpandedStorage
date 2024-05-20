@@ -15,7 +15,7 @@ internal sealed class ApiFactory : IApiFactory<IFauxCoreApi>
     /// <summary>Initializes a new instance of the <see cref="ApiFactory" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public ApiFactory(
         IAssetHandler assetHandler,

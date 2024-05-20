@@ -30,7 +30,7 @@ internal sealed class AssetHandler
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="foundGarbageCans">The discovered garbage cans.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     public AssetHandler(
         IEventManager eventManager,

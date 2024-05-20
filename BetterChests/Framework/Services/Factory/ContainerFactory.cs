@@ -5,11 +5,13 @@ using Microsoft.Xna.Framework;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models.Containers;
 using StardewMods.BetterChests.Framework.Models.StorageOptions;
+using StardewMods.Common.Models.Data;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewValley.Buildings;
 using StardewValley.Characters;
 using StardewValley.Menus;
 using StardewValley.Objects;
+using StardewValley.TokenizableStrings;
 
 /// <summary>Provides access to all known storages for other services.</summary>
 internal sealed class ContainerFactory
@@ -20,7 +22,7 @@ internal sealed class ContainerFactory
     private readonly Dictionary<string, IStorageOptions> storageOptions = new();
 
     /// <summary>Initializes a new instance of the <see cref="ContainerFactory" /> class.</summary>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="proxyChestFactory">Dependency used for creating virtualized chests.</param>
     public ContainerFactory(IModConfig modConfig, ProxyChestFactory proxyChestFactory)
     {
@@ -347,11 +349,21 @@ internal sealed class ContainerFactory
         // Create the farmer container
         farmerContainer = new FarmerContainer(farmer);
 
-        // Get or initialize the backpack options (TBD replace backpack type with config options)
-        var backpackOptions = new BackpackStorageOptions(farmer);
+        // Add type options for the backpack
+        if (this.modConfig.StorageOptions.GetValueOrDefault("Characters")?.GetValueOrDefault("Farmer") is not null)
+        {
+            var backpackOptions = new ConfigStorageOptions(
+                () => this.modConfig.StorageOptions["Characters"]["Farmer"],
+                I18n.Storage_Backpack_Tooltip,
+                I18n.Storage_Backpack_Name);
 
-        // Add options to the farmer container
-        farmerContainer.AddOptions(StorageOption.Type, () => backpackOptions);
+            farmerContainer.AddOptions(StorageOption.Type, backpackOptions);
+        }
+
+        // Add mod options for the farmer
+        var farmerModel = new ModDataModel(farmer.modData);
+        var farmerOptions = new DictionaryStorageOptions(farmerModel);
+        farmerContainer.AddOptions(StorageOption.Individual, farmerOptions);
 
         // Cache container to instance
         this.cachedContainers.AddOrUpdate(farmer, farmerContainer);
@@ -369,10 +381,10 @@ internal sealed class ContainerFactory
             return true;
         }
 
+        // Create the building container
         switch (building)
         {
             case ShippingBin shippingBin:
-                // Create the shipping bin container
                 buildingContainer = new BuildingContainer(shippingBin);
                 break;
 
@@ -385,7 +397,6 @@ internal sealed class ContainerFactory
                     return true;
                 }
 
-                // Create the building container
                 buildingContainer = new BuildingContainer(building, chest);
 
                 // Cache building chest to the building storage container
@@ -395,20 +406,42 @@ internal sealed class ContainerFactory
             default: return false;
         }
 
-        // Get or initialize the building options
+        // Add global options to the building container
+        buildingContainer.AddOptions(StorageOption.Global, this.modConfig.DefaultOptions);
+
+        // Add mod options to the building container
+        var buildingModel = new ModDataModel(building.modData);
+        var buildingOptions = new DictionaryStorageOptions(buildingModel);
+        buildingContainer.AddOptions(StorageOption.Individual, buildingOptions);
+
+        // Add type options to the building container
         if (!this.storageOptions.TryGetValue($"(B){building.buildingType.Value}", out var typeOptions))
         {
-            typeOptions = new BuildingStorageOptions(building.buildingType.Value);
+            var typeModel = new DictionaryModel(GetCustomFields);
+            typeOptions = new DictionaryStorageOptions(typeModel, GetDescription, GetDisplayName);
             this.storageOptions.Add($"(B){building.buildingType.Value}", typeOptions);
         }
 
-        // Add options to the building container
-        buildingContainer.AddOptions(StorageOption.Global, () => this.modConfig.DefaultOptions);
-        buildingContainer.AddOptions(StorageOption.Type, () => typeOptions);
+        buildingContainer.AddOptions(StorageOption.Type, typeOptions);
 
         // Cache container to instance
         this.cachedContainers.AddOrUpdate(building, buildingContainer);
         return true;
+
+        Dictionary<string, string>? GetCustomFields() =>
+            Game1.buildingData.TryGetValue(building.buildingType.Value, out var buildingData)
+                ? buildingData.CustomFields
+                : null;
+
+        string GetDescription() =>
+            Game1.buildingData.TryGetValue(building.buildingType.Value, out var buildingData)
+                ? TokenParser.ParseText(buildingData.Description)
+                : I18n.Storage_Other_Name();
+
+        string GetDisplayName() =>
+            Game1.buildingData.TryGetValue(building.buildingType.Value, out var buildingData)
+                ? TokenParser.ParseText(buildingData.Name)
+                : I18n.Storage_Other_Tooltip();
     }
 
     /// <summary>Tries to get a container from the specified NPC.</summary>
@@ -447,21 +480,37 @@ internal sealed class ContainerFactory
                 // Create the horse container
                 npcContainer = new NpcContainer(horse, saddleBagChest);
 
-                // Get or initialize the stable options
+                // Add global options to the horse container
+                npcContainer.AddOptions(StorageOption.Global, this.modConfig.DefaultOptions);
+
+                // Add mod options to the horse container
+                var npcModel = new ModDataModel(horse.modData);
+                var npcOptions = new DictionaryStorageOptions(npcModel);
+                npcContainer.AddOptions(StorageOption.Individual, npcOptions);
+
+                // Add type options to the horse container
                 if (!this.storageOptions.TryGetValue($"(B){stable.buildingType.Value}", out var typeOptions))
                 {
-                    typeOptions = new BuildingStorageOptions(stable.buildingType.Value);
+                    var typeModel = new DictionaryModel(GetCustomFields);
+                    typeOptions = new DictionaryStorageOptions(
+                        typeModel,
+                        I18n.Storage_Saddlebag_Tooltip,
+                        I18n.Storage_Saddlebag_Name);
+
                     this.storageOptions.Add($"(B){stable.buildingType.Value}", typeOptions);
                 }
 
-                // Add options to the horse container
-                npcContainer.AddOptions(StorageOption.Global, () => this.modConfig.DefaultOptions);
-                npcContainer.AddOptions(StorageOption.Type, () => typeOptions);
+                npcContainer.AddOptions(StorageOption.Type, typeOptions);
 
                 // Cache container to instance
                 this.cachedContainers.AddOrUpdate(npc, npcContainer);
                 this.cachedContainers.AddOrUpdate(saddleBagChest, npcContainer);
                 return true;
+
+                Dictionary<string, string>? GetCustomFields() =>
+                    Game1.buildingData.TryGetValue(stable.buildingType.Value, out var buildingData)
+                        ? buildingData.CustomFields
+                        : null;
 
             default: return false;
         }
@@ -555,21 +604,35 @@ internal sealed class ContainerFactory
         // Create the fridge container
         locationContainer = new FridgeContainer(location, fridge);
 
-        // Get or initialize the fridge options
+        // Add global options to the fridge container
+        locationContainer.AddOptions(StorageOption.Global, this.modConfig.DefaultOptions);
+
+        // Add mod options to the fridge container
+        var buildingModel = new ModDataModel(location.modData);
+        var buildingOptions = new DictionaryStorageOptions(buildingModel);
+        locationContainer.AddOptions(StorageOption.Individual, buildingOptions);
+
+        // Add type options to the fridge container
         if (!this.storageOptions.TryGetValue($"(L){location.Name}", out var typeOptions))
         {
-            typeOptions = new LocationStorageOptions(location.Name);
+            var typeModel = new DictionaryModel(GetCustomFields);
+            typeOptions = new DictionaryStorageOptions(
+                typeModel,
+                I18n.Storage_Fridge_Tooltip,
+                I18n.Storage_Fridge_Name);
+
             this.storageOptions.Add($"(L){location.Name}", typeOptions);
         }
 
-        // Add options to the fridge container
-        locationContainer.AddOptions(StorageOption.Global, () => this.modConfig.DefaultOptions);
-        locationContainer.AddOptions(StorageOption.Type, () => typeOptions);
+        locationContainer.AddOptions(StorageOption.Type, typeOptions);
 
         // Cache container to instance
         this.cachedContainers.AddOrUpdate(fridge, locationContainer);
         this.cachedContainers.AddOrUpdate(location, locationContainer);
         return true;
+
+        Dictionary<string, string>? GetCustomFields() =>
+            DataLoader.Locations(Game1.content).GetValueOrDefault(location.Name)?.CustomFields;
     }
 
     /// <summary>Tries to get a container from the specified object.</summary>
@@ -752,17 +815,25 @@ internal sealed class ContainerFactory
                 container = new FurnitureContainer(furniture);
 
                 // Add global options to the furniture container
-                container.AddOptions(StorageOption.Global, () => this.modConfig.DefaultOptions);
+                container.AddOptions(StorageOption.Global, this.modConfig.DefaultOptions);
+
+                // Add mod options to the furniture container
+                var furnitureModel = new ModDataModel(furniture.modData);
+                var furnitureOptions = new DictionaryStorageOptions(furnitureModel);
+                container.AddOptions(StorageOption.Individual, furnitureOptions);
 
                 // Add type options if furniture exists in config
                 if (this.modConfig.StorageOptions.GetValueOrDefault("Furniture")?.GetValueOrDefault(@object.ItemId) is
                     not null)
                 {
-                    var furnitureOptions = new FurnitureStorageOptions(
+                    var furnitureTypeOptions = new ConfigStorageOptions(
                         () => this.modConfig.StorageOptions["Furniture"][@object.ItemId],
-                        @object.ItemId);
+                        () => TokenParser.ParseText(
+                            ItemRegistry.RequireTypeDefinition("(F)").GetData(@object.ItemId).Description),
+                        () => TokenParser.ParseText(
+                            ItemRegistry.RequireTypeDefinition("(F)").GetData(@object.ItemId).DisplayName));
 
-                    container.AddOptions(StorageOption.Type, () => furnitureOptions);
+                    container.AddOptions(StorageOption.Type, furnitureTypeOptions);
                 }
 
                 // Cache container to instance
@@ -772,16 +843,23 @@ internal sealed class ContainerFactory
             default: return false;
         }
 
-        // Get or initialize the object options
+        // Add global options to the object container
+        container.AddOptions(StorageOption.Global, this.modConfig.DefaultOptions);
+
+        // Add mod options to the object container
+        var objectModel = new ModDataModel(@object.modData);
+        var objectOptions = new DictionaryStorageOptions(objectModel);
+        container.AddOptions(StorageOption.Individual, objectOptions);
+
+        // Add type options to the object container
         if (!this.storageOptions.TryGetValue(@object.QualifiedItemId, out var typeOptions))
         {
-            typeOptions = new BigCraftableStorageOptions(@object.ItemId);
+            var typeModel = new DictionaryModel(GetCustomFields);
+            typeOptions = new DictionaryStorageOptions(typeModel, GetDescription, GetDisplayName);
             this.storageOptions.Add(@object.QualifiedItemId, typeOptions);
         }
 
-        // Add options to the object container
-        container.AddOptions(StorageOption.Global, () => this.modConfig.DefaultOptions);
-        container.AddOptions(StorageOption.Type, () => typeOptions);
+        container.AddOptions(StorageOption.Type, typeOptions);
 
         // Cache container to instance
         this.cachedContainers.AddOrUpdate(@object, container);
@@ -793,5 +871,20 @@ internal sealed class ContainerFactory
         }
 
         return true;
+
+        Dictionary<string, string>? GetCustomFields() =>
+            Game1.bigCraftableData.TryGetValue(@object.ItemId, out var bigCraftableData)
+                ? bigCraftableData.CustomFields
+                : null;
+
+        string GetDescription() =>
+            Game1.bigCraftableData.TryGetValue(@object.ItemId, out var bigCraftableData)
+                ? TokenParser.ParseText(bigCraftableData.Description)
+                : I18n.Storage_Other_Name();
+
+        string GetDisplayName() =>
+            Game1.bigCraftableData.TryGetValue(@object.ItemId, out var bigCraftableData)
+                ? TokenParser.ParseText(bigCraftableData.Name)
+                : I18n.Storage_Other_Tooltip();
     }
 }

@@ -1,6 +1,5 @@
 namespace StardewMods.FauxCore;
 
-using SimpleInjector;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
@@ -12,46 +11,25 @@ using StardewMods.FauxCore.Framework.Services;
 /// <inheritdoc />
 public sealed class ModEntry : Mod
 {
-    private Container container = null!;
-
     /// <inheritdoc />
-    public override object GetApi(IModInfo mod) => this.container.GetInstance<ApiFactory>().CreateApi(mod);
+    public override object GetApi(IModInfo mod) => this.Container.GetInstance<ApiFactory>().CreateApi(mod);
 
     /// <inheritdoc />
     protected override void Init()
     {
-        // Init
         I18n.Init(this.Helper.Translation);
-        this.container = new Container();
-
-        // Configuration
-        this.container.RegisterInstance(this.Helper);
-        this.container.RegisterInstance(this.ModManifest);
-        this.container.RegisterInstance(this.Monitor);
-        this.container.RegisterInstance(this.Helper.Data);
-        this.container.RegisterInstance(this.Helper.Events);
-        this.container.RegisterInstance(this.Helper.GameContent);
-        this.container.RegisterInstance(this.Helper.Input);
-        this.container.RegisterInstance(this.Helper.ModContent);
-        this.container.RegisterInstance(this.Helper.ModRegistry);
-        this.container.RegisterInstance(this.Helper.Reflection);
-        this.container.RegisterInstance(this.Helper.Translation);
-
-        this.container.RegisterSingleton<ApiFactory>();
-        this.container.RegisterSingleton<IAssetHandler, AssetHandler>();
-        this.container.RegisterSingleton<CacheManager>();
-        this.container.RegisterSingleton<IModConfig, ConfigManager>();
-        this.container.RegisterSingleton<ConfigManager, ConfigManager>();
-        this.container.RegisterSingleton<ContentPatcherIntegration>();
-        this.container.RegisterSingleton<IEventManager, EventManager>();
-        this.container.RegisterSingleton<IExpressionHandler, ExpressionHandler>();
-        this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
-        this.container.RegisterSingleton<Log>();
-        this.container.RegisterSingleton<ISimpleLogging, SimpleLogging>();
-        this.container.RegisterSingleton<ThemeHelper>();
-        this.container.RegisterSingleton<IThemeHelper, ThemeHelper>();
-
-        // Verify
-        this.container.Verify();
+        this.Container.RegisterSingleton<ApiFactory>();
+        this.Container.RegisterSingleton<IAssetHandler, AssetHandler>();
+        this.Container.RegisterSingleton<CacheManager>();
+        this.Container.RegisterSingleton<IModConfig, ConfigManager>();
+        this.Container.RegisterSingleton<ConfigManager, ConfigManager>();
+        this.Container.RegisterSingleton<ContentPatcherIntegration>();
+        this.Container.RegisterSingleton<IEventManager, EventManager>();
+        this.Container.RegisterSingleton<IExpressionHandler, ExpressionHandler>();
+        this.Container.RegisterSingleton<GenericModConfigMenuIntegration>();
+        this.Container.RegisterSingleton<Log>();
+        this.Container.RegisterSingleton<ISimpleLogging, SimpleLogging>();
+        this.Container.RegisterSingleton<ThemeHelper>();
+        this.Container.RegisterSingleton<IThemeHelper, ThemeHelper>();
     }
 }

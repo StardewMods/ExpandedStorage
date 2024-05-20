@@ -11,7 +11,7 @@ internal sealed class StatusEffectManager : BaseService<StatusEffectManager>
     private readonly IModConfig modConfig;
 
     /// <summary>Initializes a new instance of the <see cref="StatusEffectManager" /> class.</summary>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     public StatusEffectManager(IModConfig modConfig) => this.modConfig = modConfig;
 
     /// <summary>Adds a custom status effect to the player.</summary>

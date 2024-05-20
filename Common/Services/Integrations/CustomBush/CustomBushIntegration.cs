@@ -13,4 +13,7 @@ internal sealed class CustomBushIntegration : ModIntegration<ICustomBushApi>
 
     /// <inheritdoc />
     public override string UniqueId => "furyx639.CustomBush";
+
+    /// <inheritdoc/>
+    public override ISemanticVersion Version { get; } = new SemanticVersion(1, 2, 2);
 }

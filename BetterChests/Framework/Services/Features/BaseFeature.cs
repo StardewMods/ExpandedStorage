@@ -14,7 +14,7 @@ internal abstract class BaseFeature<TFeature> : BaseService<TFeature>, IFeature
 
     /// <summary>Initializes a new instance of the <see cref="BaseFeature{TFeature}" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     protected BaseFeature(IEventManager eventManager, IModConfig modConfig)
     {
         this.Config = modConfig;

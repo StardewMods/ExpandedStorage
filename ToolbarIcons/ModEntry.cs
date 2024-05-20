@@ -1,6 +1,5 @@
 namespace StardewMods.ToolbarIcons;
 
-using SimpleInjector;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
@@ -15,47 +14,30 @@ using StardewMods.ToolbarIcons.Framework.Services.Integrations.Vanilla;
 /// <inheritdoc />
 public sealed class ModEntry : Mod
 {
-    private Container container = null!;
-
     /// <inheritdoc />
-    public override object GetApi(IModInfo mod) => this.container.GetInstance<ApiFactory>().CreateApi(mod);
+    public override object GetApi(IModInfo mod) => this.Container.GetInstance<ApiFactory>().CreateApi(mod);
 
     /// <inheritdoc />
     protected override void Init()
     {
-        // Init
         I18n.Init(this.Helper.Translation);
-        this.container = new Container();
-
-        // Configuration
-        this.container.RegisterInstance(this.Helper);
-        this.container.RegisterInstance(this.Monitor);
-        this.container.RegisterInstance(this.Helper.Data);
-        this.container.RegisterInstance(this.Helper.Events);
-        this.container.RegisterInstance(this.Helper.GameContent);
-        this.container.RegisterInstance(this.Helper.Input);
-        this.container.RegisterInstance(this.Helper.ModContent);
-        this.container.RegisterInstance(this.Helper.ModRegistry);
-        this.container.RegisterInstance(this.Helper.Reflection);
-        this.container.RegisterInstance(this.Helper.Translation);
-
-        this.container.RegisterSingleton<ApiFactory>();
-        this.container.RegisterSingleton<AssetHandler>();
-        this.container.RegisterSingleton<ComplexOptionFactory>();
-        this.container.RegisterSingleton<ContentPatcherIntegration>();
-        this.container.RegisterSingleton<IEventManager, EventManager>();
-        this.container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
-        this.container.RegisterSingleton<FauxCoreIntegration>();
-        this.container.RegisterSingleton<GenericModConfigMenuIntegration>();
-        this.container.RegisterSingleton<IModConfig, ConfigManager>();
-        this.container.RegisterSingleton<ConfigManager, ConfigManager>();
-        this.container.RegisterSingleton<IntegrationManager>();
-        this.container.RegisterSingleton<Log>();
-        this.container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
-        this.container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
-        this.container.RegisterSingleton<ToolbarManager>();
-
-        this.container.Collection.Register<ICustomIntegration>(
+        this.Container.RegisterSingleton<ApiFactory>();
+        this.Container.RegisterSingleton<AssetHandler>();
+        this.Container.RegisterSingleton<ComplexOptionFactory>();
+        this.Container.RegisterSingleton<ContentPatcherIntegration>();
+        this.Container.RegisterSingleton<IEventManager, EventManager>();
+        this.Container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
+        this.Container.RegisterSingleton<FauxCoreIntegration>();
+        this.Container.RegisterSingleton<GenericModConfigMenuIntegration>();
+        this.Container.RegisterSingleton<IModConfig, ConfigManager>();
+        this.Container.RegisterSingleton<ConfigManager, ConfigManager>();
+        this.Container.RegisterSingleton<IntegrationManager>();
+        this.Container.RegisterSingleton<Log>();
+        this.Container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
+        this.Container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
+        this.Container.RegisterSingleton<ToolbarManager>();
+        this.Container.RegisterInstance(new Dictionary<string, string?>());
+        this.Container.Collection.Register<ICustomIntegration>(
             typeof(AlwaysScrollMap),
             typeof(CjbCheatsMenu),
             typeof(CjbItemSpawner),
@@ -65,10 +47,5 @@ public sealed class ModEntry : Mod
             typeof(StardewAquarium),
             typeof(ToDew),
             typeof(ToggleCollision));
-
-        this.container.RegisterInstance(new Dictionary<string, string?>());
-
-        // Verify
-        this.container.Verify();
     }
 }

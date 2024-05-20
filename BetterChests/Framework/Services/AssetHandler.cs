@@ -10,6 +10,7 @@ using StardewMods.BetterChests.Framework.Models.StorageOptions;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
+using StardewMods.Common.Models.Data;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -32,7 +33,7 @@ internal sealed class AssetHandler
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public AssetHandler(
@@ -100,7 +101,8 @@ internal sealed class AssetHandler
                         }
 
                         bigCraftableData.CustomFields ??= new Dictionary<string, string>();
-                        var typeOptions = new CustomFieldsStorageOptions(() => bigCraftableData.CustomFields);
+                        var typeModel = new DictionaryModel(() => bigCraftableData.CustomFields);
+                        var typeOptions = new DictionaryStorageOptions(typeModel);
                         storageOptions.CopyTo(typeOptions);
                     }
                 });
@@ -123,7 +125,8 @@ internal sealed class AssetHandler
                         }
 
                         buildingData.CustomFields ??= new Dictionary<string, string>();
-                        var typeOptions = new CustomFieldsStorageOptions(() => buildingData.CustomFields);
+                        var typeModel = new DictionaryModel(() => buildingData.CustomFields);
+                        var typeOptions = new DictionaryStorageOptions(typeModel);
                         storageOptions.CopyTo(typeOptions);
                     }
                 });
@@ -146,7 +149,8 @@ internal sealed class AssetHandler
                         }
 
                         locationData.CustomFields ??= new Dictionary<string, string>();
-                        var typeOptions = new CustomFieldsStorageOptions(() => locationData.CustomFields);
+                        var typeModel = new DictionaryModel(() => locationData.CustomFields);
+                        var typeOptions = new DictionaryStorageOptions(typeModel);
                         storageOptions.CopyTo(typeOptions);
                     }
                 });

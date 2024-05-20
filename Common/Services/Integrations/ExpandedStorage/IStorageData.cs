@@ -9,6 +9,9 @@ public interface IStorageData
     /// <summary>Gets or sets the number of frames in the lid animation.</summary>
     public int Frames { get; set; }
 
+    /// <summary>Gets or sets the global inventory id.</summary>
+    public string? GlobalInventoryId { get; set; }
+
     /// <summary>Gets or sets a value indicating whether the storage is a fridge.</summary>
     public bool IsFridge { get; set; }
 

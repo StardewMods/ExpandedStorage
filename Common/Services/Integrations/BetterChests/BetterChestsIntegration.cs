@@ -1,5 +1,6 @@
 namespace StardewMods.Common.Services.Integrations.BetterChests;
 
+/// <inheritdoc />
 internal sealed class BetterChestsIntegration : ModIntegration<IBetterChestsApi>
 {
     /// <summary>Initializes a new instance of the <see cref="BetterChestsIntegration" /> class.</summary>
@@ -9,4 +10,7 @@ internal sealed class BetterChestsIntegration : ModIntegration<IBetterChestsApi>
 
     /// <inheritdoc />
     public override string UniqueId => "furyx639.BetterChests";
+
+    /// <inheritdoc/>
+    public override ISemanticVersion Version { get; } = new SemanticVersion(2, 19, 0);
 }

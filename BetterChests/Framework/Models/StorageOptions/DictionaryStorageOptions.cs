@@ -1,406 +1,267 @@
 namespace StardewMods.BetterChests.Framework.Models.StorageOptions;
 
-using System.Globalization;
-using NetEscapades.EnumGenerators;
-using StardewMods.Common.Helpers;
+using StardewMods.Common.Interfaces;
+using StardewMods.Common.Models.Data;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 
-/// <inheritdoc />
-internal abstract class DictionaryStorageOptions : IStorageOptions
+/// <inheritdoc cref="StardewMods.Common.Services.Integrations.BetterChests.IStorageOptions" />
+internal sealed class DictionaryStorageOptions : DictionaryDataModel, IStorageOptions
 {
-    private const string Prefix = "furyx639.BetterChests/";
-    private readonly Dictionary<string, CachedValue<ChestMenuOption>> cachedChestMenuOption = new();
+    private readonly Func<string> getDescription;
+    private readonly Func<string> getDisplayName;
 
-    private readonly Dictionary<string, CachedValue<int>> cachedInt = new();
-    private readonly Dictionary<string, CachedValue<FeatureOption>> cachedOption = new();
-    private readonly Dictionary<string, CachedValue<RangeOption>> cachedRangeOption = new();
+    /// <summary>Initializes a new instance of the <see cref="DictionaryStorageOptions" /> class.</summary>
+    /// <param name="dictionaryModel">The backing dictionary.</param>
+    /// <param name="getDescription">Get method for the description.</param>
+    /// <param name="getDisplayName">Get method for the display name.</param>
+    public DictionaryStorageOptions(
+        IDictionaryModel dictionaryModel,
+        Func<string>? getDescription = null,
+        Func<string>? getDisplayName = null)
+        : base(dictionaryModel)
+    {
+        this.getDescription = getDescription ?? I18n.Storage_Other_Tooltip;
+        this.getDisplayName = getDisplayName ?? I18n.Storage_Other_Name;
+    }
 
     /// <inheritdoc />
-    public virtual string Description => I18n.Storage_Other_Name();
+    public string Description => this.getDescription();
 
     /// <inheritdoc />
-    public virtual string DisplayName => I18n.Storage_Other_Tooltip();
+    public string DisplayName => this.getDisplayName();
 
     /// <inheritdoc />
     public RangeOption AccessChest
     {
-        get => this.Get(RangeOptionKey.AccessChest);
-        set => this.Set(RangeOptionKey.AccessChest, value);
+        get => this.Get(nameof(this.AccessChest), DictionaryStorageOptions.StringToRangeOption);
+        set => this.Set(nameof(this.AccessChest), value, DictionaryStorageOptions.RangeOptionToString);
     }
 
     /// <inheritdoc />
     public int AccessChestPriority
     {
-        get => this.Get(IntegerKey.AccessChestPriority);
-        set => this.Set(IntegerKey.AccessChestPriority, value);
+        get => this.Get(nameof(this.AccessChestPriority), DictionaryDataModel.StringToInt);
+        set => this.Set(nameof(this.AccessChestPriority), value, DictionaryDataModel.IntToString);
     }
 
     /// <inheritdoc />
     public FeatureOption AutoOrganize
     {
-        get => this.Get(OptionKey.AutoOrganize);
-        set => this.Set(OptionKey.AutoOrganize, value);
+        get => this.Get(nameof(this.AutoOrganize), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.AutoOrganize), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public FeatureOption CarryChest
     {
-        get => this.Get(OptionKey.CarryChest);
-        set => this.Set(OptionKey.CarryChest, value);
+        get => this.Get(nameof(this.CarryChest), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.CarryChest), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public FeatureOption CategorizeChest
     {
-        get => this.Get(OptionKey.CategorizeChest);
-        set => this.Set(OptionKey.CategorizeChest, value);
+        get => this.Get(nameof(this.CategorizeChest), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.CategorizeChest), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public FeatureOption CategorizeChestBlockItems
     {
-        get => this.Get(OptionKey.CategorizeChestBlockItems);
-        set => this.Set(OptionKey.CategorizeChestBlockItems, value);
+        get => this.Get(nameof(this.CategorizeChestBlockItems), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.CategorizeChestBlockItems), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public FeatureOption CategorizeChestIncludeStacks
     {
-        get => this.Get(OptionKey.CategorizeChestIncludeStacks);
-        set => this.Set(OptionKey.CategorizeChestIncludeStacks, value);
+        get => this.Get(nameof(this.CategorizeChestIncludeStacks), DictionaryStorageOptions.StringToFeatureOption);
+        set =>
+            this.Set(nameof(this.CategorizeChestIncludeStacks), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public string CategorizeChestSearchTerm
     {
-        get => this.Get(StringKey.CategorizeChestSearchTerm);
-        set => this.Set(StringKey.CategorizeChestSearchTerm, value);
+        get => this.Get(nameof(this.CategorizeChestSearchTerm));
+        set => this.Set(nameof(this.CategorizeChestSearchTerm), value);
     }
 
     /// <inheritdoc />
     public FeatureOption ChestFinder
     {
-        get => this.Get(OptionKey.ChestFinder);
-        set => this.Set(OptionKey.ChestFinder, value);
+        get => this.Get(nameof(this.ChestFinder), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.ChestFinder), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public FeatureOption CollectItems
     {
-        get => this.Get(OptionKey.CollectItems);
-        set => this.Set(OptionKey.CollectItems, value);
+        get => this.Get(nameof(this.CollectItems), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.CollectItems), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public FeatureOption ConfigureChest
     {
-        get => this.Get(OptionKey.ConfigureChest);
-        set => this.Set(OptionKey.ConfigureChest, value);
+        get => this.Get(nameof(this.ConfigureChest), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.ConfigureChest), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public RangeOption CookFromChest
     {
-        get => this.Get(RangeOptionKey.CookFromChest);
-        set => this.Set(RangeOptionKey.CookFromChest, value);
+        get => this.Get(nameof(this.CookFromChest), DictionaryStorageOptions.StringToRangeOption);
+        set => this.Set(nameof(this.CookFromChest), value, DictionaryStorageOptions.RangeOptionToString);
     }
 
     /// <inheritdoc />
     public RangeOption CraftFromChest
     {
-        get => this.Get(RangeOptionKey.CraftFromChest);
-        set => this.Set(RangeOptionKey.CraftFromChest, value);
+        get => this.Get(nameof(this.CraftFromChest), DictionaryStorageOptions.StringToRangeOption);
+        set => this.Set(nameof(this.CraftFromChest), value, DictionaryStorageOptions.RangeOptionToString);
     }
 
     /// <inheritdoc />
     public int CraftFromChestDistance
     {
-        get => this.Get(IntegerKey.CraftFromChestDistance);
-        set => this.Set(IntegerKey.CraftFromChestDistance, value);
+        get => this.Get(nameof(this.CraftFromChestDistance), DictionaryDataModel.StringToInt);
+        set => this.Set(nameof(this.CraftFromChestDistance), value, DictionaryDataModel.IntToString);
     }
 
     /// <inheritdoc />
     public FeatureOption HslColorPicker
     {
-        get => this.Get(OptionKey.HslColorPicker);
-        set => this.Set(OptionKey.HslColorPicker, value);
+        get => this.Get(nameof(this.HslColorPicker), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.HslColorPicker), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public FeatureOption InventoryTabs
     {
-        get => this.Get(OptionKey.InventoryTabs);
-        set => this.Set(OptionKey.InventoryTabs, value);
+        get => this.Get(nameof(this.InventoryTabs), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.InventoryTabs), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public FeatureOption OpenHeldChest
     {
-        get => this.Get(OptionKey.OpenHeldChest);
-        set => this.Set(OptionKey.OpenHeldChest, value);
+        get => this.Get(nameof(this.OpenHeldChest), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.OpenHeldChest), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public ChestMenuOption ResizeChest
     {
-        get =>
-            ChestMenuOptionExtensions.TryParse(this.Get(StringKey.ResizeChest), out var capacityOption)
-                ? capacityOption
-                : ChestMenuOption.Default;
-        set => this.Set(StringKey.ResizeChest, value == ChestMenuOption.Default ? string.Empty : value.ToStringFast());
+        get => this.Get(nameof(this.ResizeChest), DictionaryStorageOptions.StringToChestMenuOption);
+        set => this.Set(nameof(this.ResizeChest), value, DictionaryStorageOptions.ChestMenuOptionToString);
     }
 
     /// <inheritdoc />
-    public virtual int ResizeChestCapacity
+    public int ResizeChestCapacity
     {
-        get => this.Get(IntegerKey.ResizeChestCapacity);
-        set => this.Set(IntegerKey.ResizeChestCapacity, value);
+        get => this.Get(nameof(this.ResizeChestCapacity), DictionaryDataModel.StringToInt);
+        set => this.Set(nameof(this.ResizeChestCapacity), value, DictionaryDataModel.IntToString);
     }
 
     /// <inheritdoc />
     public FeatureOption SearchItems
     {
-        get => this.Get(OptionKey.SearchItems);
-        set => this.Set(OptionKey.SearchItems, value);
+        get => this.Get(nameof(this.SearchItems), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.SearchItems), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public FeatureOption ShopFromChest
     {
-        get => this.Get(OptionKey.ShopFromChest);
-        set => this.Set(OptionKey.ShopFromChest, value);
+        get => this.Get(nameof(this.ShopFromChest), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.ShopFromChest), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public FeatureOption SortInventory
     {
-        get => this.Get(OptionKey.SortInventory);
-        set => this.Set(OptionKey.SortInventory, value);
+        get => this.Get(nameof(this.SortInventory), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.SortInventory), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public string SortInventoryBy
     {
-        get => this.Get(StringKey.SortInventoryBy);
-        set => this.Set(StringKey.SortInventoryBy, value);
+        get => this.Get(nameof(this.SortInventoryBy));
+        set => this.Set(nameof(this.SortInventoryBy), value);
     }
 
     /// <inheritdoc />
     public RangeOption StashToChest
     {
-        get => this.Get(RangeOptionKey.StashToChest);
-        set => this.Set(RangeOptionKey.StashToChest, value);
+        get => this.Get(nameof(this.StashToChest), DictionaryStorageOptions.StringToRangeOption);
+        set => this.Set(nameof(this.StashToChest), value, DictionaryStorageOptions.RangeOptionToString);
     }
 
     /// <inheritdoc />
     public int StashToChestDistance
     {
-        get => this.Get(IntegerKey.StashToChestDistance);
-        set => this.Set(IntegerKey.StashToChestDistance, value);
+        get => this.Get(nameof(this.StashToChestDistance), DictionaryDataModel.StringToInt);
+        set => this.Set(nameof(this.StashToChestDistance), value, DictionaryDataModel.IntToString);
     }
 
     /// <inheritdoc />
     public StashPriority StashToChestPriority
     {
-        get =>
-            StashPriorityExtensions.TryParse(this.Get(StringKey.StashToChestPriority), out var stashPriority)
-                ? stashPriority
-                : StashPriority.Default;
-        set => this.Set(StringKey.StashToChestPriority, value.ToStringFast());
+        get => this.Get(nameof(this.StashToChestPriority), DictionaryStorageOptions.StringToStashPriority);
+        set => this.Set(nameof(this.StashToChestPriority), value, DictionaryStorageOptions.StashPriorityToString);
     }
 
     /// <inheritdoc />
     public string StorageIcon
     {
-        get => this.Get(StringKey.StorageIcon);
-        set => this.Set(StringKey.StorageIcon, value);
+        get => this.Get(nameof(this.StorageIcon));
+        set => this.Set(nameof(this.StorageIcon), value);
     }
 
     /// <inheritdoc />
     public FeatureOption StorageInfo
     {
-        get => this.Get(OptionKey.StorageInfo);
-        set => this.Set(OptionKey.StorageInfo, value);
+        get => this.Get(nameof(this.StorageInfo), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.StorageInfo), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public FeatureOption StorageInfoHover
     {
-        get => this.Get(OptionKey.StorageInfoHover);
-        set => this.Set(OptionKey.StorageInfoHover, value);
+        get => this.Get(nameof(this.StorageInfoHover), DictionaryStorageOptions.StringToFeatureOption);
+        set => this.Set(nameof(this.StorageInfoHover), value, DictionaryStorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />
     public string StorageName
     {
-        get => this.Get(StringKey.StorageName);
-        set => this.Set(StringKey.StorageName, value);
+        get => this.Get(nameof(this.StorageName));
+        set => this.Set(nameof(this.StorageName), value);
     }
 
-    /// <summary>Sets the value for a given key in the derived class.</summary>
-    /// <param name="key">The key associated with the value.</param>
-    /// <param name="value">The value to be set.</param>
-    protected abstract void SetValue(string key, string value);
+    /// <inheritdoc />
+    protected override string Prefix => Mod.Prefix;
 
-    /// <summary>Tries to get the data associated with the specified key.</summary>
-    /// <param name="key">The key to search for.</param>
-    /// <param name="value">When this method returns, contains the value associated with the specified key; otherwise, null.</param>
-    /// <returns><c>true</c> if the key was found; otherwise, <c>false</c>.</returns>
-    protected abstract bool TryGetValue(string key, [NotNullWhen(true)] out string? value);
+    private static string ChestMenuOptionToString(ChestMenuOption value) => value.ToStringFast();
 
-    private FeatureOption Get(OptionKey optionKey)
-    {
-        var key = DictionaryStorageOptions.Prefix + optionKey.ToStringFast();
-        if (!this.TryGetValue(key, out var value))
-        {
-            return FeatureOption.Default;
-        }
+    private static string FeatureOptionToString(FeatureOption value) => value.ToStringFast();
 
-        // Return from cache
-        if (this.cachedOption.TryGetValue(key, out var cachedValue) && cachedValue.OriginalValue == value)
-        {
-            return cachedValue.Value;
-        }
+    private static string RangeOptionToString(RangeOption value) => value.ToStringFast();
 
-        // Save to cache
-        var newValue = FeatureOptionExtensions.TryParse(value, out var option) ? option : FeatureOption.Default;
-        this.cachedOption[key] = new CachedValue<FeatureOption>(value, newValue);
-        return newValue;
-    }
+    private static string StashPriorityToString(StashPriority value) => value.ToStringFast();
 
-    private RangeOption Get(RangeOptionKey rangeOptionKey)
-    {
-        var key = DictionaryStorageOptions.Prefix + rangeOptionKey.ToStringFast();
-        if (!this.TryGetValue(key, out var value))
-        {
-            return RangeOption.Default;
-        }
+    private static ChestMenuOption StringToChestMenuOption(string value) =>
+        ChestMenuOptionExtensions.TryParse(value, out var chestMenuOption) ? chestMenuOption : ChestMenuOption.Default;
 
-        // Return from cache
-        if (this.cachedRangeOption.TryGetValue(key, out var cachedValue) && cachedValue.OriginalValue == value)
-        {
-            return cachedValue.Value;
-        }
+    private static FeatureOption StringToFeatureOption(string value) =>
+        FeatureOptionExtensions.TryParse(value, out var featureOption, true) ? featureOption : FeatureOption.Default;
 
-        // Save to cache
-        var newValue = RangeOptionExtensions.TryParse(value, out var rangeOption) ? rangeOption : RangeOption.Default;
-        this.cachedRangeOption[key] = new CachedValue<RangeOption>(value, newValue);
-        return newValue;
-    }
+    private static RangeOption StringToRangeOption(string value) =>
+        RangeOptionExtensions.TryParse(value, out var rangeOption, true) ? rangeOption : RangeOption.Default;
 
-    private int Get(IntegerKey integerKey)
-    {
-        var key = DictionaryStorageOptions.Prefix + integerKey.ToStringFast();
-        if (!this.TryGetValue(key, out var value))
-        {
-            return 0;
-        }
-
-        // Return from cache
-        if (this.cachedInt.TryGetValue(key, out var cachedValue) && cachedValue.OriginalValue == value)
-        {
-            return cachedValue.Value;
-        }
-
-        // Save to cache
-        var newValue = value.GetInt();
-        this.cachedInt[key] = new CachedValue<int>(value, newValue);
-        return newValue;
-    }
-
-    private string Get(StringKey stringKey)
-    {
-        var key = DictionaryStorageOptions.Prefix + stringKey.ToStringFast();
-        return !this.TryGetValue(key, out var value) ? string.Empty : value;
-    }
-
-    private void Set(OptionKey optionKey, FeatureOption value)
-    {
-        var key = DictionaryStorageOptions.Prefix + optionKey.ToStringFast();
-        var stringValue = value == FeatureOption.Default ? string.Empty : value.ToStringFast();
-        this.cachedOption[key] = new CachedValue<FeatureOption>(stringValue, value);
-        this.SetValue(key, stringValue);
-    }
-
-    private void Set(RangeOptionKey rangeOptionKey, RangeOption value)
-    {
-        var key = DictionaryStorageOptions.Prefix + rangeOptionKey.ToStringFast();
-        var stringValue = value == RangeOption.Default ? string.Empty : value.ToStringFast();
-        this.cachedRangeOption[key] = new CachedValue<RangeOption>(stringValue, value);
-        this.SetValue(key, stringValue);
-    }
-
-    private void Set(IntegerKey integerKey, int value)
-    {
-        var key = DictionaryStorageOptions.Prefix + integerKey.ToStringFast();
-        var stringValue = value == 0 ? string.Empty : value.ToString(CultureInfo.InvariantCulture);
-        this.cachedInt[key] = new CachedValue<int>(stringValue, value);
-        this.SetValue(key, stringValue);
-    }
-
-    private void Set(StringKey stringKey, string value)
-    {
-        var key = DictionaryStorageOptions.Prefix + stringKey.ToStringFast();
-        this.SetValue(key, value);
-    }
-
-    private readonly struct CachedValue<T>(string originalValue, T cachedValue)
-    {
-        public T Value { get; } = cachedValue;
-
-        public string OriginalValue { get; } = originalValue;
-    }
-#pragma warning disable SA1201
-#pragma warning disable SA1600
-#pragma warning disable SA1602
-
-    [EnumExtensions]
-    internal enum IntegerKey
-    {
-        AccessChestPriority,
-        CraftFromChestDistance,
-        ResizeChestCapacity,
-        StashToChestDistance,
-    }
-
-    [EnumExtensions]
-    internal enum OptionKey
-    {
-        AutoOrganize,
-        CarryChest,
-        CategorizeChest,
-        CategorizeChestBlockItems,
-        CategorizeChestIncludeStacks,
-        ChestFinder,
-        CollectItems,
-        ConfigureChest,
-        HslColorPicker,
-        InventoryTabs,
-        OpenHeldChest,
-        SearchItems,
-        ShopFromChest,
-        SortInventory,
-        StorageInfo,
-        StorageInfoHover,
-    }
-
-    [EnumExtensions]
-    internal enum RangeOptionKey
-    {
-        AccessChest,
-        CookFromChest,
-        CraftFromChest,
-        StashToChest,
-    }
-
-    [EnumExtensions]
-    internal enum StringKey
-    {
-        CategorizeChestSearchTerm,
-        ResizeChest,
-        SortInventoryBy,
-        StashToChestPriority,
-        StorageIcon,
-        StorageName,
-    }
+    private static StashPriority StringToStashPriority(string value) =>
+        StashPriorityExtensions.TryParse(value, out var stashPriority) ? stashPriority : StashPriority.Default;
 }

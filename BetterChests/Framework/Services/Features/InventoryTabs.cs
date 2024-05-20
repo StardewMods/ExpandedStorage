@@ -26,7 +26,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     public InventoryTabs(
         IEventManager eventManager,
         IExpressionHandler expressionHandler,

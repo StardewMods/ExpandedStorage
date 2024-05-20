@@ -4,13 +4,16 @@ using NetEscapades.EnumGenerators;
 
 /// <summary>Custom field keys supported by Expanded Storage.</summary>
 [EnumExtensions]
-internal enum CustomFieldKeys
+internal enum DictionaryKeys
 {
     /// <summary>The sound to play when the lid closing animation plays.</summary>
     CloseNearbySound,
 
     /// <summary>The number of frames in the lid animation.</summary>
     Frames,
+
+    /// <summary>The global inventory id.</summary>
+    GlobalInventoryId,
 
     /// <summary>Indicates whether the storage is a fridge.</summary>
     IsFridge,

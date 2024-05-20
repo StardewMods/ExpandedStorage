@@ -20,7 +20,7 @@ internal sealed class CollectService : BaseService<CollectService>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public CollectService(
         AssetHandler assetHandler,

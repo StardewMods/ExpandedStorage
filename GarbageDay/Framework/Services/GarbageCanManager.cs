@@ -32,7 +32,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="foundGarbageCans">The discovered garbage cans.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public GarbageCanManager(

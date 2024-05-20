@@ -45,7 +45,7 @@ internal sealed class HslPicker
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
-    /// <param name="modConfig">Dependency used for managing config data.</param>
+    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="getColor">Get method for the current color.</param>
     /// <param name="setColor">Set method for the current color.</param>
     public HslPicker(

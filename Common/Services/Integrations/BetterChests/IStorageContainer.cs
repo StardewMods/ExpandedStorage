@@ -37,8 +37,8 @@ public interface IStorageContainer : IStorageOptions
 
     /// <summary>Adds an option getter.</summary>
     /// <param name="storageOption">Which storage option to add.</param>
-    /// <param name="getOptions">A function that returns an instance of IStorageOptions.</param>
-    public void AddOptions(StorageOption storageOption, Func<IStorageOptions> getOptions);
+    /// <param name="options">The storage options.</param>
+    public void AddOptions(StorageOption storageOption, IStorageOptions options);
 
     /// <summary>Gets the parent storage options.</summary>
     /// <returns>The parent storage options.</returns>
