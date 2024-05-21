@@ -2,9 +2,9 @@ namespace StardewMods.FauxCore.Framework.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Interfaces;
 using StardewMods.FauxCore.Framework.Models;
@@ -69,26 +69,26 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandlerExtension, I
     private readonly IconRegistry iconRegistry;
     private readonly Dictionary<Color, Color> paletteSwap = new();
 
-    private IRawTextureData? mouseCursors;
-
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
+    /// <param name="contentPatcherIntegration">Dependency for Content Patcher integration.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     public AssetHandler(
+        ContentPatcherIntegration contentPatcherIntegration,
         IEventManager eventManager,
         IGameContentHelper gameContentHelper,
         IModContentHelper modContentHelper)
-        : base(eventManager, gameContentHelper, modContentHelper)
+        : base(contentPatcherIntegration, eventManager, gameContentHelper, modContentHelper)
     {
         this.iconRegistry = new IconRegistry(this, Mod.Manifest);
 
         this
             .Asset($"{Mod.Id}/Icons")
             .Load(static () => new Dictionary<string, IconData>(StringComparer.OrdinalIgnoreCase))
-            .Watch(onInvalidated: this.RefreshIcons);
+            .Watch(this.RefreshIcons, _ => this.RefreshIcons());
 
-        this.Asset("LooseSprites/Cursors").Watch(onInvalidated: this.RefreshPalette);
+        this.Asset("LooseSprites/Cursors").Watch(this.RefreshPalette, _ => this.RefreshPalette());
 
         this.AddAsset($"{Mod.Id}/UI", modContentHelper.Load<IRawTextureData>("assets/ui.png"));
 
@@ -108,37 +108,40 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandlerExtension, I
             return;
         }
 
+        Log.Trace("Adding asset to theme helper: {0}", path);
         this.cachedRawTextures.TryAdd(assetName, data);
-        this.Asset(assetName).Load(() => this.LoadAsset(assetName));
-        this.Asset("LooseSprites/Cursors").Watch(onInvalidated: _ => this.Asset(assetName).Invalidate());
+        var asset = this.Asset(assetName);
+        asset.Load(() => this.LoadAsset(assetName));
+        this.Asset("LooseSprites/Cursors").Watch(onInvalidated: _ => asset.Invalidate());
     }
 
     /// <inheritdoc />
     public void AddAsset(IIcon icon)
     {
         var assetName = this.GameContentHelper.ParseAssetName($"{Mod.Id}/Buttons/{icon.Id}");
-        this.Asset(assetName).Load(() => this.LoadButtonTexture(icon));
-        this.Asset(icon.Path).Watch(onInvalidated: _ => this.Asset(assetName).Invalidate());
-        this.Asset($"{Mod.Id}/UI").Watch(onInvalidated: _ => this.Asset(assetName).Invalidate());
+        var asset = this.Asset(assetName);
+        asset.Load(() => this.LoadButtonTexture(icon));
+        this.Asset(icon.Path).Watch(onInvalidated: _ => asset.Invalidate());
+        this.Asset($"{Mod.Id}/UI").Watch(onInvalidated: _ => asset.Invalidate());
     }
 
     private object LoadAsset(IAssetName assetName)
     {
-        if (!this.cachedRawTextures.TryGetValue(assetName, out var cachedRawTexture))
+        if (!this.cachedRawTextures.TryGetValue(assetName, out var rawTexture))
         {
             throw new KeyNotFoundException($"No asset data found for key: {assetName}");
         }
 
-        var texture = new Texture2D(Game1.spriteBatch.GraphicsDevice, cachedRawTexture.Width, cachedRawTexture.Height);
-
-        texture.SetData(
-            cachedRawTexture.Data.Select(color => this.paletteSwap.GetValueOrDefault(color, color)).ToArray());
-
+        Log.Trace("Generating texture for asset {0}", assetName.Name);
+        var texture = new Texture2D(Game1.spriteBatch.GraphicsDevice, rawTexture.Width, rawTexture.Height);
+        texture.SetData(rawTexture.Data.Select(color => this.paletteSwap.GetValueOrDefault(color, color)).ToArray());
         return texture;
     }
 
     private Texture2D LoadButtonTexture(IIcon icon)
     {
+        Log.Trace("Generating button texture for icon {0}", icon.Id);
+
         // Generate button texture
         var length = (int)(16 * Math.Ceiling(icon.Area.Width / 16d));
         var scale = length / 16;
@@ -151,7 +154,6 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandlerExtension, I
         {
             var uiTexture = this.Asset(uiAsset).Require<Texture2D>();
             uiRawTexture = new VanillaTexture(uiTexture);
-            this.cachedRawTextures.Add(uiAsset, uiRawTexture);
         }
 
         // Copy base to colors
@@ -205,49 +207,26 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandlerExtension, I
         return texture;
     }
 
-    private void RefreshIcons(AssetsInvalidatedEventArgs e)
+    private void RefreshIcons()
     {
-        var icons = this.GameContentHelper.Load<Dictionary<string, IconData>>($"{Mod.Id}/Icons");
-        foreach (var (key, icon) in icons)
+        foreach (var (key, icon) in this.Asset($"{Mod.Id}/Icons").Require<Dictionary<string, IconData>>())
         {
             this.iconRegistry.Add(key, icon.Path, icon.Area);
         }
     }
 
-    private void RefreshPalette(AssetsInvalidatedEventArgs e)
+    private void RefreshPalette()
     {
-        this.mouseCursors = new VanillaTexture(Game1.mouseCursors);
-        var assetName = this.GameContentHelper.ParseAssetName("LooseSprites/MouseCursors");
-        this.cachedRawTextures[assetName] = this.mouseCursors;
+        var mouseCursors = new VanillaTexture(Game1.mouseCursors);
+        this.paletteSwap.Clear();
         foreach (var (points, color) in AssetHandler.VanillaPalette)
         {
-            var sample = points
-                .Select(point => this.mouseCursors.Data[point.X + (point.Y * this.mouseCursors.Width)])
+            this.paletteSwap[color] = points
+                .Select(point => mouseCursors.Data[point.X + (point.Y * mouseCursors.Width)])
                 .GroupBy(sample => sample)
                 .OrderByDescending(group => group.Count())
                 .First()
                 .Key;
-
-            var same = color.Equals(sample);
-            if (this.paletteSwap.TryGetValue(color, out var currentColor))
-            {
-                if (same)
-                {
-                    this.paletteSwap.Remove(color);
-                    continue;
-                }
-
-                if (currentColor == sample)
-                {
-                    continue;
-                }
-            }
-            else if (same)
-            {
-                continue;
-            }
-
-            this.paletteSwap[color] = sample;
         }
     }
 }

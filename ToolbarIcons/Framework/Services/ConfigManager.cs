@@ -48,8 +48,14 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     /// <inheritdoc />
     public List<ToolbarIcon> Icons => this.Config.Icons;
 
+    /// <inheritdoc/>
+    public bool PlaySound => this.Config.PlaySound;
+
     /// <inheritdoc />
     public float Scale => this.Config.Scale;
+
+    /// <inheritdoc />
+    public bool ShowTooltip => this.Config.ShowTooltip;
 
     /// <inheritdoc />
     public KeybindList ToggleKey => this.Config.ToggleKey;
@@ -91,6 +97,20 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
 
         gmcm.AddBoolOption(
             Mod.Manifest,
+            () => config.PlaySound,
+            value => config.PlaySound = value,
+            I18n.Config_PlaySound_Name,
+            I18n.Config_PlaySound_Tooltip);
+
+        gmcm.AddBoolOption(
+            Mod.Manifest,
+            () => config.ShowTooltip,
+            value => config.ShowTooltip = value,
+            I18n.Config_ShowTooltip_Name,
+            I18n.Config_ShowTooltip_Tooltip);
+
+        gmcm.AddBoolOption(
+            Mod.Manifest,
             () => config.Visible,
             value => config.Visible = value,
             I18n.Config_Visible_Name,
@@ -103,6 +123,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         {
             if (!this.complexOptionFactory.TryGetToolbarIconOption(
                 GetCurrentId(index),
+                GetTooltip(index),
                 GetEnabled(index),
                 SetEnabled(index),
                 GetMoveDown(index),
@@ -123,6 +144,11 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         Func<bool> GetEnabled(int i) => () => config.Icons[i].Enabled;
 
         Action<bool> SetEnabled(int i) => enabled => config.Icons[i].Enabled = enabled;
+
+        Func<string> GetTooltip(int i) =>
+            () => this.icons.TryGetValue(config.Icons[i].Id, out var hoverText)
+                ? hoverText ?? string.Empty
+                : string.Empty;
 
         Action? GetMoveDown(int i)
         {

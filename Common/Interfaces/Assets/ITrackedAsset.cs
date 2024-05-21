@@ -5,6 +5,9 @@ using StardewModdingAPI.Events;
 /// <summary>Identifies an asset tied to a game path.</summary>
 public interface ITrackedAsset
 {
+    /// <summary>Gets a value indicating whether the asset has been invalidated since it's last load.</summary>
+    bool Invalidated { get; }
+
     /// <summary>Gets the asset name.</summary>
     IAssetName Name { get; }
 
@@ -69,11 +72,13 @@ public interface ITrackedAsset
         where TAssetType : notnull;
 
     /// <summary>Watch an asset.</summary>
+    /// <param name="onInitialLoad">The action to perform when the game is loaded.</param>
     /// <param name="onInvalidated">The action to perform when the asset is invalidated.</param>
     /// <param name="onReady">The action to perform when the asset is ready.</param>
     /// <param name="onRequested">The action to perform when the asset is requested.</param>
     /// <returns>Returns the tracked asset.</returns>
     ITrackedAsset Watch(
+        Action? onInitialLoad = null,
         Action<AssetsInvalidatedEventArgs>? onInvalidated = null,
         Action<AssetReadyEventArgs>? onReady = null,
         Action<AssetRequestedEventArgs>? onRequested = null);

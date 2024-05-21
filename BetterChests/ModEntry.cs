@@ -1,6 +1,5 @@
 namespace StardewMods.BetterChests;
 
-using HarmonyLib;
 using SimpleInjector;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services;
@@ -15,40 +14,38 @@ using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 
 /// <inheritdoc />
-public sealed class ModEntry : Mod
+internal sealed class ModEntry : Mod
 {
     /// <inheritdoc />
-    public override object GetApi(IModInfo mod) => this.Container.GetInstance<ApiFactory>().CreateApi(mod);
+    public override object GetApi(IModInfo mod) => this.CreateApi(mod);
 
     /// <inheritdoc />
-    protected override void Init()
+    protected override void Init(Container container)
     {
         I18n.Init(this.Helper.Translation);
-        this.Container.RegisterSingleton(() => new Harmony(this.ModManifest.UniqueID));
-        this.Container.RegisterSingleton<ApiFactory>();
-        this.Container.RegisterSingleton<AssetHandler>();
-        this.Container.RegisterSingleton<BetterCraftingIntegration>();
-        this.Container.RegisterSingleton<BetterCraftingInventoryProvider>();
-        this.Container.RegisterSingleton<IModConfig, ConfigManager>();
-        this.Container.RegisterSingleton<ConfigManager, ConfigManager>();
-        this.Container.RegisterSingleton<ContainerFactory>();
-        this.Container.RegisterSingleton<ContainerHandler>();
-        this.Container.RegisterSingleton<ContentPatcherIntegration>();
-        this.Container.RegisterSingleton<IEventManager, EventManager>();
-        this.Container.RegisterSingleton<IExpressionHandler, FauxCoreIntegration>();
-        this.Container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
-        this.Container.RegisterSingleton<GenericModConfigMenuIntegration>();
-        this.Container.RegisterSingleton<MenuHandler>();
-        this.Container.RegisterSingleton<Localized>();
-        this.Container.RegisterSingleton<Log>();
-        this.Container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
-        this.Container.RegisterSingleton<ProxyChestFactory>();
-        this.Container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
-        this.Container.RegisterSingleton<StatusEffectManager>();
-        this.Container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
-        this.Container.RegisterSingleton<ToolbarIconsIntegration>();
-        this.Container.RegisterInstance<Func<IModConfig>>(this.Container.GetInstance<IModConfig>);
-        this.Container.Collection.Register<IFeature>(
+        container.RegisterSingleton<IApiFactory, ApiFactory>();
+        container.RegisterSingleton<AssetHandler>();
+        container.RegisterSingleton<BetterCraftingIntegration>();
+        container.RegisterSingleton<BetterCraftingInventoryProvider>();
+        container.RegisterSingleton<IModConfig, ConfigManager>();
+        container.RegisterSingleton<ConfigManager, ConfigManager>();
+        container.RegisterSingleton<ContainerFactory>();
+        container.RegisterSingleton<ContainerHandler>();
+        container.RegisterSingleton<ContentPatcherIntegration>();
+        container.RegisterSingleton<IEventManager, EventManager>();
+        container.RegisterSingleton<IExpressionHandler, FauxCoreIntegration>();
+        container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
+        container.RegisterSingleton<GenericModConfigMenuIntegration>();
+        container.RegisterSingleton<MenuHandler>();
+        container.RegisterSingleton<Localized>();
+        container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
+        container.RegisterSingleton<ProxyChestFactory>();
+        container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
+        container.RegisterSingleton<StatusEffectManager>();
+        container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
+        container.RegisterSingleton<ToolbarIconsIntegration>();
+        container.RegisterInstance<Func<IModConfig>>(container.GetInstance<IModConfig>);
+        container.Collection.Register<IFeature>(
             new[]
             {
                 typeof(AccessChest),

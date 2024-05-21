@@ -12,6 +12,7 @@ using StardewMods.Common.Models;
 using StardewMods.Common.Models.Data;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.GameData.BigCraftables;
 using StardewValley.GameData.Buildings;
@@ -49,6 +50,7 @@ internal sealed class AssetHandler : BaseAssetHandler
     private Color[]? hslTextureData;
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
+    /// <param name="contentPatcherIntegration">Dependency for Content Patcher integration.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
@@ -56,13 +58,14 @@ internal sealed class AssetHandler : BaseAssetHandler
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public AssetHandler(
+        ContentPatcherIntegration contentPatcherIntegration,
         IEventManager eventManager,
         IGameContentHelper gameContentHelper,
         IIconRegistry iconRegistry,
         IModConfig modConfig,
         IModContentHelper modContentHelper,
         IThemeHelper themeHelper)
-        : base(eventManager, gameContentHelper, modContentHelper)
+        : base(contentPatcherIntegration, eventManager, gameContentHelper, modContentHelper)
     {
         this.modConfig = modConfig;
 
@@ -88,7 +91,7 @@ internal sealed class AssetHandler : BaseAssetHandler
                     "Locations",
                     data => data.CustomFields ??= new Dictionary<string, string>()));
 
-        themeHelper.AddAsset(Mod.Id + "/UI", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
+        themeHelper.AddAsset($"{Mod.Id}/UI", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
 
         for (var index = 0; index < AssetHandler.Icons.Length; index++)
         {

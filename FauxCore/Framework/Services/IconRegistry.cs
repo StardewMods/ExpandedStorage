@@ -57,6 +57,7 @@ internal sealed class IconRegistry : IIconRegistry
             icon = this.Add(uniqueId, path, area);
         }
 
+        Log.Trace("Registering icon: {0}", uniqueId);
         this.ids.TryAdd(id, uniqueId);
         icon.Path = path;
         icon.Area = area;
@@ -103,7 +104,9 @@ internal sealed class IconRegistry : IIconRegistry
         var texture = this.GetTexture(icon, style);
         scale = style switch
         {
-            IconStyle.Transparent => (int)Math.Ceiling(16f * scale / icon.Area.Width),
+            IconStyle.Transparent => Math.Min(
+                4,
+                (int)Math.Floor(16f * scale / Math.Max(icon.Area.Height, icon.Area.Width))),
             IconStyle.Button => 16f * scale / texture.Width,
             _ => scale,
         };

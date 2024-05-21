@@ -1,10 +1,9 @@
 namespace StardewMods.CustomBush.Framework.Services;
 
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services.Integrations.CustomBush;
 
 /// <inheritdoc />
-internal sealed class ApiFactory : IApiFactory<ICustomBushApi>
+internal sealed class ApiFactory : IApiFactory
 {
     private readonly AssetHandler assetHandler;
     private readonly ModPatches modPatches;
@@ -19,5 +18,5 @@ internal sealed class ApiFactory : IApiFactory<ICustomBushApi>
     }
 
     /// <inheritdoc />
-    public ICustomBushApi CreateApi(IModInfo modInfo) => new CustomBushApi(this.assetHandler, modInfo, this.modPatches);
+    public object CreateApi(IModInfo modInfo) => new CustomBushApi(this.assetHandler, modInfo, this.modPatches);
 }

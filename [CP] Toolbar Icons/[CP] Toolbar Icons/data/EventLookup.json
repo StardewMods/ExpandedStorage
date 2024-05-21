@@ -1,24 +1,26 @@
 {
   "Changes": [
     {
+      "LogName": "FauxCore Icon for EventLookup.Lookup",
       "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
+      "Target": "furyx639.FauxCore/Icons",
       "Entries": {
-        "furyx639.ToolbarIconsCP/EventLookup.Lookup": {
-          "ModId": "shekurika.EventLookup",
-          "Type": "Keybind",
-          "ExtraData": "{{EventLookupHotkey}}",
-          "HoverText": "{{i18n: button.EventLookup}}"
+        "{{ModId}}/EventLookup.Lookup": {
+          "Area": { "X": 48, "Y": 0, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
         }
       }
     },
     {
+      "LogName": "Toolbar Icon for EventLookup.Lookup",
       "Action": "EditData",
-      "Target": "furyx639.FauxCore/Icons",
+      "Target": "furyx639.ToolbarIcons/Data",
       "Entries": {
-        "furyx639.ToolbarIconsCP/EventLookup.Lookup": {
-          "Area": { "X": 48, "Y": 0, "Width": 16, "Height": 16 },
-          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        "{{ModId}}/EventLookup.Lookup": {
+          "ModId": "shekurika.EventLookup",
+          "Type": "Keybind",
+          "ExtraData": "{{EventLookupHotkey}}",
+          "HoverText": "{{i18n: button.EventLookup}}"
         }
       }
     }

@@ -12,25 +12,24 @@ using StardewMods.ExpandedStorage.Framework.Interfaces;
 using StardewMods.ExpandedStorage.Framework.Services;
 
 /// <inheritdoc />
-public sealed class ModEntry : Mod
+internal sealed class ModEntry : Mod
 {
     /// <inheritdoc />
-    protected override void Init()
+    protected override void Init(Container container)
     {
         I18n.Init(this.Helper.Translation);
-        this.Container.RegisterSingleton(() => new Harmony(this.ModManifest.UniqueID));
-        this.Container.RegisterSingleton<AssetHandler>();
-        this.Container.RegisterSingleton<BetterChestsIntegration>();
-        this.Container.RegisterSingleton<IModConfig, ConfigManager>();
-        this.Container.RegisterSingleton<ContentPatcherIntegration>();
-        this.Container.RegisterSingleton<IEventManager, EventManager>();
-        this.Container.RegisterSingleton<FauxCoreIntegration>();
-        this.Container.RegisterSingleton<GenericModConfigMenuIntegration>();
-        this.Container.RegisterSingleton<Log>();
-        this.Container.RegisterSingleton<ModPatches>();
-        this.Container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
-        this.Container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
-        this.Container.RegisterSingleton<StorageDataFactory>();
-        this.Container.RegisterSingleton<ToolbarIconsIntegration>();
+        container.RegisterSingleton(() => new Harmony(this.ModManifest.UniqueID));
+        container.RegisterSingleton<AssetHandler>();
+        container.RegisterSingleton<BetterChestsIntegration>();
+        container.RegisterSingleton<IModConfig, ConfigManager>();
+        container.RegisterSingleton<ContentPatcherIntegration>();
+        container.RegisterSingleton<IEventManager, EventManager>();
+        container.RegisterSingleton<FauxCoreIntegration>();
+        container.RegisterSingleton<GenericModConfigMenuIntegration>();
+        container.RegisterSingleton<ModPatches>();
+        container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
+        container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
+        container.RegisterSingleton<StorageDataFactory>();
+        container.RegisterSingleton<ToolbarIconsIntegration>();
     }
 }

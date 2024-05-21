@@ -24,6 +24,7 @@ internal sealed class ComplexOptionFactory
 
     /// <summary>Attempt to retrieve a complex option.</summary>
     /// <param name="getCurrentId">Function which returns the current id.</param>
+    /// <param name="getTooltip">Function which returns the tooltip.</param>
     /// <param name="getEnabled">Function which returns if icon is enabled.</param>
     /// <param name="setEnabled">Action which sets if the icon is enabled.</param>
     /// <param name="moveDown">Action to perform when down is pressed.</param>
@@ -32,6 +33,7 @@ internal sealed class ComplexOptionFactory
     /// <returns><c>true</c> if the option can be created; otherwise, <c>false</c>.</returns>
     public bool TryGetToolbarIconOption(
         Func<string> getCurrentId,
+        Func<string> getTooltip,
         Func<bool> getEnabled,
         Action<bool> setEnabled,
         Action? moveDown,
@@ -42,9 +44,9 @@ internal sealed class ComplexOptionFactory
         {
             option = new ToolbarIconOption(
                 this.iconRegistry,
-                this.icons,
                 this.inputHelper,
                 getCurrentId,
+                getTooltip,
                 getEnabled,
                 setEnabled,
                 moveDown,

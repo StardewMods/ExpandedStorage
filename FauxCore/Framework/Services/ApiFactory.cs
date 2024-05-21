@@ -5,7 +5,7 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Interfaces;
 
 /// <inheritdoc />
-internal sealed class ApiFactory : IApiFactory<IFauxCoreApi>
+internal sealed class ApiFactory : IApiFactory
 {
     private readonly IAssetHandlerExtension assetHandler;
     private readonly IExpressionHandler expressionHandler;
@@ -30,6 +30,6 @@ internal sealed class ApiFactory : IApiFactory<IFauxCoreApi>
     }
 
     /// <inheritdoc />
-    public IFauxCoreApi CreateApi(IModInfo modInfo) =>
+    public object CreateApi(IModInfo modInfo) =>
         new FauxCoreApi(modInfo, this.assetHandler, this.expressionHandler, this.modConfig, this.themeHelper);
 }

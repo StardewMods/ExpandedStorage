@@ -1,10 +1,9 @@
 namespace StardewMods.BetterChests.Framework.Services.Factory;
 
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services.Integrations.BetterChests;
 
 /// <inheritdoc />
-internal sealed class ApiFactory : IApiFactory<IBetterChestsApi>
+internal sealed class ApiFactory : IApiFactory
 {
     private readonly ConfigManager configManager;
     private readonly ContainerFactory containerFactory;
@@ -22,6 +21,6 @@ internal sealed class ApiFactory : IApiFactory<IBetterChestsApi>
     }
 
     /// <inheritdoc />
-    public IBetterChestsApi CreateApi(IModInfo modInfo) =>
+    public object CreateApi(IModInfo modInfo) =>
         new BetterChestsApi(modInfo, this.configManager, this.containerHandler, this.containerFactory);
 }

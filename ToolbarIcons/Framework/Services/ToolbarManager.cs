@@ -25,6 +25,7 @@ internal sealed class ToolbarManager
     private readonly PerScreen<Toolbar?> lastToolbar = new();
     private readonly IReflectionHelper reflectionHelper;
 
+    private bool initialized;
     private Vector2 lastOrigin = Vector2.Zero;
 
     /// <summary>Initializes a new instance of the <see cref="ToolbarManager" /> class.</summary>
@@ -110,7 +111,7 @@ internal sealed class ToolbarManager
             return;
         }
 
-        Log.Trace("Adding icon: {0}", id);
+        Log.Trace("Adding icon to toolbar: {0}", id);
         this.eventManager.Publish(new IconsChangedEventArgs([id], []));
         this.RefreshComponents(true);
     }
@@ -124,7 +125,7 @@ internal sealed class ToolbarManager
             return;
         }
 
-        Log.Trace("Removing icon: {0}", id);
+        Log.Trace("Removing icon from toolbar: {0}", id);
         this.icons.Remove(id);
         this.eventManager.Publish(new IconsChangedEventArgs([], [id]));
         this.RefreshComponents(true);
@@ -169,11 +170,14 @@ internal sealed class ToolbarManager
             return;
         }
 
-        Game1.playSound("drumkit6");
+        this.inputHelper.Suppress(e.Button);
+        if (this.configManager.PlaySound)
+        {
+            Game1.playSound("drumkit6");
+        }
+
         this.eventManager.Publish<IIconPressedEventArgs, IconPressedEventArgs>(
             new IconPressedEventArgs(this.ActiveComponent.name, e.Button));
-
-        this.inputHelper.Suppress(e.Button);
     }
 
     private void OnButtonsChanged(ButtonsChangedEventArgs e)
@@ -183,6 +187,7 @@ internal sealed class ToolbarManager
             return;
         }
 
+        this.inputHelper.SuppressActiveKeybinds(this.configManager.ToggleKey);
         var config = this.configManager.GetNew();
         config.Visible = !config.Visible;
         this.configManager.Save(config);
@@ -192,7 +197,7 @@ internal sealed class ToolbarManager
 
     private void OnRenderedHud(RenderedHudEventArgs e)
     {
-        if (!this.ShowToolbar)
+        if (!this.ShowToolbar || !this.configManager.ShowTooltip)
         {
             return;
         }
@@ -232,12 +237,13 @@ internal sealed class ToolbarManager
             return;
         }
 
+        this.initialized = true;
         this.RefreshComponents(true);
     }
 
     private void RefreshComponents(bool force = false)
     {
-        if (this.Button is null || this.Toolbar is null)
+        if (!this.initialized || this.Button is null || this.Toolbar is null)
         {
             return;
         }

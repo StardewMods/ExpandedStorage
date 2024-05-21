@@ -5,6 +5,7 @@ using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Data;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
 using StardewMods.CrystallineJunimoChests.Framework.Models;
 using StardewValley.GameData.BigCraftables;
@@ -13,14 +14,16 @@ using StardewValley.GameData.BigCraftables;
 internal sealed class AssetHandler : BaseAssetHandler
 {
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
+    /// <param name="contentPatcherIntegration">Dependency for Content Patcher integration.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     public AssetHandler(
+        ContentPatcherIntegration contentPatcherIntegration,
         IEventManager eventManager,
         IGameContentHelper gameContentHelper,
         IModContentHelper modContentHelper)
-        : base(eventManager, gameContentHelper, modContentHelper)
+        : base(contentPatcherIntegration, eventManager, gameContentHelper, modContentHelper)
     {
         this.Asset($"{Mod.Id}/Data").Load<ColorData[]>("assets/data.json");
         this.Asset("Data/BigCraftables").Edit<BigCraftableData>("256", this.EditJunimoChest, AssetEditPriority.Late);

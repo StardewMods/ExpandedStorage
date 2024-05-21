@@ -10,22 +10,21 @@ using StardewMods.GarbageDay.Framework.Models;
 using StardewMods.GarbageDay.Framework.Services;
 
 /// <inheritdoc />
-public sealed class ModEntry : Mod
+internal sealed class ModEntry : Mod
 {
     /// <inheritdoc />
-    protected override void Init()
+    protected override void Init(Container container)
     {
         I18n.Init(this.Helper.Translation);
-        this.Container.RegisterInstance(new Dictionary<string, FoundGarbageCan>());
-        this.Container.RegisterSingleton<AssetHandler>();
-        this.Container.RegisterSingleton<IModConfig, ConfigManager>();
-        this.Container.RegisterSingleton<ContentPatcherIntegration>();
-        this.Container.RegisterSingleton<IEventManager, EventManager>();
-        this.Container.RegisterSingleton<FauxCoreIntegration>();
-        this.Container.RegisterSingleton<GarbageCanManager>();
-        this.Container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
-        this.Container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
-        this.Container.RegisterSingleton<Log>();
-        this.Container.RegisterSingleton<ToolbarIconsIntegration>();
+        container.RegisterInstance(new Dictionary<string, FoundGarbageCan>());
+        container.RegisterSingleton<AssetHandler>();
+        container.RegisterSingleton<IModConfig, ConfigManager>();
+        container.RegisterSingleton<ContentPatcherIntegration>();
+        container.RegisterSingleton<IEventManager, EventManager>();
+        container.RegisterSingleton<FauxCoreIntegration>();
+        container.RegisterSingleton<GarbageCanManager>();
+        container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
+        container.RegisterSingleton<IIconRegistry, FauxCoreIntegration>();
+        container.RegisterSingleton<ToolbarIconsIntegration>();
     }
 }

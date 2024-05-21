@@ -9,11 +9,12 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 internal sealed class PatchManager : BaseService<PatchManager>, IPatchManager
 {
     private readonly HashSet<string> appliedPatches = [];
-    private readonly Lazy<Harmony> harmony;
+    private readonly Harmony harmony;
     private readonly Dictionary<string, List<ISavedPatch>> savedPatches = new();
 
     /// <summary>Initializes a new instance of the <see cref="PatchManager" /> class.</summary>
-    public PatchManager() => this.harmony = new Lazy<Harmony>(() => new Harmony(Mod.Id));
+    /// <param name="modInfo">Dependency used for accessing mod info.</param>
+    public PatchManager(IModInfo modInfo) => this.harmony = new Harmony(modInfo.Manifest.UniqueID);
 
     /// <inheritdoc />
     public void Add(string id, params ISavedPatch[] patches)
@@ -51,16 +52,16 @@ internal sealed class PatchManager : BaseService<PatchManager>, IPatchManager
                 switch (patch.Type)
                 {
                     case PatchType.Prefix:
-                        this.harmony.Value.Patch(patch.Original, new HarmonyMethod(patch.Patch));
+                        this.harmony.Patch(patch.Original, new HarmonyMethod(patch.Patch));
                         continue;
                     case PatchType.Postfix:
-                        this.harmony.Value.Patch(patch.Original, postfix: new HarmonyMethod(patch.Patch));
+                        this.harmony.Patch(patch.Original, postfix: new HarmonyMethod(patch.Patch));
                         continue;
                     case PatchType.Transpiler:
-                        this.harmony.Value.Patch(patch.Original, transpiler: new HarmonyMethod(patch.Patch));
+                        this.harmony.Patch(patch.Original, transpiler: new HarmonyMethod(patch.Patch));
                         continue;
                     case PatchType.Finalizer:
-                        this.harmony.Value.Patch(patch.Original, finalizer: new HarmonyMethod(patch.Patch));
+                        this.harmony.Patch(patch.Original, finalizer: new HarmonyMethod(patch.Patch));
                         continue;
                 }
             }
@@ -86,7 +87,7 @@ internal sealed class PatchManager : BaseService<PatchManager>, IPatchManager
         foreach (var patch in patches)
         {
             Log.Trace("Unpatching {0} with {1}.", patch.Original.Name, patch.Patch.Name);
-            this.harmony.Value.Unpatch(patch.Original, patch.Patch);
+            this.harmony.Unpatch(patch.Original, patch.Patch);
         }
     }
 }

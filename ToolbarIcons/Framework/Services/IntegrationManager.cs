@@ -3,6 +3,7 @@ namespace StardewMods.ToolbarIcons.Framework.Services;
 using System.Reflection;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
 using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Interfaces;
@@ -12,8 +13,8 @@ using StardewValley.Menus;
 /// <summary>Base class for adding toolbar icons for integrated mods.</summary>
 internal sealed class IntegrationManager
 {
+    private readonly Dictionary<string, Action> actions = new();
     private readonly IEnumerable<ICustomIntegration> customIntegrations;
-    private readonly Dictionary<string, Action> icons = new();
     private readonly IModRegistry modRegistry;
     private readonly MethodInfo overrideButtonReflected;
     private readonly IReflectionHelper reflectionHelper;
@@ -45,6 +46,9 @@ internal sealed class IntegrationManager
         eventManager.Subscribe<IIconPressedEventArgs>(this.OnIconPressed);
     }
 
+    /// <summary>Adds an icon from the data model.</summary>
+    /// <param name="id">The icon id.</param>
+    /// <param name="data">The icon action.</param>
     public void AddIcon(string id, IntegrationData data)
     {
         Action? action;
@@ -65,7 +69,18 @@ internal sealed class IntegrationManager
             default: return;
         }
 
-        this.icons.Add(id, action);
+        if (!this.actions.TryAdd(id, action))
+        {
+            return;
+        }
+
+        Log.Trace(
+            "Adding icon: {{ id: {0}, mod: {1}, type: {2}, description: {3} }}.",
+            id,
+            data.ModId,
+            data.Type.ToStringFast(),
+            data.HoverText);
+
         this.toolbarManager.AddIcon(id, data.HoverText);
     }
 
@@ -82,6 +97,12 @@ internal sealed class IntegrationManager
                     integration.GetAction,
                     out var integrationAction):
                     action = integrationAction;
+                    Log.Trace(
+                        "Adding icon: {{ id: {0}, mod: {1}, description: {2} }}.",
+                        integration.Icon,
+                        integration.ModId,
+                        integration.HoverText);
+
                     break;
                 case IMethodIntegration integration when this.TryGetMethodWithParams(
                     integration.ModId,
@@ -89,21 +110,37 @@ internal sealed class IntegrationManager
                     integration.Arguments,
                     out var integrationAction):
                     action = integrationAction;
+                    Log.Trace(
+                        "Adding icon {{ id: {0}, mod: {1}, description: {2}, method: {3} }}.",
+                        integration.Icon,
+                        integration.ModId,
+                        integration.HoverText,
+                        integration.MethodName);
+
                     break;
-                case IVanillaIntegration vanillaIntegration:
-                    action = vanillaIntegration.DoAction;
+                case IVanillaIntegration integration:
+                    action = integration.DoAction;
+                    Log.Trace(
+                        "Adding icon {{ id: {0}, mod: vanilla, description: {1} }}.",
+                        integration.Icon,
+                        integration.HoverText);
+
                     break;
                 default: continue;
             }
 
-            this.icons.Add(customIntegration.Icon, action);
+            if (!this.actions.TryAdd(customIntegration.Icon, action))
+            {
+                continue;
+            }
+
             this.toolbarManager.AddIcon(customIntegration.Icon, customIntegration.HoverText);
         }
     }
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (this.icons.TryGetValue(e.Id, out var action))
+        if (this.actions.TryGetValue(e.Id, out var action))
         {
             action.Invoke();
         }

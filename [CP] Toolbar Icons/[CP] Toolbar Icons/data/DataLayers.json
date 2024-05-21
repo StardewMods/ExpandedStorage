@@ -1,24 +1,26 @@
 {
   "Changes": [
     {
+      "LogName": "FauxCore Icon for DataLayers.Toggle",
       "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
+      "Target": "furyx639.FauxCore/Icons",
       "Entries": {
-        "furyx639.ToolbarIconsCP/DataLayers.Toggle": {
-          "ModId": "Pathoschild.DataLayers",
-          "Type": "Method",
-          "ExtraData": "ToggleLayers",
-          "HoverText": "{{i18n: button.DataLayers}}"
+        "{{ModId}}/DataLayers.Toggle": {
+          "Area": { "X": 16, "Y": 0, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
         }
       }
     },
     {
+      "LogName": "Toolbar Icon for DataLayers.Toggle",
       "Action": "EditData",
-      "Target": "furyx639.FauxCore/Icons",
+      "Target": "furyx639.ToolbarIcons/Data",
       "Entries": {
-        "furyx639.ToolbarIconsCP/DataLayers.Toggle": {
-          "Area": { "X": 16, "Y": 0, "Width": 16, "Height": 16 },
-          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        "{{ModId}}/DataLayers.Toggle": {
+          "ModId": "Pathoschild.DataLayers",
+          "Type": "Method",
+          "ExtraData": "ToggleLayers",
+          "HoverText": "{{i18n: button.DataLayers}}"
         }
       }
     }

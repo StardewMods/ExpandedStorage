@@ -6,6 +6,8 @@
 
 * Added icon for showing the calendar.
 * Added hotkey for toggling all icons on/off.
+* Added config option to enable/disable icon tooltips.
+* Added config option to enable/disable icon sounds.
 
 ### Changed
 

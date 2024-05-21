@@ -7,6 +7,7 @@ using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Data;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.ExpandedStorage;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.GarbageDay.Framework.Interfaces;
@@ -23,6 +24,7 @@ internal sealed class AssetHandler : BaseAssetHandler
     private readonly IModConfig modConfig;
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
+    /// <param name="contentPatcherIntegration">Dependency for Content Patcher integration.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="foundGarbageCans">The discovered garbage cans.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
@@ -30,13 +32,14 @@ internal sealed class AssetHandler : BaseAssetHandler
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     public AssetHandler(
+        ContentPatcherIntegration contentPatcherIntegration,
         IEventManager eventManager,
         Dictionary<string, FoundGarbageCan> foundGarbageCans,
         IGameContentHelper gameContentHelper,
         IIconRegistry iconRegistry,
         IModConfig modConfig,
         IModContentHelper modContentHelper)
-        : base(eventManager, gameContentHelper, modContentHelper)
+        : base(contentPatcherIntegration, eventManager, gameContentHelper, modContentHelper)
     {
         // Init
         this.foundGarbageCans = foundGarbageCans;
@@ -44,7 +47,7 @@ internal sealed class AssetHandler : BaseAssetHandler
 
         this.Asset($"{Mod.Id}/Icons").Load<Texture2D>("assets/icons.png");
         this.Asset("Data/BigCraftables").Edit($"{Mod.Id}/GarbageCan", () => this.GarbageCan);
-        this.Asset("Data/GarbageCans").Watch(onInvalidated: e => this.foundGarbageCans.Clear());
+        this.Asset("Data/GarbageCans").Watch(onInvalidated: _ => this.foundGarbageCans.Clear());
 
         this.DynamicAsset(
             e => e.DataType == typeof(Map),

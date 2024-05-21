@@ -1,24 +1,26 @@
 {
   "Changes": [
     {
+      "LogName": "FauxCore Icon for DebugMode.Toggle",
       "Action": "EditData",
-      "Target": "furyx639.ToolbarIcons/Data",
+      "Target": "furyx639.FauxCore/Icons",
       "Entries": {
-        "furyx639.ToolbarIconsCP/DebugMode.Toggle": {
-          "ModId": "Pathoschild.DebugMode",
-          "Type": "Method",
-          "ExtraData": "ToggleDebugMenu",
-          "HoverText": "{{i18n: button.DebugMode}}"
+        "{{ModId}}/DebugMode.Toggle": {
+          "Area": { "X": 32, "Y": 0, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
         }
       }
     },
     {
+      "LogName": "Toolbar Icon for DebugMode.Toggle",
       "Action": "EditData",
-      "Target": "furyx639.FauxCore/Icons",
+      "Target": "furyx639.ToolbarIcons/Data",
       "Entries": {
-        "furyx639.ToolbarIconsCP/DebugMode.Toggle": {
-          "Area": { "X": 32, "Y": 0, "Width": 16, "Height": 16 },
-          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        "{{ModId}}/DebugMode.Toggle": {
+          "ModId": "Pathoschild.DebugMode",
+          "Type": "Method",
+          "ExtraData": "ToggleDebugMenu",
+          "HoverText": "{{i18n: button.DebugMode}}"
         }
       }
     }

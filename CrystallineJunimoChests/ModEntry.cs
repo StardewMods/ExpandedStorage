@@ -9,22 +9,21 @@ using StardewMods.CrystallineJunimoChests.Framework.Interfaces;
 using StardewMods.CrystallineJunimoChests.Framework.Services;
 
 /// <inheritdoc />
-public sealed class ModEntry : Mod
+internal sealed class ModEntry : Mod
 {
     /// <inheritdoc />
-    protected override void Init()
+    protected override void Init(Container container)
     {
         I18n.Init(this.Helper.Translation);
-        this.Container.RegisterSingleton<AssetHandler>();
-        this.Container.RegisterSingleton<ChestHandler>();
-        this.Container.RegisterSingleton<IModConfig, ConfigManager>();
-        this.Container.RegisterSingleton<ConfigManager, ConfigManager>();
-        this.Container.RegisterSingleton<ContentPatcherIntegration>();
-        this.Container.RegisterSingleton<FauxCoreIntegration>();
-        this.Container.RegisterSingleton<GenericModConfigMenuIntegration>();
-        this.Container.RegisterSingleton<IEventManager, EventManager>();
-        this.Container.RegisterSingleton<Log>();
-        this.Container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
-        this.Container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
+        container.RegisterSingleton<AssetHandler>();
+        container.RegisterSingleton<ChestHandler>();
+        container.RegisterSingleton<IModConfig, ConfigManager>();
+        container.RegisterSingleton<ConfigManager, ConfigManager>();
+        container.RegisterSingleton<ContentPatcherIntegration>();
+        container.RegisterSingleton<FauxCoreIntegration>();
+        container.RegisterSingleton<GenericModConfigMenuIntegration>();
+        container.RegisterSingleton<IEventManager, EventManager>();
+        container.RegisterSingleton<IPatchManager, FauxCoreIntegration>();
+        container.RegisterSingleton<ISimpleLogging, FauxCoreIntegration>();
     }
 }

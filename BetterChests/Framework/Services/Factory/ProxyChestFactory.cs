@@ -5,8 +5,11 @@ using HarmonyLib;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Models;
+using StardewMods.Common.Enums;
 using StardewMods.Common.Helpers;
+using StardewMods.Common.Models;
 using StardewMods.Common.Services;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Objects;
 
 /// <summary>Manages the global inventories and chest/item creation and retrieval operations.</summary>
@@ -22,44 +25,59 @@ internal sealed class ProxyChestFactory : BaseService<ProxyChestFactory>
     private readonly Dictionary<string, Chest> proxyChests = new();
 
     /// <summary>Initializes a new instance of the <see cref="ProxyChestFactory" /> class.</summary>
-    /// <param name="harmony">Dependency used to patch external code.</param>
-    public ProxyChestFactory(Harmony harmony)
+    /// <param name="patchManager">Dependency used for managing patches.</param>
+    public ProxyChestFactory(IPatchManager patchManager)
     {
         // Init
         ProxyChestFactory.instance = this;
 
         // Patches
-        harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(Item), nameof(Item.canBeDropped)),
-            postfix: new HarmonyMethod(typeof(ProxyChestFactory), nameof(ProxyChestFactory.Item_canBeDropped_postfix)));
+        patchManager.Add(
+            this.UniqueId,
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Item), nameof(Item.canBeDropped)),
+                AccessTools.DeclaredMethod(
+                    typeof(ProxyChestFactory),
+                    nameof(ProxyChestFactory.Item_canBeDropped_postfix)),
+                PatchType.Postfix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Item), nameof(Item.canBeTrashed)),
+                AccessTools.DeclaredMethod(
+                    typeof(ProxyChestFactory),
+                    nameof(ProxyChestFactory.Item_canBeTrashed_postfix)),
+                PatchType.Postfix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Item), nameof(Item.canStackWith)),
+                AccessTools.DeclaredMethod(
+                    typeof(ProxyChestFactory),
+                    nameof(ProxyChestFactory.Item_canStackWith_postfix)),
+                PatchType.Postfix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(Item), nameof(Item.GetContextTags)),
+                AccessTools.DeclaredMethod(
+                    typeof(ProxyChestFactory),
+                    nameof(ProxyChestFactory.Item_GetContextTags_postfix)),
+                PatchType.Postfix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.drawInMenu)),
+                AccessTools.DeclaredMethod(
+                    typeof(ProxyChestFactory),
+                    nameof(ProxyChestFactory.Object_drawInMenu_postfix)),
+                PatchType.Postfix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.drawWhenHeld)),
+                AccessTools.DeclaredMethod(
+                    typeof(ProxyChestFactory),
+                    nameof(ProxyChestFactory.Object_drawWhenHeld_prefix)),
+                PatchType.Prefix),
+            new SavedPatch(
+                AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.maximumStackSize)),
+                AccessTools.DeclaredMethod(
+                    typeof(ProxyChestFactory),
+                    nameof(ProxyChestFactory.Object_maximumStackSize_postfix)),
+                PatchType.Postfix));
 
-        harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(Item), nameof(Item.canBeTrashed)),
-            postfix: new HarmonyMethod(typeof(ProxyChestFactory), nameof(ProxyChestFactory.Item_canBeTrashed_postfix)));
-
-        harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(Item), nameof(Item.canStackWith)),
-            postfix: new HarmonyMethod(typeof(ProxyChestFactory), nameof(ProxyChestFactory.Item_canStackWith_postfix)));
-
-        harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(Item), nameof(Item.GetContextTags)),
-            postfix: new HarmonyMethod(
-                typeof(ProxyChestFactory),
-                nameof(ProxyChestFactory.Item_GetContextTags_postfix)));
-
-        harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.drawInMenu)),
-            postfix: new HarmonyMethod(typeof(ProxyChestFactory), nameof(ProxyChestFactory.Object_drawInMenu_postfix)));
-
-        harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.drawWhenHeld)),
-            new HarmonyMethod(typeof(ProxyChestFactory), nameof(ProxyChestFactory.Object_drawWhenHeld_prefix)));
-
-        harmony.Patch(
-            AccessTools.DeclaredMethod(typeof(SObject), nameof(SObject.maximumStackSize)),
-            postfix: new HarmonyMethod(
-                typeof(ProxyChestFactory),
-                nameof(ProxyChestFactory.Object_maximumStackSize_postfix)));
+        patchManager.Patch(this.UniqueId);
     }
 
     /// <summary>Determines if the given item represents a proxy chest.</summary>

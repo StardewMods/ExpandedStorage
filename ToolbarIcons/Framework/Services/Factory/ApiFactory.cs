@@ -2,10 +2,9 @@ namespace StardewMods.ToolbarIcons.Framework.Services.Factory;
 
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Services.Integrations.FauxCore;
-using StardewMods.Common.Services.Integrations.ToolbarIcons;
 
 /// <inheritdoc />
-internal sealed class ApiFactory : IApiFactory<IToolbarIconsApi>
+internal sealed class ApiFactory : IApiFactory
 {
     private readonly IEventManager eventManager;
     private readonly IIconRegistry iconRegistry;
@@ -23,6 +22,6 @@ internal sealed class ApiFactory : IApiFactory<IToolbarIconsApi>
     }
 
     /// <inheritdoc />
-    public IToolbarIconsApi CreateApi(IModInfo modInfo) =>
+    public object CreateApi(IModInfo modInfo) =>
         new ToolbarIconsApi(modInfo, this.eventManager, this.iconRegistry, this.toolbarManager);
 }

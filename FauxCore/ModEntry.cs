@@ -9,26 +9,25 @@ using StardewMods.FauxCore.Framework.Interfaces;
 using StardewMods.FauxCore.Framework.Services;
 
 /// <inheritdoc />
-public sealed class ModEntry : Mod
+internal sealed class ModEntry : Mod
 {
     /// <inheritdoc />
-    public override object GetApi(IModInfo mod) => this.Container.GetInstance<ApiFactory>().CreateApi(mod);
+    public override object GetApi(IModInfo mod) => this.CreateApi(mod);
 
     /// <inheritdoc />
-    protected override void Init()
+    protected override void Init(Container container)
     {
         I18n.Init(this.Helper.Translation);
-        this.Container.RegisterSingleton<ApiFactory>();
-        this.Container.RegisterSingleton<IAssetHandlerExtension, AssetHandler>();
-        this.Container.RegisterSingleton<IThemeHelper, AssetHandler>();
-        this.Container.RegisterSingleton<CacheManager>();
-        this.Container.RegisterSingleton<IModConfig, ConfigManager>();
-        this.Container.RegisterSingleton<ConfigManager, ConfigManager>();
-        this.Container.RegisterSingleton<ContentPatcherIntegration>();
-        this.Container.RegisterSingleton<IEventManager, EventManager>();
-        this.Container.RegisterSingleton<IExpressionHandler, ExpressionHandler>();
-        this.Container.RegisterSingleton<GenericModConfigMenuIntegration>();
-        this.Container.RegisterSingleton<Log>();
-        this.Container.RegisterSingleton<ISimpleLogging, SimpleLogging>();
+        container.RegisterSingleton<IApiFactory, ApiFactory>();
+        container.RegisterSingleton<IAssetHandlerExtension, AssetHandler>();
+        container.RegisterSingleton<IThemeHelper, AssetHandler>();
+        container.RegisterSingleton<CacheManager>();
+        container.RegisterSingleton<IModConfig, ConfigManager>();
+        container.RegisterSingleton<ConfigManager, ConfigManager>();
+        container.RegisterSingleton<ContentPatcherIntegration>();
+        container.RegisterSingleton<IEventManager, EventManager>();
+        container.RegisterSingleton<IExpressionHandler, ExpressionHandler>();
+        container.RegisterSingleton<GenericModConfigMenuIntegration>();
+        container.RegisterSingleton<ISimpleLogging, SimpleLogging>();
     }
 }

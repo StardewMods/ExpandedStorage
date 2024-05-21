@@ -43,7 +43,7 @@ public sealed class FauxCoreApi : IFauxCoreApi
         this.iconRegistry ??= new IconRegistry(this.assetHandler, this.modInfo.Manifest);
 
     /// <inheritdoc />
-    public IPatchManager PatchManager => this.patchManager ??= new PatchManager();
+    public IPatchManager PatchManager => this.patchManager ??= new PatchManager(this.modInfo);
 
     /// <inheritdoc />
     public ISimpleLogging SimpleLogging =>

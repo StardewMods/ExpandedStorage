@@ -7,6 +7,7 @@ using StardewMods.Common.Models.Data;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
+using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.ExpandedStorage.Framework.Interfaces;
 using StardewMods.ExpandedStorage.Framework.Models;
 using StardewValley.GameData.BigCraftables;
@@ -17,16 +18,18 @@ internal sealed class AssetHandler : BaseAssetHandler
     private readonly IModConfig modConfig;
 
     /// <summary>Initializes a new instance of the <see cref="AssetHandler" /> class.</summary>
+    /// <param name="contentPatcherIntegration">Dependency for Content Patcher integration.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="gameContentHelper">Dependency used for loading game assets.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="modContentHelper">Dependency used for accessing mod content.</param>
     public AssetHandler(
+        ContentPatcherIntegration contentPatcherIntegration,
         IEventManager eventManager,
         IGameContentHelper gameContentHelper,
         IModConfig modConfig,
         IModContentHelper modContentHelper)
-        : base(eventManager, gameContentHelper, modContentHelper)
+        : base(contentPatcherIntegration, eventManager, gameContentHelper, modContentHelper)
     {
         this.modConfig = modConfig;
         this.Asset("Data/BigCraftables").Edit(this.AddOptions, AssetEditPriority.Late);
