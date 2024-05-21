@@ -45,5 +45,9 @@ internal sealed class ManagedTexture : IManagedTexture
     public int Width { get; }
 
     /// <summary>Invalidates the texture cache.</summary>
-    public void InvalidateCache() => this.cachedTexture = null;
+    public void InvalidateCache()
+    {
+        this.cachedTexture = null;
+        this.gameContentHelper.InvalidateCache(this.Name);
+    }
 }

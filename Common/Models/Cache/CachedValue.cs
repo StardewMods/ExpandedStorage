@@ -1,6 +1,6 @@
 namespace StardewMods.Common.Models.Cache;
 
-using StardewMods.Common.Interfaces;
+using StardewMods.Common.Interfaces.Cache;
 
 /// <inheritdoc />
 public readonly struct CachedValue<T> : ICachedValue

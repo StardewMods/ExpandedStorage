@@ -19,7 +19,8 @@ public sealed class ModEntry : Mod
     {
         I18n.Init(this.Helper.Translation);
         this.Container.RegisterSingleton<ApiFactory>();
-        this.Container.RegisterSingleton<IAssetHandler, AssetHandler>();
+        this.Container.RegisterSingleton<IAssetHandlerExtension, AssetHandler>();
+        this.Container.RegisterSingleton<IThemeHelper, AssetHandler>();
         this.Container.RegisterSingleton<CacheManager>();
         this.Container.RegisterSingleton<IModConfig, ConfigManager>();
         this.Container.RegisterSingleton<ConfigManager, ConfigManager>();
@@ -29,7 +30,5 @@ public sealed class ModEntry : Mod
         this.Container.RegisterSingleton<GenericModConfigMenuIntegration>();
         this.Container.RegisterSingleton<Log>();
         this.Container.RegisterSingleton<ISimpleLogging, SimpleLogging>();
-        this.Container.RegisterSingleton<ThemeHelper>();
-        this.Container.RegisterSingleton<IThemeHelper, ThemeHelper>();
     }
 }

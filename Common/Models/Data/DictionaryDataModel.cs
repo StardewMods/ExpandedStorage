@@ -2,7 +2,8 @@ namespace StardewMods.Common.Models.Data;
 
 using System.Globalization;
 using Microsoft.Xna.Framework;
-using StardewMods.Common.Interfaces;
+using StardewMods.Common.Interfaces.Cache;
+using StardewMods.Common.Interfaces.Data;
 using StardewMods.Common.Models.Cache;
 
 internal abstract class DictionaryDataModel

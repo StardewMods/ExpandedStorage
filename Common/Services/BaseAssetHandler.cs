@@ -2,15 +2,14 @@ namespace StardewMods.Common.Services;
 
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
+using StardewMods.Common.Interfaces.Assets;
 using StardewMods.Common.Models.Assets;
-using StardewMods.Common.Models.Events;
 
-/// <summary>Handles modification and manipulation of assets in the game.</summary>
-internal abstract class BaseAssetHandler
+/// <inheritdoc />
+internal abstract class BaseAssetHandler : IAssetHandler
 {
-    private readonly Dictionary<IAssetName, ICachedAsset> cachedAssets = new();
-    private readonly IEventManager eventManager;
-    private readonly Dictionary<IAssetName, List<ITrackedAsset>> trackedAssets = new();
+    private readonly Dictionary<Func<AssetRequestedEventArgs, bool>, Action<ITrackedAsset>> dynamicAssets = [];
+    private readonly Dictionary<IAssetName, TrackedAsset> trackedAssets = new();
 
     /// <summary>Initializes a new instance of the <see cref="BaseAssetHandler" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
@@ -21,7 +20,6 @@ internal abstract class BaseAssetHandler
         IGameContentHelper gameContentHelper,
         IModContentHelper modContentHelper)
     {
-        this.eventManager = eventManager;
         this.GameContentHelper = gameContentHelper;
         this.ModContentHelper = modContentHelper;
 
@@ -32,90 +30,72 @@ internal abstract class BaseAssetHandler
     }
 
     /// <summary>Gets the game content helper.</summary>
-    protected IGameContentHelper GameContentHelper { get; }
+    public IGameContentHelper GameContentHelper { get; }
 
     /// <summary>Gets the mod content helper.</summary>
-    protected IModContentHelper ModContentHelper { get; }
+    public IModContentHelper ModContentHelper { get; }
 
-    /// <summary>Retrieves the specified asset by name and ensures that it is not null.</summary>
-    /// <typeparam name="TAssetType">The type of the asset.</typeparam>
-    /// <param name="name">The name of the asset.</param>
-    /// <returns>The asset of type TAssetType.</returns>
-    /// <exception cref="InvalidOperationException">Thrown when the asset cannot be found or is null.</exception>
-    public TAssetType RequireAsset<TAssetType>(string name)
-        where TAssetType : notnull
-    {
-        if (!this.TryGetAsset<TAssetType>(name, out var asset))
-        {
-            throw new InvalidOperationException($"Failed to get asset: {name}");
-        }
-
-        return asset;
-    }
-
-    /// <summary>Attempt to get an asset.</summary>
-    /// <param name="name">The name of the asset to get.</param>
-    /// <param name="asset">When this method returns, contains the asset, if found; otherwise, null.</param>
-    /// <typeparam name="TAssetType">The type of asset to return.</typeparam>
-    /// <returns><c>true</c> if the asset with the given type is found; otherwise, <c>false</c>.</returns>
-    public bool TryGetAsset<TAssetType>(string name, [NotNullWhen(true)] out TAssetType? asset)
-        where TAssetType : notnull
+    /// <inheritdoc />
+    public ITrackedAsset Asset(string name)
     {
         var assetName = this.GameContentHelper.ParseAssetName(name);
-        if (!this.cachedAssets.TryGetValue(assetName, out var cachedAsset))
-        {
-            cachedAsset = new CachedAsset<TAssetType>(() => this.GameContentHelper.Load<TAssetType>(name));
-            this.cachedAssets.Add(assetName, cachedAsset);
-        }
-
-        if (cachedAsset is not CachedAsset<TAssetType> typedCachedAsset)
-        {
-            asset = default(TAssetType);
-            return false;
-        }
-
-        asset = typedCachedAsset.Value;
-        return true;
+        return this.Asset(assetName);
     }
 
-    /// <summary>Adds an asset to load or edit.</summary>
-    /// <param name="name">The name of the asset.</param>
-    /// <param name="asset">The asset.</param>
-    protected void AddAsset(string name, ITrackedAsset asset)
+    /// <inheritdoc />
+    public ITrackedAsset Asset(IAssetName assetName)
     {
-        var assetName = this.GameContentHelper.ParseAssetName(name);
-        if (!this.trackedAssets.TryGetValue(assetName, out var assets))
+        if (this.trackedAssets.TryGetValue(assetName, out var trackedAsset))
         {
-            assets = new List<ITrackedAsset>();
-            this.trackedAssets.Add(assetName, assets);
+            return trackedAsset;
         }
 
-        assets.Add(asset);
+        trackedAsset = new TrackedAsset(this, assetName);
+        this.trackedAssets.Add(assetName, trackedAsset);
+        return trackedAsset;
     }
 
-    private void OnAssetReady(AssetReadyEventArgs e) { }
+    /// <inheritdoc />
+    public void DynamicAsset(Func<AssetRequestedEventArgs, bool> predicate, Action<ITrackedAsset> action) =>
+        this.dynamicAssets.Add(predicate, action);
+
+    private void OnAssetReady(AssetReadyEventArgs e)
+    {
+        foreach (var (assetName, trackedAsset) in this.trackedAssets)
+        {
+            if (e.NameWithoutLocale.IsEquivalentTo(assetName))
+            {
+                trackedAsset.OnAssetReady(e);
+            }
+        }
+    }
 
     private void OnAssetRequested(AssetRequestedEventArgs e)
     {
-        if (!this.trackedAssets.TryGetValue(e.NameWithoutLocale, out var assets))
+        foreach (var (assetName, trackedAsset) in this.trackedAssets)
         {
-            return;
+            if (e.NameWithoutLocale.IsEquivalentTo(assetName))
+            {
+                trackedAsset.OnAssetRequested(e);
+            }
         }
 
-        foreach (var asset in assets)
+        foreach (var (predicate, action) in this.dynamicAssets)
         {
-            asset.ProvideAsset(e);
+            if (predicate(e))
+            {
+                action(this.Asset(e.NameWithoutLocale));
+            }
         }
     }
 
     private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
     {
-        foreach (var name in e.NamesWithoutLocale)
+        foreach (var (assetName, trackedAsset) in this.trackedAssets)
         {
-            if (this.cachedAssets.TryGetValue(name, out var cachedAsset))
+            if (e.NamesWithoutLocale.Any(name => name.IsEquivalentTo(assetName)))
             {
-                cachedAsset.ClearCache();
-                this.eventManager.Publish(new AssetInvalidatedEventArgs(name));
+                trackedAsset.OnAssetsInvalidated(e);
             }
         }
     }

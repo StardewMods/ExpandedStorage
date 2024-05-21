@@ -2,6 +2,7 @@ namespace StardewMods.FauxCore.Framework.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Interfaces;
 using StardewMods.FauxCore.Framework.Models;
@@ -12,14 +13,14 @@ internal sealed class IconRegistry : IIconRegistry
 {
     private static readonly Dictionary<string, Icon> Icons = new();
 
-    private readonly IAssetHandler assetHandler;
+    private readonly IAssetHandlerExtension assetHandler;
     private readonly Dictionary<string, string> ids = [];
     private readonly IManifest manifest;
 
     /// <summary>Initializes a new instance of the <see cref="IconRegistry" /> class.</summary>
     /// <param name="assetHandler">Dependency used for handling assets.</param>
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
-    public IconRegistry(IAssetHandler assetHandler, IManifest manifest)
+    public IconRegistry(IAssetHandlerExtension assetHandler, IManifest manifest)
     {
         this.assetHandler = assetHandler;
         this.manifest = manifest;
@@ -39,7 +40,11 @@ internal sealed class IconRegistry : IIconRegistry
             Path = path,
         };
 
-        IconRegistry.Icons.TryAdd(id, icon);
+        if (IconRegistry.Icons.TryAdd(id, icon))
+        {
+            this.assetHandler.AddAsset(icon);
+        }
+
         return icon;
     }
 
@@ -128,8 +133,8 @@ internal sealed class IconRegistry : IIconRegistry
     private Texture2D GetTexture(IIcon icon, IconStyle style) =>
         style switch
         {
-            IconStyle.Transparent => this.assetHandler.GetTexture(icon),
-            IconStyle.Button => this.assetHandler.CreateButtonTexture(icon),
+            IconStyle.Transparent => this.assetHandler.Asset(icon.Path).Require<Texture2D>(),
+            IconStyle.Button => this.assetHandler.Asset($"{Mod.Id}/Buttons/{icon.Id}").Require<Texture2D>(),
             _ => throw new ArgumentOutOfRangeException(nameof(style), style, null),
         };
 }

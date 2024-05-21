@@ -7,7 +7,7 @@ using StardewMods.FauxCore.Framework.Interfaces;
 /// <inheritdoc />
 internal sealed class ApiFactory : IApiFactory<IFauxCoreApi>
 {
-    private readonly IAssetHandler assetHandler;
+    private readonly IAssetHandlerExtension assetHandler;
     private readonly IExpressionHandler expressionHandler;
     private readonly IModConfig modConfig;
     private readonly IThemeHelper themeHelper;
@@ -18,7 +18,7 @@ internal sealed class ApiFactory : IApiFactory<IFauxCoreApi>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public ApiFactory(
-        IAssetHandler assetHandler,
+        IAssetHandlerExtension assetHandler,
         IExpressionHandler expressionHandler,
         IModConfig modConfig,
         IThemeHelper themeHelper)

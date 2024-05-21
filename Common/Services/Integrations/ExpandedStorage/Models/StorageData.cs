@@ -1,7 +1,7 @@
 namespace StardewMods.Common.Services.Integrations.ExpandedStorage;
 
 using Microsoft.Xna.Framework;
-using StardewMods.Common.Interfaces;
+using StardewMods.Common.Interfaces.Data;
 using StardewMods.Common.Models.Data;
 
 /// <inheritdoc cref="StardewMods.Common.Services.Integrations.ExpandedStorage.IStorageData" />

@@ -2,7 +2,6 @@ namespace StardewMods.CrystallineJunimoChests.Framework.Services;
 
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Models.Assets;
 using StardewMods.Common.Models.Data;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
@@ -23,27 +22,21 @@ internal sealed class AssetHandler : BaseAssetHandler
         IModContentHelper modContentHelper)
         : base(eventManager, gameContentHelper, modContentHelper)
     {
-        this.AddAsset($"{Mod.Id}/Data", new ModAsset<ColorData[]>("assets/data.json", AssetLoadPriority.Exclusive));
-        this.AddAsset("Data/BigCraftables", new AssetEditor(this.EditBigCraftables, AssetEditPriority.Late));
+        this.Asset($"{Mod.Id}/Data").Load<ColorData[]>("assets/data.json");
+        this.Asset("Data/BigCraftables").Edit<BigCraftableData>("256", this.EditJunimoChest, AssetEditPriority.Late);
     }
 
     /// <summary>Gets the data model.</summary>
-    public ColorData[] Data => this.RequireAsset<ColorData[]>($"{Mod.Id}/Data");
+    public ColorData[] Data => this.Asset($"{Mod.Id}/Data").Require<ColorData[]>();
 
-    private void EditBigCraftables(IAssetData asset)
+    private void EditJunimoChest(BigCraftableData entry)
     {
-        var data = asset.AsDictionary<string, BigCraftableData>().Data;
-        if (!data.TryGetValue("256", out var bigCraftableData))
-        {
-            return;
-        }
+        entry.SpriteIndex = 0;
+        entry.Texture = this.ModContentHelper.GetInternalAssetName("assets/Default.png").Name;
+        entry.CustomFields ??= [];
+        entry.CustomFields["furyx639.ExpandedStorage/Enabled"] = "true";
 
-        bigCraftableData.SpriteIndex = 0;
-        bigCraftableData.Texture = this.ModContentHelper.GetInternalAssetName("assets/Default.png").Name;
-        bigCraftableData.CustomFields ??= [];
-        bigCraftableData.CustomFields["furyx639.ExpandedStorage/Enabled"] = "true";
-
-        var typeModel = new DictionaryModel(() => bigCraftableData.CustomFields);
+        var typeModel = new DictionaryModel(() => entry.CustomFields);
         var storageData = new StorageData(typeModel);
         storageData.Frames = 5;
         storageData.GlobalInventoryId = "JunimoChest";

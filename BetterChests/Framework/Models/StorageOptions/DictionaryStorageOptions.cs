@@ -1,6 +1,6 @@
 namespace StardewMods.BetterChests.Framework.Models.StorageOptions;
 
-using StardewMods.Common.Interfaces;
+using StardewMods.Common.Interfaces.Data;
 using StardewMods.Common.Services.Integrations.BetterChests;
 
 /// <inheritdoc cref="StardewMods.Common.Services.Integrations.BetterChests.IStorageOptions" />

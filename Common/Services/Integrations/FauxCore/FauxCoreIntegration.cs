@@ -110,11 +110,6 @@ internal sealed class FauxCoreIntegration
     }
 
     /// <inheritdoc />
-    public IManagedTexture RequireAsset(string path) =>
-        this.themeHelper?.Value.RequireAsset(path)
-        ?? throw new InvalidOperationException($"Failed to load asset: {path}.");
-
-    /// <inheritdoc />
     public IIcon RequireIcon(string id) =>
         this.iconRegistry?.Value.RequireIcon(id) ?? throw new InvalidOperationException($"Failed to load icon: {id}.");
 
@@ -142,34 +137,10 @@ internal sealed class FauxCoreIntegration
     }
 
     /// <inheritdoc />
-    public bool TryGetAsset(string path, [NotNullWhen(true)] out IManagedTexture? texture)
-    {
-        if (this.themeHelper?.Value.TryGetAsset(path, out texture) == true)
-        {
-            return true;
-        }
-
-        texture = null;
-        return false;
-    }
-
-    /// <inheritdoc />
     public bool TryGetIcon(string id, [NotNullWhen(true)] out IIcon? icon)
     {
         icon = null;
         return this.iconRegistry?.Value.TryGetIcon(id, out icon) ?? false;
-    }
-
-    /// <inheritdoc />
-    public bool TryGetRawTextureData(string path, [NotNullWhen(true)] out IRawTextureData? rawTextureData)
-    {
-        if (this.themeHelper?.Value.TryGetRawTextureData(path, out rawTextureData) == true)
-        {
-            return true;
-        }
-
-        rawTextureData = null;
-        return false;
     }
 
     /// <inheritdoc />

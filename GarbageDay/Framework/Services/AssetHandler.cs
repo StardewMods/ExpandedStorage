@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Models.Assets;
 using StardewMods.Common.Models.Data;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
@@ -43,120 +42,105 @@ internal sealed class AssetHandler : BaseAssetHandler
         this.foundGarbageCans = foundGarbageCans;
         this.modConfig = modConfig;
 
-        this.AddAsset($"{Mod.Id}/Icons", new ModAsset<Texture2D>("assets/icons.png", AssetLoadPriority.Exclusive));
-        this.AddAsset("Data/BigCraftables", new AssetEditor(this.LoadGarbageCan, AssetEditPriority.Default));
+        this.Asset($"{Mod.Id}/Icons").Load<Texture2D>("assets/icons.png");
+        this.Asset("Data/BigCraftables").Edit($"{Mod.Id}/GarbageCan", () => this.GarbageCan);
+        this.Asset("Data/GarbageCans").Watch(onInvalidated: e => this.foundGarbageCans.Clear());
+
+        this.DynamicAsset(
+            e => e.DataType == typeof(Map),
+            asset => asset.Edit(this.DiscoverGarbageCans, (AssetEditPriority)int.MaxValue));
 
         iconRegistry.AddIcon("GarbageCan", $"{Mod.Id}/Icons", new Rectangle(0, 0, 16, 16));
-
-        // Events
-        eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
-        eventManager.Subscribe<AssetRequestedEventArgs>(this.OnAssetRequested);
     }
 
-    private void LoadGarbageCan(IAssetData asset)
+    private BigCraftableData GarbageCan
     {
-        var data = asset.AsDictionary<string, BigCraftableData>().Data;
-        var bigCraftableData = new BigCraftableData
+        get
         {
-            Name = "Garbage Can",
-            DisplayName = I18n.GarbageCan_Name(),
-            Description = I18n.GarbageCan_Description(),
-            Fragility = 2,
-            IsLamp = false,
-            Texture = this.ModContentHelper.GetInternalAssetName("assets/GarbageCan.png").Name,
-            CustomFields = new Dictionary<string, string>
+            var bigCraftableData = new BigCraftableData
             {
-                { "furyx639.ExpandedStorage/Enabled", "true" },
-            },
-        };
-
-        var typeModel = new DictionaryModel(() => bigCraftableData.CustomFields);
-        var storageData = new StorageData(typeModel);
-        storageData.Frames = 3;
-        storageData.CloseNearbySound = "trashcanlid";
-        storageData.OpenNearby = true;
-        storageData.OpenNearbySound = "trashcanlid";
-        storageData.OpenSound = "trashcan";
-        storageData.PlayerColor = true;
-
-        var storageOptions = new StorageOptions(typeModel);
-        storageOptions.AutoOrganize = FeatureOption.Disabled;
-        storageOptions.CarryChest = FeatureOption.Disabled;
-        storageOptions.CategorizeChest = FeatureOption.Disabled;
-        storageOptions.CollectItems = FeatureOption.Disabled;
-        storageOptions.ConfigureChest = FeatureOption.Disabled;
-        storageOptions.CookFromChest = RangeOption.Disabled;
-        storageOptions.CraftFromChest = RangeOption.Disabled;
-        storageOptions.HslColorPicker = FeatureOption.Disabled;
-        storageOptions.InventoryTabs = FeatureOption.Disabled;
-        storageOptions.OpenHeldChest = FeatureOption.Disabled;
-        storageOptions.ResizeChest = ChestMenuOption.Small;
-        storageOptions.ResizeChestCapacity = 9;
-        storageOptions.SearchItems = FeatureOption.Disabled;
-        storageOptions.StashToChest = RangeOption.Disabled;
-        storageOptions.StorageInfo = FeatureOption.Disabled;
-
-        data.Add($"{Mod.Id}/GarbageCan", bigCraftableData);
-    }
-
-    private void OnAssetRequested(AssetRequestedEventArgs e)
-    {
-        if (e.DataType != typeof(Map))
-        {
-            return;
-        }
-
-        e.Edit(
-            asset =>
-            {
-                var map = asset.AsMap().Data;
-                for (var x = 0; x < map.Layers[0].LayerWidth; ++x)
+                Name = "Garbage Can",
+                DisplayName = I18n.GarbageCan_Name(),
+                Description = I18n.GarbageCan_Description(),
+                Fragility = 2,
+                IsLamp = false,
+                Texture = this.ModContentHelper.GetInternalAssetName("assets/GarbageCan.png").Name,
+                CustomFields = new Dictionary<string, string>
                 {
-                    for (var y = 0; y < map.Layers[0].LayerHeight; ++y)
-                    {
-                        var layer = map.GetLayer("Buildings");
-                        var tile = layer.PickTile(new Location(x, y) * Game1.tileSize, Game1.viewport.Size);
-                        if (tile is null
-                            || !tile.Properties.TryGetValue("Action", out var property)
-                            || string.IsNullOrWhiteSpace(property))
-                        {
-                            continue;
-                        }
+                    { "furyx639.ExpandedStorage/Enabled", "true" },
+                },
+            };
 
-                        var parts = ArgUtility.SplitBySpace(property);
-                        if (parts.Length < 2
-                            || !parts[0].Equals("Garbage", StringComparison.OrdinalIgnoreCase)
-                            || string.IsNullOrWhiteSpace(parts[1])
-                            || !this.TryAddFound(parts[1], asset.NameWithoutLocale, x, y))
-                        {
-                            continue;
-                        }
+            var typeModel = new DictionaryModel(() => bigCraftableData.CustomFields);
+            var storageData = new StorageData(typeModel);
+            storageData.Frames = 3;
+            storageData.CloseNearbySound = "trashcanlid";
+            storageData.OpenNearby = true;
+            storageData.OpenNearbySound = "trashcanlid";
+            storageData.OpenSound = "trashcan";
+            storageData.PlayerColor = true;
 
-                        Log.Trace("Garbage Can found on map: {0}", parts[1]);
+            var storageOptions = new StorageOptions(typeModel);
+            storageOptions.AutoOrganize = FeatureOption.Disabled;
+            storageOptions.CarryChest = FeatureOption.Disabled;
+            storageOptions.CategorizeChest = FeatureOption.Disabled;
+            storageOptions.CollectItems = FeatureOption.Disabled;
+            storageOptions.ConfigureChest = FeatureOption.Disabled;
+            storageOptions.CookFromChest = RangeOption.Disabled;
+            storageOptions.CraftFromChest = RangeOption.Disabled;
+            storageOptions.HslColorPicker = FeatureOption.Disabled;
+            storageOptions.InventoryTabs = FeatureOption.Disabled;
+            storageOptions.OpenHeldChest = FeatureOption.Disabled;
+            storageOptions.ResizeChest = ChestMenuOption.Small;
+            storageOptions.ResizeChestCapacity = 9;
+            storageOptions.SearchItems = FeatureOption.Disabled;
+            storageOptions.StashToChest = RangeOption.Disabled;
+            storageOptions.StorageInfo = FeatureOption.Disabled;
 
-                        // Remove base tile
-                        layer.Tiles[x, y] = null;
-
-                        // Remove Lid tile
-                        layer = map.GetLayer("Front");
-                        layer.Tiles[x, y - 1] = null;
-
-                        // Add NoPath to tile
-                        map
-                            .GetLayer("Back")
-                            .PickTile(new Location(x, y) * Game1.tileSize, Game1.viewport.Size)
-                            ?.Properties.Add("NoPath", string.Empty);
-                    }
-                }
-            },
-            (AssetEditPriority)int.MaxValue);
+            return bigCraftableData;
+        }
     }
 
-    private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
+    private void DiscoverGarbageCans(IAssetData asset)
     {
-        if (e.Names.Any(assetName => assetName.IsEquivalentTo("Data/GarbageCans")))
+        var map = asset.AsMap().Data;
+        for (var x = 0; x < map.Layers[0].LayerWidth; ++x)
         {
-            this.foundGarbageCans.Clear();
+            for (var y = 0; y < map.Layers[0].LayerHeight; ++y)
+            {
+                var layer = map.GetLayer("Buildings");
+                var tile = layer.PickTile(new Location(x, y) * Game1.tileSize, Game1.viewport.Size);
+                if (tile is null
+                    || !tile.Properties.TryGetValue("Action", out var property)
+                    || string.IsNullOrWhiteSpace(property))
+                {
+                    continue;
+                }
+
+                var parts = ArgUtility.SplitBySpace(property);
+                if (parts.Length < 2
+                    || !parts[0].Equals("Garbage", StringComparison.OrdinalIgnoreCase)
+                    || string.IsNullOrWhiteSpace(parts[1])
+                    || !this.TryAddFound(parts[1], asset.NameWithoutLocale, x, y))
+                {
+                    continue;
+                }
+
+                Log.Trace("Garbage Can found on map: {0}", parts[1]);
+
+                // Remove base tile
+                layer.Tiles[x, y] = null;
+
+                // Remove Lid tile
+                layer = map.GetLayer("Front");
+                layer.Tiles[x, y - 1] = null;
+
+                // Add NoPath to tile
+                map
+                    .GetLayer("Back")
+                    .PickTile(new Location(x, y) * Game1.tileSize, Game1.viewport.Size)
+                    ?.Properties.Add("NoPath", string.Empty);
+            }
         }
     }
 

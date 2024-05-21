@@ -3,9 +3,7 @@ namespace StardewMods.ToolbarIcons.Framework.Services;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Models.Assets;
 using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Models;
@@ -45,11 +43,10 @@ internal sealed class AssetHandler : BaseAssetHandler
     {
         // Init
         this.integrationManager = integrationManager;
-        this.AddAsset(
-            $"{Mod.Id}/Data",
-            new ModAsset<Dictionary<string, IntegrationData>>(
-                static () => new Dictionary<string, IntegrationData>(StringComparer.OrdinalIgnoreCase),
-                AssetLoadPriority.Exclusive));
+        this
+            .Asset($"{Mod.Id}/Data")
+            .Load(static () => new Dictionary<string, IntegrationData>(StringComparer.OrdinalIgnoreCase))
+            .Watch(onInvalidated: this.AddIcons);
 
         themeHelper.AddAsset($"{Mod.Id}/Arrows", modContentHelper.Load<IRawTextureData>("assets/arrows.png"));
         themeHelper.AddAsset($"{Mod.Id}/Icons", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
@@ -61,17 +58,16 @@ internal sealed class AssetHandler : BaseAssetHandler
                 $"{Mod.Id}/Icons",
                 new Rectangle(16 * (index % 5), 16 * (int)(index / 5f), 16, 16));
         }
-
-        // Events
-        eventManager.Subscribe<ConditionsApiReadyEventArgs>(this.OnConditionsApiReady);
     }
 
-    private Dictionary<string, IntegrationData> Data =>
-        this.RequireAsset<Dictionary<string, IntegrationData>>($"{Mod.Id}/Data");
-
-    private void OnConditionsApiReady(ConditionsApiReadyEventArgs e)
+    private void AddIcons(AssetsInvalidatedEventArgs e)
     {
-        foreach (var (id, integrationData) in this.Data)
+        if (!this.Asset($"{Mod.Id}/Data").TryGet<Dictionary<string, IntegrationData>>(out var data))
+        {
+            return;
+        }
+
+        foreach (var (id, integrationData) in data)
         {
             this.integrationManager.AddIcon(id, integrationData);
         }

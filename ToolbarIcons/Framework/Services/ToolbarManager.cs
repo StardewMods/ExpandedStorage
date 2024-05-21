@@ -1,5 +1,6 @@
 namespace StardewMods.ToolbarIcons.Framework.Services;
 
+using System.Collections.Immutable;
 using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
@@ -50,6 +51,7 @@ internal sealed class ToolbarManager
         this.reflectionHelper = reflectionHelper;
 
         // Events
+        eventManager.Subscribe<AssetsInvalidatedEventArgs>(this.OnAssetsInvalidated);
         eventManager.Subscribe<ButtonPressedEventArgs>(this.OnButtonPressed);
         eventManager.Subscribe<ButtonsChangedEventArgs>(this.OnButtonsChanged);
         eventManager.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
@@ -128,6 +130,28 @@ internal sealed class ToolbarManager
         this.RefreshComponents(true);
     }
 
+    private void OnAssetsInvalidated(AssetsInvalidatedEventArgs e)
+    {
+        var names = this
+            .Toolbar?.allClickableComponents?.OfType<ClickableTextureComponent>()
+            .Select(component => component.texture.Name)
+            .ToImmutableList();
+
+        if (names is null)
+        {
+            return;
+        }
+
+        if (e.NamesWithoutLocale.Any(MatchesAnyComponent))
+        {
+            this.RefreshComponents(true);
+        }
+
+        return;
+
+        bool MatchesAnyComponent(IAssetName assetName) => names.Any(name => assetName.IsEquivalentTo(name));
+    }
+
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
         if (!this.ShowToolbar || this.inputHelper.IsSuppressed(e.Button))
@@ -181,7 +205,7 @@ internal sealed class ToolbarManager
 
     private void OnRenderingHud(RenderingHudEventArgs e)
     {
-        if (this.Toolbar is null)
+        if (!this.ShowToolbar || this.Toolbar is null)
         {
             return;
         }

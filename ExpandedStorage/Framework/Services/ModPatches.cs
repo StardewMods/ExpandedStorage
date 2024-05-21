@@ -229,7 +229,7 @@ internal sealed class ModPatches
         var data = ItemRegistry.GetDataOrErrorItem(__instance.QualifiedItemId);
         var texture = string.IsNullOrWhiteSpace(storage.TextureOverride)
             ? data.GetTexture()
-            : ModPatches.assetHandler.RequireAsset<Texture2D>(storage.TextureOverride);
+            : ModPatches.assetHandler.Asset(storage.TextureOverride).Require<Texture2D>();
 
         var pos = Game1.GlobalToLocal(Game1.viewport, new Vector2(drawX, drawY - 1f) * Game1.tileSize);
         var startingLidFrame = __instance.startingLidFrame.Value;
@@ -295,7 +295,7 @@ internal sealed class ModPatches
         var data = ItemRegistry.GetDataOrErrorItem(__instance.QualifiedItemId);
         var texture = string.IsNullOrWhiteSpace(storage.TextureOverride)
             ? data.GetTexture()
-            : ModPatches.assetHandler.RequireAsset<Texture2D>(storage.TextureOverride);
+            : ModPatches.assetHandler.Asset(storage.TextureOverride).Require<Texture2D>();
 
         var pos = local
             ? new Vector2(x, y - 64)

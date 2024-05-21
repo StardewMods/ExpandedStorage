@@ -1,6 +1,6 @@
 namespace StardewMods.Common.Models.Assets;
 
-using StardewMods.Common.Interfaces;
+using StardewMods.Common.Interfaces.Cache;
 
 /// <inheritdoc />
 internal sealed class CachedAsset<TAssetType> : ICachedAsset

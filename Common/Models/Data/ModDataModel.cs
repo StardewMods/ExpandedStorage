@@ -1,6 +1,6 @@
 namespace StardewMods.Common.Models.Data;
 
-using StardewMods.Common.Interfaces;
+using StardewMods.Common.Interfaces.Data;
 using StardewValley.Mods;
 
 /// <inheritdoc />

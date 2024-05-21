@@ -3,7 +3,6 @@ namespace StardewMods.ExpandedStorage.Framework.Services;
 using StardewModdingAPI.Events;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
-using StardewMods.Common.Models.Assets;
 using StardewMods.Common.Models.Data;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
@@ -30,7 +29,7 @@ internal sealed class AssetHandler : BaseAssetHandler
         : base(eventManager, gameContentHelper, modContentHelper)
     {
         this.modConfig = modConfig;
-        this.AddAsset("Data/BigCraftables", new AssetEditor(this.AddOptions, AssetEditPriority.Late));
+        this.Asset("Data/BigCraftables").Edit(this.AddOptions, AssetEditPriority.Late);
         eventManager.Subscribe<ConfigChangedEventArgs<DefaultConfig>>(this.OnConfigChanged);
     }
 

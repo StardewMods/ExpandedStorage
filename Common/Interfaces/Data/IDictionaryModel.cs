@@ -1,4 +1,4 @@
-namespace StardewMods.Common.Interfaces;
+namespace StardewMods.Common.Interfaces.Data;
 
 /// <summary>Represents modeled data stored as a dictionary of string key value pairs.</summary>
 internal interface IDictionaryModel

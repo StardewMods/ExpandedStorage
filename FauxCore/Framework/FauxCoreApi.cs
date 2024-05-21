@@ -7,7 +7,7 @@ using StardewMods.FauxCore.Framework.Services;
 /// <inheritdoc />
 public sealed class FauxCoreApi : IFauxCoreApi
 {
-    private readonly IAssetHandler assetHandler;
+    private readonly IAssetHandlerExtension assetHandler;
     private readonly IModConfig modConfig;
     private readonly IModInfo modInfo;
 
@@ -23,7 +23,7 @@ public sealed class FauxCoreApi : IFauxCoreApi
     /// <param name="themeHelper">Dependency used for swapping palettes.</param>
     public FauxCoreApi(
         IModInfo modInfo,
-        IAssetHandler assetHandler,
+        IAssetHandlerExtension assetHandler,
         IExpressionHandler expressionHandler,
         IModConfig modConfig,
         IThemeHelper themeHelper)

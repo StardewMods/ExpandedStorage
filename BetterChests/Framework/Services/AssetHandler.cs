@@ -2,7 +2,6 @@ namespace StardewMods.BetterChests.Framework.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewModdingAPI.Events;
 using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models;
@@ -10,7 +9,6 @@ using StardewMods.BetterChests.Framework.Models.StorageOptions;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
-using StardewMods.Common.Models.Assets;
 using StardewMods.Common.Models.Data;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
@@ -68,30 +66,27 @@ internal sealed class AssetHandler : BaseAssetHandler
     {
         this.modConfig = modConfig;
 
-        this.AddAsset($"{Mod.Id}/HueBar", new ModAsset<Texture2D>("assets/hue.png", AssetLoadPriority.Exclusive));
-        this.AddAsset(
-            "Data/BigCraftables",
-            new AssetEditor(
+        this.Asset($"{Mod.Id}/HueBar").Load<Texture2D>("assets/hue.png");
+        this
+            .Asset("Data/BigCraftables")
+            .Edit(
                 this.AddOptions<BigCraftableData>(
                     "BigCraftables",
-                    data => data.CustomFields ??= new Dictionary<string, string>()),
-                AssetEditPriority.Default));
+                    data => data.CustomFields ??= new Dictionary<string, string>()));
 
-        this.AddAsset(
-            "Data/Buildings",
-            new AssetEditor(
+        this
+            .Asset("Data/Buildings")
+            .Edit(
                 this.AddOptions<BuildingData>(
                     "Buildings",
-                    data => data.CustomFields ??= new Dictionary<string, string>()),
-                AssetEditPriority.Default));
+                    data => data.CustomFields ??= new Dictionary<string, string>()));
 
-        this.AddAsset(
-            "Data/Locations",
-            new AssetEditor(
+        this
+            .Asset("Data/Locations")
+            .Edit(
                 this.AddOptions<LocationData>(
                     "Locations",
-                    data => data.CustomFields ??= new Dictionary<string, string>()),
-                AssetEditPriority.Default));
+                    data => data.CustomFields ??= new Dictionary<string, string>()));
 
         themeHelper.AddAsset(Mod.Id + "/UI", modContentHelper.Load<IRawTextureData>("assets/icons.png"));
 
@@ -112,7 +107,7 @@ internal sealed class AssetHandler : BaseAssetHandler
         this.hslColors ??= this.HslTextureData.Select(HslColor.FromColor).Distinct().ToArray();
 
     /// <summary>Gets the hsl texture.</summary>
-    public Texture2D HslTexture => this.RequireAsset<Texture2D>($"{Mod.Id}/HueBar");
+    public Texture2D HslTexture => this.Asset($"{Mod.Id}/HueBar").Require<Texture2D>();
 
     private IEnumerable<Color> HslTextureData
     {
