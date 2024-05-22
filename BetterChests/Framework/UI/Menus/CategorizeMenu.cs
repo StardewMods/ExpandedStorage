@@ -1,5 +1,6 @@
 namespace StardewMods.BetterChests.Framework.UI.Menus;
 
+using Force.DeepCloner;
 using Microsoft.Xna.Framework;
 using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.Common.Services.Integrations.BetterChests;
@@ -10,11 +11,14 @@ using StardewValley.Menus;
 internal sealed class CategorizeMenu : SearchMenu
 {
     private readonly IStorageContainer container;
-    private readonly ClickableTextureComponent copyComponent;
-    private readonly IIcon iconNoStack;
-    private readonly ClickableTextureComponent pasteComponent;
-    private readonly ClickableTextureComponent saveComponent;
-    private readonly ClickableTextureComponent stackComponent;
+    private readonly ClickableTextureComponent copyButton;
+    private readonly IIcon noStackIcon;
+    private readonly ClickableTextureComponent okButton;
+    private readonly ClickableTextureComponent pasteButton;
+    private readonly ClickableTextureComponent saveButton;
+    private readonly ClickableTextureComponent stackToggle;
+
+    private IExpression? savedExpression;
 
     /// <summary>Initializes a new instance of the <see cref="CategorizeMenu" /> class.</summary>
     /// <param name="container">The container to categorize.</param>
@@ -31,52 +35,64 @@ internal sealed class CategorizeMenu : SearchMenu
         : base(expressionHandler, iconRegistry, inputHelper, reflectionHelper, container.CategorizeChestSearchTerm)
     {
         this.container = container;
+        this.savedExpression =
+            expressionHandler.TryParseExpression(container.CategorizeChestSearchTerm, out var expression)
+                ? expression
+                : null;
 
-        this.saveComponent = iconRegistry
+        this.saveButton = iconRegistry
             .RequireIcon(InternalIcon.Save)
             .GetComponent(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
                 this.yPositionOnScreen + Game1.tileSize + 16);
 
-        this.saveComponent.hoverText = I18n.Button_SaveAsCategorization_Name();
+        this.saveButton.hoverText = I18n.Ui_Save_Name();
 
-        this.iconNoStack = iconRegistry.RequireIcon(InternalIcon.NoStack);
-        this.stackComponent = this.iconNoStack.GetComponent(
+        this.noStackIcon = iconRegistry.RequireIcon(InternalIcon.NoStack);
+        this.stackToggle = this.noStackIcon.GetComponent(
             IconStyle.Button,
             this.xPositionOnScreen + this.width + 4,
             this.yPositionOnScreen + ((Game1.tileSize + 16) * 2));
 
-        this.stackComponent.hoverText = I18n.Button_IncludeExistingStacks_Name();
+        this.stackToggle.hoverText = I18n.Button_IncludeExistingStacks_Name();
 
         if (this.container.CategorizeChestIncludeStacks is FeatureOption.Enabled)
         {
-            this.stackComponent.texture = Game1.mouseCursors;
-            this.stackComponent.sourceRect = new Rectangle(103, 469, 16, 16);
+            this.stackToggle.texture = Game1.mouseCursors;
+            this.stackToggle.sourceRect = new Rectangle(103, 469, 16, 16);
         }
 
-        this.copyComponent = iconRegistry
-            .RequireIcon(InternalIcon.NoStack)
+        this.copyButton = iconRegistry
+            .RequireIcon(InternalIcon.Copy)
             .GetComponent(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
                 this.yPositionOnScreen + ((Game1.tileSize + 16) * 3));
 
-        this.copyComponent.hoverText = I18n.Button_Copy_Name();
+        this.copyButton.hoverText = I18n.Ui_Copy_Tooltip();
 
-        this.pasteComponent = iconRegistry
+        this.pasteButton = iconRegistry
             .RequireIcon(InternalIcon.Paste)
             .GetComponent(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
                 this.yPositionOnScreen + ((Game1.tileSize + 16) * 4));
 
-        this.pasteComponent.hoverText = I18n.Button_Paste_Name();
+        this.pasteButton.hoverText = I18n.Ui_Paste_Tooltip();
 
-        this.allClickableComponents.Add(this.saveComponent);
-        this.allClickableComponents.Add(this.stackComponent);
-        this.allClickableComponents.Add(this.copyComponent);
-        this.allClickableComponents.Add(this.pasteComponent);
+        this.okButton = iconRegistry
+            .RequireIcon(VanillaIcon.Ok)
+            .GetComponent(
+                IconStyle.Transparent,
+                this.xPositionOnScreen + this.width + 4,
+                this.yPositionOnScreen + this.height - Game1.tileSize - (IClickableMenu.borderWidth / 2));
+
+        this.allClickableComponents.Add(this.saveButton);
+        this.allClickableComponents.Add(this.stackToggle);
+        this.allClickableComponents.Add(this.copyButton);
+        this.allClickableComponents.Add(this.pasteButton);
+        this.allClickableComponents.Add(this.okButton);
     }
 
     /// <inheritdoc />
@@ -87,48 +103,60 @@ internal sealed class CategorizeMenu : SearchMenu
     }
 
     /// <inheritdoc />
-    protected override bool HighlightMethod(Item item) => true;
+    protected override bool HighlightMethod(Item item) =>
+        this.savedExpression is null || this.savedExpression.Equals(item);
 
     /// <inheritdoc />
     protected override bool TryLeftClick(int x, int y)
     {
-        if (this.saveComponent.containsPoint(x, y) && this.readyToClose())
+        if (this.saveButton.containsPoint(x, y) && this.readyToClose())
         {
+            Game1.playSound("drumkit6");
+            this.savedExpression = this.Expression.DeepClone();
             this.container.CategorizeChestSearchTerm = this.SearchText;
-            this.container.CategorizeChestIncludeStacks = this.stackComponent.texture.Equals(Game1.mouseCursors)
+            this.container.CategorizeChestIncludeStacks = this.stackToggle.texture.Equals(Game1.mouseCursors)
                 ? FeatureOption.Enabled
                 : FeatureOption.Disabled;
 
-            this.exitThisMenuNoSound();
-            this.container.ShowMenu();
             return true;
         }
 
-        if (this.stackComponent.containsPoint(x, y))
+        if (this.stackToggle.containsPoint(x, y))
         {
-            if (this.stackComponent.texture.Equals(Game1.mouseCursors))
+            Game1.playSound("drumkit6");
+            if (this.stackToggle.texture.Equals(Game1.mouseCursors))
             {
-                this.stackComponent.texture = this.iconNoStack.GetTexture(IconStyle.Button);
-                this.stackComponent.sourceRect = new Rectangle(0, 0, 16, 16);
+                this.stackToggle.texture = this.noStackIcon.GetTexture(IconStyle.Button);
+                this.stackToggle.sourceRect = new Rectangle(0, 0, 16, 16);
                 return true;
             }
 
-            this.stackComponent.texture = Game1.mouseCursors;
-            this.stackComponent.sourceRect = new Rectangle(103, 469, 16, 16);
+            this.stackToggle.texture = Game1.mouseCursors;
+            this.stackToggle.sourceRect = new Rectangle(103, 469, 16, 16);
             return true;
         }
 
-        if (this.copyComponent.containsPoint(x, y))
+        if (this.copyButton.containsPoint(x, y))
         {
+            Game1.playSound("drumkit6");
             DesktopClipboard.SetText(this.SearchText);
             return true;
         }
 
-        if (this.pasteComponent.containsPoint(x, y))
+        if (this.pasteButton.containsPoint(x, y))
         {
+            Game1.playSound("drumkit6");
             var searchText = string.Empty;
             DesktopClipboard.GetText(ref searchText);
             this.SetSearchText(searchText, true);
+            return true;
+        }
+
+        if (this.okButton.containsPoint(x, y))
+        {
+            Game1.playSound("bigDeSelect");
+            this.exitThisMenuNoSound();
+            this.container.ShowMenu();
             return true;
         }
 

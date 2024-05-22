@@ -199,7 +199,13 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
                 return;
             case "sort":
-                Game1.activeClickableMenu = new SortMenu(this.inputHelper);
+                Game1.activeClickableMenu = new SortMenu(
+                    container,
+                    this.expressionHandler,
+                    this.iconRegistry,
+                    this.inputHelper,
+                    this.reflectionHelper);
+
                 return;
         }
     }

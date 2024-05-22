@@ -48,7 +48,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
     /// <inheritdoc />
     public List<ToolbarIcon> Icons => this.Config.Icons;
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool PlaySound => this.Config.PlaySound;
 
     /// <inheritdoc />

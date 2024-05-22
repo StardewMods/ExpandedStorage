@@ -2,7 +2,6 @@ namespace StardewMods.BetterChests.Framework.Services.Features;
 
 using System.Globalization;
 using StardewMods.BetterChests.Framework.Enums;
-using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.BetterChests.Framework.UI.Menus;
 using StardewMods.Common.Helpers;
@@ -14,6 +13,7 @@ using StardewMods.Common.Services.Integrations.ToolbarIcons;
 /// <summary>Feature used for debugging purposes.</summary>
 internal sealed class DebugMode : BaseFeature<DebugMode>
 {
+    private readonly ConfigManager configManager;
     private readonly ContainerFactory containerFactory;
     private readonly ContainerHandler containerHandler;
     private readonly IExpressionHandler expressionHandler;
@@ -24,29 +24,30 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
 
     /// <summary>Initializes a new instance of the <see cref="DebugMode" /> class.</summary>
     /// <param name="commandHelper">Dependency used for handling console commands.</param>
+    /// <param name="configManager">Dependency used for accessing config data.</param>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="containerHandler">Dependency used for handling operations by containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="modConfig">Dependency used for accessing config data.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public DebugMode(
         ICommandHelper commandHelper,
+        ConfigManager configManager,
         ContainerFactory containerFactory,
         ContainerHandler containerHandler,
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
-        IModConfig modConfig,
         IReflectionHelper reflectionHelper,
         ToolbarIconsIntegration toolbarIconsIntegration)
-        : base(eventManager, modConfig)
+        : base(eventManager, configManager)
     {
         // Init
+        this.configManager = configManager;
         this.containerFactory = containerFactory;
         this.containerHandler = containerHandler;
         this.expressionHandler = expressionHandler;
@@ -178,11 +179,14 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
                     "({category}~\"fish\" !{tags}~\"ocean\" [{quality}~iridium {quality}~gold])");
 
                 return;
-            case "sort":
-                Game1.activeClickableMenu = new SortMenu(this.inputHelper);
-                return;
             case "tab":
-                Game1.activeClickableMenu = new TabMenu(this.inputHelper);
+                Game1.activeClickableMenu = new TabMenu(
+                    this.configManager,
+                    this.expressionHandler,
+                    this.iconRegistry,
+                    this.inputHelper,
+                    this.reflectionHelper);
+
                 return;
         }
     }

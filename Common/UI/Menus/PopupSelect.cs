@@ -152,6 +152,8 @@ internal sealed class PopupSelect : BaseMenu
     {
         this.CurrentText = value ?? string.Empty;
         this.textField.Reset();
+        this.callback(this.CurrentText);
+        this.exitThisMenuNoSound();
     }
 
     private IEnumerable<KeyValuePair<string, string>> SortOptions(IEnumerable<KeyValuePair<string, string>> options) =>

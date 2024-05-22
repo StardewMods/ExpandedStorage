@@ -22,7 +22,7 @@ internal sealed class DebugMenu : BaseMenu
     {
         this.debugMode = debugMode;
         var lineHeight = Game1.smallFont.MeasureString("T").ToPoint().Y;
-        this.items = ["backpack", "reset", "config", "layout", "search", "sort", "tab"];
+        this.items = ["backpack", "reset", "config", "layout", "search", "tab"];
         this.descriptions =
         [
             "Configure the player backpack",
@@ -30,7 +30,6 @@ internal sealed class DebugMenu : BaseMenu
             "Open the config menu",
             "Open the layout menu",
             "Open the search menu",
-            "Open the sort menu",
             "Open the tab menu",
         ];
 
@@ -95,11 +94,7 @@ internal sealed class DebugMenu : BaseMenu
                     case "reset":
                         this.debugMode.Command("bc_reset", [item]);
                         return true;
-                    case "config":
-                    case "layout":
-                    case "search":
-                    case "sort":
-                    case "tab":
+                    default:
                         this.debugMode.Command("bc_menu", [item]);
                         return true;
                 }

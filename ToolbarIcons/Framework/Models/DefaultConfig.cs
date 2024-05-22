@@ -9,7 +9,7 @@ internal sealed class DefaultConfig : IModConfig
     /// <inheritdoc />
     public List<ToolbarIcon> Icons { get; set; } = [];
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public bool PlaySound { get; set; } = true;
 
     /// <inheritdoc />

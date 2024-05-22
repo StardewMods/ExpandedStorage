@@ -73,6 +73,11 @@ internal sealed class ComparableExpression : IExpression
     /// <inheritdoc />
     public int Compare(Item? x, Item? y)
     {
+        if (string.IsNullOrWhiteSpace(this.RightTerm?.Term))
+        {
+            return this.LeftTerm?.Compare(x, y) ?? 0;
+        }
+
         if ((x is null && y is null) || this.LeftTerm is null)
         {
             return 0;

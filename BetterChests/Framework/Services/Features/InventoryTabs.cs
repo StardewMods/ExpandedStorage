@@ -2,7 +2,6 @@ namespace StardewMods.BetterChests.Framework.Services.Features;
 
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
-using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Interfaces;
@@ -53,11 +52,12 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     protected override void Deactivate() =>
         this.Events.Unsubscribe<InventoryMenuChangedEventArgs>(this.OnInventoryMenuChanged);
 
-    private void OnClicked(object? sender, TabData tabData)
+    private void OnClicked(object? sender, TabClickedEventArgs e)
     {
-        Log.Trace("{0}: Switching tab to {1}.", this.Id, tabData.Label);
-        this.expressionHandler.TryParseExpression(tabData.SearchTerm, out var expression);
-        this.Events.Publish(new SearchChangedEventArgs(tabData.SearchTerm, expression));
+        Log.Trace("{0}: Switching tab to {1}.", this.Id, e.Data.Label);
+        Game1.playSound("drumkit6");
+        this.expressionHandler.TryParseExpression(e.Data.SearchTerm, out var expression);
+        this.Events.Publish(new SearchChangedEventArgs(e.Data.SearchTerm, expression));
     }
 
     private void OnInventoryMenuChanged(InventoryMenuChangedEventArgs e)

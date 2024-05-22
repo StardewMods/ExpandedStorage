@@ -20,7 +20,6 @@ internal class SearchMenu : BaseMenu
 
     private List<Item> allItems = [];
     private int rowOffset;
-    private IExpression? searchExpression;
     private int totalRows;
 
     /// <summary>Initializes a new instance of the <see cref="SearchMenu" /> class.</summary>
@@ -110,6 +109,9 @@ internal class SearchMenu : BaseMenu
     /// <summary>Gets the current search text.</summary>
     public string SearchText { get; private set; }
 
+    /// <summary>Gets the current search expression.</summary>
+    protected IExpression? Expression { get; private set; }
+
     /// <inheritdoc />
     public override void receiveKeyPress(Keys key)
     {
@@ -157,32 +159,18 @@ internal class SearchMenu : BaseMenu
     /// <summary>Get the items that should be displayed in the menu.</summary>
     /// <returns>The items to display.</returns>
     protected virtual List<Item> GetItems() =>
-        this.searchExpression is null
+        this.Expression is null
             ? Array.Empty<Item>().ToList()
-            : ItemRepository.GetItems(this.searchExpression.Equals).ToList();
+            : ItemRepository.GetItems(this.Expression.Equals).ToList();
 
     /// <summary>Highlight the item.</summary>
     /// <param name="item">The item to highlight.</param>
     /// <returns>A value indicating whether the item should be highlighted.</returns>
     protected virtual bool HighlightMethod(Item item) => InventoryMenu.highlightAllItems(item);
 
-    /// <summary>Updates the search text without parsing.</summary>
-    /// <param name="value">The new search text value.</param>
-    /// <param name="parse">Indicates whether to parse the text.</param>
-    [MemberNotNull(nameof(SearchMenu.SearchText))]
-    protected void SetSearchText(string value, bool parse = false)
+    /// <summary>Refresh the displayed items.</summary>
+    protected void RefreshItems()
     {
-        this.SearchText = value;
-        if (parse)
-        {
-            this.searchExpression = this.expressionHandler.TryParseExpression(this.SearchText, out var expression)
-                ? expression
-                : null;
-
-            this.expressionEditor.ReInitializeComponents(this.searchExpression);
-        }
-
-        this.textField?.Reset();
         this.allItems = this.GetItems();
         if (!this.allItems.Any())
         {
@@ -194,6 +182,26 @@ internal class SearchMenu : BaseMenu
         this.inventory.actualInventory = this.allItems.Take(this.inventory.capacity).ToList();
         this.totalRows = (int)Math.Ceiling(
             (float)this.allItems.Count / (this.inventory.capacity / this.inventory.rows));
+    }
+
+    /// <summary>Updates the search text without parsing.</summary>
+    /// <param name="value">The new search text value.</param>
+    /// <param name="parse">Indicates whether to parse the text.</param>
+    [MemberNotNull(nameof(SearchMenu.SearchText))]
+    protected void SetSearchText(string value, bool parse = false)
+    {
+        this.SearchText = value;
+        if (parse)
+        {
+            this.Expression = this.expressionHandler.TryParseExpression(this.SearchText, out var expression)
+                ? expression
+                : null;
+
+            this.expressionEditor.ReInitializeComponents(this.Expression);
+        }
+
+        this.textField?.Reset();
+        this.RefreshItems();
     }
 
     /// <inheritdoc />

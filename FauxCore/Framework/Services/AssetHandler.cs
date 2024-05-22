@@ -24,6 +24,7 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandlerExtension, I
         { VanillaIcon.Checked, OptionsCheckbox.sourceRectChecked },
         { VanillaIcon.Chest, new Rectangle(127, 412, 10, 11) },
         { VanillaIcon.Coin, new Rectangle(4, 388, 8, 8) },
+        { VanillaIcon.ColorPicker, new Rectangle(119, 469, 16, 16) },
         { VanillaIcon.DoNot, new Rectangle(322, 498, 12, 12) },
         { VanillaIcon.EmptyHeart, new Rectangle(218, 428, 7, 6) },
         { VanillaIcon.Fish, new Rectangle(20, 428, 10, 10) },
@@ -32,6 +33,7 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandlerExtension, I
         { VanillaIcon.Heart, new Rectangle(211, 428, 7, 6) },
         { VanillaIcon.Ok, new Rectangle(128, 256, 64, 64) },
         { VanillaIcon.Organize, new Rectangle(162, 440, 16, 16) },
+        { VanillaIcon.Plus, new Rectangle(0, 428, 10, 10) },
         { VanillaIcon.QualityGold, new Rectangle(346, 400, 8, 8) },
         { VanillaIcon.QualityIridium, new Rectangle(346, 392, 8, 8) },
         { VanillaIcon.QualitySilver, new Rectangle(338, 400, 8, 8) },
@@ -183,8 +185,8 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandlerExtension, I
         iconData ??= iconRawTexture.Data.Select(color => this.paletteSwap.GetValueOrDefault(color, color)).ToArray();
 
         // Copy icon to colors
-        var xOffset = (length - icon.Area.Width) / 2;
-        var yOffset = (length - icon.Area.Height) / 2;
+        var xOffset = (int)Math.Floor((length - icon.Area.Width) / 2f);
+        var yOffset = (int)Math.Floor((length - icon.Area.Height) / 2f);
         for (var x = xOffset; x < xOffset + icon.Area.Width; x++)
         {
             for (var y = yOffset; y < yOffset + icon.Area.Height; y++)

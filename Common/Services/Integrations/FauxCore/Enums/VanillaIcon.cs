@@ -33,6 +33,9 @@ public enum VanillaIcon
     /// <summary>A golden coin.</summary>
     Coin,
 
+    /// <summary>The color picker toggle button.</summary>
+    ColorPicker,
+
     /// <summary>A red circle with a slash.</summary>
     DoNot,
 
@@ -56,6 +59,9 @@ public enum VanillaIcon
 
     /// <summary>An organize button.</summary>
     Organize,
+
+    /// <summary>A plus.</summary>
+    Plus,
 
     /// <summary>A gold star.</summary>
     QualityGold,

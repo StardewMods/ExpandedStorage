@@ -105,7 +105,7 @@ internal sealed class HslPicker
 
         this.copyComponent = iconRegistry.RequireIcon(InternalIcon.Copy).GetComponent(IconStyle.Transparent);
         this.copyComponent.bounds = new Rectangle(this.xPosition + 30, this.yPosition - 4, 36, 36);
-        this.copyComponent.hoverText = I18n.Button_Copy_Name();
+        this.copyComponent.hoverText = I18n.Ui_Copy_Tooltip();
         this.copyComponent.scale = 3f;
         this.copyComponent.myID = (int)Math.Pow(this.yPosition + 2, 2) + this.xPosition + 34;
 

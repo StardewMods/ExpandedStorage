@@ -247,9 +247,10 @@ internal abstract class BaseMenu : IClickableMenu
             switch (component)
             {
                 case ICustomComponent
-                {
-                    Visible: true,
-                } customComponent when customComponent.TryLeftClick(x, y):
+                    {
+                        Visible: true,
+                    } customComponent
+                    when customComponent.Contains(new Vector2(x, y)) && customComponent.TryLeftClick(x, y):
                     return;
             }
         }
@@ -277,9 +278,10 @@ internal abstract class BaseMenu : IClickableMenu
             switch (component)
             {
                 case ICustomComponent
-                {
-                    Visible: true,
-                } customComponent when customComponent.TryRightClick(x, y):
+                    {
+                        Visible: true,
+                    } customComponent
+                    when customComponent.Contains(new Vector2(x, y)) && customComponent.TryRightClick(x, y):
                     return;
             }
         }

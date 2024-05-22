@@ -203,7 +203,6 @@ internal sealed class ToolbarIconOption : BaseComplexOption
         this.currentId = this.getCurrentId();
         this.name = this.currentId.Split('/')[^1];
         this.icon = this.iconRegistry.RequireIcon(this.currentId).GetComponent(IconStyle.Button, scale: 3f);
-
         this.icon.hoverText = this.getTooltip();
     }
 }

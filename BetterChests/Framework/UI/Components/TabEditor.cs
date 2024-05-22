@@ -9,42 +9,53 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
 
-/// <summary>A component with an icon that expands into a label when hovered.</summary>
-internal sealed class TabIcon : BaseComponent
+/// <summary>A component for configuring a tab.</summary>
+internal sealed class TabEditor : BaseComponent
 {
     private readonly TabData data;
-    private readonly Vector2 origin;
-    private readonly int overrideWidth;
-    private readonly int textWidth;
+    private readonly ClickableTextureComponent downArrow;
+    private readonly ClickableTextureComponent upArrow;
 
     private EventHandler<TabClickedEventArgs>? clicked;
+    private string? hoverText;
+    private EventHandler<TabClickedEventArgs>? moveDown;
+    private EventHandler<TabClickedEventArgs>? moveUp;
 
-    /// <summary>Initializes a new instance of the <see cref="TabIcon" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="TabEditor" /> class.</summary>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="x">The x-coordinate of the tab component.</param>
     /// <param name="y">The y-coordinate of the tab component.</param>
+    /// <param name="width">The width of the tab component.</param>
     /// <param name="icon">The tab icon.</param>
     /// <param name="tabData">The inventory tab data.</param>
-    /// <param name="overrideWidth">Indicates if the component should have a default width.</param>
-    public TabIcon(IInputHelper inputHelper, int x, int y, IIcon icon, TabData tabData, int overrideWidth = -1)
-        : base(inputHelper, x, y, Game1.tileSize, Game1.tileSize, tabData.Label)
+    public TabEditor(
+        IIconRegistry iconRegistry,
+        IInputHelper inputHelper,
+        int x,
+        int y,
+        int width,
+        IIcon icon,
+        TabData tabData)
+        : base(inputHelper, x, y, width, Game1.tileSize, tabData.Label)
     {
-        var textBounds = Game1.smallFont.MeasureString(tabData.Label).ToPoint();
         this.data = tabData;
-        this.overrideWidth = overrideWidth;
-        this.origin = new Vector2(x, y);
-        this.Component = icon.GetComponent(IconStyle.Transparent);
-        this.Component.bounds = this.bounds;
+        this.Component = icon.GetComponent(IconStyle.Transparent, x, y);
         this.Component.name = this.name;
-        this.textWidth = textBounds.X;
-
-        if (overrideWidth == -1)
+        this.Component.bounds = this.bounds with
         {
-            return;
-        }
+            X = this.bounds.X + Game1.tileSize,
+            Width = this.bounds.Width - (Game1.tileSize * 2),
+        };
 
-        this.Component.bounds.Width = overrideWidth;
-        this.Component.bounds.X = (int)this.origin.X - overrideWidth;
+        this.upArrow = iconRegistry.RequireIcon(VanillaIcon.ArrowUp).GetComponent(IconStyle.Transparent, x + 8, y + 8);
+
+        this.downArrow = iconRegistry
+            .RequireIcon(VanillaIcon.ArrowDown)
+            .GetComponent(IconStyle.Transparent, x + width - Game1.tileSize + 8, y + 8);
+
+        this.downArrow.hoverText = I18n.Ui_MoveDown_Tooltip();
+        this.upArrow.hoverText = I18n.Ui_MoveUp_Tooltip();
     }
 
     /// <summary>Event triggered when the tab is clicked.</summary>
@@ -54,17 +65,40 @@ internal sealed class TabIcon : BaseComponent
         remove => this.clicked -= value;
     }
 
+    /// <summary>Event triggered when the move up button is clicked.</summary>
+    public event EventHandler<TabClickedEventArgs> MoveDown
+    {
+        add => this.moveDown += value;
+        remove => this.moveDown -= value;
+    }
+
+    /// <summary>Event triggered when the move down button is clicked.</summary>
+    public event EventHandler<TabClickedEventArgs> MoveUp
+    {
+        add => this.moveUp += value;
+        remove => this.moveUp -= value;
+    }
+
     /// <inheritdoc />
     public override ClickableComponent Component { get; }
 
+    /// <inheritdoc />
+    public override string? HoverText => this.hoverText;
+
     /// <summary>Gets or sets a value indicating whether the tab is currently active.</summary>
     public bool Active { get; set; } = true;
+
+    /// <summary>Gets or sets the index.</summary>
+    public int Index { get; set; }
+
+    /// <inheritdoc />
+    public override bool Contains(Vector2 position) => this.bounds.Contains((int)position.X, (int)position.Y);
 
     /// <inheritdoc />
     public override void Draw(SpriteBatch spriteBatch)
     {
         var (mouseX, mouseY) = Game1.getMousePosition(true);
-        var hover = this.Component.bounds.Contains(mouseX, mouseY);
+        var hover = this.bounds.Contains(mouseX, mouseY);
         var color = this.Active
             ? Color.White
             : hover
@@ -159,12 +193,6 @@ internal sealed class TabIcon : BaseComponent
             clickableTextureComponent.draw(spriteBatch, color, 1f);
         }
 
-        if (this.Component.bounds.Width != this.overrideWidth
-            && this.Component.bounds.Width != this.textWidth + Game1.tileSize + IClickableMenu.borderWidth)
-        {
-            return;
-        }
-
         spriteBatch.DrawString(
             Game1.smallFont,
             this.Component.name,
@@ -172,11 +200,58 @@ internal sealed class TabIcon : BaseComponent
                 this.Component.bounds.X + Game1.tileSize,
                 this.Component.bounds.Y + (IClickableMenu.borderWidth / 2f)),
             this.Active ? Game1.textColor : Game1.unselectedOptionColor);
+
+        if (!this.Active)
+        {
+            return;
+        }
+
+        this.upArrow.tryHover(mouseX, mouseY);
+        this.downArrow.tryHover(mouseX, mouseY);
+
+        this.upArrow.draw(spriteBatch, color, 1f);
+        this.downArrow.draw(spriteBatch, color, 1f);
+
+        if (this.upArrow.containsPoint(mouseX, mouseY))
+        {
+            this.hoverText = this.upArrow.hoverText;
+            return;
+        }
+
+        if (this.downArrow.containsPoint(mouseX, mouseY))
+        {
+            this.hoverText = this.downArrow.hoverText;
+            return;
+        }
+
+        this.hoverText = null;
+    }
+
+    /// <inheritdoc />
+    public override void MoveTo(int x, int y)
+    {
+        this.bounds.X = x;
+        this.bounds.Y = y;
+        this.Component.bounds.Y = y;
+        this.upArrow.bounds.Y = y + 8;
+        this.downArrow.bounds.Y = y + 8;
     }
 
     /// <inheritdoc />
     public override bool TryLeftClick(int x, int y)
     {
+        if (this.Active && this.downArrow.containsPoint(x, y))
+        {
+            this.moveDown.InvokeAll(this, new TabClickedEventArgs(SButton.MouseLeft, this.data));
+            return true;
+        }
+
+        if (this.Active && this.upArrow.containsPoint(x, y))
+        {
+            this.moveUp.InvokeAll(this, new TabClickedEventArgs(SButton.MouseLeft, this.data));
+            return true;
+        }
+
         this.clicked.InvokeAll(this, new TabClickedEventArgs(SButton.MouseLeft, this.data));
         return true;
     }
@@ -184,22 +259,19 @@ internal sealed class TabIcon : BaseComponent
     /// <inheritdoc />
     public override bool TryRightClick(int x, int y)
     {
-        this.clicked.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
-        return true;
-    }
-
-    /// <inheritdoc />
-    public override void Update(int mouseX, int mouseY)
-    {
-        if (this.overrideWidth != -1)
+        if (this.Active && this.downArrow.containsPoint(x, y))
         {
-            return;
+            this.moveDown.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
+            return true;
         }
 
-        this.Component.bounds.Width = this.Component.bounds.Contains(mouseX, mouseY)
-            ? Math.Min(this.Component.bounds.Width + 16, this.textWidth + Game1.tileSize + IClickableMenu.borderWidth)
-            : Math.Max(this.Component.bounds.Width - 16, Game1.tileSize);
+        if (this.Active && this.upArrow.containsPoint(x, y))
+        {
+            this.moveUp.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
+            return true;
+        }
 
-        this.Component.bounds.X = (int)this.origin.X - this.Component.bounds.Width;
+        this.clicked.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
+        return true;
     }
 }
