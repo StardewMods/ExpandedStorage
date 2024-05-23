@@ -11,7 +11,7 @@
     <PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.0.1"/>
     <PackageReference Include="SimpleInjector">
       <HintPath>$(GameModsPath)\FauxCore\SimpleInjector.dll</HintPath>
-      <Version>5.4.2</Version>
+      <Version>5.4.5</Version>
       <Private>false</Private>
     </PackageReference>
   </ItemGroup>

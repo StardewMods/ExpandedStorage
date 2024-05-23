@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services;
+#else
 namespace StardewMods.Common.Services;
+#endif
 
 using StardewModdingAPI.Events;
 

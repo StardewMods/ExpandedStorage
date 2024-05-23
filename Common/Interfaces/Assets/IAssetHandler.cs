@@ -1,7 +1,13 @@
-namespace StardewMods.Common.Interfaces;
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Interfaces.Assets;
 
 using StardewModdingAPI.Events;
-using StardewMods.Common.Interfaces.Assets;
+
+#else
+namespace StardewMods.Common.Interfaces.Assets;
+
+using StardewModdingAPI.Events;
+#endif
 
 /// <summary>Handles modification and manipulation of assets in the game.</summary>
 public interface IAssetHandler

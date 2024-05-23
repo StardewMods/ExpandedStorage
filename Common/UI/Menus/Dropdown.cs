@@ -1,42 +1,53 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.UI.Menus;
+
+using Microsoft.Xna.Framework.Graphics;
+using StardewMods.FauxCore.Common.Helpers;
+using StardewValley.Menus;
+
+#else
 namespace StardewMods.Common.UI.Menus;
 
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.Common.Helpers;
 using StardewValley.Menus;
+#endif
 
 /// <summary>Dropdown menu for selecting an item from a list of values.</summary>
-internal class Dropdown : BaseMenu
+/// <typeparam name="TItem">The item type.</typeparam>
+internal sealed class Dropdown<TItem> : BaseMenu
 {
-    private readonly Action<string> callback;
+    private EventHandler<TItem?>? optionSelected;
 
-    /// <summary>Initializes a new instance of the <see cref="Dropdown" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="Dropdown{TItem}" /> class.</summary>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="anchor">The component to anchor the dropdown to.</param>
     /// <param name="items">The list of values to select from.</param>
-    /// <param name="callback">A method that is called when an option is selected.</param>
+    /// <param name="getValue">A function which returns a string from the item.</param>
     /// <param name="minWidth">The minimum width.</param>
     /// <param name="maxItems">The maximum number of items to display.</param>
     public Dropdown(
         IInputHelper inputHelper,
         IReflectionHelper reflectionHelper,
         ClickableComponent anchor,
-        IReadOnlyCollection<KeyValuePair<string, string>> items,
-        Action<string> callback,
+        IEnumerable<TItem> items,
+        Func<TItem, string>? getValue = null,
         int minWidth = 0,
         int maxItems = int.MaxValue)
         : base(inputHelper)
     {
-        this.callback = callback;
-        var selectOption = new SelectOption(
+        var selectOption = new SelectOption<TItem>(
             inputHelper,
             reflectionHelper,
             items,
-            this.OnSelect,
             this.xPositionOnScreen,
             this.yPositionOnScreen,
+            getValue,
             minWidth,
             maxItems);
 
+        selectOption.SelectionChanged += this.OnSelectionChanged;
         this.AddSubMenu(selectOption);
         this.Resize(selectOption.width + 16, selectOption.height + 16);
         this.MoveTo(anchor.bounds.Left, anchor.bounds.Bottom);
@@ -51,6 +62,13 @@ internal class Dropdown : BaseMenu
         }
     }
 
+    /// <summary>Event raised when the selection changes.</summary>
+    public event EventHandler<TItem?> OptionSelected
+    {
+        add => this.optionSelected += value;
+        remove => this.optionSelected -= value;
+    }
+
     /// <inheritdoc />
     protected override void DrawUnder(SpriteBatch spriteBatch) { }
 
@@ -61,9 +79,14 @@ internal class Dropdown : BaseMenu
         return false;
     }
 
-    private void OnSelect(string? value)
+    private void OnSelectionChanged(object? sender, TItem? item)
     {
-        this.callback(value ?? string.Empty);
+        if (item is null)
+        {
+            return;
+        }
+
+        this.optionSelected?.InvokeAll(this, item);
         this.exitThisMenuNoSound();
     }
 }

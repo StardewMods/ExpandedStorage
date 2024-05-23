@@ -1,7 +1,14 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.BetterChests;
+
+using StardewMods.FauxCore.Common.Interfaces.Data;
+using StardewMods.FauxCore.Common.Models.Data;
+#else
 namespace StardewMods.Common.Services.Integrations.BetterChests;
 
 using StardewMods.Common.Interfaces.Data;
 using StardewMods.Common.Models.Data;
+#endif
 
 /// <inheritdoc cref="StardewMods.Common.Services.Integrations.BetterChests.IStorageOptions" />
 internal class StorageOptions : DictionaryDataModel, IStorageOptions

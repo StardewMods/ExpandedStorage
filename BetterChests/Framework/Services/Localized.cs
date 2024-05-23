@@ -4,6 +4,7 @@ using System.Globalization;
 using System.Text;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Services.Integrations.BetterChests;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 /// <summary>Helper methods to convert between different text formats.</summary>
@@ -69,6 +70,38 @@ internal sealed class Localized
             >= (int)RangeOption.Location => I18n.Range_Distance_Many(
                 Math.Pow(2, 1 + value - (int)RangeOption.Location).ToString(CultureInfo.InvariantCulture)),
             _ => I18n.Option_Default_Name(),
+        };
+
+    /// <summary>Formats expression type name using localized text when available.</summary>
+    /// <param name="value">The value for expression type to format.</param>
+    /// <returns>Localized name for the expression type.</returns>
+    public static string ExpressionName(ExpressionType value) =>
+        value switch
+        {
+            ExpressionType.All => I18n.Ui_All_Name(),
+            ExpressionType.Any => I18n.Ui_Any_Name(),
+            ExpressionType.Comparable => I18n.Ui_Comparable_Name(),
+            ExpressionType.Dynamic => I18n.Ui_Dynamic_Name(),
+            ExpressionType.Not => I18n.Ui_Not_Name(),
+            ExpressionType.Quoted => I18n.Ui_Quoted_Name(),
+            ExpressionType.Static => I18n.Ui_Static_Name(),
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
+        };
+
+    /// <summary>Formats expression type tooltip using localized text when available.</summary>
+    /// <param name="value">The value for expression type to format.</param>
+    /// <returns>Localized tooltip for the expression type.</returns>
+    public static string ExpressionTooltip(ExpressionType value) =>
+        value switch
+        {
+            ExpressionType.All => I18n.Ui_All_Tooltip(),
+            ExpressionType.Any => I18n.Ui_Any_Tooltip(),
+            ExpressionType.Comparable => I18n.Ui_Comparable_Tooltip(),
+            ExpressionType.Dynamic => I18n.Ui_Dynamic_Tooltip(),
+            ExpressionType.Not => I18n.Ui_Not_Tooltip(),
+            ExpressionType.Quoted => I18n.Ui_Quoted_Tooltip(),
+            ExpressionType.Static => I18n.Ui_Static_Tooltip(),
+            _ => throw new ArgumentOutOfRangeException(nameof(value), value, null),
         };
 
     /// <summary>Formats a capacity value using localized text when available.</summary>

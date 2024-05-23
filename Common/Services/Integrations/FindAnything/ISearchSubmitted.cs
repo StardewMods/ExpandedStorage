@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.FindAnything;
+#else
 namespace StardewMods.Common.Services.Integrations.FindAnything;
+#endif
 
 /// <summary>The event arguments after a search is submitted.</summary>
 public interface ISearchSubmitted

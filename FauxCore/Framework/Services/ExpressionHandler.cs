@@ -3,10 +3,10 @@ namespace StardewMods.FauxCore.Framework.Services;
 using System.Text;
 using Force.DeepCloner;
 using Pidgin;
-using StardewMods.Common.Enums;
-using StardewMods.Common.Models.Cache;
-using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Enums;
+using StardewMods.FauxCore.Common.Models.Cache;
+using StardewMods.FauxCore.Common.Services;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Models.Expressions;
 
 /// <summary>Responsible for handling parsed expressions.</summary>

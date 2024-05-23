@@ -1,6 +1,6 @@
 namespace StardewMods.FauxCore.Framework.Models.Expressions;
 
-using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 
 /// <summary>Represents an item attribute term.</summary>
 internal sealed class QuotedTerm : StaticTerm

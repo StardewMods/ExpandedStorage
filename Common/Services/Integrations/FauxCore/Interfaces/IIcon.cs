@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
+#else
 namespace StardewMods.Common.Services.Integrations.FauxCore;
+#endif
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -15,6 +19,12 @@ public interface IIcon
 
     /// <summary>Gets the icon texture path.</summary>
     public string Path { get; }
+
+    /// <summary>Gets the id of the mod this icon is loaded from.</summary>
+    public string Source { get; }
+
+    /// <summary>Gets the unique identifier for this icon.</summary>
+    public string UniqueId { get; }
 
     /// <summary>Gets the icon texture.</summary>
     /// <param name="style">The style of the icon.</param>

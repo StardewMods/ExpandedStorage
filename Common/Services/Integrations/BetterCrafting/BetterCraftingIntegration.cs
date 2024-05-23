@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.BetterCrafting;
+#else
 namespace StardewMods.Common.Services.Integrations.BetterCrafting;
+#endif
 
 /// <inheritdoc />
 internal sealed class BetterCraftingIntegration : ModIntegration<IBetterCrafting>

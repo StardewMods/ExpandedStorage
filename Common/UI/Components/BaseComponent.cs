@@ -1,9 +1,19 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.UI.Components;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using StardewMods.FauxCore.Common.Interfaces;
+using StardewValley.Menus;
+
+#else
 namespace StardewMods.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.Common.Interfaces;
 using StardewValley.Menus;
+#endif
 
 /// <summary>Base custom component.</summary>
 internal abstract class BaseComponent : ClickableComponent, ICustomComponent

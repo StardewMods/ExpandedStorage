@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.FindAnything;
+#else
 namespace StardewMods.Common.Services.Integrations.FindAnything;
+#endif
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

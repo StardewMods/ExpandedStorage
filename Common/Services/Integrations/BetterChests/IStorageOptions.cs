@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.BetterChests;
+#else
 namespace StardewMods.Common.Services.Integrations.BetterChests;
+#endif
 
 /// <summary>Configurable options for a storage container.</summary>
 public interface IStorageOptions

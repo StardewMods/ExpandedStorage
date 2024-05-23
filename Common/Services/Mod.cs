@@ -1,6 +1,13 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services;
+
+using StardewMods.FauxCore.Common.Interfaces;
+
+#else
 namespace StardewMods.Common.Services;
 
 using StardewMods.Common.Interfaces;
+#endif
 
 /// <inheritdoc />
 [SuppressMessage("Naming", "CA1716", Justification = "Reviewed")]

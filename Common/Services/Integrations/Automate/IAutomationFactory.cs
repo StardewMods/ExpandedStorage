@@ -1,8 +1,15 @@
-﻿namespace StardewMods.Common.Services.Integrations.Automate;
+﻿#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.Automate;
+#else
+namespace StardewMods.Common.Services.Integrations.Automate;
+#endif
 
 using Microsoft.Xna.Framework;
 using StardewValley.Buildings;
 using StardewValley.TerrainFeatures;
+
+// ReSharper disable All
+#pragma warning disable
 
 /// <summary>Constructs machines, containers, or connectors which can be added to a machine group.</summary>
 public interface IAutomationFactory

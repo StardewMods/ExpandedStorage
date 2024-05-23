@@ -1,6 +1,13 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services;
+
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
+
+#else
 namespace StardewMods.Common.Services;
 
 using StardewMods.Common.Services.Integrations.FauxCore;
+#endif
 
 /// <summary>Static wrapper for logging service.</summary>
 internal sealed class Log

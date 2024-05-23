@@ -1,8 +1,13 @@
-﻿// ReSharper disable All
-#pragma warning disable
+﻿#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.ContentPatcher;
+#else
 namespace StardewMods.Common.Services.Integrations.ContentPatcher;
+#endif
 
 using StardewModdingAPI.Events;
+
+// ReSharper disable All
+#pragma warning disable
 
 /// <summary>The Content Patcher API which other mods can access.</summary>
 public interface IContentPatcherApi

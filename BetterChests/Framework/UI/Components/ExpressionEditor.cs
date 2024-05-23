@@ -28,7 +28,6 @@ internal sealed class ExpressionEditor : FramedMenu
         Action)> items = [];
 
     private readonly IReflectionHelper reflectionHelper;
-
     private readonly Action<string> setSearchText;
 
     private IExpression? baseExpression;
@@ -124,19 +123,8 @@ internal sealed class ExpressionEditor : FramedMenu
 
             this.items.Add((color, component, expression, string.Empty, null));
 
-            var text = expression.ExpressionType switch
-            {
-                ExpressionType.All => I18n.Ui_All_Name(),
-                ExpressionType.Any => I18n.Ui_Any_Name(),
-                ExpressionType.Not => I18n.Ui_Not_Name(),
-            };
-
-            var tooltip = expression.ExpressionType switch
-            {
-                ExpressionType.All => I18n.Ui_All_Tooltip(),
-                ExpressionType.Any => I18n.Ui_Any_Tooltip(),
-                ExpressionType.Not => I18n.Ui_Not_Tooltip(),
-            };
+            var text = Localized.ExpressionName(expression.ExpressionType);
+            var tooltip = Localized.ExpressionTooltip(expression.ExpressionType);
 
             Action? action = expression.ExpressionType switch
             {
@@ -577,20 +565,18 @@ internal sealed class ExpressionEditor : FramedMenu
         }
     }
 
-    private void ShowDropdown(IExpression expression, ClickableComponent component) =>
-        this.Parent?.SetChildMenu(
-            new Dropdown(
-                this.Input,
-                this.reflectionHelper,
-                component,
-                ItemAttributeExtensions
-                    .GetValues()
-                    .Select(
-                        value => new KeyValuePair<string, string>(
-                            value.ToStringFast(),
-                            Localized.Attribute(value.ToStringFast())))
-                    .ToList(),
-                value => this.ChangeAttribute(expression, value)));
+    private void ShowDropdown(IExpression expression, ClickableComponent component)
+    {
+        var dropdown = new Dropdown<ItemAttribute>(
+            this.Input,
+            this.reflectionHelper,
+            component,
+            ItemAttributeExtensions.GetValues().AsEnumerable(),
+            static attribute => Localized.Attribute(attribute.ToStringFast()));
+
+        dropdown.OptionSelected += (_, attribute) => this.ChangeAttribute(expression, attribute.ToStringFast());
+        this.Parent?.SetChildMenu(dropdown);
+    }
 
     private void ShowPopup(IExpression expression, ClickableComponent component)
     {
@@ -610,17 +596,19 @@ internal sealed class ExpressionEditor : FramedMenu
             ItemAttribute.Quantity =>
                 Enumerable.Range(0, 999).Select(i => i.ToString(CultureInfo.InvariantCulture)),
             ItemAttribute.Tags => ItemRepository.Tags,
+            _ => throw new ArgumentOutOfRangeException(nameof(expression)),
         };
 
-        this.Parent?.SetChildMenu(
-            new PopupSelect(
-                this.iconRegistry,
-                this.Input,
-                this.reflectionHelper,
-                popupItems.Select(popupItem => new KeyValuePair<string, string>(popupItem, popupItem)).ToList(),
-                component.label,
-                value => this.ChangeTerm(expression, value),
-                10));
+        var popupSelect = new PopupSelect<string>(
+            this.iconRegistry,
+            this.Input,
+            this.reflectionHelper,
+            popupItems,
+            component.label,
+            maxItems: 10);
+
+        popupSelect.OptionSelected += (_, value) => this.ChangeTerm(expression, value);
+        this.Parent?.SetChildMenu(popupSelect);
     }
 
     private void ToggleGroup(IExpression toToggle)

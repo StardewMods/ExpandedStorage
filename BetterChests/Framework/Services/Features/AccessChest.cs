@@ -132,7 +132,10 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         }
 
         focus.Release();
-        if (this.menuHandler.Top.Container is null) { }
+        if (this.menuHandler.Top.Container is null)
+        {
+            // Do nothing
+        }
         else if (this.LeftArrow.containsPoint(mouseX, mouseY))
         {
             this.inputHelper.Suppress(e.Button);

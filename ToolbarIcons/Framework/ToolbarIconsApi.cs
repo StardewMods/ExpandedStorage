@@ -70,8 +70,8 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
     /// <inheritdoc />
     public void AddToolbarIcon(IIcon icon, string? hoverText)
     {
-        this.ids.Add(icon.Id, icon.Id);
-        this.toolbarManager.AddIcon(icon.Id, hoverText);
+        this.ids.Add(icon.UniqueId, icon.Id);
+        this.toolbarManager.AddIcon(icon.UniqueId, hoverText);
     }
 
     /// <inheritdoc />
@@ -85,8 +85,8 @@ public sealed class ToolbarIconsApi : IToolbarIconsApi
     /// <inheritdoc />
     public void RemoveToolbarIcon(IIcon icon)
     {
-        this.ids.Remove(icon.Id);
-        this.toolbarManager.RemoveIcon(icon.Id);
+        this.ids.Remove(icon.UniqueId);
+        this.toolbarManager.RemoveIcon(icon.UniqueId);
     }
 
     /// <inheritdoc />

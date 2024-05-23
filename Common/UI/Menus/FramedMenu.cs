@@ -1,8 +1,17 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.UI.Menus;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using StardewMods.FauxCore.Common.UI.Components;
+
+#else
 namespace StardewMods.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.Common.UI.Components;
+#endif
 
 /// <summary>Framed menu with vertical scrolling.</summary>
 internal abstract class FramedMenu : BaseMenu

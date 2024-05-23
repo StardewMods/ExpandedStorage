@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.CustomBush;
+#else
 namespace StardewMods.Common.Services.Integrations.CustomBush;
+#endif
 
 /// <inheritdoc />
 internal sealed class CustomBushIntegration : ModIntegration<ICustomBushApi>

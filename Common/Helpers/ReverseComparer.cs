@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Helpers;
+#else
 namespace StardewMods.Common.Helpers;
+#endif
 
 /// <inheritdoc />
 internal sealed class ReverseComparer<T> : Comparer<T>

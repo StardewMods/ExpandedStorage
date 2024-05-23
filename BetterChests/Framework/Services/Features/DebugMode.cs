@@ -9,6 +9,7 @@ using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.Services.Integrations.ToolbarIcons;
+using StardewMods.Common.UI.Menus;
 
 /// <summary>Feature used for debugging purposes.</summary>
 internal sealed class DebugMode : BaseFeature<DebugMode>
@@ -96,8 +97,10 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
             return;
         }
 
-        this.toolbarIconsIntegration.Api.AddToolbarIcon(this.Id, icon.Path, icon.Area, I18n.Button_Debug_Name());
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
+        this.toolbarIconsIntegration.Api.AddToolbarIcon(
+            this.iconRegistry.RequireIcon(InternalIcon.Debug),
+            I18n.Button_Debug_Name());
     }
 
     /// <inheritdoc />
@@ -108,13 +111,14 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
             return;
         }
 
-        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.Id);
         this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
+        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.RequireIcon(InternalIcon.Debug));
     }
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (e.Id != this.Id || Game1.activeClickableMenu?.readyToClose() == false)
+        if (e.Id != this.iconRegistry.RequireIcon(InternalIcon.Debug).Id
+            || Game1.activeClickableMenu?.readyToClose() == false)
         {
             return;
         }
@@ -166,6 +170,9 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         {
             case "config":
                 Game1.activeClickableMenu = new ConfigMenu(this.inputHelper);
+                return;
+            case "icons":
+                Game1.activeClickableMenu = new IconPicker(this.iconRegistry, this.inputHelper, this.reflectionHelper);
                 return;
             case "layout":
                 Game1.activeClickableMenu = new LayoutMenu(this.inputHelper);

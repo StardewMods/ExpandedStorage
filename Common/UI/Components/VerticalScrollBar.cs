@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.UI.Components;
+#else
 namespace StardewMods.Common.UI.Components;
+#endif
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;

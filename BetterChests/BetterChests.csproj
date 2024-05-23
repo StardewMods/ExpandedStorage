@@ -12,7 +12,7 @@
     <PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.0.1"/>
     <PackageReference Include="SimpleInjector">
       <HintPath>$(GameModsPath)\FauxCore\SimpleInjector.dll</HintPath>
-      <Version>5.4.2</Version>
+      <Version>5.4.5</Version>
       <Private>false</Private>
     </PackageReference>
     <PackageReference Include="Pidgin">
@@ -28,7 +28,7 @@
   <ItemGroup>
     <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.0" required="true"/>
     <SMAPIDependency Include="furyx639.ToolbarIcons" Version="2.8.0" required="false"/>
-    <SMAPIDependency Include="leclair.bettercrafting" Version="2.1.0" required="false"/>
+    <SMAPIDependency Include="leclair.bettercrafting" Version="2.10.0" required="false"/>
     <SMAPIDependency Include="spacechase0.GenericModConfigMenu" Version="1.12.0" required="false"/>
     <SMAPIDependency Include="Pathoschild.Automate" Version="2.0.7" required="false"/>
   </ItemGroup>

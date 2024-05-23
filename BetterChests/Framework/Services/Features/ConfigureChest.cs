@@ -2,6 +2,7 @@ namespace StardewMods.BetterChests.Framework.Services.Features;
 
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
+using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Services.Factory;
 using StardewMods.BetterChests.Framework.UI.Menus;
@@ -66,6 +67,12 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         this.Config.DefaultOptions.ConfigureChest != FeatureOption.Disabled
         && this.genericModConfigMenuIntegration.IsLoaded;
 
+    private IIcon CategorizeIcon => this.iconRegistry.RequireIcon(InternalIcon.Miscellaneous);
+
+    private IIcon ConfigureIcon => this.iconRegistry.RequireIcon(InternalIcon.Config);
+
+    private IIcon SortIcon => this.iconRegistry.RequireIcon(InternalIcon.Debug);
+
     /// <inheritdoc />
     protected override void Activate()
     {
@@ -88,10 +95,30 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
     private static void OnItemHighlighting(ItemHighlightingEventArgs e)
     {
-        if (Game1.activeClickableMenu?.GetChildMenu() is Dropdown)
+        if (Game1.activeClickableMenu?.GetChildMenu() is Dropdown<KeyValuePair<string, string>>)
         {
             e.UnHighlight();
         }
+    }
+
+    private string GetHoverText(IIcon icon)
+    {
+        if (icon == this.ConfigureIcon)
+        {
+            return I18n.Configure_Options_Name();
+        }
+
+        if (icon == this.CategorizeIcon)
+        {
+            return I18n.Configure_Categorize_Name();
+        }
+
+        if (icon == this.SortIcon)
+        {
+            return I18n.Configure_Sorting_Name();
+        }
+
+        return string.Empty;
     }
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
@@ -127,23 +154,20 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
             return;
         }
 
-        var options = new List<KeyValuePair<string, string>>
+        var options = new List<IIcon>
         {
-            new("configure", I18n.Configure_Options_Name()),
-            new("categorize", I18n.Configure_Categorize_Name()),
-            new("sort", I18n.Configure_Sorting_Name()),
+            this.ConfigureIcon,
+            this.CategorizeIcon,
+            this.SortIcon,
         };
 
         focus.Release();
         this.inputHelper.Suppress(e.Button);
-        Game1.activeClickableMenu?.SetChildMenu(
-            new Dropdown(
-                this.inputHelper,
-                this.reflectionHelper,
-                icon,
-                options,
-                value => this.ShowMenu(container, value),
-                3));
+        var dropdown =
+            new IconDropdown(this.inputHelper, this.reflectionHelper, icon, options, 3, 1, this.GetHoverText);
+
+        dropdown.IconSelected += (_, i) => this.ShowMenu(container, i);
+        Game1.activeClickableMenu?.SetChildMenu(dropdown);
     }
 
     private void OnButtonsChanged(ButtonsChangedEventArgs e)
@@ -157,7 +181,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         }
 
         this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.ConfigureChest);
-        this.ShowMenu(container);
+        this.ShowMenu(container, this.ConfigureIcon);
     }
 
     private void OnMenuChanged(MenuChangedEventArgs e)
@@ -181,32 +205,35 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         this.lastContainer.Value = null;
     }
 
-    private void ShowMenu(IStorageContainer container, string? whichMenu = "configure")
+    private void ShowMenu(IStorageContainer container, IIcon? icon)
     {
         this.lastContainer.Value = container;
-        switch (whichMenu)
+        if (icon is null || icon == this.ConfigureIcon)
         {
-            case "configure":
-                this.containerHandler.Configure(container);
-                return;
-            case "categorize":
-                Game1.activeClickableMenu = new CategorizeMenu(
-                    container,
-                    this.expressionHandler,
-                    this.iconRegistry,
-                    this.inputHelper,
-                    this.reflectionHelper);
+            this.containerHandler.Configure(container);
+            return;
+        }
 
-                return;
-            case "sort":
-                Game1.activeClickableMenu = new SortMenu(
-                    container,
-                    this.expressionHandler,
-                    this.iconRegistry,
-                    this.inputHelper,
-                    this.reflectionHelper);
+        if (icon == this.CategorizeIcon)
+        {
+            Game1.activeClickableMenu = new CategorizeMenu(
+                container,
+                this.expressionHandler,
+                this.iconRegistry,
+                this.inputHelper,
+                this.reflectionHelper);
 
-                return;
+            return;
+        }
+
+        if (icon == this.SortIcon)
+        {
+            Game1.activeClickableMenu = new SortMenu(
+                container,
+                this.expressionHandler,
+                this.iconRegistry,
+                this.inputHelper,
+                this.reflectionHelper);
         }
     }
 }

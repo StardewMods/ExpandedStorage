@@ -21,57 +21,51 @@ using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
 #endif
 
-/// <summary>Popup menu for selecting an item from a list of values.</summary>
-/// <typeparam name="TItem">The item type.</typeparam>
-internal sealed class PopupSelect<TItem> : BaseMenu
+/// <summary>Popup menu for selecting an icon.</summary>
+internal sealed class IconPicker : BaseMenu
 {
     private readonly ClickableTextureComponent cancelButton;
+    private readonly ClickableTextureComponent dropdown;
+    private readonly IInputHelper inputHelper;
     private readonly ClickableTextureComponent okButton;
-    private readonly SelectOption<TItem> selectOption;
+    private readonly IReflectionHelper reflectionHelper;
+    private readonly SelectIcon selectIcon;
+    private readonly List<string> sources;
     private readonly TextField textField;
 
     private string currentText;
-    private EventHandler<TItem>? optionSelected;
+    private EventHandler<IIcon?>? iconSelected;
 
-    /// <summary>Initializes a new instance of the <see cref="PopupSelect{TItem}" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="IconPicker" /> class.</summary>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
-    /// <param name="items">The list of values to select from.</param>
-    /// <param name="initialValue">The initial value of the text field.</param>
-    /// <param name="getValue">A function which returns a string from the item.</param>
-    /// <param name="maxItems">The maximum number of items to display.</param>
-    public PopupSelect(
-        IIconRegistry iconRegistry,
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
-        IEnumerable<TItem> items,
-        string? initialValue,
-        Func<TItem, string>? getValue = null,
-        int maxItems = int.MaxValue)
+    public IconPicker(IIconRegistry iconRegistry, IInputHelper inputHelper, IReflectionHelper reflectionHelper)
         : base(inputHelper, width: 400)
     {
-        this.selectOption = new SelectOption<TItem>(
+        this.inputHelper = inputHelper;
+        this.reflectionHelper = reflectionHelper;
+        var icons = iconRegistry.GetIcons().ToList();
+        this.sources = icons.Select(icon => icon.Source).Distinct().ToList();
+        this.sources.Sort();
+
+        this.selectIcon = new SelectIcon(
             inputHelper,
             reflectionHelper,
-            items,
-            this.xPositionOnScreen,
-            this.yPositionOnScreen + 48,
-            getValue,
-            400,
-            400,
-            maxItems);
+            icons,
+            5,
+            5,
+            x: this.xPositionOnScreen,
+            y: this.yPositionOnScreen + 48);
 
-        this.selectOption.SelectionChanged += this.OnSelectionChanged;
-        this.selectOption.AddHighlight(this.HighlightOption);
-        this.selectOption.AddOperation(this.SortOptions);
-        this.AddSubMenu(this.selectOption);
-        this.Resize(this.selectOption.width + 16, this.selectOption.height + 16);
+        this.selectIcon.AddOperation(this.FilterIcons);
+        this.AddSubMenu(this.selectIcon);
+        this.Resize(this.selectIcon.width + 16, this.selectIcon.height + 16);
         this.MoveTo(
             ((Game1.uiViewport.Width - this.width) / 2) + IClickableMenu.borderWidth,
             ((Game1.uiViewport.Height - this.height) / 2) + IClickableMenu.borderWidth);
 
-        this.currentText = initialValue ?? string.Empty;
+        this.currentText = string.Empty;
         this.textField = new TextField(
             this.Input,
             this.xPositionOnScreen - 12,
@@ -82,6 +76,10 @@ internal sealed class PopupSelect<TItem> : BaseMenu
         {
             Selected = true,
         };
+
+        this.dropdown = iconRegistry
+            .RequireIcon(VanillaIcon.Dropdown)
+            .GetComponent(IconStyle.Transparent, this.xPositionOnScreen + this.width - 16, this.yPositionOnScreen);
 
         this.okButton = iconRegistry
             .RequireIcon(VanillaIcon.Ok)
@@ -98,15 +96,16 @@ internal sealed class PopupSelect<TItem> : BaseMenu
                 this.yPositionOnScreen + this.height + Game1.tileSize);
 
         this.allClickableComponents.Add(this.textField);
+        this.allClickableComponents.Add(this.dropdown);
         this.allClickableComponents.Add(this.okButton);
         this.allClickableComponents.Add(this.cancelButton);
     }
 
     /// <summary>Event raised when the selection changes.</summary>
-    public event EventHandler<TItem> OptionSelected
+    public event EventHandler<IIcon?> IconSelected
     {
-        add => this.optionSelected += value;
-        remove => this.optionSelected -= value;
+        add => this.iconSelected += value;
+        remove => this.iconSelected -= value;
     }
 
     /// <summary>Gets or sets the current text.</summary>
@@ -122,7 +121,7 @@ internal sealed class PopupSelect<TItem> : BaseMenu
             }
 
             this.currentText = value;
-            this.selectOption.RefreshOptions();
+            this.selectIcon.RefreshIcons();
         }
     }
 
@@ -134,14 +133,16 @@ internal sealed class PopupSelect<TItem> : BaseMenu
             case Keys.Escape when this.readyToClose():
                 this.exitThisMenuNoSound();
                 return;
-            case Keys.Enter when this.readyToClose() && this.selectOption.CurrentSelection is not null:
-                this.optionSelected?.InvokeAll(this, this.selectOption.CurrentSelection);
+            case Keys.Enter when this.readyToClose() && this.selectIcon.CurrentSelection is not null:
+                this.iconSelected?.InvokeAll(this, this.selectIcon.CurrentSelection);
                 this.exitThisMenuNoSound();
                 return;
-            case Keys.Tab when this.textField.Selected
-                && !string.IsNullOrWhiteSpace(this.CurrentText)
-                && this.selectOption.Options.Any():
-                this.CurrentText = this.selectOption.GetValue(this.selectOption.Options.First());
+            case Keys.Tab when this.textField.Selected && !string.IsNullOrWhiteSpace(this.CurrentText):
+                this.CurrentText =
+                    this.sources.FirstOrDefault(
+                        source => source.Contains(this.CurrentText, StringComparison.OrdinalIgnoreCase))
+                    ?? this.CurrentText;
+
                 this.textField.Reset();
                 break;
         }
@@ -159,9 +160,9 @@ internal sealed class PopupSelect<TItem> : BaseMenu
     {
         if (this.okButton.containsPoint(x, y) && this.readyToClose())
         {
-            if (this.selectOption.CurrentSelection is not null)
+            if (this.selectIcon.CurrentSelection is not null)
             {
-                this.optionSelected?.InvokeAll(this, this.selectOption.CurrentSelection);
+                this.iconSelected?.InvokeAll(this, this.selectIcon.CurrentSelection);
             }
 
             this.exitThisMenuNoSound();
@@ -174,18 +175,31 @@ internal sealed class PopupSelect<TItem> : BaseMenu
             return true;
         }
 
+        if (this.dropdown.containsPoint(x, y))
+        {
+            var sourceDropdown = new Dropdown<string>(
+                this.inputHelper,
+                this.reflectionHelper,
+                this.textField,
+                this.sources,
+                minWidth: this.width,
+                maxItems: 10);
+
+            sourceDropdown.OptionSelected += (_, value) =>
+            {
+                this.CurrentText = value ?? this.CurrentText;
+                this.textField.Reset();
+            };
+
+            this.SetChildMenu(sourceDropdown);
+            return true;
+        }
+
         return false;
     }
 
-    private bool HighlightOption(TItem option) =>
-        this.selectOption.GetValue(option).Contains(this.CurrentText, StringComparison.OrdinalIgnoreCase);
-
-    private void OnSelectionChanged(object? sender, TItem? item)
-    {
-        this.CurrentText = item is not null ? this.selectOption.GetValue(item) : string.Empty;
-        this.textField.Reset();
-    }
-
-    private IEnumerable<TItem> SortOptions(IEnumerable<TItem> options) =>
-        options.OrderByDescending(this.HighlightOption).ThenBy(this.selectOption.GetValue);
+    private IEnumerable<IIcon> FilterIcons(IEnumerable<IIcon> icons) =>
+        string.IsNullOrWhiteSpace(this.CurrentText)
+            ? icons
+            : icons.Where(icon => icon.Source.Contains(this.CurrentText, StringComparison.OrdinalIgnoreCase));
 }

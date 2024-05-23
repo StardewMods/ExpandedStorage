@@ -101,7 +101,7 @@ internal sealed class ToolbarIconOption : BaseComplexOption
 
         Utility.drawTextWithShadow(
             spriteBatch,
-            this.name,
+            this.icon.hoverText,
             Game1.dialogueFont,
             pos - new Vector2(540, 0),
             SpriteText.color_Gray);
@@ -159,9 +159,9 @@ internal sealed class ToolbarIconOption : BaseComplexOption
         if (this.Enabled && this.icon.containsPoint(mouseX, mouseY))
         {
             this.icon.tryHover(mouseX, mouseY);
-            ToolbarIconOption.hoverText = this.icon.hoverText;
+            ToolbarIconOption.hoverText = this.name;
         }
-        else if (ToolbarIconOption.hoverText == this.icon.hoverText)
+        else if (ToolbarIconOption.hoverText == this.name)
         {
             ToolbarIconOption.hoverText = null;
         }
@@ -193,7 +193,7 @@ internal sealed class ToolbarIconOption : BaseComplexOption
 
         if (!string.IsNullOrWhiteSpace(ToolbarIconOption.hoverText))
         {
-            IClickableMenu.drawToolTip(spriteBatch, ToolbarIconOption.hoverText, string.Empty, null);
+            IClickableMenu.drawToolTip(spriteBatch, ToolbarIconOption.hoverText, null, null);
         }
     }
 

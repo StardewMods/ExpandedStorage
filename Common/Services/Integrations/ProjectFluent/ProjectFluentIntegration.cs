@@ -1,4 +1,8 @@
-﻿namespace StardewMods.Common.Services.Integrations.ProjectFluent;
+﻿#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.ProjectFluent;
+#else
+namespace StardewMods.Common.Services.Integrations.ProjectFluent;
+#endif
 
 /// <inheritdoc />
 internal sealed class ProjectFluentIntegration : ModIntegration<IProjectFluentApi>

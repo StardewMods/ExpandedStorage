@@ -1,6 +1,6 @@
 namespace StardewMods.FauxCore.Framework.Interfaces;
 
-using StardewMods.Common.Enums;
+using StardewMods.FauxCore.Common.Enums;
 
 /// <summary>Mod config data with log level.</summary>
 public interface IModConfig

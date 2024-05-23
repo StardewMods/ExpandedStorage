@@ -1,9 +1,19 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Helpers;
+
+using Microsoft.Xna.Framework;
+using StardewMods.FauxCore.Common.Models;
+using StardewMods.FauxCore.Common.Services.Integrations.BetterChests;
+using StardewValley.Mods;
+
+#else
 namespace StardewMods.Common.Helpers;
 
 using Microsoft.Xna.Framework;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewValley.Mods;
+#endif
 
 /// <summary>Common extension methods.</summary>
 internal static class CommonExtensions
@@ -14,9 +24,9 @@ internal static class CommonExtensions
     /// <returns>An enumerable collection of Vector2 coordinates representing the points in the box.</returns>
     public static IEnumerable<Vector2> Box(this Vector2 center, int radius)
     {
-        for (var x = (int)(center.X - radius); x <= center.X + radius; ++x)
+        for (var x = center.X - radius; x <= center.X + radius; ++x)
         {
-            for (var y = (int)(center.Y - radius); y <= center.Y + radius; ++y)
+            for (var y = center.Y - radius; y <= center.Y + radius; ++y)
             {
                 yield return new Vector2(x, y);
             }

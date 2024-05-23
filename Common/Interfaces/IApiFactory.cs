@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Interfaces;
+#else
 namespace StardewMods.Common.Interfaces;
+#endif
 
 /// <summary>Factory service for creating Api instances.</summary>
 internal interface IApiFactory

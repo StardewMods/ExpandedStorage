@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.GenericModConfigMenu;
+#else
 namespace StardewMods.Common.Services.Integrations.GenericModConfigMenu;
+#endif
 
 /// <inheritdoc />
 internal sealed class GenericModConfigMenuIntegration : ModIntegration<IGenericModConfigMenuApi>

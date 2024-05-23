@@ -1,3 +1,13 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.UI.Menus;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using StardewMods.FauxCore.Common.Interfaces;
+using StardewMods.FauxCore.Common.UI.Components;
+using StardewValley.Menus;
+
+#else
 namespace StardewMods.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
@@ -5,6 +15,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
+#endif
 
 /// <summary>Base menu.</summary>
 internal abstract class BaseMenu : IClickableMenu
@@ -28,8 +39,8 @@ internal abstract class BaseMenu : IClickableMenu
         int? height = null,
         bool showUpperRightCloseButton = false)
         : base(
-            x ?? (Game1.uiViewport.Width / 2) - ((800 + (IClickableMenu.borderWidth * 2)) / 2),
-            y ?? (Game1.uiViewport.Height / 2) - ((600 + (IClickableMenu.borderWidth * 2)) / 2),
+            x ?? (Game1.uiViewport.Width / 2) - ((width ?? 800 + (IClickableMenu.borderWidth * 2)) / 2),
+            y ?? (Game1.uiViewport.Height / 2) - ((height ?? 600 + (IClickableMenu.borderWidth * 2)) / 2),
             width ?? 800 + (IClickableMenu.borderWidth * 2),
             height ?? 600 + (IClickableMenu.borderWidth * 2),
             showUpperRightCloseButton)
@@ -162,8 +173,6 @@ internal abstract class BaseMenu : IClickableMenu
     {
         var dx = x - this.xPositionOnScreen;
         var dy = y - this.yPositionOnScreen;
-        this.xPositionOnScreen = x;
-        this.yPositionOnScreen = y;
 
         // Move sub-menus
         foreach (var subMenu in this.SubMenus)
@@ -186,6 +195,9 @@ internal abstract class BaseMenu : IClickableMenu
             component.bounds.X += dx;
             component.bounds.Y += dy;
         }
+
+        this.xPositionOnScreen = x;
+        this.yPositionOnScreen = y;
     }
 
     /// <inheritdoc />
@@ -364,7 +376,7 @@ internal abstract class BaseMenu : IClickableMenu
         // Draw hover text
         if (!string.IsNullOrWhiteSpace(this.HoverText))
         {
-            IClickableMenu.drawToolTip(spriteBatch, this.HoverText, string.Empty, null);
+            IClickableMenu.drawToolTip(spriteBatch, this.HoverText, null, null);
         }
 
         // Draw cursor

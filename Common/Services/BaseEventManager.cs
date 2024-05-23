@@ -1,9 +1,19 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services;
+
+using System.Reflection;
+using StardewMods.FauxCore.Common.Helpers;
+using StardewMods.FauxCore.Common.Interfaces;
+using StardewMods.FauxCore.Common.Models;
+
+#else
 namespace StardewMods.Common.Services;
 
 using System.Reflection;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models;
+#endif
 
 /// <summary>Represents a base event manager service.</summary>
 internal class BaseEventManager : IEventManager

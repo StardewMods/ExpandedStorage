@@ -1,6 +1,11 @@
-﻿// ReSharper disable All
-#pragma warning disable
+﻿#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.ProjectFluent;
+#else
 namespace StardewMods.Common.Services.Integrations.ProjectFluent;
+#endif
+
+// ReSharper disable All
+#pragma warning disable
 
 /// <summary>A type allowing access to Project Fluent translations.</summary>
 /// <typeparam name="Key">The type of values this instance allows retrieving translations for.</typeparam>

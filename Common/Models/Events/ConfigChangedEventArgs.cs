@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Models.Events;
+#else
 namespace StardewMods.Common.Models.Events;
+#endif
 
 /// <summary>Represents the event arguments for a configuration changes.</summary>
 /// <typeparam name="TConfig">The config type.</typeparam>

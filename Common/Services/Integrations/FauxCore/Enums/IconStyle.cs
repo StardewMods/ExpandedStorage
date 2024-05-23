@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
+#else
 namespace StardewMods.Common.Services.Integrations.FauxCore;
+#endif
 
 /// <summary>The styles of icon.</summary>
 public enum IconStyle

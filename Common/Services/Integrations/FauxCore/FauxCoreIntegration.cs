@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
+#else
 namespace StardewMods.Common.Services.Integrations.FauxCore;
+#endif
 
 using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
@@ -92,7 +96,8 @@ internal sealed class FauxCoreIntegration
     public void Error(string message, object?[]? args = null) => this.log?.Value.Error(message, args);
 
     /// <inheritdoc />
-    public IEnumerable<IIcon> GetIcons() => this.iconRegistry?.Value.GetIcons() ?? Enumerable.Empty<IIcon>();
+    public IEnumerable<IIcon> GetIcons(string? modId = null) =>
+        this.iconRegistry?.Value.GetIcons(modId) ?? Enumerable.Empty<IIcon>();
 
     /// <inheritdoc />
     public void Info(string message, object?[]? args = null) => this.log?.Value.Info(message, args);

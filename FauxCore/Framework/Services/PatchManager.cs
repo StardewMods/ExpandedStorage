@@ -1,9 +1,9 @@
 namespace StardewMods.FauxCore.Framework.Services;
 
 using HarmonyLib;
-using StardewMods.Common.Enums;
-using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Enums;
+using StardewMods.FauxCore.Common.Services;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 
 /// <inheritdoc cref="IPatchManager" />
 internal sealed class PatchManager : BaseService<PatchManager>, IPatchManager

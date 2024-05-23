@@ -17,7 +17,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
-    private readonly PerScreen<List<TabIcon>> tabs = new(() => []);
+    private readonly PerScreen<List<InventoryTab>> tabs = new(() => []);
 
     /// <summary>Initializes a new instance of the <see cref="InventoryTabs" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
@@ -56,7 +56,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     {
         Log.Trace("{0}: Switching tab to {1}.", this.Id, e.Data.Label);
         Game1.playSound("drumkit6");
-        this.expressionHandler.TryParseExpression(e.Data.SearchTerm, out var expression);
+        _ = this.expressionHandler.TryParseExpression(e.Data.SearchTerm, out var expression);
         this.Events.Publish(new SearchChangedEventArgs(e.Data.SearchTerm, expression));
     }
 
@@ -92,7 +92,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
                 continue;
             }
 
-            var tabIcon = new TabIcon(this.inputHelper, x, y, icon, tabData);
+            var tabIcon = new InventoryTab(this.inputHelper, x, y, icon, tabData);
             tabIcon.Clicked += this.OnClicked;
             e.AddComponent(tabIcon);
 

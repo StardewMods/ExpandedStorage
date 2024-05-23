@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
+#else
 namespace StardewMods.Common.Services.Integrations.FauxCore;
+#endif
 
 using Microsoft.Xna.Framework;
 
@@ -12,8 +16,9 @@ public interface IIconRegistry
     public void AddIcon(string id, string path, Rectangle area);
 
     /// <summary>Gets the icons registered by any mod.</summary>
+    /// <param name="modId">Restrict to icons from a particular mod.</param>
     /// <returns>An enumerable of icons.</returns>
-    public IEnumerable<IIcon> GetIcons();
+    public IEnumerable<IIcon> GetIcons(string? modId = null);
 
     /// <summary>Retrieves an icon with the given id.</summary>
     /// <param name="id">The unique identifier of the icon.</param>
@@ -22,7 +27,7 @@ public interface IIconRegistry
     public IIcon RequireIcon(string id);
 
     /// <summary>Retrieves a vanilla icon.</summary>
-    /// <param name="icon">The vanilla icon..</param>
+    /// <param name="icon">The vanilla icon.</param>
     /// <returns>Returns the icon.</returns>
     public IIcon RequireIcon(VanillaIcon icon);
 

@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Interfaces.Assets;
+#else
 namespace StardewMods.Common.Interfaces.Assets;
+#endif
 
 using StardewModdingAPI.Events;
 

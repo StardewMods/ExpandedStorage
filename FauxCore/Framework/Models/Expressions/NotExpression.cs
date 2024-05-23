@@ -1,7 +1,7 @@
 namespace StardewMods.FauxCore.Framework.Models.Expressions;
 
 using System.Collections.Immutable;
-using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Inventories;
 
 /// <summary>Represents an individual expression where the sub-expression must not match.</summary>

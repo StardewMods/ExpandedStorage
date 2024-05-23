@@ -1,8 +1,8 @@
 namespace StardewMods.FauxCore.Framework.Models.Expressions;
 
 using System.Collections.Immutable;
-using StardewMods.Common.Enums;
-using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Enums;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Inventories;
 
 /// <summary>Represents an individual expression where the left and rights terms must match.</summary>

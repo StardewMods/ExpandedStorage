@@ -158,7 +158,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             DesktopClipboard.GetText(ref pasteText);
             this.searchText.Value = pasteText;
             this.searchBar.Value.Reset();
-            this.expressionHandler.TryParseExpression(pasteText, out var expression);
+            _ = this.expressionHandler.TryParseExpression(pasteText, out var expression);
             this.Events.Publish(new SearchChangedEventArgs(pasteText, expression));
             return;
         }

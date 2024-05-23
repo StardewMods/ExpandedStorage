@@ -224,7 +224,7 @@
   "button.reject-uncategorized.name": "Reject Uncategorized Items",
   "button.debug.name": "Debug",
   // Configure
-  "configure.options.name": "Config Options",
+  "configure.options.name": "Configure",
   "configure.categorize.name": "Categorize",
   "configure.sorting.name": "Sorting",
   // Tabs
@@ -247,6 +247,14 @@
   "ui.all.tooltip": "All must match",
   "ui.any.name": "any",
   "ui.any.tooltip": "Any must match",
+  "ui.comparable.name": "comparable",
+  "ui.comparable.tooltip": "The left and right terms must match",
+  "ui.dynamic.name": "dynamic",
+  "ui.dynamic.tooltip": "Gets the value of an attribute",
+  "ui.quoted.name": "quoted",
+  "ui.quoted.tooltip": "A quoted string.",
+  "ui.static.name": "static",
+  "ui.static.tooltip": "A static value.",
   "ui.not.name": "not",
   "ui.not.tooltip": "Must not match",
   "ui.add.tooltip": "Add",

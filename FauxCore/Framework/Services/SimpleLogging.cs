@@ -1,8 +1,8 @@
 namespace StardewMods.FauxCore.Framework.Services;
 
 using System.Globalization;
-using StardewMods.Common.Enums;
-using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Enums;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Interfaces;
 
 /// <inheritdoc />

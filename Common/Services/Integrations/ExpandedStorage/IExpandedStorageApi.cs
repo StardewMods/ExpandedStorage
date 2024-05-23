@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.ExpandedStorage;
+#else
 namespace StardewMods.Common.Services.Integrations.ExpandedStorage;
+#endif
 
 /// <summary>Mod API for Expanded Storage.</summary>
 public interface IExpandedStorageApi

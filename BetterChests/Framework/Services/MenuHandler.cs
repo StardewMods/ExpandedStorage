@@ -276,8 +276,10 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
             if (__instance.actualInventory[index] is null)
             {
                 // Iterate to next empty index
-                while (++emptyIndex < __state.Container.Items.Count
-                    && __state.Container.Items[emptyIndex] is not null) { }
+                while (++emptyIndex < __state.Container.Items.Count && __state.Container.Items[emptyIndex] is not null)
+                {
+                    // Do nothing
+                }
 
                 if (emptyIndex >= __state.Container.Items.Count)
                 {

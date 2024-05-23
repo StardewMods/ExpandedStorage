@@ -2,7 +2,7 @@ namespace StardewMods.FauxCore.Framework.Models;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 /// <inheritdoc />
@@ -23,6 +23,9 @@ public sealed class Icon : IIcon
     }
 
     /// <inheritdoc />
+    public string UniqueId => $"{this.Source}/{this.Id}";
+
+    /// <inheritdoc />
     public Rectangle Area { get; set; } = Rectangle.Empty;
 
     /// <inheritdoc />
@@ -30,6 +33,9 @@ public sealed class Icon : IIcon
 
     /// <inheritdoc />
     public string Path { get; set; } = string.Empty;
+
+    /// <inheritdoc />
+    public string Source { get; set; } = string.Empty;
 
     /// <inheritdoc />
     public ClickableTextureComponent

@@ -1,11 +1,15 @@
-// ReSharper disable All
-#pragma warning disable
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.GenericModConfigMenu;
+#else
 namespace StardewMods.Common.Services.Integrations.GenericModConfigMenu;
+#endif
 
-#nullable disable
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewModdingAPI.Utilities;
+
+// ReSharper disable All
+#pragma warning disable
 
 /// <summary>The API which lets other mods add a config UI through Generic Mod Config Menu.</summary>
 public interface IGenericModConfigMenuApi

@@ -5,6 +5,9 @@ using Netcode;
 using StardewValley.Inventories;
 using StardewValley.Objects;
 
+// ReSharper disable All
+#pragma warning disable
+
 /// <inheritdoc />
 internal sealed class HeldItemsWrapper : IInventory
 {

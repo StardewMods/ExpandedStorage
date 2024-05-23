@@ -1,9 +1,19 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Models.Assets;
+
+using StardewModdingAPI.Events;
+using StardewMods.FauxCore.Common.Interfaces.Assets;
+using StardewMods.FauxCore.Common.Interfaces.Cache;
+using StardewMods.FauxCore.Common.Services;
+
+#else
 namespace StardewMods.Common.Models.Assets;
 
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces.Assets;
 using StardewMods.Common.Interfaces.Cache;
 using StardewMods.Common.Services;
+#endif
 
 /// <inheritdoc />
 internal sealed class TrackedAsset : ITrackedAsset

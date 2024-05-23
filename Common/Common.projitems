@@ -63,7 +63,6 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Enums\VanillaIcon.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\IExpression.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\IIcon.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\IManagedTexture.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Services\IExpressionHandler.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Services\IIconRegistry.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Services\ISimpleLogging.cs"/>
@@ -114,6 +113,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\BaseMenu.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\Dropdown.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\FramedMenu.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\IconDropdown.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\IconPicker.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\SelectIcon.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\PopupSelect.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\SelectOption.cs"/>
   </ItemGroup>

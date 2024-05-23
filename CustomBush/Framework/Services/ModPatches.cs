@@ -270,7 +270,7 @@ internal sealed class ModPatches
 
         // Try to produce item
         Log.Trace("{0} attempting to produce random item.", id);
-        if (!ModPatches.instance.TryToProduceRandomItem(__instance, bushModel, out var item))
+        if (!ModPatches.TryToProduceRandomItem(__instance, bushModel, out var item))
         {
             Log.Trace("{0} will not produce. No item was produced.", id);
             __result = false;
@@ -388,7 +388,7 @@ internal sealed class ModPatches
         // Try to return random item
         if (bush.modData.TryGetValue(ModPatches.instance.modDataId, out var bushId)
             && ModPatches.instance.assetHandler.Data.TryGetValue(bushId, out var bushModel)
-            && ModPatches.instance.TryToProduceRandomItem(bush, bushModel, out var item))
+            && ModPatches.TryToProduceRandomItem(bush, bushModel, out var item))
         {
             return item;
         }
@@ -442,7 +442,7 @@ internal sealed class ModPatches
         // Try to create random item
         if (bush.modData.TryGetValue(ModPatches.instance.modDataId, out var bushId)
             && ModPatches.instance.assetHandler.Data.TryGetValue(bushId, out var bushModel)
-            && ModPatches.instance.TryToProduceRandomItem(bush, bushModel, out var item))
+            && ModPatches.TryToProduceRandomItem(bush, bushModel, out var item))
         {
             Game1.createObjectDebris(
                 item.QualifiedItemId,
@@ -577,6 +577,83 @@ internal sealed class ModPatches
                 CodeInstruction.Call(typeof(ModPatches), nameof(ModPatches.AddModData)))
             .InstructionEnumeration();
 
+    [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
+    private static Item? TryToProduceItem(Bush bush, ICustomBushDrop drop)
+    {
+        if (!Game1.random.NextBool(drop.Chance))
+        {
+            return null;
+        }
+
+        if (drop.Condition != null
+            && !GameStateQuery.CheckConditions(
+                drop.Condition,
+                bush.Location,
+                null,
+                null,
+                null,
+                null,
+                bush.Location.SeedsIgnoreSeasonsHere() ? GameStateQuery.SeasonQueryKeys : null))
+        {
+            Log.Trace(
+                "{0} did not select {1}. Failed: {2}",
+                bush.modData[ModPatches.instance.modDataId],
+                drop.Id,
+                drop.Condition);
+
+            return null;
+        }
+
+        if (drop.Season.HasValue
+            && bush.Location.SeedsIgnoreSeasonsHere()
+            && drop.Season != Game1.GetSeasonForLocation(bush.Location))
+        {
+            Log.Trace(
+                "{0} did not select {1}. Failed: {2}",
+                bush.modData[ModPatches.instance.modDataId],
+                drop.Id,
+                drop.Season.ToString());
+
+            return null;
+        }
+
+        var item = ItemQueryResolver.TryResolveRandomItem(
+            drop,
+            new ItemQueryContext(bush.Location, null, null),
+            false,
+            null,
+            null,
+            null,
+            delegate(string query, string error)
+            {
+                Log.Error(
+                    "{0} failed parsing item query {1} for item {2}: {3}",
+                    bush.modData[ModPatches.instance.modDataId],
+                    query,
+                    drop.Id,
+                    error);
+            });
+
+        return item;
+    }
+
+    private static bool TryToProduceRandomItem(Bush bush, CustomBush customBush, [NotNullWhen(true)] out Item? item)
+    {
+        foreach (var drop in customBush.ItemsProduced)
+        {
+            item = ModPatches.TryToProduceItem(bush, drop);
+            if (item is null)
+            {
+                continue;
+            }
+
+            return true;
+        }
+
+        item = null;
+        return false;
+    }
+
     private void OnGameLaunched(GameLaunchedEventArgs e)
     {
         // Patches
@@ -656,82 +733,5 @@ internal sealed class ModPatches
         }
 
         this.patchManager.Patch(Mod.Id);
-    }
-
-    [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
-    private Item? TryToProduceItem(Bush bush, ICustomBushDrop drop)
-    {
-        if (!Game1.random.NextBool(drop.Chance))
-        {
-            return null;
-        }
-
-        if (drop.Condition != null
-            && !GameStateQuery.CheckConditions(
-                drop.Condition,
-                bush.Location,
-                null,
-                null,
-                null,
-                null,
-                bush.Location.SeedsIgnoreSeasonsHere() ? GameStateQuery.SeasonQueryKeys : null))
-        {
-            Log.Trace(
-                "{0} did not select {1}. Failed: {2}",
-                bush.modData[ModPatches.instance.modDataId],
-                drop.Id,
-                drop.Condition);
-
-            return null;
-        }
-
-        if (drop.Season.HasValue
-            && bush.Location.SeedsIgnoreSeasonsHere()
-            && drop.Season != Game1.GetSeasonForLocation(bush.Location))
-        {
-            Log.Trace(
-                "{0} did not select {1}. Failed: {2}",
-                bush.modData[ModPatches.instance.modDataId],
-                drop.Id,
-                drop.Season.ToString());
-
-            return null;
-        }
-
-        var item = ItemQueryResolver.TryResolveRandomItem(
-            drop,
-            new ItemQueryContext(bush.Location, null, null),
-            false,
-            null,
-            null,
-            null,
-            delegate(string query, string error)
-            {
-                Log.Error(
-                    "{0} failed parsing item query {1} for item {2}: {3}",
-                    bush.modData[ModPatches.instance.modDataId],
-                    query,
-                    drop.Id,
-                    error);
-            });
-
-        return item;
-    }
-
-    private bool TryToProduceRandomItem(Bush bush, CustomBush customBush, [NotNullWhen(true)] out Item? item)
-    {
-        foreach (var drop in customBush.ItemsProduced)
-        {
-            item = this.TryToProduceItem(bush, drop);
-            if (item is null)
-            {
-                continue;
-            }
-
-            return true;
-        }
-
-        item = null;
-        return false;
     }
 }

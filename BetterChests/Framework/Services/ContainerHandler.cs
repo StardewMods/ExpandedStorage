@@ -127,7 +127,7 @@ internal sealed class ContainerHandler : BaseService<ContainerHandler>
         var parentOptions = container.GetParentOptions();
         this.genericModConfigMenuIntegration.Register(() => new DefaultStorageOptions().CopyTo(options), Save);
 
-        gmcm.AddSectionTitle(Mod.Manifest, () => container.DisplayName, container.ToString);
+        gmcm.AddSectionTitle(Mod.Manifest, () => container.DisplayName, container.ToString!);
 
         gmcm.AddTextOption(
             Mod.Manifest,

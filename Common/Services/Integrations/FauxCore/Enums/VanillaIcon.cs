@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
+#else
 namespace StardewMods.Common.Services.Integrations.FauxCore;
+#endif
 
 using NetEscapades.EnumGenerators;
 
@@ -38,6 +42,9 @@ public enum VanillaIcon
 
     /// <summary>A red circle with a slash.</summary>
     DoNot,
+
+    /// <summary>A dropdown arrow.</summary>
+    Dropdown,
 
     /// <summary>An empty heart.</summary>
     EmptyHeart,

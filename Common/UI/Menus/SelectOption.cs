@@ -1,29 +1,41 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.UI.Menus;
+
+using System.Globalization;
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using StardewMods.FauxCore.Common.Helpers;
+using StardewValley.Menus;
+
+#else
 namespace StardewMods.Common.UI.Menus;
 
 using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.Common.Helpers;
 using StardewValley.Menus;
+#endif
 
 /// <summary>Menu for selecting an item from a list of values.</summary>
-internal class SelectOption : FramedMenu
+/// <typeparam name="TItem">The item type.</typeparam>
+internal sealed class SelectOption<TItem> : FramedMenu
 {
-    private readonly Action<string?> callback;
     private readonly List<ClickableComponent> components;
-    private readonly List<Func<KeyValuePair<string, string>, bool>> highlights = [];
-    private readonly List<KeyValuePair<string, string>> items;
-
-    private readonly List<Func<IEnumerable<KeyValuePair<string, string>>, IEnumerable<KeyValuePair<string, string>>>>
-        operations = [];
+    private readonly Func<TItem, string> getValue;
+    private readonly List<Highlight> highlights = [];
+    private readonly List<TItem> items;
+    private readonly List<Operation> operations = [];
 
     private int currentIndex = -1;
-    private List<KeyValuePair<string, string>>? options;
+    private List<TItem>? options;
+    private EventHandler<TItem?>? selectionChanged;
 
-    /// <summary>Initializes a new instance of the <see cref="SelectOption" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="SelectOption{TItem}" /> class.</summary>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="items">The list of values to select from.</param>
-    /// <param name="callback">A method that is called when an option is selected.</param>
+    /// <param name="getValue">A function which returns a string from the item.</param>
     /// <param name="x">The x-position.</param>
     /// <param name="y">The y-position.</param>
     /// <param name="minWidth">The minimum width.</param>
@@ -32,31 +44,33 @@ internal class SelectOption : FramedMenu
     public SelectOption(
         IInputHelper inputHelper,
         IReflectionHelper reflectionHelper,
-        IReadOnlyCollection<KeyValuePair<string, string>> items,
-        Action<string?> callback,
+        IEnumerable<TItem> items,
         int x,
         int y,
+        Func<TItem, string>? getValue = null,
         int minWidth = 0,
         int maxWidth = int.MaxValue,
         int maxItems = int.MaxValue)
         : base(inputHelper, reflectionHelper, x, y)
     {
-        this.callback = callback;
+        this.getValue = getValue ?? SelectOption<TItem>.GetDefaultValue;
         this.items = items
             .Where(
-                item => item.Value.Trim().Length >= 3
-                    && !item.Value.StartsWith("id_", StringComparison.OrdinalIgnoreCase))
+                item => this.GetValue(item).Trim().Length >= 3
+                    && !this.GetValue(item).StartsWith("id_", StringComparison.OrdinalIgnoreCase))
             .ToList();
 
-        var textBounds = items.Select(item => Game1.smallFont.MeasureString(item.Value).ToPoint()).ToList();
+        var textBounds =
+            this.items.Select(item => Game1.smallFont.MeasureString(this.GetValue(item)).ToPoint()).ToList();
+
         var textHeight = textBounds.Max(textBound => textBound.Y);
 
         this.Resize(
             Math.Max(minWidth, Math.Min(maxWidth, textBounds.Max(textBound => textBound.X) + 16)),
             textBounds.Take(maxItems).Sum(textBound => textBound.Y) + 16);
 
-        this.components = items
-            .Take(maxItems)
+        this.components = this
+            .items.Take(maxItems)
             .Select(
                 (_, index) => new ClickableComponent(
                     new Rectangle(
@@ -76,22 +90,39 @@ internal class SelectOption : FramedMenu
         }
     }
 
+    /// <summary>Highlight an option.</summary>
+    /// <param name="option">The option to highlight.</param>
+    /// <returns><c>true</c> if the option should be highlighted; otherwise, <c>false</c>.</returns>
+    public delegate bool Highlight(TItem option);
+
+    /// <summary>An operation to perform on the options.</summary>
+    /// <param name="options">The original options.</param>
+    /// <returns>Returns a modified list of options.</returns>
+    public delegate IEnumerable<TItem> Operation(IEnumerable<TItem> options);
+
+    /// <summary>Event raised when the selection changes.</summary>
+    public event EventHandler<TItem?> SelectionChanged
+    {
+        add => this.selectionChanged += value;
+        remove => this.selectionChanged -= value;
+    }
+
     /// <summary>Gets the currently selected option.</summary>
-    public string? CurrentSelection => this.Options.ElementAtOrDefault(this.CurrentIndex).Key;
+    public TItem? CurrentSelection => this.Options.ElementAtOrDefault(this.CurrentIndex);
 
     /// <summary>Gets the options.</summary>
-    public virtual IEnumerable<KeyValuePair<string, string>> Options =>
+    public List<TItem> Options =>
         this.options ??=
             this.operations.Aggregate(this.items.AsEnumerable(), (current, operation) => operation(current)).ToList();
 
-    /// <summary>Gets or sets the current index.</summary>
+    /// <summary>Gets the current index.</summary>
     public int CurrentIndex
     {
         get => this.currentIndex;
-        protected set
+        private set
         {
             this.currentIndex = value;
-            this.callback(this.CurrentSelection);
+            this.selectionChanged?.InvokeAll(this, this.CurrentSelection);
         }
     }
 
@@ -100,13 +131,16 @@ internal class SelectOption : FramedMenu
 
     /// <summary>Add a highlight operation that will be applied to the items.</summary>
     /// <param name="highlight">The highlight operation.</param>
-    public void AddHighlight(Func<KeyValuePair<string, string>, bool> highlight) => this.highlights.Add(highlight);
+    public void AddHighlight(Highlight highlight) => this.highlights.Add(highlight);
 
     /// <summary>Add an operation that will be applied to the items.</summary>
     /// <param name="operation">The operation to perform.</param>
-    public void AddOperation(
-        Func<IEnumerable<KeyValuePair<string, string>>, IEnumerable<KeyValuePair<string, string>>> operation) =>
-        this.operations.Add(operation);
+    public void AddOperation(Operation operation) => this.operations.Add(operation);
+
+    /// <summary>Gets the text value for an item.</summary>
+    /// <param name="item">The item to get the value from.</param>
+    /// <returns>The text value of the item.</returns>
+    public string GetValue(TItem item) => this.getValue(item);
 
     /// <summary>Refreshes the items by applying the operations to them.</summary>
     public void RefreshOptions() => this.options = null;
@@ -125,6 +159,11 @@ internal class SelectOption : FramedMenu
                 {
                     var index = this.Offset + int.Parse(component.name, CultureInfo.InvariantCulture);
                     var item = this.Options.ElementAtOrDefault(index);
+                    if (item is null)
+                    {
+                        continue;
+                    }
+
                     if (component.bounds.Contains(mouseX, mouseY))
                     {
                         spriteBatch.Draw(
@@ -140,11 +179,9 @@ internal class SelectOption : FramedMenu
 
                     spriteBatch.DrawString(
                         Game1.smallFont,
-                        item.Value,
+                        this.getValue(item),
                         new Vector2(component.bounds.X, component.bounds.Y),
-                        !this.highlights.Any() || this.highlights.Any(highlight => highlight(item))
-                            ? Game1.textColor
-                            : Game1.unselectedOptionColor);
+                        this.HighlightOption(item) ? Game1.textColor : Game1.unselectedOptionColor);
                 }
             });
     }
@@ -176,4 +213,10 @@ internal class SelectOption : FramedMenu
         this.CurrentIndex = this.Offset + int.Parse(component.name, CultureInfo.InvariantCulture);
         return true;
     }
+
+    private static string GetDefaultValue(TItem item) =>
+        item switch { string s => s, _ => item?.ToString() ?? string.Empty };
+
+    private bool HighlightOption(TItem option) =>
+        !this.highlights.Any() || this.highlights.All(highlight => highlight(option));
 }

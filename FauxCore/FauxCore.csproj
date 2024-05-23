@@ -13,10 +13,13 @@
       ^NetEscapades
     </IgnoreModFilePatterns>
   </PropertyGroup>
+  <PropertyGroup>
+    <DefineConstants>IS_FAUXCORE</DefineConstants>
+  </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.0.1"/>
     <PackageReference Include="Pidgin" Version="3.2.3" />
-    <PackageReference Include="SimpleInjector" Version="5.4.2"/>
+    <PackageReference Include="SimpleInjector" Version="5.4.5" />
     <Reference Include="HarmonyLib">
       <HintPath>$(GamePath)\smapi-internal\0Harmony.dll</HintPath>
       <Private>false</Private>

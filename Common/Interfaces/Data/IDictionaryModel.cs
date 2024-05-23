@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Interfaces.Data;
+#else
 namespace StardewMods.Common.Interfaces.Data;
+#endif
 
 /// <summary>Represents modeled data stored as a dictionary of string key value pairs.</summary>
 internal interface IDictionaryModel

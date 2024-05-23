@@ -1,10 +1,10 @@
 namespace StardewMods.FauxCore;
 
-using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.ContentPatcher;
-using StardewMods.Common.Services.Integrations.FauxCore;
-using StardewMods.Common.Services.Integrations.GenericModConfigMenu;
+using StardewMods.FauxCore.Common.Interfaces;
+using StardewMods.FauxCore.Common.Services;
+using StardewMods.FauxCore.Common.Services.Integrations.ContentPatcher;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Services.Integrations.GenericModConfigMenu;
 using StardewMods.FauxCore.Framework.Interfaces;
 using StardewMods.FauxCore.Framework.Services;
 

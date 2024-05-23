@@ -1,6 +1,13 @@
-﻿namespace StardewMods.Common.Services.Integrations.Automate;
+﻿#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.Automate;
+#else
+namespace StardewMods.Common.Services.Integrations.Automate;
+#endif
 
 using Microsoft.Xna.Framework;
+
+// ReSharper disable All
+#pragma warning disable
 
 /// <summary>The API which lets other mods interact with Automate.</summary>
 public interface IAutomateApi

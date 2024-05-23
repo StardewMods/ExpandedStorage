@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Interfaces;
+#else
 namespace StardewMods.Common.Interfaces;
+#endif
 
 /// <summary>Represents a service for publishing and subscribing to events.</summary>
 public interface IEventManager

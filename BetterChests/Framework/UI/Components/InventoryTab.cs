@@ -10,7 +10,7 @@ using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
 
 /// <summary>A component with an icon that expands into a label when hovered.</summary>
-internal sealed class TabIcon : BaseComponent
+internal sealed class InventoryTab : BaseComponent
 {
     private readonly TabData data;
     private readonly Vector2 origin;
@@ -19,14 +19,14 @@ internal sealed class TabIcon : BaseComponent
 
     private EventHandler<TabClickedEventArgs>? clicked;
 
-    /// <summary>Initializes a new instance of the <see cref="TabIcon" /> class.</summary>
+    /// <summary>Initializes a new instance of the <see cref="InventoryTab" /> class.</summary>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="x">The x-coordinate of the tab component.</param>
     /// <param name="y">The y-coordinate of the tab component.</param>
     /// <param name="icon">The tab icon.</param>
     /// <param name="tabData">The inventory tab data.</param>
     /// <param name="overrideWidth">Indicates if the component should have a default width.</param>
-    public TabIcon(IInputHelper inputHelper, int x, int y, IIcon icon, TabData tabData, int overrideWidth = -1)
+    public InventoryTab(IInputHelper inputHelper, int x, int y, IIcon icon, TabData tabData, int overrideWidth = -1)
         : base(inputHelper, x, y, Game1.tileSize, Game1.tileSize, tabData.Label)
     {
         var textBounds = Game1.smallFont.MeasureString(tabData.Label).ToPoint();
@@ -177,14 +177,14 @@ internal sealed class TabIcon : BaseComponent
     /// <inheritdoc />
     public override bool TryLeftClick(int x, int y)
     {
-        this.clicked.InvokeAll(this, new TabClickedEventArgs(SButton.MouseLeft, this.data));
+        this.clicked?.InvokeAll(this, new TabClickedEventArgs(SButton.MouseLeft, this.data));
         return true;
     }
 
     /// <inheritdoc />
     public override bool TryRightClick(int x, int y)
     {
-        this.clicked.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
+        this.clicked?.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
         return true;
     }
 

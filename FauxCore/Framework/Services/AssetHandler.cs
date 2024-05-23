@@ -2,10 +2,10 @@ namespace StardewMods.FauxCore.Framework.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.ContentPatcher;
-using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Interfaces;
+using StardewMods.FauxCore.Common.Services;
+using StardewMods.FauxCore.Common.Services.Integrations.ContentPatcher;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Interfaces;
 using StardewMods.FauxCore.Framework.Models;
 using StardewValley.Menus;
@@ -26,6 +26,7 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandlerExtension, I
         { VanillaIcon.Coin, new Rectangle(4, 388, 8, 8) },
         { VanillaIcon.ColorPicker, new Rectangle(119, 469, 16, 16) },
         { VanillaIcon.DoNot, new Rectangle(322, 498, 12, 12) },
+        { VanillaIcon.Dropdown, new Rectangle(437, 450, 10, 11) },
         { VanillaIcon.EmptyHeart, new Rectangle(218, 428, 7, 6) },
         { VanillaIcon.Fish, new Rectangle(20, 428, 10, 10) },
         { VanillaIcon.FishingChest, new Rectangle(137, 412, 10, 11) },
@@ -91,12 +92,11 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandlerExtension, I
             .Watch(this.RefreshIcons, _ => this.RefreshIcons());
 
         this.Asset("LooseSprites/Cursors").Watch(this.RefreshPalette, _ => this.RefreshPalette());
-
         this.AddAsset($"{Mod.Id}/UI", modContentHelper.Load<IRawTextureData>("assets/ui.png"));
 
         foreach (var (key, area) in AssetHandler.VanillaIcons)
         {
-            this.iconRegistry.Add(key.ToStringFast(), "LooseSprites/Cursors", area);
+            this.iconRegistry.Add(key.ToStringFast(), "LooseSprites/Cursors", area, "StardewValley");
         }
     }
 
@@ -211,9 +211,16 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandlerExtension, I
 
     private void RefreshIcons()
     {
-        foreach (var (key, icon) in this.Asset($"{Mod.Id}/Icons").Require<Dictionary<string, IconData>>())
+        foreach (var (id, icon) in this.Asset($"{Mod.Id}/Icons").Require<Dictionary<string, IconData>>())
         {
-            this.iconRegistry.Add(key, icon.Path, icon.Area);
+            var parts = id.Split('/');
+            if (parts.Length < 2)
+            {
+                this.iconRegistry.Add(id, icon.Path, icon.Area, $"{Mod.Id}/Icons");
+                continue;
+            }
+
+            this.iconRegistry.Add(string.Join(string.Empty, parts[1..]), icon.Path, icon.Area, parts[0]);
         }
     }
 

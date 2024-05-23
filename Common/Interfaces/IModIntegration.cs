@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Interfaces;
+#else
 namespace StardewMods.Common.Interfaces;
+#endif
 
 /// <summary>Provides an integration point for using external mods' APIs.</summary>
 public interface IModIntegration

@@ -22,12 +22,13 @@ internal sealed class DebugMenu : BaseMenu
     {
         this.debugMode = debugMode;
         var lineHeight = Game1.smallFont.MeasureString("T").ToPoint().Y;
-        this.items = ["backpack", "reset", "config", "layout", "search", "tab"];
+        this.items = ["backpack", "reset", "config", "icons", "layout", "search", "tab"];
         this.descriptions =
         [
             "Configure the player backpack",
             "Reset individual storages to default",
             "Open the config menu",
+            "Open the icon menu",
             "Open the layout menu",
             "Open the search menu",
             "Open the tab menu",

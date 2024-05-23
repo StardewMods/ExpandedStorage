@@ -2,19 +2,19 @@ namespace StardewMods.FauxCore.Framework.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewMods.Common.Services;
-using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Services;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Interfaces;
 using StardewMods.FauxCore.Framework.Models;
 using StardewValley.Menus;
 
-/// <inheritdoc cref="StardewMods.Common.Services.Integrations.FauxCore.IIconRegistry" />
+/// <inheritdoc />
 internal sealed class IconRegistry : IIconRegistry
 {
-    private static readonly Dictionary<string, Icon> Icons = new();
+    private static readonly Dictionary<string, IconRegistry> Registries = [];
 
     private readonly IAssetHandlerExtension assetHandler;
-    private readonly Dictionary<string, string> ids = [];
+    private readonly Dictionary<string, Icon> icons = [];
     private readonly IManifest manifest;
 
     /// <summary>Initializes a new instance of the <see cref="IconRegistry" /> class.</summary>
@@ -22,6 +22,7 @@ internal sealed class IconRegistry : IIconRegistry
     /// <param name="manifest">Dependency for accessing mod manifest.</param>
     public IconRegistry(IAssetHandlerExtension assetHandler, IManifest manifest)
     {
+        IconRegistry.Registries.Add(manifest.UniqueID, this);
         this.assetHandler = assetHandler;
         this.manifest = manifest;
     }
@@ -30,17 +31,19 @@ internal sealed class IconRegistry : IIconRegistry
     /// <param name="id">The unique identifier of the icon.</param>
     /// <param name="path">The icon texture path.</param>
     /// <param name="area">The icon source area.</param>
+    /// <param name="source">The icon source mod.</param>
     /// <returns>The icon.</returns>
-    public Icon Add(string id, string path, Rectangle area)
+    public Icon Add(string id, string path, Rectangle area, string source)
     {
         var icon = new Icon(this.GetTexture, this.CreateComponent)
         {
             Area = area,
             Id = id,
             Path = path,
+            Source = source,
         };
 
-        if (IconRegistry.Icons.TryAdd(id, icon))
+        if (this.icons.TryAdd(id, icon))
         {
             this.assetHandler.AddAsset(icon);
         }
@@ -51,20 +54,23 @@ internal sealed class IconRegistry : IIconRegistry
     /// <inheritdoc />
     public void AddIcon(string id, string path, Rectangle area)
     {
-        var uniqueId = $"{this.manifest.UniqueID}/{id}";
-        if (!IconRegistry.Icons.TryGetValue(uniqueId, out var icon))
+        if (!this.icons.TryGetValue(id, out var icon))
         {
-            icon = this.Add(uniqueId, path, area);
+            icon = this.Add(id, path, area, this.manifest.UniqueID);
         }
 
-        Log.Trace("Registering icon: {0}", uniqueId);
-        this.ids.TryAdd(id, uniqueId);
+        Log.Trace("Registering icon: {0}", id);
         icon.Path = path;
         icon.Area = area;
     }
 
     /// <inheritdoc />
-    public IEnumerable<IIcon> GetIcons() => IconRegistry.Icons.Values;
+    public IEnumerable<IIcon> GetIcons(string? modId = null) =>
+        modId is null
+            ? IconRegistry.Registries.Values.SelectMany(reg => reg.icons.Values)
+            : IconRegistry.Registries.TryGetValue(modId, out var registry)
+                ? registry.icons.Values
+                : Enumerable.Empty<IIcon>();
 
     /// <inheritdoc />
     public IIcon RequireIcon(string id)
@@ -78,19 +84,45 @@ internal sealed class IconRegistry : IIconRegistry
     }
 
     /// <inheritdoc />
-    public IIcon RequireIcon(VanillaIcon icon) => this.RequireIcon(icon.ToStringFast());
+    public IIcon RequireIcon(VanillaIcon icon) =>
+        IconRegistry.Registries[Mod.Id].icons.TryGetValue(icon.ToStringFast(), out var vanillaIcon)
+            ? vanillaIcon
+            : throw new KeyNotFoundException($"No icon found with the id: {icon}.");
 
     /// <inheritdoc />
     public bool TryGetIcon(string id, [NotNullWhen(true)] out IIcon? icon)
     {
         icon = null;
-        if ((this.ids.TryGetValue(id, out var uniqueId) && IconRegistry.Icons.TryGetValue(uniqueId, out var value))
-            || IconRegistry.Icons.TryGetValue(id, out value))
+
+        // Internal icons
+        if (this.icons.TryGetValue(id, out var internalIcon))
         {
-            icon = value;
+            icon = internalIcon;
+            return true;
         }
 
-        return icon is not null;
+        // All icons
+        var parts = id.Split('/');
+        if (parts.Length < 2)
+        {
+            return false;
+        }
+
+        var modId = parts[0];
+        var subId = string.Join(string.Empty, parts[1..]);
+        if (!IconRegistry.Registries.TryGetValue(modId, out var registry))
+        {
+            registry = IconRegistry.Registries[Mod.Id];
+        }
+
+        if (!registry.icons.TryGetValue(subId, out var externalIcon)
+            && !registry.icons.TryGetValue(id, out externalIcon))
+        {
+            return false;
+        }
+
+        icon = externalIcon;
+        return true;
     }
 
     [SuppressMessage("ReSharper", "PossibleLossOfFraction", Justification = "Reviewed")]

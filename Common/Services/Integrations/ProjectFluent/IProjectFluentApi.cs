@@ -1,6 +1,11 @@
-﻿// ReSharper disable All
-#pragma warning disable
+﻿#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.ProjectFluent;
+#else
 namespace StardewMods.Common.Services.Integrations.ProjectFluent;
+#endif
+
+// ReSharper disable All
+#pragma warning disable
 
 /// <summary>The Project Fluent API which other mods can access.</summary>
 public interface IProjectFluentApi

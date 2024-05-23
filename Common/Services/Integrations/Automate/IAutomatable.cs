@@ -1,7 +1,14 @@
-﻿namespace StardewMods.Common.Services.Integrations.Automate;
+﻿#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.Automate;
+#else
+namespace StardewMods.Common.Services.Integrations.Automate;
+#endif
 
 using System.ComponentModel;
 using Microsoft.Xna.Framework;
+
+// ReSharper disable All
+#pragma warning disable
 
 /// <summary>
 /// An automatable entity, which can implement a more specific type like <see cref="IMachine" /> or

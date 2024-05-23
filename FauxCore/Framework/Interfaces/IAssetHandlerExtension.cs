@@ -1,7 +1,7 @@
 namespace StardewMods.FauxCore.Framework.Interfaces;
 
-using StardewMods.Common.Interfaces;
-using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Interfaces.Assets;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 
 /// <summary>Extended Asset Handler methods for FauxCore.</summary>
 public interface IAssetHandlerExtension : IAssetHandler

@@ -1,4 +1,8 @@
+#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Models.Cache;
+#else
 namespace StardewMods.Common.Models.Cache;
+#endif
 
 /// <summary>Represents a cached object.</summary>
 /// <typeparam name="T">The cached object type.</typeparam>

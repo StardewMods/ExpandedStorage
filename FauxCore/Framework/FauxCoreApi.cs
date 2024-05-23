@@ -1,6 +1,6 @@
 namespace StardewMods.FauxCore.Framework;
 
-using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Framework.Interfaces;
 using StardewMods.FauxCore.Framework.Services;
 

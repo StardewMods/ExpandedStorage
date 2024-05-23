@@ -1,7 +1,14 @@
-﻿namespace StardewMods.Common.Services.Integrations.ContentPatcher;
+﻿#if IS_FAUXCORE
+namespace StardewMods.FauxCore.Common.Services.Integrations.ContentPatcher;
+
+using StardewMods.FauxCore.Common.Interfaces;
+#else
+namespace StardewMods.Common.Services.Integrations.ContentPatcher;
+
+using StardewMods.Common.Interfaces;
+#endif
 
 using StardewModdingAPI.Events;
-using StardewMods.Common.Interfaces;
 
 /// <inheritdoc />
 internal sealed class ContentPatcherIntegration : ModIntegration<IContentPatcherApi>
