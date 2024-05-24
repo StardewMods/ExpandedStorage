@@ -24,8 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IApiFactory.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IEventManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IModIntegration.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\UI\ICustomComponent.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)Interfaces\UI\ICustomMenu.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\ICustomMenu.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Assets\CachedAsset.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Assets\TrackedAsset.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Cache\BaseCachedObject.cs"/>
@@ -46,6 +45,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\BaseEventManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\Models\StorageOptions.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ExpandedStorage\Models\StorageData.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\ICustomComponent.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\IFramedMenu.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Mod.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\CacheManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\BetterChests\BetterChestsIntegration.cs"/>
@@ -109,8 +110,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\EventManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Log.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\BaseComponent.cs"/>
-    <Compile Include="$(MSBuildThisFileDirectory)UI\Components\FramedComponent.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\TextField.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Components\TextureComponent.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\VerticalScrollBar.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\BaseMenu.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Menus\Dropdown.cs"/>

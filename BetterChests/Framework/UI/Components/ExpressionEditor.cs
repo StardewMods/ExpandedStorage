@@ -9,14 +9,24 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
 
-internal abstract class ExpressionComponent : FramedComponent
+/// <summary>A component which represents an <see cref="IExpression" />.</summary>
+internal abstract class ExpressionEditor : BaseComponent
 {
     private static readonly Color[] Colors =
     [
         Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Violet, Color.Pink,
     ];
 
-    public ExpressionComponent(
+    /// <summary>Initializes a new instance of the <see cref="ExpressionEditor" /> class.</summary>
+    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
+    /// <param name="x">The x-position of the component.</param>
+    /// <param name="y">The y-position of the component.</param>
+    /// <param name="width">The width of the component.</param>
+    /// <param name="height">The height of the component.</param>
+    /// <param name="expression">The expression.</param>
+    /// <param name="level">The level.</param>
+    public ExpressionEditor(
         IInputHelper inputHelper,
         IReflectionHelper reflectionHelper,
         int x,
@@ -29,9 +39,7 @@ internal abstract class ExpressionComponent : FramedComponent
     {
         this.Expression = expression;
         this.Level = level;
-        this.Color = level >= 0
-            ? ExpressionComponent.Colors[this.Level % ExpressionComponent.Colors.Length]
-            : Color.Black;
+        this.Color = level >= 0 ? ExpressionEditor.Colors[this.Level % ExpressionEditor.Colors.Length] : Color.Black;
     }
 
     /// <summary>Event raised when the expression is changed.</summary>
@@ -78,8 +86,8 @@ internal abstract class ExpressionComponent : FramedComponent
             component.bounds.Width,
             component.bounds.Height,
             component.bounds.Contains(cursor - offset)
-                ? ExpressionComponent.Highlighted(color)
-                : ExpressionComponent.Muted(color),
+                ? ExpressionEditor.Highlighted(color)
+                : ExpressionEditor.Muted(color),
             Game1.pixelZoom,
             false);
 

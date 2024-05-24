@@ -65,16 +65,18 @@ internal sealed class PopupSelect<TItem> : BaseMenu
         this.selectOption.SelectionChanged += this.OnSelectionChanged;
         this.selectOption.AddHighlight(this.HighlightOption);
         this.selectOption.AddOperation(this.SortOptions);
-        this.AddSubMenu(this.selectOption);
-        this.Resize(new Point(this.selectOption.width + 16, this.selectOption.height + 16));
-        this.MoveTo(
-            new Point(
-                ((Game1.uiViewport.Width - this.width) / 2) + IClickableMenu.borderWidth,
-                ((Game1.uiViewport.Height - this.height) / 2) + IClickableMenu.borderWidth));
+        this
+            .AddSubMenu(this.selectOption)
+            .ResizeTo(new Point(this.selectOption.width + 16, this.selectOption.height + 16))
+            .MoveTo(
+                new Point(
+                    ((Game1.uiViewport.Width - this.width) / 2) + IClickableMenu.borderWidth,
+                    ((Game1.uiViewport.Height - this.height) / 2) + IClickableMenu.borderWidth));
 
         this.currentText = initialValue ?? string.Empty;
         this.textField = new TextField(
             this.Input,
+            reflectionHelper,
             this.xPositionOnScreen - 12,
             this.yPositionOnScreen,
             this.width,
@@ -85,15 +87,15 @@ internal sealed class PopupSelect<TItem> : BaseMenu
         };
 
         this.okButton = iconRegistry
-            .RequireIcon(VanillaIcon.Ok)
-            .GetComponent(
+            .Icon(VanillaIcon.Ok)
+            .Component(
                 IconStyle.Transparent,
                 this.xPositionOnScreen + ((this.width - IClickableMenu.borderWidth) / 2) - Game1.tileSize,
                 this.yPositionOnScreen + this.height + Game1.tileSize);
 
         this.cancelButton = iconRegistry
-            .RequireIcon(VanillaIcon.Cancel)
-            .GetComponent(
+            .Icon(VanillaIcon.Cancel)
+            .Component(
                 IconStyle.Transparent,
                 this.xPositionOnScreen + ((this.width + IClickableMenu.borderWidth) / 2),
                 this.yPositionOnScreen + this.height + Game1.tileSize);
@@ -128,6 +130,13 @@ internal sealed class PopupSelect<TItem> : BaseMenu
     }
 
     /// <inheritdoc />
+    public override void DrawUnder(SpriteBatch spriteBatch, Point cursor) =>
+        spriteBatch.Draw(
+            Game1.fadeToBlackRect,
+            new Rectangle(0, 0, Game1.uiViewport.Width, Game1.uiViewport.Height),
+            Color.Black * 0.5f);
+
+    /// <inheritdoc />
     public override void receiveKeyPress(Keys key)
     {
         switch (key)
@@ -149,14 +158,7 @@ internal sealed class PopupSelect<TItem> : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override void DrawUnder(SpriteBatch spriteBatch, Point cursor) =>
-        spriteBatch.Draw(
-            Game1.fadeToBlackRect,
-            new Rectangle(0, 0, Game1.uiViewport.Width, Game1.uiViewport.Height),
-            Color.Black * 0.5f);
-
-    /// <inheritdoc />
-    protected override bool TryLeftClick(Point cursor)
+    public override bool TryLeftClick(Point cursor)
     {
         if (this.okButton.bounds.Contains(cursor) && this.readyToClose())
         {

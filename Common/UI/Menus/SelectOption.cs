@@ -65,9 +65,9 @@ internal sealed class SelectOption<TItem> : FramedMenu
 
         var textHeight = textBounds.Max(textBound => textBound.Y);
 
-        this.Resize(
+        this.ResizeTo(
             new Point(
-                Math.Max(minWidth, Math.Min(maxWidth, textBounds.Max(textBound => textBound.X) + 16)),
+                Math.Clamp(textBounds.Max(textBound => textBound.X) + 16, minWidth, maxWidth),
                 textBounds.Take(maxItems).Sum(textBound => textBound.Y) + 16));
 
         this.components = this
@@ -84,7 +84,7 @@ internal sealed class SelectOption<TItem> : FramedMenu
 
         this.allClickableComponents.AddRange(this.components);
         var offset = this.allItems.Count - this.components.Count;
-        this.MaxOffset = new Point(-1, offset <= 0 ? -1 : offset);
+        this.SetMaxOffset(new Point(-1, offset <= 0 ? -1 : offset));
     }
 
     /// <summary>Highlight an option.</summary>
@@ -133,20 +133,12 @@ internal sealed class SelectOption<TItem> : FramedMenu
     /// <param name="operation">The operation to perform.</param>
     public void AddOperation(Operation operation) => this.operations.Add(operation);
 
-    /// <summary>Gets the text value for an item.</summary>
-    /// <param name="item">The item to get the value from.</param>
-    /// <returns>The text value of the item.</returns>
-    public string GetValue(TItem item) => this.getValue(item);
-
-    /// <summary>Refreshes the items by applying the operations to them.</summary>
-    public void RefreshOptions() => this.items = null;
-
     /// <inheritdoc />
-    protected override void DrawInFrame(SpriteBatch spriteBatch, Point cursor)
+    public override void DrawInFrame(SpriteBatch spriteBatch, Point cursor)
     {
         foreach (var component in this.components)
         {
-            var index = this.Offset.Y + int.Parse(component.name, CultureInfo.InvariantCulture);
+            var index = this.CurrentOffset.Y + int.Parse(component.name, CultureInfo.InvariantCulture);
             var item = this.Options.ElementAtOrDefault(index);
             if (item is null)
             {
@@ -175,7 +167,7 @@ internal sealed class SelectOption<TItem> : FramedMenu
     }
 
     /// <inheritdoc />
-    protected override void DrawUnder(SpriteBatch b, Point cursor) =>
+    public override void DrawUnder(SpriteBatch b, Point cursor) =>
         IClickableMenu.drawTextureBox(
             b,
             Game1.mouseCursors,
@@ -189,8 +181,16 @@ internal sealed class SelectOption<TItem> : FramedMenu
             false,
             0.97f);
 
+    /// <summary>Gets the text value for an item.</summary>
+    /// <param name="item">The item to get the value from.</param>
+    /// <returns>The text value of the item.</returns>
+    public string GetValue(TItem item) => this.getValue(item);
+
+    /// <summary>Refreshes the items by applying the operations to them.</summary>
+    public void RefreshOptions() => this.items = null;
+
     /// <inheritdoc />
-    protected override bool TryLeftClick(Point cursor)
+    public override bool TryLeftClick(Point cursor)
     {
         if (base.TryLeftClick(cursor))
         {
@@ -203,7 +203,7 @@ internal sealed class SelectOption<TItem> : FramedMenu
             return false;
         }
 
-        this.CurrentIndex = this.Offset.Y + int.Parse(component.name, CultureInfo.InvariantCulture);
+        this.CurrentIndex = this.CurrentOffset.Y + int.Parse(component.name, CultureInfo.InvariantCulture);
         return true;
     }
 

@@ -51,8 +51,10 @@ internal sealed class Dropdown<TItem> : BaseMenu
 
         selectOption.SelectionChanged += this.OnSelectionChanged;
         this.AddSubMenu(selectOption);
-        this.Resize(new Point(selectOption.width + 16, selectOption.height + 16));
-        this.MoveTo(new Point(anchor.bounds.Left, anchor.bounds.Bottom));
+        this
+            .ResizeTo(new Point(selectOption.width + 16, selectOption.height + 16))
+            .MoveTo(new Point(anchor.bounds.Left, anchor.bounds.Bottom));
+
         if (this.xPositionOnScreen + this.width > Game1.uiViewport.Width)
         {
             this.MoveTo(new Point(anchor.bounds.Right - this.width, this.yPositionOnScreen));
@@ -72,10 +74,10 @@ internal sealed class Dropdown<TItem> : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override void DrawUnder(SpriteBatch spriteBatch, Point cursor) { }
+    public override void DrawUnder(SpriteBatch spriteBatch, Point cursor) { }
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(Point cursor)
+    public override bool TryLeftClick(Point cursor)
     {
         this.exitThisMenuNoSound();
         return false;

@@ -18,13 +18,13 @@ internal sealed class TabEditor : BaseComponent
     private readonly ClickableTextureComponent upArrow;
 
     private EventHandler<TabClickedEventArgs>? clicked;
-    private string? hoverText;
     private EventHandler<TabClickedEventArgs>? moveDown;
     private EventHandler<TabClickedEventArgs>? moveUp;
 
     /// <summary>Initializes a new instance of the <see cref="TabEditor" /> class.</summary>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="x">The x-coordinate of the tab component.</param>
     /// <param name="y">The y-coordinate of the tab component.</param>
     /// <param name="width">The width of the tab component.</param>
@@ -33,26 +33,27 @@ internal sealed class TabEditor : BaseComponent
     public TabEditor(
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
+        IReflectionHelper reflectionHelper,
         int x,
         int y,
         int width,
         IIcon icon,
         TabData tabData)
-        : base(inputHelper, x, y, width, Game1.tileSize, tabData.Label)
+        : base(inputHelper, reflectionHelper, x, y, width, Game1.tileSize, tabData.Label)
     {
         this.data = tabData;
-        this.icon = icon.GetComponent(IconStyle.Transparent, x, y);
+        this.icon = icon.Component(IconStyle.Transparent, x, y);
         this.icon.bounds = this.bounds with
         {
             X = this.bounds.X + Game1.tileSize,
             Width = this.bounds.Width - (Game1.tileSize * 2),
         };
 
-        this.upArrow = iconRegistry.RequireIcon(VanillaIcon.ArrowUp).GetComponent(IconStyle.Transparent, x + 8, y + 8);
+        this.upArrow = iconRegistry.Icon(VanillaIcon.ArrowUp).Component(IconStyle.Transparent, x + 8, y + 8);
 
         this.downArrow = iconRegistry
-            .RequireIcon(VanillaIcon.ArrowDown)
-            .GetComponent(IconStyle.Transparent, x + width - Game1.tileSize + 8, y + 8);
+            .Icon(VanillaIcon.ArrowDown)
+            .Component(IconStyle.Transparent, x + width - Game1.tileSize + 8, y + 8);
 
         this.downArrow.hoverText = I18n.Ui_MoveDown_Tooltip();
         this.upArrow.hoverText = I18n.Ui_MoveUp_Tooltip();
@@ -78,9 +79,6 @@ internal sealed class TabEditor : BaseComponent
         add => this.moveUp += value;
         remove => this.moveUp -= value;
     }
-
-    /// <inheritdoc />
-    public override string? HoverText => this.hoverText;
 
     /// <summary>Gets or sets a value indicating whether the tab is currently active.</summary>
     public bool Active { get; set; } = true;
@@ -207,26 +205,27 @@ internal sealed class TabEditor : BaseComponent
 
         if (this.upArrow.bounds.Contains(cursor))
         {
-            this.hoverText = this.upArrow.hoverText;
+            this.SetHoverText(this.upArrow.hoverText);
             return;
         }
 
         if (this.downArrow.bounds.Contains(cursor))
         {
-            this.hoverText = this.downArrow.hoverText;
+            this.SetHoverText(this.downArrow.hoverText);
             return;
         }
 
-        this.hoverText = null;
+        this.SetHoverText(null);
     }
 
     /// <inheritdoc />
-    public override void MoveTo(Point cursor)
+    public override ICustomComponent MoveTo(Point location)
     {
-        base.MoveTo(cursor);
-        this.icon.bounds.Y = cursor.Y;
-        this.upArrow.bounds.Y = cursor.Y + 8;
-        this.downArrow.bounds.Y = cursor.Y + 8;
+        base.MoveTo(location);
+        this.icon.bounds.Y = location.Y;
+        this.upArrow.bounds.Y = location.Y + 8;
+        this.downArrow.bounds.Y = location.Y + 8;
+        return this;
     }
 
     /// <inheritdoc />

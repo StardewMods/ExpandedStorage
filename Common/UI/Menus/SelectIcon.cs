@@ -97,9 +97,16 @@ internal class SelectIcon : FramedMenu
     /// <summary>Gets the currently selected icon.</summary>
     public IIcon? CurrentSelection => this.Icons.ElementAtOrDefault(this.CurrentIndex);
 
+    /// <inheritdoc />
+    public override Rectangle Frame =>
+        new(this.xPositionOnScreen + 4, this.yPositionOnScreen + 4, this.width - 8, this.height - 8);
+
     /// <summary>Gets the icons.</summary>
     public virtual List<IIcon> Icons =>
         this.icons ??= this.operations.Aggregate(this.allIcons, (current, operation) => operation(current)).ToList();
+
+    /// <inheritdoc />
+    public override int StepSize => 32;
 
     /// <summary>Gets or sets the current index.</summary>
     public int CurrentIndex
@@ -111,13 +118,6 @@ internal class SelectIcon : FramedMenu
             this.selectionChanged?.InvokeAll(this, this.CurrentSelection);
         }
     }
-
-    /// <inheritdoc />
-    protected override Rectangle Frame =>
-        new(this.xPositionOnScreen + 4, this.yPositionOnScreen + 4, this.width - 8, this.height - 8);
-
-    /// <inheritdoc />
-    protected override int StepSize => 32;
 
     private IEnumerable<ClickableTextureComponent> Components
     {
@@ -132,7 +132,7 @@ internal class SelectIcon : FramedMenu
                 .Icons.Select(
                     (icon, index) =>
                     {
-                        var component = icon.GetComponent(IconStyle.Transparent);
+                        var component = icon.Component(IconStyle.Transparent);
 
                         component.baseScale = component.scale = (float)Math.Floor(
                             (float)this.length / Math.Max(component.sourceRect.Width, component.sourceRect.Height));
@@ -157,42 +157,38 @@ internal class SelectIcon : FramedMenu
                 .ToList();
 
             var yOffset = this.components.Last().bounds.Bottom - this.yPositionOnScreen - this.height + this.spacing;
-            this.MaxOffset = new Point(-1, yOffset <= 0 ? -1 : yOffset);
+            this.SetMaxOffset(new Point(-1, yOffset <= 0 ? -1 : yOffset));
             return this.components;
         }
     }
 
     /// <summary>Add a highlight operation that will be applied to the items.</summary>
     /// <param name="highlight">The highlight operation.</param>
-    public void AddHighlight(Highlight highlight) => this.highlights.Add(highlight);
+    /// <returns>Returns the menu.</returns>
+    public SelectIcon AddHighlight(Highlight highlight)
+    {
+        this.highlights.Add(highlight);
+        return this;
+    }
 
     /// <summary>Add an operation that will be applied to the icons.</summary>
     /// <param name="operation">The operation to perform.</param>
-    public void AddOperation(Operation operation) => this.operations.Add(operation);
-
-    /// <inheritdoc />
-    public override void MoveTo(Point dimensions)
+    /// <returns>Returns the menu.</returns>
+    public SelectIcon AddOperation(Operation operation)
     {
-        base.MoveTo(dimensions);
-        this.RefreshIcons();
-    }
-
-    /// <summary>Refreshes the icons by applying the operations to them.</summary>
-    public void RefreshIcons()
-    {
-        this.components = null;
-        this.icons = null;
+        this.operations.Add(operation);
+        return this;
     }
 
     /// <inheritdoc />
-    protected override void DrawInFrame(SpriteBatch spriteBatch, Point cursor)
+    public override void DrawInFrame(SpriteBatch spriteBatch, Point cursor)
     {
         // Draw items
         foreach (var component in this.Components)
         {
             var index = int.Parse(component.name, CultureInfo.InvariantCulture);
             var icon = this.Icons[index];
-            component.tryHover(cursor.X + this.Offset.X, cursor.Y + this.Offset.Y, 0.2f);
+            component.tryHover(cursor.X + this.CurrentOffset.X, cursor.Y + this.CurrentOffset.Y, 0.2f);
 
             if (index == this.CurrentIndex)
             {
@@ -202,11 +198,11 @@ internal class SelectIcon : FramedMenu
                         this.xPositionOnScreen
                         + (index % this.columns * (this.length + this.spacing))
                         + this.spacing
-                        - this.Offset.X,
+                        - this.CurrentOffset.X,
                         this.yPositionOnScreen
                         + (index / this.columns * (this.length + this.spacing))
                         + this.spacing
-                        - this.Offset.Y,
+                        - this.CurrentOffset.Y,
                         this.length,
                         this.length),
                     new Rectangle(194, 388, 16, 16),
@@ -222,18 +218,18 @@ internal class SelectIcon : FramedMenu
                 this.HighlightIcon(icon) ? Color.White : Color.White * 0.25f,
                 1f,
                 0,
-                -this.Offset.X,
-                -this.Offset.Y);
+                -this.CurrentOffset.X,
+                -this.CurrentOffset.Y);
 
-            if (component.bounds.Contains(cursor + this.Offset))
+            if (component.bounds.Contains(cursor + this.CurrentOffset))
             {
-                this.HoverText ??= component.hoverText;
+                this.SetHoverText(component.hoverText);
             }
         }
     }
 
     /// <inheritdoc />
-    protected override void DrawUnder(SpriteBatch b, Point cursor) =>
+    public override void DrawUnder(SpriteBatch b, Point cursor) =>
         IClickableMenu.drawTextureBox(
             b,
             Game1.mouseCursors,
@@ -248,14 +244,31 @@ internal class SelectIcon : FramedMenu
             0.97f);
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(Point cursor)
+    public override ICustomMenu MoveTo(Point dimensions)
+    {
+        base.MoveTo(dimensions);
+        this.RefreshIcons();
+        return this;
+    }
+
+    /// <summary>Refreshes the icons by applying the operations to them.</summary>
+    /// <returns>Returns the menu.</returns>
+    public SelectIcon RefreshIcons()
+    {
+        this.components = null;
+        this.icons = null;
+        return this;
+    }
+
+    /// <inheritdoc />
+    public override bool TryLeftClick(Point cursor)
     {
         if (base.TryLeftClick(cursor))
         {
             return true;
         }
 
-        var component = this.Components.FirstOrDefault(i => i.bounds.Contains(cursor + this.Offset));
+        var component = this.Components.FirstOrDefault(i => i.bounds.Contains(cursor + this.CurrentOffset));
         if (component is null)
         {
             return false;

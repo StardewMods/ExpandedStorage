@@ -15,12 +15,15 @@ internal enum ExpressionChange
     /// <summary>Add a new expression term.</summary>
     AddTerm,
 
+    /// <summary>Change an attribute.</summary>
+    ChangeAttribute,
+
+    /// <summary>Change a value.</summary>
+    ChangeValue,
+
     /// <summary>Remove an expression.</summary>
     Remove,
 
     /// <summary>Toggle an expression group type.</summary>
     ToggleGroup,
-
-    /// <summary>Update an expression term.</summary>
-    UpdateTerm,
 }

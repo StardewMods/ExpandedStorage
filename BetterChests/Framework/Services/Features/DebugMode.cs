@@ -99,7 +99,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
 
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
         this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.iconRegistry.RequireIcon(InternalIcon.Debug),
+            this.iconRegistry.Icon(InternalIcon.Debug),
             I18n.Button_Debug_Name());
     }
 
@@ -112,13 +112,12 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         }
 
         this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
-        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.RequireIcon(InternalIcon.Debug));
+        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.Icon(InternalIcon.Debug));
     }
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (e.Id != this.iconRegistry.RequireIcon(InternalIcon.Debug).Id
-            || Game1.activeClickableMenu?.readyToClose() == false)
+        if (e.Id != this.iconRegistry.Icon(InternalIcon.Debug).Id || Game1.activeClickableMenu?.readyToClose() == false)
         {
             return;
         }

@@ -40,8 +40,8 @@ internal sealed class SortMenu : SearchMenu
         this.RefreshItems();
 
         this.saveButton = iconRegistry
-            .RequireIcon(InternalIcon.Save)
-            .GetComponent(
+            .Icon(InternalIcon.Save)
+            .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
                 this.yPositionOnScreen + Game1.tileSize + 16);
@@ -49,8 +49,8 @@ internal sealed class SortMenu : SearchMenu
         this.saveButton.hoverText = I18n.Ui_Save_Name();
 
         this.copyButton = iconRegistry
-            .RequireIcon(InternalIcon.Copy)
-            .GetComponent(
+            .Icon(InternalIcon.Copy)
+            .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
                 this.yPositionOnScreen + ((Game1.tileSize + 16) * 2));
@@ -58,8 +58,8 @@ internal sealed class SortMenu : SearchMenu
         this.copyButton.hoverText = I18n.Ui_Copy_Tooltip();
 
         this.pasteButton = iconRegistry
-            .RequireIcon(InternalIcon.Paste)
-            .GetComponent(
+            .Icon(InternalIcon.Paste)
+            .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
                 this.yPositionOnScreen + ((Game1.tileSize + 16) * 3));
@@ -67,8 +67,8 @@ internal sealed class SortMenu : SearchMenu
         this.pasteButton.hoverText = I18n.Ui_Paste_Tooltip();
 
         this.okButton = iconRegistry
-            .RequireIcon(VanillaIcon.Ok)
-            .GetComponent(
+            .Icon(VanillaIcon.Ok)
+            .Component(
                 IconStyle.Transparent,
                 this.xPositionOnScreen + this.width + 4,
                 this.yPositionOnScreen + this.height - Game1.tileSize - (IClickableMenu.borderWidth / 2));
@@ -80,25 +80,7 @@ internal sealed class SortMenu : SearchMenu
     }
 
     /// <inheritdoc />
-    protected override List<Item> GetItems()
-    {
-        var items = this.searchExpression is null
-            ? ItemRepository.GetItems().ToList()
-            : ItemRepository.GetItems(this.searchExpression.Equals).ToList();
-
-        if (this.Expression is not null)
-        {
-            items.Sort(this.Expression);
-        }
-
-        return items;
-    }
-
-    /// <inheritdoc />
-    protected override bool HighlightMethod(Item item) => true;
-
-    /// <inheritdoc />
-    protected override bool TryLeftClick(Point cursor)
+    public override bool TryLeftClick(Point cursor)
     {
         if (this.saveButton.bounds.Contains(cursor) && this.readyToClose())
         {
@@ -133,4 +115,22 @@ internal sealed class SortMenu : SearchMenu
 
         return false;
     }
+
+    /// <inheritdoc />
+    protected override List<Item> GetItems()
+    {
+        var items = this.searchExpression is null
+            ? ItemRepository.GetItems().ToList()
+            : ItemRepository.GetItems(this.searchExpression.Equals).ToList();
+
+        if (this.Expression is not null)
+        {
+            items.Sort(this.Expression);
+        }
+
+        return items;
+    }
+
+    /// <inheritdoc />
+    protected override bool HighlightMethod(Item item) => true;
 }

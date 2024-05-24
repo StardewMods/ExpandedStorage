@@ -3,7 +3,7 @@ namespace StardewMods.FauxCore.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewMods.FauxCore.Common.Interfaces.UI;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 #else
@@ -11,7 +11,7 @@ namespace StardewMods.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewMods.Common.Interfaces.UI;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 #endif
 
@@ -54,40 +54,16 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
+    public Rectangle Bounds => this.bounds;
+
+    /// <inheritdoc />
     public Point Dimensions => this.Bounds.Location;
 
     /// <inheritdoc />
+    public string? HoverText => (this.Parent as ICustomMenu)?.HoverText ?? this.hoverText;
+
+    /// <inheritdoc />
     public IEnumerable<IClickableMenu> SubMenus => this.subMenus;
-
-    /// <inheritdoc />
-    public Rectangle Bounds
-    {
-        get => this.bounds;
-        set
-        {
-            this.bounds = value;
-            this.xPositionOnScreen = value.X;
-            this.yPositionOnScreen = value.Y;
-            this.width = value.Width;
-            this.height = value.Height;
-        }
-    }
-
-    /// <inheritdoc />
-    public string? HoverText
-    {
-        get => (this.Parent as ICustomMenu)?.HoverText ?? this.hoverText;
-        set
-        {
-            if (this.Parent is ICustomMenu parent)
-            {
-                parent.HoverText = value;
-                return;
-            }
-
-            this.hoverText = value;
-        }
-    }
 
     /// <inheritdoc />
     public IClickableMenu? Parent { get; private set; }
@@ -96,13 +72,25 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     protected IInputHelper Input { get; }
 
     /// <inheritdoc />
+    public ICustomMenu AddSubMenu(IClickableMenu subMenu)
+    {
+        this.subMenus.Add(subMenu);
+        if (subMenu is BaseMenu baseMenu)
+        {
+            baseMenu.Parent = this;
+        }
+
+        return this;
+    }
+
+    /// <inheritdoc />
     public sealed override void draw(SpriteBatch b) => this.draw(b, -1);
 
     /// <inheritdoc />
     public sealed override void draw(SpriteBatch b, int red = -1, int green = -1, int blue = -1)
     {
         var cursor = this.Input.GetCursorPosition().GetScaledScreenPixels().ToPoint();
-        this.HoverText = null;
+        this.SetHoverText(null);
 
         // Draw under
         this.DrawUnder(b, cursor);
@@ -126,7 +114,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
                     if (clickableTextureComponent.bounds.Contains(cursor)
                         && !string.IsNullOrWhiteSpace(clickableTextureComponent.hoverText))
                     {
-                        this.HoverText ??= clickableTextureComponent.hoverText;
+                        this.SetHoverText(clickableTextureComponent.hoverText);
                     }
 
                     break;
@@ -134,7 +122,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
                     customComponent.Draw(b, cursor, Point.Zero);
                     if (component.bounds.Contains(cursor) && !string.IsNullOrWhiteSpace(customComponent.HoverText))
                     {
-                        this.HoverText ??= customComponent.HoverText;
+                        this.SetHoverText(customComponent.HoverText);
                     }
 
                     break;
@@ -151,6 +139,47 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
 
         // Draw over
         this.DrawOver(b, cursor);
+    }
+
+    /// <inheritdoc />
+    public virtual void Draw(SpriteBatch spriteBatch, Point cursor) { }
+
+    /// <inheritdoc />
+    public virtual void DrawOver(SpriteBatch spriteBatch, Point cursor)
+    {
+        // Draw hover text
+        if (!string.IsNullOrWhiteSpace(this.HoverText))
+        {
+            IClickableMenu.drawToolTip(spriteBatch, this.HoverText, null, null);
+        }
+
+        // Draw cursor
+        Game1.mouseCursorTransparency = 1f;
+        this.drawMouse(spriteBatch);
+    }
+
+    /// <inheritdoc />
+    public virtual void DrawUnder(SpriteBatch spriteBatch, Point cursor)
+    {
+        // Draw background
+        if (!Game1.options.showClearBackgrounds && this.Parent is null && this.GetParentMenu() is null)
+        {
+            spriteBatch.Draw(
+                Game1.fadeToBlackRect,
+                new Rectangle(0, 0, Game1.uiViewport.Width, Game1.uiViewport.Height),
+                Color.Black * 0.5f);
+        }
+
+        Game1.drawDialogueBox(
+            this.xPositionOnScreen,
+            this.yPositionOnScreen,
+            this.width,
+            this.height,
+            false,
+            true,
+            null,
+            false,
+            false);
     }
 
     /// <inheritdoc />
@@ -187,7 +216,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public virtual void MoveTo(Point position)
+    public virtual ICustomMenu MoveTo(Point position)
     {
         var delta = position - this.Position.ToPoint();
 
@@ -220,7 +249,10 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
             }
         }
 
-        this.Bounds = new Rectangle(position.X, position.Y, this.width, this.height);
+        this.bounds.Location = position;
+        this.xPositionOnScreen = position.X;
+        this.yPositionOnScreen = position.Y;
+        return this;
     }
 
     /// <inheritdoc />
@@ -364,88 +396,40 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public virtual void Resize(Point dimensions) =>
-        this.Bounds = new Rectangle(this.xPositionOnScreen, this.yPositionOnScreen, dimensions.X, dimensions.Y);
-
-    /// <summary>Adds a submenu to the current menu.</summary>
-    /// <param name="subMenu">The submenu to add.</param>
-    protected void AddSubMenu(IClickableMenu subMenu)
+    public virtual ICustomMenu ResizeTo(Point size)
     {
-        this.subMenus.Add(subMenu);
-        if (subMenu is BaseMenu baseMenu)
-        {
-            baseMenu.Parent = this;
-        }
+        this.bounds.Size = size;
+        return this;
     }
 
-    /// <summary>Draw to the menu.</summary>
-    /// <param name="spriteBatch">The sprite batch to draw to.</param>
-    /// <param name="cursor">The mouse position.</param>
-    protected virtual void Draw(SpriteBatch spriteBatch, Point cursor) { }
-
-    /// <summary>Draw over the menu.</summary>
-    /// <param name="spriteBatch">The sprite batch to draw to.</param>
-    /// <param name="cursor">The mouse position.</param>
-    protected virtual void DrawOver(SpriteBatch spriteBatch, Point cursor)
+    /// <inheritdoc />
+    public ICustomMenu SetHoverText(string? value)
     {
-        // Draw hover text
-        if (!string.IsNullOrWhiteSpace(this.HoverText))
+        if (this.Parent is ICustomMenu parent)
         {
-            IClickableMenu.drawToolTip(spriteBatch, this.HoverText, null, null);
+            parent.SetHoverText(value);
+            return this;
         }
 
-        // Draw cursor
-        Game1.mouseCursorTransparency = 1f;
-        this.drawMouse(spriteBatch);
+        this.hoverText = value;
+        return this;
     }
 
-    /// <summary>Draw under the menu.</summary>
-    /// <param name="spriteBatch">The sprite batch to draw to.</param>
-    /// <param name="cursor">The mouse position.</param>
-    protected virtual void DrawUnder(SpriteBatch spriteBatch, Point cursor)
+    /// <inheritdoc />
+    public virtual bool TryHover(Point cursor) => false;
+
+    /// <inheritdoc />
+    public virtual bool TryLeftClick(Point cursor) => false;
+
+    /// <inheritdoc />
+    public virtual bool TryRightClick(Point cursor) => false;
+
+    /// <inheritdoc />
+    public virtual bool TryScroll(int direction) => false;
+
+    /// <inheritdoc />
+    public virtual void Update(Point cursor)
     {
-        // Draw background
-        if (!Game1.options.showClearBackgrounds && this.Parent is null && this.GetParentMenu() is null)
-        {
-            spriteBatch.Draw(
-                Game1.fadeToBlackRect,
-                new Rectangle(0, 0, Game1.uiViewport.Width, Game1.uiViewport.Height),
-                Color.Black * 0.5f);
-        }
-
-        Game1.drawDialogueBox(
-            this.xPositionOnScreen,
-            this.yPositionOnScreen,
-            this.width,
-            this.height,
-            false,
-            true,
-            null,
-            false,
-            false);
+        // Do nothing
     }
-
-    /// <summary>Try to perform a hover.</summary>
-    /// <param name="cursor">The mouse position.</param>
-    /// <returns><c>true</c> if hover was handled; otherwise, <c>false</c>.</returns>
-    protected virtual bool TryHover(Point cursor) => false;
-
-    /// <summary>Try to perform a left-click.</summary>
-    /// <param name="cursor">The mouse position.</param>
-    /// <returns><c>true</c> if left click was handled; otherwise, <c>false</c>.</returns>
-    protected virtual bool TryLeftClick(Point cursor) => false;
-
-    /// <summary>Try to perform a right-click.</summary>
-    /// <param name="cursor">The mouse position.</param>
-    /// <returns><c>true</c> if right click was handled; otherwise, <c>false</c>.</returns>
-    protected virtual bool TryRightClick(Point cursor) => false;
-
-    /// <summary>Try to perform a scroll.</summary>
-    /// <param name="direction">The direction of the scroll.</param>
-    /// <returns><c>true</c> if scroll was handled; otherwise, <c>false</c>.</returns>
-    protected virtual bool TryScroll(int direction) => false;
-
-    /// <summary>Performs an update.</summary>
-    /// <param name="cursor">The mouse position.</param>
-    protected virtual void Update(Point cursor) { }
 }

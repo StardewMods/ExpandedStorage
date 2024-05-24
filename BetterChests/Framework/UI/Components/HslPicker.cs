@@ -103,7 +103,7 @@ internal sealed class HslPicker
                 + this.xPosition,
         };
 
-        this.copyComponent = iconRegistry.RequireIcon(InternalIcon.Copy).GetComponent(IconStyle.Transparent);
+        this.copyComponent = iconRegistry.Icon(InternalIcon.Copy).Component(IconStyle.Transparent);
         this.copyComponent.bounds = new Rectangle(this.xPosition + 30, this.yPosition - 4, 36, 36);
         this.copyComponent.hoverText = I18n.Ui_Copy_Tooltip();
         this.copyComponent.scale = 3f;

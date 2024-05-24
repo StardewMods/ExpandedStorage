@@ -73,21 +73,18 @@ internal sealed class IconRegistry : IIconRegistry
                 : Enumerable.Empty<IIcon>();
 
     /// <inheritdoc />
-    public IIcon RequireIcon(string id)
-    {
-        if (this.TryGetIcon(id, out var icon))
-        {
-            return icon;
-        }
-
-        throw new KeyNotFoundException($"No icon found with the id: {id}.");
-    }
+    public IIcon Icon(string id) =>
+        new IconWrapper(
+            () => this.TryGetIcon(id, out var icon)
+                ? icon
+                : throw new KeyNotFoundException($"No icon found with the id: {id}."));
 
     /// <inheritdoc />
-    public IIcon RequireIcon(VanillaIcon icon) =>
-        IconRegistry.Registries[Mod.Id].icons.TryGetValue(icon.ToStringFast(), out var vanillaIcon)
-            ? vanillaIcon
-            : throw new KeyNotFoundException($"No icon found with the id: {icon}.");
+    public IIcon Icon(VanillaIcon icon) =>
+        new IconWrapper(
+            () => IconRegistry.Registries[Mod.Id].icons.TryGetValue(icon.ToStringFast(), out var vanillaIcon)
+                ? vanillaIcon
+                : throw new KeyNotFoundException($"No icon found with the id: {icon}."));
 
     /// <inheritdoc />
     public bool TryGetIcon(string id, [NotNullWhen(true)] out IIcon? icon)

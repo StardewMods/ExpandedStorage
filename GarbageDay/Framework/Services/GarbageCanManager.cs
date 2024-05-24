@@ -172,7 +172,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
         }
 
         this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.iconRegistry.RequireIcon("GarbageCan"),
+            this.iconRegistry.Icon("GarbageCan"),
             I18n.Button_GarbageFill_Name());
 
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
@@ -180,7 +180,7 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (e.Id != this.iconRegistry.RequireIcon("GarbageCan").Id)
+        if (e.Id != this.iconRegistry.Icon("GarbageCan").Id)
         {
             return;
         }

@@ -138,9 +138,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
         // Add new organize button to the bottom inventory menu
         var x = itemGrabMenu.okButton.bounds.X;
         var y = itemGrabMenu.okButton.bounds.Y - Game1.tileSize - 16;
-        this.organizeButton.Value =
-            this.iconRegistry.RequireIcon(VanillaIcon.Organize).GetComponent(IconStyle.Transparent, x, y);
-
+        this.organizeButton.Value = this.iconRegistry.Icon(VanillaIcon.Organize).Component(IconStyle.Transparent, x, y);
         this.organizeButton.Value.bounds = this.organizeButton.Value.bounds with
         {
             X = x,

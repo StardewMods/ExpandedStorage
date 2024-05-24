@@ -1,12 +1,19 @@
 #if IS_FAUXCORE
 namespace StardewMods.FauxCore.Common.UI.Components;
-#else
-namespace StardewMods.Common.UI.Components;
-#endif
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
+
+#else
+namespace StardewMods.Common.UI.Components;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewValley.Menus;
+#endif
 
 /// <summary>Represents a scrollbar with up/down arrows.</summary>
 internal sealed class VerticalScrollBar : BaseComponent
@@ -24,6 +31,7 @@ internal sealed class VerticalScrollBar : BaseComponent
 
     /// <summary>Initializes a new instance of the <see cref="VerticalScrollBar" /> class.</summary>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="x">The x-coordinate of the scroll bar.</param>
     /// <param name="y">The y-coordinate of the scroll bar.</param>
     /// <param name="height">The height of the scroll bar.</param>
@@ -35,6 +43,7 @@ internal sealed class VerticalScrollBar : BaseComponent
     /// <param name="name">The name of the scroll bar.</param>
     public VerticalScrollBar(
         IInputHelper inputHelper,
+        IReflectionHelper reflectionHelper,
         int x,
         int y,
         int height,
@@ -44,7 +53,7 @@ internal sealed class VerticalScrollBar : BaseComponent
         Func<int> getMax,
         Func<int>? getStepSize = null,
         string name = "ScrollBar")
-        : base(inputHelper, x, y, 48, height, name)
+        : base(inputHelper, reflectionHelper, x, y, 48, height, name)
     {
         this.getMethod = getMethod;
         this.setMethod = setMethod;
@@ -131,9 +140,9 @@ internal sealed class VerticalScrollBar : BaseComponent
     }
 
     /// <inheritdoc />
-    public override void MoveTo(Point cursor)
+    public override ICustomComponent MoveTo(Point location)
     {
-        base.MoveTo(cursor);
+        base.MoveTo(location);
         this.arrowUp.bounds.Location = this.bounds.Location;
         this.arrowDown.bounds.X = this.bounds.X;
         this.arrowDown.bounds.Y = this.bounds.Y + this.bounds.Height - (12 * Game1.pixelZoom);
@@ -145,18 +154,21 @@ internal sealed class VerticalScrollBar : BaseComponent
 
         this.grabber.bounds.X = this.bounds.X + 12;
         this.SetScrollPosition();
+        return this;
     }
 
     /// <inheritdoc />
-    public override void Resize(Point dimensions)
+    public override ICustomComponent ResizeTo(Point size)
     {
-        base.Resize(dimensions);
+        base.ResizeTo(size);
         this.arrowDown.bounds.Y = this.bounds.Y + this.bounds.Height - (12 * Game1.pixelZoom);
         this.runner = new Rectangle(
             this.bounds.X + 12,
             this.bounds.Y + (12 * Game1.pixelZoom) + 4,
             24,
             this.bounds.Height - (24 * Game1.pixelZoom) - 12);
+
+        return this;
     }
 
     /// <inheritdoc />
@@ -241,7 +253,7 @@ internal sealed class VerticalScrollBar : BaseComponent
             return;
         }
 
-        this.Value = Math.Min(1, Math.Max(0, (float)(cursor.Y - this.runner.Y) / this.runner.Height));
+        this.Value = Math.Clamp((float)(cursor.Y - this.runner.Y) / this.runner.Height, 0, 1);
         var initialY = this.grabber.bounds.Y;
         this.SourceValue = (int)((this.Value * (this.MaxValue - this.MinValue)) + this.MinValue);
         this.SetScrollPosition();

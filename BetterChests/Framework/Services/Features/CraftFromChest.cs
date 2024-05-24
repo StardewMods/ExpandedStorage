@@ -111,7 +111,7 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
 
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
         this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.iconRegistry.RequireIcon(InternalIcon.Craft),
+            this.iconRegistry.Icon(InternalIcon.Craft),
             I18n.Button_CraftFromChest_Name());
     }
 
@@ -142,7 +142,7 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
         }
 
         this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
-        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.RequireIcon(InternalIcon.Craft));
+        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.Icon(InternalIcon.Craft));
     }
 
     private static bool CookingPredicate(IStorageContainer container) =>
@@ -193,7 +193,7 @@ internal sealed class CraftFromChest : BaseFeature<CraftFromChest>
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (e.Id == this.iconRegistry.RequireIcon(InternalIcon.Craft).Id)
+        if (e.Id == this.iconRegistry.Icon(InternalIcon.Craft).Id)
         {
             this.betterCraftingIntegration.Api!.OpenCraftingMenu(
                 false,

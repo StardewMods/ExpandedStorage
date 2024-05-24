@@ -10,7 +10,7 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 /// <inheritdoc />
-internal sealed class ExpressionTerm : ExpressionComponent
+internal sealed class ExpressionTerm : ExpressionEditor
 {
     private readonly ClickableComponent leftComponent;
     private readonly IExpression? leftTerm;
@@ -56,8 +56,8 @@ internal sealed class ExpressionTerm : ExpressionComponent
             this.rightTerm?.Term ?? expression.Term);
 
         this.removeButton = iconRegistry
-            .RequireIcon(VanillaIcon.DoNot)
-            .GetComponent(IconStyle.Transparent, x + width - 24, y + 8, 2f);
+            .Icon(VanillaIcon.DoNot)
+            .Component(IconStyle.Transparent, x + width - 24, y + 8, 2f);
 
         this.removeButton.name = "remove";
         this.removeButton.hoverText = I18n.Ui_Remove_Tooltip();
@@ -83,13 +83,24 @@ internal sealed class ExpressionTerm : ExpressionComponent
     }
 
     /// <inheritdoc />
+    public override void DrawInFrame(SpriteBatch spriteBatch, Point cursor, Point offset)
+    {
+        this.DrawComponent(spriteBatch, this.leftComponent, this.Color, cursor, offset);
+        this.DrawComponent(spriteBatch, this.rightComponent, this.Color, cursor, offset);
+        this.removeButton.tryHover(cursor.X - offset.X, cursor.Y - offset.Y);
+        this.removeButton.draw(spriteBatch, Color.White, 1f, 0, offset.X, offset.Y);
+        this.warningIcon?.tryHover(cursor.X - offset.X, cursor.Y - offset.Y);
+        this.warningIcon?.draw(spriteBatch, Color.White, 1f, 0, offset.X, offset.Y);
+    }
+
+    /// <inheritdoc />
     public override bool TryLeftClick(Point cursor)
     {
         if (this.leftComponent.bounds.Contains(cursor))
         {
             this.expressionChanged?.InvokeAll(
                 this,
-                new ExpressionChangedEventArgs(ExpressionChange.UpdateTerm, this.Expression));
+                new ExpressionChangedEventArgs(ExpressionChange.ChangeAttribute, this.Expression));
 
             return true;
         }
@@ -98,7 +109,7 @@ internal sealed class ExpressionTerm : ExpressionComponent
         {
             this.expressionChanged?.InvokeAll(
                 this,
-                new ExpressionChangedEventArgs(ExpressionChange.UpdateTerm, this.Expression));
+                new ExpressionChangedEventArgs(ExpressionChange.ChangeValue, this.Expression));
 
             return true;
         }
@@ -113,16 +124,5 @@ internal sealed class ExpressionTerm : ExpressionComponent
         }
 
         return false;
-    }
-
-    /// <inheritdoc />
-    protected override void DrawInFrame(SpriteBatch spriteBatch, Point cursor, Point offset)
-    {
-        this.DrawComponent(spriteBatch, this.leftComponent, this.Color, cursor, offset);
-        this.DrawComponent(spriteBatch, this.rightComponent, this.Color, cursor, offset);
-        this.removeButton.tryHover(cursor.X - offset.X, cursor.Y - offset.Y);
-        this.removeButton.draw(spriteBatch, Color.White, 1f, 0, offset.X, offset.Y);
-        this.warningIcon?.tryHover(cursor.X - offset.X, cursor.Y - offset.Y);
-        this.warningIcon?.draw(spriteBatch, Color.White, 1f, 0, offset.X, offset.Y);
     }
 }

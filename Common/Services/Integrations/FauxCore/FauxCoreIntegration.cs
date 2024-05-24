@@ -115,12 +115,12 @@ internal sealed class FauxCoreIntegration
     }
 
     /// <inheritdoc />
-    public IIcon RequireIcon(string id) =>
-        this.iconRegistry?.Value.RequireIcon(id) ?? throw new InvalidOperationException($"Failed to load icon: {id}.");
+    public IIcon Icon(string id) =>
+        this.iconRegistry?.Value.Icon(id) ?? throw new InvalidOperationException($"Failed to load icon: {id}.");
 
     /// <inheritdoc/>
-    public IIcon RequireIcon(VanillaIcon icon) =>
-        this.iconRegistry?.Value.RequireIcon(icon)
+    public IIcon Icon(VanillaIcon icon) =>
+        this.iconRegistry?.Value.Icon(icon)
         ?? throw new InvalidOperationException($"Failed to load icon: {icon.ToStringFast()}.");
 
     /// <inheritdoc />

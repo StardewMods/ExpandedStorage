@@ -3,6 +3,7 @@ namespace StardewMods.FauxCore.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewMods.FauxCore.Common.UI.Components;
 
 #else
@@ -10,11 +11,12 @@ namespace StardewMods.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Components;
 #endif
 
 /// <summary>Framed menu with vertical scrolling.</summary>
-internal abstract class FramedMenu : BaseMenu
+internal abstract class FramedMenu : BaseMenu, IFramedMenu
 {
     private readonly IReflectionHelper reflectionHelper;
     private readonly VerticalScrollBar scrollBar;
@@ -44,6 +46,7 @@ internal abstract class FramedMenu : BaseMenu
         this.maxOffset = new Point(-1, -1);
         this.scrollBar = new VerticalScrollBar(
             this.Input,
+            reflectionHelper,
             this.xPositionOnScreen + this.width + 4,
             this.yPositionOnScreen + 4,
             this.height,
@@ -57,52 +60,20 @@ internal abstract class FramedMenu : BaseMenu
             () => this.StepSize);
     }
 
-    /// <summary>Gets or sets the maximum offset.</summary>
-    public Point MaxOffset
-    {
-        get => this.maxOffset;
-        protected set
-        {
-            this.maxOffset.X = Math.Max(-1, value.X);
-            this.maxOffset.Y = Math.Max(-1, value.Y);
-            this.scrollBar.visible = this.maxOffset.Y > -1;
-        }
-    }
-
     /// <summary>Gets or sets the y-offset.</summary>
-    public Point Offset
-    {
-        get => this.offset;
-        set
-        {
-            this.offset.X = Math.Min(this.maxOffset.X, Math.Max(0, value.X));
-            this.offset.Y = Math.Min(this.maxOffset.Y, Math.Max(0, value.Y));
-        }
-    }
+    public Point CurrentOffset => this.offset;
 
     /// <summary>Gets the frame.</summary>
-    protected virtual Rectangle Frame => this.Bounds;
+    public virtual Rectangle Frame => this.Bounds;
+
+    /// <inheritdoc />
+    public Point MaxOffset => this.maxOffset;
 
     /// <summary>Gets the step size for scrolling.</summary>
-    protected virtual int StepSize => 1;
+    public virtual int StepSize => 1;
 
     /// <inheritdoc />
-    public override void MoveTo(Point position)
-    {
-        base.MoveTo(position);
-        this.scrollBar.MoveTo(new Point(this.xPositionOnScreen + this.width + 4, this.yPositionOnScreen + 4));
-    }
-
-    /// <inheritdoc />
-    public override void Resize(Point dimensions)
-    {
-        base.Resize(dimensions);
-        this.scrollBar.Resize(new Point(0, dimensions.Y));
-        this.scrollBar.MoveTo(new Point(this.Bounds.Right + 4, this.Bounds.Top + 4));
-    }
-
-    /// <inheritdoc />
-    protected sealed override void Draw(SpriteBatch spriteBatch, Point cursor)
+    public sealed override void Draw(SpriteBatch spriteBatch, Point cursor)
     {
         var sortModeReflected = this.reflectionHelper.GetField<SpriteSortMode>(spriteBatch, "_sortMode", false);
         var sortModeOriginal = sortModeReflected?.GetValue() ?? SpriteSortMode.Deferred;
@@ -176,17 +147,48 @@ internal abstract class FramedMenu : BaseMenu
         }
     }
 
-    /// <summary>Draws the specified render action within a specified area of the screen.</summary>
-    /// <param name="spriteBatch">The SpriteBatch used for drawing.</param>
-    /// <param name="cursor">The mouse position.</param>
-    protected abstract void DrawInFrame(SpriteBatch spriteBatch, Point cursor);
+    /// <inheritdoc />
+    public abstract void DrawInFrame(SpriteBatch spriteBatch, Point cursor);
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(Point cursor) => this.scrollBar.visible && this.scrollBar.TryLeftClick(cursor);
+    public override ICustomMenu MoveTo(Point position)
+    {
+        base.MoveTo(position);
+        this.scrollBar.MoveTo(new Point(this.xPositionOnScreen + this.width + 4, this.yPositionOnScreen + 4));
+        return this;
+    }
 
     /// <inheritdoc />
-    protected override bool TryScroll(int direction) => this.scrollBar.visible && this.scrollBar.TryScroll(direction);
+    public override ICustomMenu ResizeTo(Point size)
+    {
+        base.ResizeTo(size);
+        this.scrollBar.ResizeTo(new Point(0, size.Y)).MoveTo(new Point(this.Bounds.Right + 4, this.Bounds.Top + 4));
+        return this;
+    }
 
     /// <inheritdoc />
-    protected override void Update(Point cursor) => this.scrollBar.Update(cursor);
+    public IFramedMenu SetCurrentOffset(Point value)
+    {
+        this.offset.X = Math.Clamp(value.X, 0, this.maxOffset.X);
+        this.offset.Y = Math.Clamp(value.Y, 0, this.maxOffset.Y);
+        return this;
+    }
+
+    /// <inheritdoc />
+    public IFramedMenu SetMaxOffset(Point value)
+    {
+        this.maxOffset.X = Math.Max(-1, value.X);
+        this.maxOffset.Y = Math.Max(-1, value.Y);
+        this.scrollBar.visible = this.maxOffset.Y > -1;
+        return this;
+    }
+
+    /// <inheritdoc />
+    public override bool TryLeftClick(Point cursor) => this.scrollBar.visible && this.scrollBar.TryLeftClick(cursor);
+
+    /// <inheritdoc />
+    public override bool TryScroll(int direction) => this.scrollBar.visible && this.scrollBar.TryScroll(direction);
+
+    /// <inheritdoc />
+    public override void Update(Point cursor) => this.scrollBar.Update(cursor);
 }

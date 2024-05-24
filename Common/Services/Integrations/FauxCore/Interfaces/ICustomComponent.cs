@@ -1,11 +1,11 @@
 #if IS_FAUXCORE
-namespace StardewMods.FauxCore.Common.Interfaces.UI;
+namespace StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 #else
-namespace StardewMods.Common.Interfaces.UI;
+namespace StardewMods.Common.Services.Integrations.FauxCore;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
@@ -26,13 +26,26 @@ public interface ICustomComponent
     /// <param name="offset">The offset.</param>
     void Draw(SpriteBatch spriteBatch, Point cursor, Point offset);
 
+    /// <summary>Draws the component in a framed area.</summary>
+    /// <param name="spriteBatch">The sprite batch to draw the component to.</param>
+    /// <param name="cursor">The mouse position.</param>
+    /// <param name="offset">The offset.</param>
+    void DrawInFrame(SpriteBatch spriteBatch, Point cursor, Point offset);
+
     /// <summary>Moves the component to the specified position.</summary>
-    /// <param name="cursor">The position to move to.</param>
-    void MoveTo(Point cursor);
+    /// <param name="location">The position to move to.</param>
+    /// <returns>Returns the component.</returns>
+    ICustomComponent MoveTo(Point location);
 
     /// <summary>Resize the component to the specified dimensions.</summary>
-    /// <param name="dimensions">The component dimensions.</param>
-    void Resize(Point dimensions);
+    /// <param name="size">The component dimensions.</param>
+    /// <returns>Returns the component.</returns>
+    ICustomComponent ResizeTo(Point size);
+
+    /// <summary>Sets the hover text.</summary>
+    /// <param name="value">The hover text value.</param>
+    /// <returns>Returns the component.</returns>
+    ICustomComponent SetHoverText(string? value);
 
     /// <summary>Attempts to left-click the component based at the cursor position.</summary>
     /// <param name="cursor">The mouse position.</param>

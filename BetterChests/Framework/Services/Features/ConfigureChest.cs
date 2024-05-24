@@ -67,11 +67,11 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         this.Config.DefaultOptions.ConfigureChest != FeatureOption.Disabled
         && this.genericModConfigMenuIntegration.IsLoaded;
 
-    private IIcon CategorizeIcon => this.iconRegistry.RequireIcon(InternalIcon.Miscellaneous);
+    private IIcon CategorizeIcon => this.iconRegistry.Icon(InternalIcon.Miscellaneous);
 
-    private IIcon ConfigureIcon => this.iconRegistry.RequireIcon(InternalIcon.Config);
+    private IIcon ConfigureIcon => this.iconRegistry.Icon(InternalIcon.Config);
 
-    private IIcon SortIcon => this.iconRegistry.RequireIcon(InternalIcon.Debug);
+    private IIcon SortIcon => this.iconRegistry.Icon(InternalIcon.Debug);
 
     /// <inheritdoc />
     protected override void Activate()

@@ -64,17 +64,109 @@ internal sealed class ExpressionEditor : FramedMenu
     }
 
     /// <inheritdoc />
-    protected override Rectangle Frame =>
+    public override Rectangle Frame =>
         new(this.xPositionOnScreen - 4, this.yPositionOnScreen - 8, this.width + 8, this.height + 16);
 
     /// <inheritdoc />
-    protected override int StepSize => 40;
+    public override int StepSize => 40;
 
     private string SearchText
     {
         get => this.getSearchText();
         set => this.setSearchText(value);
     }
+
+    /// <inheritdoc />
+    public override void DrawInFrame(SpriteBatch spriteBatch, Point cursor)
+    {
+        foreach (var (baseColor, component, expression, tooltip, _) in this.items)
+        {
+            var hover = component.bounds.Contains(cursor - this.CurrentOffset);
+            var color = hover && this.Parent!.GetChildMenu() is null
+                ? ExpressionEditor.Highlighted(baseColor)
+                : ExpressionEditor.Muted(baseColor);
+
+            switch (expression?.ExpressionType)
+            {
+                case ExpressionType.All:
+                case ExpressionType.Any:
+                case ExpressionType.Not:
+                    IClickableMenu.drawTextureBox(
+                        spriteBatch,
+                        Game1.mouseCursors,
+                        new Rectangle(403, 373, 9, 9),
+                        component.bounds.X - this.CurrentOffset.X,
+                        component.bounds.Y - this.CurrentOffset.Y,
+                        component.bounds.Width,
+                        component.bounds.Height,
+                        color,
+                        Game1.pixelZoom,
+                        false);
+
+                    continue;
+                case ExpressionType.Comparable: continue;
+            }
+
+            if (component is ClickableTextureComponent clickableTextureComponent)
+            {
+                if (hover)
+                {
+                    this.SetHoverText(clickableTextureComponent.hoverText);
+                }
+
+                clickableTextureComponent.draw(
+                    spriteBatch,
+                    Color.White,
+                    1f,
+                    0,
+                    -this.CurrentOffset.X,
+                    -this.CurrentOffset.Y);
+
+                continue;
+            }
+
+            if (hover && !string.IsNullOrWhiteSpace(tooltip))
+            {
+                this.SetHoverText(tooltip);
+            }
+
+            if (component.label is not null)
+            {
+                IClickableMenu.drawTextureBox(
+                    spriteBatch,
+                    Game1.mouseCursors,
+                    new Rectangle(432, 439, 9, 9),
+                    component.bounds.X - this.CurrentOffset.X,
+                    component.bounds.Y - this.CurrentOffset.Y,
+                    component.bounds.Width,
+                    component.bounds.Height,
+                    color,
+                    Game1.pixelZoom,
+                    false);
+            }
+
+            if (string.IsNullOrWhiteSpace(component.label))
+            {
+                continue;
+            }
+
+            spriteBatch.DrawString(
+                Game1.smallFont,
+                component.label,
+                new Vector2(
+                    component.bounds.X - this.CurrentOffset.X + 8,
+                    component.bounds.Y - this.CurrentOffset.Y + 2),
+                Game1.textColor,
+                0f,
+                Vector2.Zero,
+                1f,
+                SpriteEffects.None,
+                1f);
+        }
+    }
+
+    /// <inheritdoc />
+    public override void DrawUnder(SpriteBatch b, Point cursor) { }
 
     /// <summary>Re-initializes the components of the object with the given initialization expression.</summary>
     /// <param name="initExpression">The initial expression, or null to clear.</param>
@@ -95,8 +187,10 @@ internal sealed class ExpressionEditor : FramedMenu
 
         var offsetX = -1;
         Enqueue(initExpression);
-        this.MaxOffset = new Point(-1, Math.Max(0, currentY - this.yPositionOnScreen - this.height));
-        this.Offset = new Point(0, Math.Min(Math.Max(0, this.Offset.Y), this.MaxOffset.Y));
+        this
+            .SetMaxOffset(new Point(-1, Math.Max(0, currentY - this.yPositionOnScreen - this.height)))
+            .SetCurrentOffset(new Point(0, Math.Min(Math.Max(0, this.CurrentOffset.Y), this.MaxOffset.Y)));
+
         return;
 
         void AddGroup(IExpression expression)
@@ -328,91 +422,7 @@ internal sealed class ExpressionEditor : FramedMenu
     }
 
     /// <inheritdoc />
-    protected override void DrawInFrame(SpriteBatch spriteBatch, Point cursor)
-    {
-        foreach (var (baseColor, component, expression, tooltip, _) in this.items)
-        {
-            var hover = component.bounds.Contains(cursor - this.Offset);
-            var color = hover && this.Parent!.GetChildMenu() is null
-                ? ExpressionEditor.Highlighted(baseColor)
-                : ExpressionEditor.Muted(baseColor);
-
-            switch (expression?.ExpressionType)
-            {
-                case ExpressionType.All:
-                case ExpressionType.Any:
-                case ExpressionType.Not:
-                    IClickableMenu.drawTextureBox(
-                        spriteBatch,
-                        Game1.mouseCursors,
-                        new Rectangle(403, 373, 9, 9),
-                        component.bounds.X - this.Offset.X,
-                        component.bounds.Y - this.Offset.Y,
-                        component.bounds.Width,
-                        component.bounds.Height,
-                        color,
-                        Game1.pixelZoom,
-                        false);
-
-                    continue;
-                case ExpressionType.Comparable: continue;
-            }
-
-            if (component is ClickableTextureComponent clickableTextureComponent)
-            {
-                if (hover)
-                {
-                    this.HoverText ??= clickableTextureComponent.hoverText;
-                }
-
-                clickableTextureComponent.draw(spriteBatch, Color.White, 1f, 0, -this.Offset.X, -this.Offset.Y);
-
-                continue;
-            }
-
-            if (hover && !string.IsNullOrWhiteSpace(tooltip))
-            {
-                this.HoverText ??= tooltip;
-            }
-
-            if (component.label is not null)
-            {
-                IClickableMenu.drawTextureBox(
-                    spriteBatch,
-                    Game1.mouseCursors,
-                    new Rectangle(432, 439, 9, 9),
-                    component.bounds.X - this.Offset.X,
-                    component.bounds.Y - this.Offset.Y,
-                    component.bounds.Width,
-                    component.bounds.Height,
-                    color,
-                    Game1.pixelZoom,
-                    false);
-            }
-
-            if (string.IsNullOrWhiteSpace(component.label))
-            {
-                continue;
-            }
-
-            spriteBatch.DrawString(
-                Game1.smallFont,
-                component.label,
-                new Vector2(component.bounds.X + 8, component.bounds.Y + 2) - this.Offset.ToVector2(),
-                Game1.textColor,
-                0f,
-                Vector2.Zero,
-                1f,
-                SpriteEffects.None,
-                1f);
-        }
-    }
-
-    /// <inheritdoc />
-    protected override void DrawUnder(SpriteBatch b, Point cursor) { }
-
-    /// <inheritdoc />
-    protected override bool TryHover(Point cursor)
+    public override bool TryHover(Point cursor)
     {
         if (base.TryHover(cursor))
         {
@@ -423,7 +433,7 @@ internal sealed class ExpressionEditor : FramedMenu
         {
             if (component is ClickableTextureComponent clickableTextureComponent)
             {
-                clickableTextureComponent.tryHover(cursor.X + this.Offset.X, cursor.Y + this.Offset.Y);
+                clickableTextureComponent.tryHover(cursor.X + this.CurrentOffset.X, cursor.Y + this.CurrentOffset.Y);
             }
         }
 
@@ -431,7 +441,7 @@ internal sealed class ExpressionEditor : FramedMenu
     }
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(Point cursor)
+    public override bool TryLeftClick(Point cursor)
     {
         if (base.TryLeftClick(cursor))
         {
@@ -440,7 +450,7 @@ internal sealed class ExpressionEditor : FramedMenu
 
         foreach (var (_, component, _, _, action) in this.items)
         {
-            if (action is null || !component.bounds.Contains(cursor + this.Offset))
+            if (action is null || !component.bounds.Contains(cursor + this.CurrentOffset))
             {
                 continue;
             }
@@ -453,7 +463,7 @@ internal sealed class ExpressionEditor : FramedMenu
     }
 
     /// <inheritdoc />
-    protected override bool TryRightClick(Point cursor)
+    public override bool TryRightClick(Point cursor)
     {
         if (base.TryRightClick(cursor))
         {
@@ -462,7 +472,7 @@ internal sealed class ExpressionEditor : FramedMenu
 
         foreach (var (_, component, _, _, action) in this.items)
         {
-            if (!component.bounds.Contains(cursor + this.Offset))
+            if (!component.bounds.Contains(cursor + this.CurrentOffset))
             {
                 continue;
             }

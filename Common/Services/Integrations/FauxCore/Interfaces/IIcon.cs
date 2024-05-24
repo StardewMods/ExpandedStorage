@@ -29,7 +29,7 @@ public interface IIcon
     /// <summary>Gets the icon texture.</summary>
     /// <param name="style">The style of the icon.</param>
     /// <returns>Returns the texture.</returns>
-    public Texture2D GetTexture(IconStyle style);
+    public Texture2D Texture(IconStyle style);
 
     /// <summary>Gets a component with the icon.</summary>
     /// <param name="style">The component style.</param>
@@ -37,5 +37,5 @@ public interface IIcon
     /// <param name="y">The component y-coordinate.</param>
     /// <param name="scale">The target component scale.</param>
     /// <returns>Returns a new button.</returns>
-    public ClickableTextureComponent GetComponent(IconStyle style, int x = 0, int y = 0, float scale = Game1.pixelZoom);
+    public ClickableTextureComponent Component(IconStyle style, int x = 0, int y = 0, float scale = Game1.pixelZoom);
 }

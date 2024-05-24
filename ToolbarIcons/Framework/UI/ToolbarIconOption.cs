@@ -12,8 +12,8 @@ internal sealed class ToolbarIconOption : BaseComplexOption
 {
     private static string? hoverText;
 
-    private readonly ClickableTextureComponent checkedIcon;
-    private readonly ClickableTextureComponent downArrow;
+    private readonly IIcon checkedIcon;
+    private readonly IIcon downArrowIcon;
     private readonly Func<string> getCurrentId;
     private readonly Func<bool> getEnabled;
     private readonly Func<string> getTooltip;
@@ -22,12 +22,16 @@ internal sealed class ToolbarIconOption : BaseComplexOption
     private readonly Action? moveDown;
     private readonly Action? moveUp;
     private readonly Action<bool> setEnabled;
-    private readonly ClickableTextureComponent uncheckedIcon;
-    private readonly ClickableTextureComponent upArrow;
+    private readonly IIcon uncheckedIcon;
+    private readonly IIcon upArrowIcon;
+    private ClickableTextureComponent? checkedComponent;
 
     private string currentId;
+    private ClickableTextureComponent? downArrow;
     private ClickableTextureComponent icon;
     private string name;
+    private ClickableTextureComponent? uncheckedComponent;
+    private ClickableTextureComponent? upArrow;
 
     /// <summary>Initializes a new instance of the <see cref="ToolbarIconOption" /> class.</summary>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
@@ -57,16 +61,10 @@ internal sealed class ToolbarIconOption : BaseComplexOption
         this.setEnabled = setEnabled;
         this.moveDown = moveDown;
         this.moveUp = moveUp;
-        this.downArrow = iconRegistry.RequireIcon(VanillaIcon.ArrowDown).GetComponent(IconStyle.Transparent);
-        this.upArrow = iconRegistry.RequireIcon(VanillaIcon.ArrowUp).GetComponent(IconStyle.Transparent);
-        this.checkedIcon = iconRegistry.RequireIcon(VanillaIcon.Checked).GetComponent(IconStyle.Transparent);
-        this.uncheckedIcon = iconRegistry.RequireIcon(VanillaIcon.Unchecked).GetComponent(IconStyle.Transparent);
-
-        this.downArrow.hoverText = I18n.Config_MoveDown_Tooltip();
-        this.upArrow.hoverText = I18n.Config_MoveUp_Tooltip();
-        this.checkedIcon.hoverText = I18n.Config_CheckBox_Tooltip();
-        this.uncheckedIcon.hoverText = I18n.Config_CheckBox_Tooltip();
-
+        this.downArrowIcon = iconRegistry.Icon(VanillaIcon.ArrowDown);
+        this.upArrowIcon = iconRegistry.Icon(VanillaIcon.ArrowUp);
+        this.checkedIcon = iconRegistry.Icon(VanillaIcon.Checked);
+        this.uncheckedIcon = iconRegistry.Icon(VanillaIcon.Unchecked);
         this.UpdateId();
     }
 
@@ -78,6 +76,66 @@ internal sealed class ToolbarIconOption : BaseComplexOption
 
     /// <inheritdoc />
     public override int Height { get; protected set; }
+
+    private ClickableTextureComponent CheckedIcon
+    {
+        get
+        {
+            if (this.checkedComponent is not null)
+            {
+                return this.checkedComponent;
+            }
+
+            this.checkedComponent = this.checkedIcon.Component(IconStyle.Transparent);
+            this.checkedComponent.hoverText = I18n.Config_CheckBox_Tooltip();
+            return this.checkedComponent;
+        }
+    }
+
+    private ClickableTextureComponent DownArrow
+    {
+        get
+        {
+            if (this.downArrow is not null)
+            {
+                return this.downArrow;
+            }
+
+            this.downArrow = this.downArrowIcon.Component(IconStyle.Transparent);
+            this.downArrow.hoverText = I18n.Config_MoveDown_Tooltip();
+            return this.downArrow;
+        }
+    }
+
+    private ClickableTextureComponent UncheckedIcon
+    {
+        get
+        {
+            if (this.uncheckedComponent is not null)
+            {
+                return this.uncheckedComponent;
+            }
+
+            this.uncheckedComponent = this.uncheckedIcon.Component(IconStyle.Transparent);
+            this.uncheckedComponent.hoverText = I18n.Config_CheckBox_Tooltip();
+            return this.uncheckedComponent;
+        }
+    }
+
+    private ClickableTextureComponent UpArrow
+    {
+        get
+        {
+            if (this.upArrow is not null)
+            {
+                return this.upArrow;
+            }
+
+            this.upArrow = this.upArrowIcon.Component(IconStyle.Transparent);
+            this.upArrow.hoverText = I18n.Config_MoveUp_Tooltip();
+            return this.upArrow;
+        }
+    }
 
     private bool Enabled
     {
@@ -107,7 +165,7 @@ internal sealed class ToolbarIconOption : BaseComplexOption
             SpriteText.color_Gray);
 
         // Checkbox
-        var checkbox = this.Enabled ? this.checkedIcon : this.uncheckedIcon;
+        var checkbox = this.Enabled ? this.CheckedIcon : this.UncheckedIcon;
         checkbox.bounds.X = (int)pos.X + Game1.tileSize;
         checkbox.bounds.Y = (int)pos.Y;
         checkbox.tryHover(mouseX, mouseY);
@@ -130,27 +188,27 @@ internal sealed class ToolbarIconOption : BaseComplexOption
         }
 
         // Up Arrow
-        this.upArrow.bounds.X = (int)pos.X + (Game1.tileSize * 2);
-        this.upArrow.bounds.Y = (int)pos.Y;
+        this.UpArrow.bounds.X = (int)pos.X + (Game1.tileSize * 2);
+        this.UpArrow.bounds.Y = (int)pos.Y;
 
-        if (this.moveUp is not null && this.upArrow.containsPoint(mouseX, mouseY))
+        if (this.moveUp is not null && this.UpArrow.containsPoint(mouseX, mouseY))
         {
-            this.upArrow.tryHover(mouseX, mouseY);
-            ToolbarIconOption.hoverText = this.upArrow.hoverText;
+            this.UpArrow.tryHover(mouseX, mouseY);
+            ToolbarIconOption.hoverText = this.UpArrow.hoverText;
             if (clicked)
             {
-                this.upArrow.scale = 3.5f;
+                this.UpArrow.scale = 3.5f;
                 this.moveUp();
                 Game1.playSound("shwip");
             }
         }
-        else if ((mouseX < this.upArrow.bounds.Left || mouseX > this.upArrow.bounds.Right)
-            && ToolbarIconOption.hoverText == this.upArrow.hoverText)
+        else if ((mouseX < this.UpArrow.bounds.Left || mouseX > this.UpArrow.bounds.Right)
+            && ToolbarIconOption.hoverText == this.UpArrow.hoverText)
         {
             ToolbarIconOption.hoverText = null;
         }
 
-        this.upArrow.draw(spriteBatch, this.moveUp is not null ? Color.White : Color.Black * 0.35f, 1f);
+        this.UpArrow.draw(spriteBatch, this.moveUp is not null ? Color.White : Color.Black * 0.35f, 1f);
 
         // Icon
         this.icon.bounds.X = (int)pos.X + (Game1.tileSize * 3);
@@ -169,27 +227,27 @@ internal sealed class ToolbarIconOption : BaseComplexOption
         this.icon.draw(spriteBatch, this.Enabled ? Color.White : Color.Black * 0.35f, 1f);
 
         // Down Arrow
-        this.downArrow.bounds.X = (int)pos.X + (Game1.tileSize * 4);
-        this.downArrow.bounds.Y = (int)pos.Y;
+        this.DownArrow.bounds.X = (int)pos.X + (Game1.tileSize * 4);
+        this.DownArrow.bounds.Y = (int)pos.Y;
 
-        if (this.moveDown is not null && this.downArrow.containsPoint(mouseX, mouseY))
+        if (this.moveDown is not null && this.DownArrow.containsPoint(mouseX, mouseY))
         {
-            this.downArrow.tryHover(mouseX, mouseY);
-            ToolbarIconOption.hoverText = this.downArrow.hoverText;
+            this.DownArrow.tryHover(mouseX, mouseY);
+            ToolbarIconOption.hoverText = this.DownArrow.hoverText;
             if (clicked)
             {
-                this.downArrow.scale = 3.5f;
+                this.DownArrow.scale = 3.5f;
                 this.moveDown();
                 Game1.playSound("shwip");
             }
         }
-        else if ((mouseX < this.downArrow.bounds.Left || mouseX > this.downArrow.bounds.Right)
-            && ToolbarIconOption.hoverText == this.downArrow.hoverText)
+        else if ((mouseX < this.DownArrow.bounds.Left || mouseX > this.DownArrow.bounds.Right)
+            && ToolbarIconOption.hoverText == this.DownArrow.hoverText)
         {
             ToolbarIconOption.hoverText = null;
         }
 
-        this.downArrow.draw(spriteBatch, this.moveDown is not null ? Color.White : Color.Black * 0.35f, 1f);
+        this.DownArrow.draw(spriteBatch, this.moveDown is not null ? Color.White : Color.Black * 0.35f, 1f);
 
         if (!string.IsNullOrWhiteSpace(ToolbarIconOption.hoverText))
         {
@@ -202,7 +260,7 @@ internal sealed class ToolbarIconOption : BaseComplexOption
     {
         this.currentId = this.getCurrentId();
         this.name = this.currentId.Split('/')[^1];
-        this.icon = this.iconRegistry.RequireIcon(this.currentId).GetComponent(IconStyle.Button, scale: 3f);
+        this.icon = this.iconRegistry.Icon(this.currentId).Component(IconStyle.Button, scale: 3f);
         this.icon.hoverText = this.getTooltip();
     }
 }

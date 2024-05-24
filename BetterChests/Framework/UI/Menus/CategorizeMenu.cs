@@ -41,16 +41,16 @@ internal sealed class CategorizeMenu : SearchMenu
                 : null;
 
         this.saveButton = iconRegistry
-            .RequireIcon(InternalIcon.Save)
-            .GetComponent(
+            .Icon(InternalIcon.Save)
+            .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
                 this.yPositionOnScreen + Game1.tileSize + 16);
 
         this.saveButton.hoverText = I18n.Ui_Save_Name();
 
-        this.noStackIcon = iconRegistry.RequireIcon(InternalIcon.NoStack);
-        this.stackToggle = this.noStackIcon.GetComponent(
+        this.noStackIcon = iconRegistry.Icon(InternalIcon.NoStack);
+        this.stackToggle = this.noStackIcon.Component(
             IconStyle.Button,
             this.xPositionOnScreen + this.width + 4,
             this.yPositionOnScreen + ((Game1.tileSize + 16) * 2));
@@ -64,8 +64,8 @@ internal sealed class CategorizeMenu : SearchMenu
         }
 
         this.copyButton = iconRegistry
-            .RequireIcon(InternalIcon.Copy)
-            .GetComponent(
+            .Icon(InternalIcon.Copy)
+            .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
                 this.yPositionOnScreen + ((Game1.tileSize + 16) * 3));
@@ -73,8 +73,8 @@ internal sealed class CategorizeMenu : SearchMenu
         this.copyButton.hoverText = I18n.Ui_Copy_Tooltip();
 
         this.pasteButton = iconRegistry
-            .RequireIcon(InternalIcon.Paste)
-            .GetComponent(
+            .Icon(InternalIcon.Paste)
+            .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
                 this.yPositionOnScreen + ((Game1.tileSize + 16) * 4));
@@ -82,8 +82,8 @@ internal sealed class CategorizeMenu : SearchMenu
         this.pasteButton.hoverText = I18n.Ui_Paste_Tooltip();
 
         this.okButton = iconRegistry
-            .RequireIcon(VanillaIcon.Ok)
-            .GetComponent(
+            .Icon(VanillaIcon.Ok)
+            .Component(
                 IconStyle.Transparent,
                 this.xPositionOnScreen + this.width + 4,
                 this.yPositionOnScreen + this.height - Game1.tileSize - (IClickableMenu.borderWidth / 2));
@@ -96,18 +96,7 @@ internal sealed class CategorizeMenu : SearchMenu
     }
 
     /// <inheritdoc />
-    protected override List<Item> GetItems()
-    {
-        var items = base.GetItems();
-        return items;
-    }
-
-    /// <inheritdoc />
-    protected override bool HighlightMethod(Item item) =>
-        this.savedExpression is null || this.savedExpression.Equals(item);
-
-    /// <inheritdoc />
-    protected override bool TryLeftClick(Point cursor)
+    public override bool TryLeftClick(Point cursor)
     {
         if (this.saveButton.bounds.Contains(cursor) && this.readyToClose())
         {
@@ -126,7 +115,7 @@ internal sealed class CategorizeMenu : SearchMenu
             Game1.playSound("drumkit6");
             if (this.stackToggle.texture.Equals(Game1.mouseCursors))
             {
-                this.stackToggle.texture = this.noStackIcon.GetTexture(IconStyle.Button);
+                this.stackToggle.texture = this.noStackIcon.Texture(IconStyle.Button);
                 this.stackToggle.sourceRect = new Rectangle(0, 0, 16, 16);
                 return true;
             }
@@ -162,4 +151,15 @@ internal sealed class CategorizeMenu : SearchMenu
 
         return false;
     }
+
+    /// <inheritdoc />
+    protected override List<Item> GetItems()
+    {
+        var items = base.GetItems();
+        return items;
+    }
+
+    /// <inheritdoc />
+    protected override bool HighlightMethod(Item item) =>
+        this.savedExpression is null || this.savedExpression.Equals(item);
 }

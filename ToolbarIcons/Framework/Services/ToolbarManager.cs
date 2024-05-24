@@ -274,7 +274,7 @@ internal sealed class ToolbarManager
                 continue;
             }
 
-            var component = icon.GetComponent(IconStyle.Button, (int)origin.X, (int)origin.Y, 2f);
+            var component = icon.Component(IconStyle.Button, (int)origin.X, (int)origin.Y, 2f);
             component.name = id;
             component.hoverText = hoverText;
             this.Toolbar.allClickableComponents.Add(component);

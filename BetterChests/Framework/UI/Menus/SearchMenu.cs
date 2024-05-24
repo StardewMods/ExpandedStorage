@@ -12,7 +12,7 @@ using StardewValley.Menus;
 /// <summary>A menu for editing search.</summary>
 internal class SearchMenu : BaseMenu
 {
-    private readonly ExpressionEditorNew expressionEditor;
+    private readonly ExpressionsMenu expressionEditor;
     private readonly IExpressionHandler expressionHandler;
     private readonly InventoryMenu inventory;
     private readonly VerticalScrollBar scrollInventory;
@@ -53,7 +53,7 @@ internal class SearchMenu : BaseMenu
         //     + 12,
         //     340,
         //     448);
-        this.expressionEditor = new ExpressionEditorNew(
+        this.expressionEditor = new ExpressionsMenu(
             this.expressionHandler,
             iconRegistry,
             inputHelper,
@@ -86,6 +86,7 @@ internal class SearchMenu : BaseMenu
 
         this.scrollInventory = new VerticalScrollBar(
             this.Input,
+            reflectionHelper,
             this.inventory.xPositionOnScreen + this.inventory.width + 4,
             this.inventory.yPositionOnScreen + 4,
             this.inventory.height,
@@ -106,6 +107,7 @@ internal class SearchMenu : BaseMenu
 
         this.textField = new TextField(
             this.Input,
+            reflectionHelper,
             this.xPositionOnScreen + IClickableMenu.spaceToClearSideBorder + (IClickableMenu.borderWidth / 2),
             this.yPositionOnScreen
             + IClickableMenu.spaceToClearSideBorder
@@ -129,6 +131,35 @@ internal class SearchMenu : BaseMenu
     protected IExpression? Expression { get; private set; }
 
     /// <inheritdoc />
+    public override void Draw(SpriteBatch spriteBatch, Point cursor)
+    {
+        this.drawHorizontalPartition(
+            spriteBatch,
+            this.yPositionOnScreen + (IClickableMenu.borderWidth / 2) + Game1.tileSize + 40);
+
+        this.drawVerticalIntersectingPartition(
+            spriteBatch,
+            this.xPositionOnScreen + (IClickableMenu.borderWidth / 2) + 400,
+            this.yPositionOnScreen + (IClickableMenu.borderWidth / 2) + Game1.tileSize + 40);
+    }
+
+    /// <inheritdoc />
+    public override void DrawOver(SpriteBatch spriteBatch, Point cursor)
+    {
+        var item = this.inventory.hover(cursor.X, cursor.Y, null);
+        if (item is not null)
+        {
+            IClickableMenu.drawToolTip(
+                spriteBatch,
+                this.inventory.descriptionText,
+                this.inventory.descriptionTitle,
+                item);
+        }
+
+        base.DrawOver(spriteBatch, cursor);
+    }
+
+    /// <inheritdoc />
     public override void receiveKeyPress(Keys key)
     {
         if (key is Keys.Escape && this.readyToClose())
@@ -143,32 +174,10 @@ internal class SearchMenu : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override void Draw(SpriteBatch spriteBatch, Point cursor)
+    public override bool TryScroll(int direction)
     {
-        this.drawHorizontalPartition(
-            spriteBatch,
-            this.yPositionOnScreen + (IClickableMenu.borderWidth / 2) + Game1.tileSize + 40);
-
-        this.drawVerticalIntersectingPartition(
-            spriteBatch,
-            this.xPositionOnScreen + (IClickableMenu.borderWidth / 2) + 400,
-            this.yPositionOnScreen + (IClickableMenu.borderWidth / 2) + Game1.tileSize + 40);
-    }
-
-    /// <inheritdoc />
-    protected override void DrawOver(SpriteBatch spriteBatch, Point cursor)
-    {
-        var item = this.inventory.hover(cursor.X, cursor.Y, null);
-        if (item is not null)
-        {
-            IClickableMenu.drawToolTip(
-                spriteBatch,
-                this.inventory.descriptionText,
-                this.inventory.descriptionTitle,
-                item);
-        }
-
-        base.DrawOver(spriteBatch, cursor);
+        var cursor = this.Input.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        return this.inventory.isWithinBounds(cursor.X, cursor.Y) && this.scrollInventory.TryScroll(direction);
     }
 
     /// <summary>Get the items that should be displayed in the menu.</summary>
@@ -217,12 +226,5 @@ internal class SearchMenu : BaseMenu
 
         this.textField?.Reset();
         this.RefreshItems();
-    }
-
-    /// <inheritdoc />
-    protected override bool TryScroll(int direction)
-    {
-        var cursor = this.Input.GetCursorPosition().GetScaledScreenPixels().ToPoint();
-        return this.inventory.isWithinBounds(cursor.X, cursor.Y) && this.scrollInventory.TryScroll(direction);
     }
 }

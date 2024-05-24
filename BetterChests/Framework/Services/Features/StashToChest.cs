@@ -76,7 +76,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
 
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
         this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.iconRegistry.RequireIcon(InternalIcon.Stash),
+            this.iconRegistry.Icon(InternalIcon.Stash),
             I18n.Button_StashToChest_Name());
     }
 
@@ -95,7 +95,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
         }
 
         this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
-        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.RequireIcon(InternalIcon.Stash));
+        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.Icon(InternalIcon.Stash));
     }
 
     private void LogTransfer(IStorageContainer from, IStorageContainer to, Dictionary<string, int> amounts)
@@ -175,7 +175,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (e.Id == this.iconRegistry.RequireIcon(InternalIcon.Stash).Id)
+        if (e.Id == this.iconRegistry.Icon(InternalIcon.Stash).Id)
         {
             this.StashIntoAll();
         }
@@ -210,7 +210,7 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
             return;
         }
 
-        itemGrabMenu.fillStacksButton.texture = icon.GetTexture(IconStyle.Button);
+        itemGrabMenu.fillStacksButton.texture = icon.Texture(IconStyle.Button);
         itemGrabMenu.fillStacksButton.sourceRect = new Rectangle(0, 0, 16, 16);
     }
 

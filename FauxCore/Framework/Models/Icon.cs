@@ -6,7 +6,7 @@ using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 /// <inheritdoc />
-public sealed class Icon : IIcon
+internal sealed class Icon : IIcon
 {
     private readonly Func<IIcon, IconStyle, int, int, float, ClickableTextureComponent> getComponent;
     private readonly Func<IIcon, IconStyle, Texture2D> getTexture;
@@ -38,10 +38,9 @@ public sealed class Icon : IIcon
     public string Source { get; set; } = string.Empty;
 
     /// <inheritdoc />
-    public ClickableTextureComponent
-        GetComponent(IconStyle style, int x = 0, int y = 0, float scale = Game1.pixelZoom) =>
+    public ClickableTextureComponent Component(IconStyle style, int x = 0, int y = 0, float scale = Game1.pixelZoom) =>
         this.getComponent(this, style, x, y, scale);
 
     /// <inheritdoc />
-    public Texture2D GetTexture(IconStyle style) => this.getTexture(this, style);
+    public Texture2D Texture(IconStyle style) => this.getTexture(this, style);
 }

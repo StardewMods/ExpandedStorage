@@ -55,9 +55,11 @@ internal sealed class IconDropdown : BaseMenu
             this.yPositionOnScreen);
 
         selectIcon.SelectionChanged += this.OnSelectionChanged;
-        this.AddSubMenu(selectIcon);
-        this.Resize(new Point(selectIcon.width + 16, selectIcon.height + 16));
-        this.MoveTo(new Point(anchor.bounds.Left, anchor.bounds.Bottom));
+        this
+            .AddSubMenu(selectIcon)
+            .ResizeTo(new Point(selectIcon.width + 16, selectIcon.height + 16))
+            .MoveTo(new Point(anchor.bounds.Left, anchor.bounds.Bottom));
+
         if (this.xPositionOnScreen + this.width > Game1.uiViewport.Width)
         {
             this.MoveTo(new Point(anchor.bounds.Right - this.width, this.yPositionOnScreen));
@@ -77,7 +79,7 @@ internal sealed class IconDropdown : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(Point cursor)
+    public override bool TryLeftClick(Point cursor)
     {
         this.exitThisMenuNoSound();
         return false;

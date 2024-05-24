@@ -60,12 +60,10 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
     public override bool ShouldBeActive => this.Config.DefaultOptions.AccessChest != RangeOption.Disabled;
 
     private ClickableTextureComponent LeftArrow =>
-        this.leftArrow.Value ??=
-            this.iconRegistry.RequireIcon(VanillaIcon.ArrowLeft).GetComponent(IconStyle.Transparent);
+        this.leftArrow.Value ??= this.iconRegistry.Icon(VanillaIcon.ArrowLeft).Component(IconStyle.Transparent);
 
     private ClickableTextureComponent RightArrow =>
-        this.rightArrow.Value ??=
-            this.iconRegistry.RequireIcon(VanillaIcon.ArrowRight).GetComponent(IconStyle.Transparent);
+        this.rightArrow.Value ??= this.iconRegistry.Icon(VanillaIcon.ArrowRight).Component(IconStyle.Transparent);
 
     /// <inheritdoc />
     protected override void Activate()
@@ -367,7 +365,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         if (icon is not null)
         {
             e.SpriteBatch.Draw(
-                icon.GetTexture(IconStyle.Transparent),
+                icon.Texture(IconStyle.Transparent),
                 new Vector2(this.currentContainer.Value.bounds.X, this.currentContainer.Value.bounds.Y),
                 icon.Area,
                 Color.White,
@@ -426,7 +424,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             {
                 xOffset = 32;
                 e.SpriteBatch.Draw(
-                    icon.GetTexture(IconStyle.Transparent),
+                    icon.Texture(IconStyle.Transparent),
                     new Vector2(item.bounds.X, item.bounds.Y),
                     icon.Area,
                     Color.White,

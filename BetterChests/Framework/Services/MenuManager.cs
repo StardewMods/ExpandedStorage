@@ -79,10 +79,10 @@ internal sealed class MenuManager
     public InventoryMenu.highlightThisItem? OriginalHighlightMethod { get; set; }
 
     private ClickableTextureComponent DownArrow =>
-        this.downArrow ??= this.iconRegistry.RequireIcon(VanillaIcon.ArrowDown).GetComponent(IconStyle.Transparent);
+        this.downArrow ??= this.iconRegistry.Icon(VanillaIcon.ArrowDown).Component(IconStyle.Transparent);
 
     private ClickableTextureComponent UpArrow =>
-        this.upArrow ??= this.iconRegistry.RequireIcon(VanillaIcon.ArrowUp).GetComponent(IconStyle.Transparent);
+        this.upArrow ??= this.iconRegistry.Icon(VanillaIcon.ArrowUp).Component(IconStyle.Transparent);
 
     /// <summary>Draws overlay components to the SpriteBatch.</summary>
     /// <param name="spriteBatch">The SpriteBatch used to draw the game object.</param>
@@ -237,7 +237,7 @@ internal sealed class MenuManager
             return;
         }
 
-        this.Icon = storageIcon.GetComponent(IconStyle.Transparent);
+        this.Icon = storageIcon.Component(IconStyle.Transparent);
         this.Icon.bounds = new Rectangle(x, y, Game1.tileSize, Game1.tileSize + 12);
         parent.allClickableComponents?.Add(this.Icon);
     }

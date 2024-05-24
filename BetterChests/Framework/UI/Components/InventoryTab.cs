@@ -22,19 +22,27 @@ internal sealed class InventoryTab : BaseComponent
 
     /// <summary>Initializes a new instance of the <see cref="InventoryTab" /> class.</summary>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="x">The x-coordinate of the tab component.</param>
     /// <param name="y">The y-coordinate of the tab component.</param>
     /// <param name="icon">The tab icon.</param>
     /// <param name="tabData">The inventory tab data.</param>
     /// <param name="overrideWidth">Indicates if the component should have a default width.</param>
-    public InventoryTab(IInputHelper inputHelper, int x, int y, IIcon icon, TabData tabData, int overrideWidth = -1)
-        : base(inputHelper, x, y, Game1.tileSize, Game1.tileSize, tabData.Label)
+    public InventoryTab(
+        IInputHelper inputHelper,
+        IReflectionHelper reflectionHelper,
+        int x,
+        int y,
+        IIcon icon,
+        TabData tabData,
+        int overrideWidth = -1)
+        : base(inputHelper, reflectionHelper, x, y, Game1.tileSize, Game1.tileSize, tabData.Label)
     {
         var textBounds = Game1.smallFont.MeasureString(tabData.Label).ToPoint();
         this.data = tabData;
         this.overrideWidth = overrideWidth;
         this.origin = new Vector2(x, y);
-        this.icon = icon.GetComponent(IconStyle.Transparent, x - Game1.tileSize, y);
+        this.icon = icon.Component(IconStyle.Transparent, x - Game1.tileSize, y);
         this.textWidth = textBounds.X;
 
         if (overrideWidth == -1)

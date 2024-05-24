@@ -24,12 +24,12 @@ public interface IIconRegistry
     /// <param name="id">The unique identifier of the icon.</param>
     /// <returns>Returns the icon.</returns>
     /// <exception cref="KeyNotFoundException">Thrown when no icon is found for the given id.</exception>
-    public IIcon RequireIcon(string id);
+    public IIcon Icon(string id);
 
     /// <summary>Retrieves a vanilla icon.</summary>
     /// <param name="icon">The vanilla icon.</param>
     /// <returns>Returns the icon.</returns>
-    public IIcon RequireIcon(VanillaIcon icon);
+    public IIcon Icon(VanillaIcon icon);
 
     /// <summary>Attempt to retrieve a specific icon with the given id.</summary>
     /// <param name="id">The unique identifier of the icon.</param>

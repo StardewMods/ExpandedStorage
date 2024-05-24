@@ -24,6 +24,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<List<Pointer>> pointers = new(() => []);
+    private readonly IReflectionHelper reflectionHelper;
     private readonly PerScreen<IExpression?> searchExpression = new();
     private readonly PerScreen<string> searchText = new(() => string.Empty);
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
@@ -31,11 +32,12 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     /// <summary>Initializes a new instance of the <see cref="ChestFinder" /> class.</summary>
     /// <param name="containerFactory">Dependency used for accessing containers.</param>
     /// <param name="eventManager">Dependency used for managing events.</param>
+    /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
-    /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public ChestFinder(
         ContainerFactory containerFactory,
@@ -45,6 +47,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         IInputHelper inputHelper,
         MenuHandler menuHandler,
         IModConfig modConfig,
+        IReflectionHelper reflectionHelper,
         ToolbarIconsIntegration toolbarIconsIntegration)
         : base(eventManager, modConfig)
     {
@@ -53,6 +56,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
+        this.reflectionHelper = reflectionHelper;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
     }
 
@@ -77,7 +81,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
 
         this.toolbarIconsIntegration.Api.Subscribe(this.OnIconPressed);
         this.toolbarIconsIntegration.Api.AddToolbarIcon(
-            this.iconRegistry.RequireIcon(InternalIcon.Search),
+            this.iconRegistry.Icon(InternalIcon.Search),
             I18n.Button_FindChest_Name());
     }
 
@@ -98,7 +102,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         }
 
         this.toolbarIconsIntegration.Api.Unsubscribe(this.OnIconPressed);
-        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.RequireIcon(InternalIcon.Search));
+        this.toolbarIconsIntegration.Api.RemoveToolbarIcon(this.iconRegistry.Icon(InternalIcon.Search));
     }
 
     private void OnButtonsChanged(ButtonsChangedEventArgs e)
@@ -144,7 +148,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
 
     private void OnIconPressed(IIconPressedEventArgs e)
     {
-        if (e.Id == this.iconRegistry.RequireIcon(InternalIcon.Search).Id)
+        if (e.Id == this.iconRegistry.Icon(InternalIcon.Search).Id)
         {
             this.OpenSearchBar();
         }
@@ -172,6 +176,7 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     private void OpenSearchBar() =>
         Game1.activeClickableMenu = new SearchOverlay(
             this.inputHelper,
+            this.reflectionHelper,
             () => this.searchText.Value,
             value =>
             {

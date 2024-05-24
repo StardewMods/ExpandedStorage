@@ -26,6 +26,7 @@ internal sealed class TextField : BaseComponent
 
     /// <summary>Initializes a new instance of the <see cref="TextField" /> class.</summary>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="x">The text field x-coordinate.</param>
     /// <param name="y">The text field y-coordinate.</param>
     /// <param name="width">The text field width.</param>
@@ -34,13 +35,14 @@ internal sealed class TextField : BaseComponent
     /// <param name="name">The text field name.</param>
     public TextField(
         IInputHelper inputHelper,
+        IReflectionHelper reflectionHelper,
         int x,
         int y,
         int width,
         Func<string> getMethod,
         Action<string> setMethod,
         string name = "TextField")
-        : base(inputHelper, x, y, width, 48, name)
+        : base(inputHelper, reflectionHelper, x, y, width, 48, name)
     {
         this.previousText = getMethod();
         this.getMethod = getMethod;

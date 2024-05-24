@@ -10,12 +10,12 @@ using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 /// <inheritdoc />
-internal sealed class ExpressionGroup : ExpressionComponent
+internal sealed class ExpressionGroup : ExpressionEditor
 {
     private readonly ClickableComponent? addGroup;
     private readonly ClickableComponent? addNot;
     private readonly ClickableComponent? addTerm;
-    private readonly List<ExpressionComponent> components = [];
+    private readonly List<ExpressionEditor> components = [];
     private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly IReflectionHelper reflectionHelper;
@@ -60,8 +60,8 @@ internal sealed class ExpressionGroup : ExpressionComponent
                 text);
 
             this.removeButton = iconRegistry
-                .RequireIcon(VanillaIcon.DoNot)
-                .GetComponent(IconStyle.Transparent, x + width - 36, y + 12, 2f);
+                .Icon(VanillaIcon.DoNot)
+                .Component(IconStyle.Transparent, x + width - 36, y + 12, 2f);
 
             this.removeButton.name = "remove";
             this.removeButton.hoverText = I18n.Ui_Remove_Tooltip();
@@ -135,8 +135,36 @@ internal sealed class ExpressionGroup : ExpressionComponent
     }
 
     /// <inheritdoc />
+    public override void DrawInFrame(SpriteBatch spriteBatch, Point cursor, Point offset)
+    {
+        if (this.Level >= 0)
+        {
+            this.DrawComponent(spriteBatch, this, this.Color, cursor, offset);
+        }
+
+        foreach (var component in this.components)
+        {
+            component.Draw(spriteBatch, cursor, offset);
+        }
+
+        this.DrawComponent(spriteBatch, this.toggleButton, Color.Gray, cursor, offset);
+        this.DrawComponent(spriteBatch, this.addGroup, Color.Gray, cursor, offset);
+        this.DrawComponent(spriteBatch, this.addTerm, Color.Gray, cursor, offset);
+        this.DrawComponent(spriteBatch, this.addNot, Color.Gray, cursor, offset);
+        this.removeButton?.tryHover(cursor.X - offset.X, cursor.Y - offset.Y);
+        this.removeButton?.draw(spriteBatch, Color.White, 1f, 0, offset.X, offset.Y);
+        this.warningIcon?.tryHover(cursor.X - offset.X, cursor.Y - offset.Y);
+        this.warningIcon?.draw(spriteBatch, Color.White, 1f, 0, offset.X, offset.Y);
+    }
+
+    /// <inheritdoc />
     public override bool TryLeftClick(Point cursor)
     {
+        if (this.components.Any(component => component.TryLeftClick(cursor)))
+        {
+            return true;
+        }
+
         if (this.removeButton?.bounds.Contains(cursor) == true)
         {
             this.expressionChanged?.InvokeAll(
@@ -159,33 +187,10 @@ internal sealed class ExpressionGroup : ExpressionComponent
         return false;
     }
 
-    /// <inheritdoc />
-    protected override void DrawInFrame(SpriteBatch spriteBatch, Point cursor, Point offset)
-    {
-        if (this.Level >= 0)
-        {
-            this.DrawComponent(spriteBatch, this, this.Color, cursor, offset);
-        }
-
-        foreach (var component in this.components)
-        {
-            component.Draw(spriteBatch, cursor, offset);
-        }
-
-        this.DrawComponent(spriteBatch, this.toggleButton, Color.Gray, cursor, offset);
-        this.DrawComponent(spriteBatch, this.addGroup, Color.Gray, cursor, offset);
-        this.DrawComponent(spriteBatch, this.addTerm, Color.Gray, cursor, offset);
-        this.DrawComponent(spriteBatch, this.addNot, Color.Gray, cursor, offset);
-        this.removeButton?.tryHover(cursor.X - offset.X, cursor.Y - offset.Y);
-        this.removeButton?.draw(spriteBatch, Color.White, 1f, 0, offset.X, offset.Y);
-        this.warningIcon?.tryHover(cursor.X - offset.X, cursor.Y - offset.Y);
-        this.warningIcon?.draw(spriteBatch, Color.White, 1f, 0, offset.X, offset.Y);
-    }
-
     private void AddSubExpression(IExpression expression)
     {
         var indent = this.Level >= 0 ? 12 : 0;
-        ExpressionComponent component;
+        ExpressionEditor editor;
         switch (expression.ExpressionType)
         {
             case ExpressionType.All or ExpressionType.Any or ExpressionType.Not:
@@ -199,7 +204,7 @@ internal sealed class ExpressionGroup : ExpressionComponent
                     expression,
                     this.Level + 1);
 
-                component = expressionGroup;
+                editor = expressionGroup;
                 break;
             default:
                 var expressionTerm = new ExpressionTerm(
@@ -212,13 +217,13 @@ internal sealed class ExpressionGroup : ExpressionComponent
                     expression,
                     this.Level + 1);
 
-                component = expressionTerm;
+                editor = expressionTerm;
                 break;
         }
 
-        component.ExpressionChanged += this.OnExpressionChanged;
-        this.bounds.Height = component.bounds.Bottom - this.bounds.Top + 12;
-        this.components.Add(component);
+        editor.ExpressionChanged += this.OnExpressionChanged;
+        this.bounds.Height = editor.bounds.Bottom - this.bounds.Top + 12;
+        this.components.Add(editor);
     }
 
     private void OnExpressionChanged(object? sender, ExpressionChangedEventArgs e) =>

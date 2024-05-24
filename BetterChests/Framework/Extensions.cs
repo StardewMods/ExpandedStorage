@@ -38,8 +38,8 @@ internal static class Extensions
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="internalIcon">The internal icon.</param>
     /// <returns>Returns the icon.</returns>
-    public static IIcon RequireIcon(this IIconRegistry iconRegistry, InternalIcon internalIcon) =>
-        iconRegistry.RequireIcon(internalIcon.ToStringFast());
+    public static IIcon Icon(this IIconRegistry iconRegistry, InternalIcon internalIcon) =>
+        iconRegistry.Icon(internalIcon.ToStringFast());
 
     /// <summary>Attempt to retrieve a specific internal icon.</summary>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>

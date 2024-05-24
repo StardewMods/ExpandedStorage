@@ -17,6 +17,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     private readonly IIconRegistry iconRegistry;
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
+    private readonly IReflectionHelper reflectionHelper;
     private readonly PerScreen<List<InventoryTab>> tabs = new(() => []);
 
     /// <summary>Initializes a new instance of the <see cref="InventoryTabs" /> class.</summary>
@@ -26,19 +27,22 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
+    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public InventoryTabs(
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
-        IModConfig modConfig)
+        IModConfig modConfig,
+        IReflectionHelper reflectionHelper)
         : base(eventManager, modConfig)
     {
         this.expressionHandler = expressionHandler;
         this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
+        this.reflectionHelper = reflectionHelper;
     }
 
     /// <inheritdoc />
@@ -92,7 +96,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
                 continue;
             }
 
-            var tabIcon = new InventoryTab(this.inputHelper, x, y, icon, tabData);
+            var tabIcon = new InventoryTab(this.inputHelper, this.reflectionHelper, x, y, icon, tabData);
             tabIcon.Clicked += this.OnClicked;
             e.AddComponent(tabIcon);
 
