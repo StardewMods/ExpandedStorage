@@ -94,16 +94,15 @@ internal sealed class VerticalScrollBar : BaseComponent
     /// <summary>Gets or sets the percentage value of the scroll bar.</summary>
     public float Value { get; set; }
 
-    /// <summary>Draws the search overlay to the screen.</summary>
-    /// <param name="spriteBatch">The SpriteBatch used for drawing.</param>
-    public override void Draw(SpriteBatch spriteBatch)
+    /// <inheritdoc />
+    public override void Draw(SpriteBatch spriteBatch, Point cursor, Point offset)
     {
         IClickableMenu.drawTextureBox(
             spriteBatch,
             Game1.mouseCursors,
             new Rectangle(403, 383, 6, 6),
-            this.runner.X,
-            this.runner.Y,
+            this.runner.X + offset.X,
+            this.runner.Y + offset.Y,
             this.runner.Width,
             this.runner.Height,
             Color.White,
@@ -111,19 +110,31 @@ internal sealed class VerticalScrollBar : BaseComponent
 
         if (this.SourceValue > this.MinValue || this.SourceValue < this.MaxValue)
         {
-            this.grabber.draw(spriteBatch);
+            this.grabber.draw(spriteBatch, Color.White, 1f, 0, offset.X, offset.Y);
         }
 
-        this.arrowUp.draw(spriteBatch, this.SourceValue > this.MinValue ? Color.White : Color.Black * 0.35f, 1f);
-        this.arrowDown.draw(spriteBatch, this.SourceValue < this.MaxValue ? Color.White : Color.Black * 0.35f, 1f);
+        this.arrowUp.draw(
+            spriteBatch,
+            this.SourceValue > this.MinValue ? Color.White : Color.Black * 0.35f,
+            1f,
+            0,
+            offset.X,
+            offset.Y);
+
+        this.arrowDown.draw(
+            spriteBatch,
+            this.SourceValue < this.MaxValue ? Color.White : Color.Black * 0.35f,
+            1f,
+            0,
+            offset.X,
+            offset.Y);
     }
 
     /// <inheritdoc />
-    public override void MoveTo(int x, int y)
+    public override void MoveTo(Point cursor)
     {
-        base.MoveTo(x, y);
-        this.arrowUp.bounds.X = this.bounds.X;
-        this.arrowUp.bounds.Y = this.bounds.Y;
+        base.MoveTo(cursor);
+        this.arrowUp.bounds.Location = this.bounds.Location;
         this.arrowDown.bounds.X = this.bounds.X;
         this.arrowDown.bounds.Y = this.bounds.Y + this.bounds.Height - (12 * Game1.pixelZoom);
         this.runner = new Rectangle(
@@ -137,9 +148,9 @@ internal sealed class VerticalScrollBar : BaseComponent
     }
 
     /// <inheritdoc />
-    public override void Resize(int width, int height)
+    public override void Resize(Point dimensions)
     {
-        base.Resize(width, height);
+        base.Resize(dimensions);
         this.arrowDown.bounds.Y = this.bounds.Y + this.bounds.Height - (12 * Game1.pixelZoom);
         this.runner = new Rectangle(
             this.bounds.X + 12,
@@ -149,22 +160,22 @@ internal sealed class VerticalScrollBar : BaseComponent
     }
 
     /// <inheritdoc />
-    public override bool TryLeftClick(int mouseX, int mouseY)
+    public override bool TryLeftClick(Point cursor)
     {
-        if (this.grabber.containsPoint(mouseX, mouseY))
+        if (this.grabber.bounds.Contains(cursor))
         {
             this.IsActive = true;
             return true;
         }
 
-        if (this.runner.Contains(mouseX, mouseY))
+        if (this.runner.Contains(cursor))
         {
-            this.Value = (float)(mouseY - this.runner.Y) / this.runner.Height;
+            this.Value = (float)(cursor.Y - this.runner.Y) / this.runner.Height;
             this.SetScrollPosition();
             return true;
         }
 
-        if (this.arrowUp.containsPoint(mouseX, mouseY) && this.SourceValue > this.MinValue)
+        if (this.arrowUp.bounds.Contains(cursor) && this.SourceValue > this.MinValue)
         {
             this.arrowUp.scale = 3.5f;
             Game1.playSound("shwip");
@@ -173,7 +184,7 @@ internal sealed class VerticalScrollBar : BaseComponent
             return true;
         }
 
-        if (this.arrowDown.containsPoint(mouseX, mouseY) && this.SourceValue < this.MaxValue)
+        if (this.arrowDown.bounds.Contains(cursor) && this.SourceValue < this.MaxValue)
         {
             this.arrowDown.scale = 3.5f;
             Game1.playSound("shwip");
@@ -212,27 +223,25 @@ internal sealed class VerticalScrollBar : BaseComponent
         return false;
     }
 
-    /// <summary>Updates the search bar based on the mouse position.</summary>
-    /// <param name="mouseX">The x-coordinate of the mouse position.</param>
-    /// <param name="mouseY">The y-coordinate of the mouse position.</param>
-    public override void Update(int mouseX, int mouseY)
+    /// <inheritdoc />
+    public override void Update(Point cursor)
     {
         if (!this.IsActive)
         {
             if (this.SourceValue > this.MinValue)
             {
-                this.arrowUp.tryHover(mouseX, mouseY);
+                this.arrowUp.tryHover(cursor.X, cursor.Y);
             }
 
             if (this.SourceValue < this.MaxValue)
             {
-                this.arrowDown.tryHover(mouseX, mouseY);
+                this.arrowDown.tryHover(cursor.X, cursor.Y);
             }
 
             return;
         }
 
-        this.Value = Math.Min(1, Math.Max(0, (float)(mouseY - this.runner.Y) / this.runner.Height));
+        this.Value = Math.Min(1, Math.Max(0, (float)(cursor.Y - this.runner.Y) / this.runner.Height));
         var initialY = this.grabber.bounds.Y;
         this.SourceValue = (int)((this.Value * (this.MaxValue - this.MinValue)) + this.MinValue);
         this.SetScrollPosition();

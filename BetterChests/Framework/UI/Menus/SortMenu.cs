@@ -1,5 +1,6 @@
 namespace StardewMods.BetterChests.Framework.UI.Menus;
 
+using Microsoft.Xna.Framework;
 using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.BetterChests;
@@ -97,23 +98,23 @@ internal sealed class SortMenu : SearchMenu
     protected override bool HighlightMethod(Item item) => true;
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(int x, int y)
+    protected override bool TryLeftClick(Point cursor)
     {
-        if (this.saveButton.containsPoint(x, y) && this.readyToClose())
+        if (this.saveButton.bounds.Contains(cursor) && this.readyToClose())
         {
             Game1.playSound("drumkit6");
             this.container.SortInventoryBy = this.SearchText;
             return true;
         }
 
-        if (this.copyButton.containsPoint(x, y))
+        if (this.copyButton.bounds.Contains(cursor))
         {
             Game1.playSound("drumkit6");
             DesktopClipboard.SetText(this.SearchText);
             return true;
         }
 
-        if (this.pasteButton.containsPoint(x, y))
+        if (this.pasteButton.bounds.Contains(cursor))
         {
             Game1.playSound("drumkit6");
             var searchText = string.Empty;
@@ -122,7 +123,7 @@ internal sealed class SortMenu : SearchMenu
             return true;
         }
 
-        if (this.okButton.containsPoint(x, y))
+        if (this.okButton.bounds.Contains(cursor))
         {
             Game1.playSound("bigDeSelect");
             this.exitThisMenuNoSound();

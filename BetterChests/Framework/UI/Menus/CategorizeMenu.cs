@@ -107,9 +107,9 @@ internal sealed class CategorizeMenu : SearchMenu
         this.savedExpression is null || this.savedExpression.Equals(item);
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(int x, int y)
+    protected override bool TryLeftClick(Point cursor)
     {
-        if (this.saveButton.containsPoint(x, y) && this.readyToClose())
+        if (this.saveButton.bounds.Contains(cursor) && this.readyToClose())
         {
             Game1.playSound("drumkit6");
             this.savedExpression = this.Expression.DeepClone();
@@ -121,7 +121,7 @@ internal sealed class CategorizeMenu : SearchMenu
             return true;
         }
 
-        if (this.stackToggle.containsPoint(x, y))
+        if (this.stackToggle.bounds.Contains(cursor))
         {
             Game1.playSound("drumkit6");
             if (this.stackToggle.texture.Equals(Game1.mouseCursors))
@@ -136,14 +136,14 @@ internal sealed class CategorizeMenu : SearchMenu
             return true;
         }
 
-        if (this.copyButton.containsPoint(x, y))
+        if (this.copyButton.bounds.Contains(cursor))
         {
             Game1.playSound("drumkit6");
             DesktopClipboard.SetText(this.SearchText);
             return true;
         }
 
-        if (this.pasteButton.containsPoint(x, y))
+        if (this.pasteButton.bounds.Contains(cursor))
         {
             Game1.playSound("drumkit6");
             var searchText = string.Empty;
@@ -152,7 +152,7 @@ internal sealed class CategorizeMenu : SearchMenu
             return true;
         }
 
-        if (this.okButton.containsPoint(x, y))
+        if (this.okButton.bounds.Contains(cursor))
         {
             Game1.playSound("bigDeSelect");
             this.exitThisMenuNoSound();

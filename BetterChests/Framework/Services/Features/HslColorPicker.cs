@@ -187,9 +187,8 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if ((this.menuHandler.CurrentMenu as ItemGrabMenu)?.colorPickerToggleButton.containsPoint(mouseX, mouseY)
-            == true)
+        var cursor = e.Cursor.GetScaledScreenPixels().ToPoint();
+        if ((this.menuHandler.CurrentMenu as ItemGrabMenu)?.colorPickerToggleButton.bounds.Contains(cursor) == true)
         {
             this.inputHelper.Suppress(e.Button);
             Game1.playSound("drumkit6");
@@ -205,8 +204,8 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
 
         switch (e.Button)
         {
-            case SButton.MouseLeft or SButton.ControllerA when this.colorPicker.Value.LeftClick(mouseX, mouseY):
-            case SButton.MouseRight or SButton.ControllerX when this.colorPicker.Value.RightClick(mouseX, mouseY):
+            case SButton.MouseLeft or SButton.ControllerA when this.colorPicker.Value.LeftClick(cursor):
+            case SButton.MouseRight or SButton.ControllerX when this.colorPicker.Value.RightClick(cursor):
                 this.inputHelper.Suppress(e.Button);
                 Game1.playSound("coin");
                 break;
@@ -260,6 +259,7 @@ internal sealed class HslColorPicker : BaseFeature<HslColorPicker>
             return;
         }
 
-        this.colorPicker.Value.Draw(e.SpriteBatch);
+        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        this.colorPicker.Value.Draw(e.SpriteBatch, cursor);
     }
 }

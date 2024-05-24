@@ -86,15 +86,14 @@ internal sealed class MenuManager
 
     /// <summary>Draws overlay components to the SpriteBatch.</summary>
     /// <param name="spriteBatch">The SpriteBatch used to draw the game object.</param>
-    public void Draw(SpriteBatch spriteBatch)
+    /// <param name="cursor">The mouse position.</param>
+    public void Draw(SpriteBatch spriteBatch, Point cursor)
     {
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-
-        this.UpArrow.scale = this.UpArrow.containsPoint(mouseX, mouseY)
+        this.UpArrow.scale = this.UpArrow.bounds.Contains(cursor)
             ? Math.Min(Game1.pixelZoom * 1.1f, this.UpArrow.scale + 0.05f)
             : Math.Max(Game1.pixelZoom, this.UpArrow.scale - 0.05f);
 
-        this.DownArrow.scale = this.DownArrow.containsPoint(mouseX, mouseY)
+        this.DownArrow.scale = this.DownArrow.bounds.Contains(cursor)
             ? Math.Min(Game1.pixelZoom * 1.1f, this.DownArrow.scale + 0.05f)
             : Math.Max(Game1.pixelZoom, this.DownArrow.scale - 0.05f);
 
@@ -250,14 +249,14 @@ internal sealed class MenuManager
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (this.scrolled > 0 && this.UpArrow.containsPoint(mouseX, mouseY))
+        var cursor = e.Cursor.GetScaledScreenPixels();
+        if (this.scrolled > 0 && this.UpArrow.bounds.Contains(cursor))
         {
             this.scrolled--;
             this.inputHelper.Suppress(e.Button);
         }
 
-        if (this.scrolled < this.maxScroll && this.DownArrow.containsPoint(mouseX, mouseY))
+        if (this.scrolled < this.maxScroll && this.DownArrow.bounds.Contains(cursor))
         {
             this.scrolled++;
             this.inputHelper.Suppress(e.Button);
@@ -266,8 +265,8 @@ internal sealed class MenuManager
 
     private void OnButtonsChanged(ButtonsChangedEventArgs e)
     {
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (this.InventoryMenu?.isWithinBounds(mouseX, mouseY) != true)
+        var cursor = e.Cursor.GetScaledScreenPixels().ToPoint();
+        if (this.InventoryMenu?.isWithinBounds(cursor.X, cursor.Y) != true)
         {
             return;
         }
@@ -307,8 +306,8 @@ internal sealed class MenuManager
 
     private void OnMouseWheelScrolled(MouseWheelScrolledEventArgs e)
     {
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (this.InventoryMenu?.isWithinBounds(mouseX, mouseY) != true)
+        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        if (this.InventoryMenu?.isWithinBounds(cursor.X, cursor.Y) != true)
         {
             return;
         }

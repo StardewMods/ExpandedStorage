@@ -196,15 +196,13 @@ internal sealed class HslPicker
 
     /// <summary>Draw the color picker.</summary>
     /// <param name="spriteBatch">The sprite batch used for drawing.</param>
-    public void Draw(SpriteBatch spriteBatch)
+    /// <param name="cursor">The mouse position.</param>
+    public void Draw(SpriteBatch spriteBatch, Point cursor)
     {
-        // Get Input states
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-
         // Update components
-        this.hue.Update(mouseX, mouseY);
-        this.saturation.Update(mouseX, mouseY);
-        this.lightness.Update(mouseX, mouseY);
+        this.hue.Update(cursor);
+        this.saturation.Update(cursor);
+        this.lightness.Update(cursor);
 
         // Background
         IClickableMenu.drawTextureBox(
@@ -247,7 +245,7 @@ internal sealed class HslPicker
         }
 
         // Chest
-        var hovering = this.chestComponent.containsPoint(mouseX, mouseY);
+        var hovering = this.chestComponent.bounds.Contains(cursor);
         if (hovering != this.hoverChest)
         {
             this.lidFrameCount = 0;
@@ -284,17 +282,16 @@ internal sealed class HslPicker
     }
 
     /// <summary>Performs a left-click action based on the given mouse coordinates.</summary>
-    /// <param name="mouseX">The x-coordinate of the mouse.</param>
-    /// <param name="mouseY">The y-coordinate of the mouse.</param>
+    /// <param name="cursor">The mouse position.</param>
     /// <returns><c>true</c> if the left-click action was successfully performed; otherwise, <c>false</c>.</returns>
-    public bool LeftClick(int mouseX, int mouseY)
+    public bool LeftClick(Point cursor)
     {
         if (this.holding is not null)
         {
             return false;
         }
 
-        if (this.defaultColorArea.Contains(mouseX, mouseY))
+        if (this.defaultColorArea.Contains(cursor))
         {
             this.CurrentColor = HslPicker.Transparent;
             this.colorPicker.colorSelection = 0;
@@ -302,25 +299,25 @@ internal sealed class HslPicker
             return true;
         }
 
-        if (this.copyComponent.bounds.Contains(mouseX, mouseY))
+        if (this.copyComponent.bounds.Contains(cursor))
         {
             DesktopClipboard.SetText(this.colorPicker.colorSelection.ToString(CultureInfo.InvariantCulture));
             return true;
         }
 
-        if (this.hue.LeftClick(mouseX, mouseY))
+        if (this.hue.LeftClick(cursor))
         {
             this.holding = this.hue;
             return true;
         }
 
-        if (this.saturation.LeftClick(mouseX, mouseY))
+        if (this.saturation.LeftClick(cursor))
         {
             this.holding = this.saturation;
             return true;
         }
 
-        if (this.lightness.LeftClick(mouseX, mouseY))
+        if (this.lightness.LeftClick(cursor))
         {
             this.holding = this.lightness;
             return true;
@@ -330,17 +327,16 @@ internal sealed class HslPicker
     }
 
     /// <summary>Performs a right-click action based on the given mouse coordinates.</summary>
-    /// <param name="mouseX">The x-coordinate of the mouse.</param>
-    /// <param name="mouseY">The y-coordinate of the mouse.</param>
+    /// <param name="cursor">The mouse position.</param>
     /// <returns><c>true</c> if the right-click action was successfully performed; otherwise, <c>false</c>.</returns>
-    public bool RightClick(int mouseX, int mouseY)
+    public bool RightClick(Point cursor)
     {
         if (this.holding is not null)
         {
             return false;
         }
 
-        if (this.copyComponent.bounds.Contains(mouseX, mouseY))
+        if (this.copyComponent.bounds.Contains(cursor))
         {
             var textColor = string.Empty;
             DesktopClipboard.GetText(ref textColor);

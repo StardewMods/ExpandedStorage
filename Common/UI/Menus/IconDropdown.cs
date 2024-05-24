@@ -1,6 +1,7 @@
 #if IS_FAUXCORE
 namespace StardewMods.FauxCore.Common.UI.Menus;
 
+using Microsoft.Xna.Framework;
 using StardewMods.FauxCore.Common.Helpers;
 using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
@@ -8,6 +9,7 @@ using StardewValley.Menus;
 #else
 namespace StardewMods.Common.UI.Menus;
 
+using Microsoft.Xna.Framework;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
@@ -54,16 +56,16 @@ internal sealed class IconDropdown : BaseMenu
 
         selectIcon.SelectionChanged += this.OnSelectionChanged;
         this.AddSubMenu(selectIcon);
-        this.Resize(selectIcon.width + 16, selectIcon.height + 16);
-        this.MoveTo(anchor.bounds.Left, anchor.bounds.Bottom);
+        this.Resize(new Point(selectIcon.width + 16, selectIcon.height + 16));
+        this.MoveTo(new Point(anchor.bounds.Left, anchor.bounds.Bottom));
         if (this.xPositionOnScreen + this.width > Game1.uiViewport.Width)
         {
-            this.MoveTo(anchor.bounds.Right - this.width, this.yPositionOnScreen);
+            this.MoveTo(new Point(anchor.bounds.Right - this.width, this.yPositionOnScreen));
         }
 
         if (this.yPositionOnScreen + this.height > Game1.uiViewport.Height)
         {
-            this.MoveTo(this.xPositionOnScreen, anchor.bounds.Top - this.height + 16);
+            this.MoveTo(new Point(this.xPositionOnScreen, anchor.bounds.Top - this.height + 16));
         }
     }
 
@@ -75,7 +77,7 @@ internal sealed class IconDropdown : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(int x, int y)
+    protected override bool TryLeftClick(Point cursor)
     {
         this.exitThisMenuNoSound();
         return false;

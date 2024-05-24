@@ -1,8 +1,8 @@
 namespace StardewMods.BetterChests.Framework.UI.Menus;
 
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Components;
@@ -12,7 +12,7 @@ using StardewValley.Menus;
 /// <summary>A menu for editing search.</summary>
 internal class SearchMenu : BaseMenu
 {
-    private readonly ExpressionEditor expressionEditor;
+    private readonly ExpressionEditorNew expressionEditor;
     private readonly IExpressionHandler expressionHandler;
     private readonly InventoryMenu inventory;
     private readonly VerticalScrollBar scrollInventory;
@@ -37,7 +37,23 @@ internal class SearchMenu : BaseMenu
         : base(inputHelper)
     {
         this.expressionHandler = expressionHandler;
-        this.expressionEditor = new ExpressionEditor(
+
+        // this.expressionEditor = new ExpressionEditor(
+        //     this.expressionHandler,
+        //     iconRegistry,
+        //     inputHelper,
+        //     reflectionHelper,
+        //     () => this.SearchText!,
+        //     value => this.SetSearchText(value),
+        //     this.xPositionOnScreen + IClickableMenu.borderWidth,
+        //     this.yPositionOnScreen
+        //     + IClickableMenu.spaceToClearSideBorder
+        //     + (IClickableMenu.borderWidth / 2)
+        //     + (Game1.tileSize * 2)
+        //     + 12,
+        //     340,
+        //     448);
+        this.expressionEditor = new ExpressionEditorNew(
             this.expressionHandler,
             iconRegistry,
             inputHelper,
@@ -127,7 +143,7 @@ internal class SearchMenu : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override void Draw(SpriteBatch spriteBatch)
+    protected override void Draw(SpriteBatch spriteBatch, Point cursor)
     {
         this.drawHorizontalPartition(
             spriteBatch,
@@ -140,10 +156,9 @@ internal class SearchMenu : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override void DrawOver(SpriteBatch spriteBatch)
+    protected override void DrawOver(SpriteBatch spriteBatch, Point cursor)
     {
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        var item = this.inventory.hover(mouseX, mouseY, null);
+        var item = this.inventory.hover(cursor.X, cursor.Y, null);
         if (item is not null)
         {
             IClickableMenu.drawToolTip(
@@ -153,7 +168,7 @@ internal class SearchMenu : BaseMenu
                 item);
         }
 
-        base.DrawOver(spriteBatch);
+        base.DrawOver(spriteBatch, cursor);
     }
 
     /// <summary>Get the items that should be displayed in the menu.</summary>
@@ -207,7 +222,7 @@ internal class SearchMenu : BaseMenu
     /// <inheritdoc />
     protected override bool TryScroll(int direction)
     {
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        return this.inventory.isWithinBounds(mouseX, mouseY) && this.scrollInventory.TryScroll(direction);
+        var cursor = this.Input.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        return this.inventory.isWithinBounds(cursor.X, cursor.Y) && this.scrollInventory.TryScroll(direction);
     }
 }

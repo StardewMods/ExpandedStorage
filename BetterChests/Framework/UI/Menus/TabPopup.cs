@@ -1,4 +1,4 @@
-namespace StardewMods.BetterChests.Framework.UI.Components;
+namespace StardewMods.BetterChests.Framework.UI.Menus;
 
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Menus;

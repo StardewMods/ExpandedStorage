@@ -130,11 +130,11 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        var cursor = e.Cursor.GetScaledScreenPixels();
         IStorageContainer? container = null;
         ClickableComponent? icon = null;
         if (this.menuHandler.Top.Container?.ConfigureChest is FeatureOption.Enabled
-            && this.menuHandler.Top.Icon?.containsPoint(mouseX, mouseY) == true)
+            && this.menuHandler.Top.Icon?.bounds.Contains(cursor) == true)
         {
             container = this.menuHandler.Top.Container;
             icon = this.menuHandler.Top.Icon;
@@ -142,7 +142,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
         if (container is null
             && this.menuHandler.Bottom.Container?.ConfigureChest is FeatureOption.Enabled
-            && this.menuHandler.Bottom.Icon?.containsPoint(mouseX, mouseY) == true)
+            && this.menuHandler.Bottom.Icon?.bounds.Contains(cursor) == true)
         {
             container = this.menuHandler.Bottom.Container;
             icon = this.menuHandler.Bottom.Icon;

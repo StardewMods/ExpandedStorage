@@ -102,8 +102,8 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (this.currentContainer.Value.containsPoint(mouseX, mouseY))
+        var cursor = e.Cursor.GetScaledScreenPixels();
+        if (this.currentContainer.Value.bounds.Contains(cursor))
         {
             this.inputHelper.Suppress(e.Button);
             this.isActive.Value = !this.isActive.Value;
@@ -136,7 +136,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         {
             // Do nothing
         }
-        else if (this.LeftArrow.containsPoint(mouseX, mouseY))
+        else if (this.LeftArrow.bounds.Contains(cursor))
         {
             this.inputHelper.Suppress(e.Button);
             this.isActive.Value = !this.isActive.Value;
@@ -150,7 +150,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             previousContainer?.ShowMenu();
             return;
         }
-        else if (this.RightArrow.containsPoint(mouseX, mouseY))
+        else if (this.RightArrow.bounds.Contains(cursor))
         {
             this.inputHelper.Suppress(e.Button);
             this.isActive.Value = !this.isActive.Value;
@@ -165,14 +165,14 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             return;
         }
 
-        if (!this.bounds.Value.Contains(mouseX, mouseY) || !this.isActive.Value)
+        if (!this.bounds.Value.Contains(cursor) || !this.isActive.Value)
         {
             this.isActive.Value = false;
             return;
         }
 
         this.inputHelper.Suppress(e.Button);
-        var item = this.items.Value.FirstOrDefault(i => i.bounds.Contains(mouseX, mouseY));
+        var item = this.items.Value.FirstOrDefault(i => i.bounds.Contains(cursor));
         if (item is null)
         {
             return;
@@ -279,8 +279,8 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (!this.bounds.Value.Contains(mouseX, mouseY))
+        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels();
+        if (!this.bounds.Value.Contains(cursor))
         {
             return;
         }
@@ -309,7 +309,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels();
 
         // Draw current container index
         if (this.menuHandler.Top.Container is not null && this.Config.AccessChestsShowArrows)
@@ -334,11 +334,11 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
                     string.Empty,
                     SpriteText.color_White);
 
-                this.LeftArrow.scale = this.LeftArrow.containsPoint(mouseX, mouseY)
+                this.LeftArrow.scale = this.LeftArrow.bounds.Contains(cursor)
                     ? Math.Min(Game1.pixelZoom * 1.1f, this.LeftArrow.scale + 0.05f)
                     : Math.Max(Game1.pixelZoom, this.LeftArrow.scale - 0.05f);
 
-                this.RightArrow.scale = this.RightArrow.containsPoint(mouseX, mouseY)
+                this.RightArrow.scale = this.RightArrow.bounds.Contains(cursor)
                     ? Math.Min(Game1.pixelZoom * 1.1f, this.RightArrow.scale + 0.05f)
                     : Math.Max(Game1.pixelZoom, this.RightArrow.scale - 0.05f);
 
@@ -407,7 +407,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
                 continue;
             }
 
-            if (item.bounds.Contains(mouseX, mouseY))
+            if (item.bounds.Contains(cursor))
             {
                 e.SpriteBatch.Draw(
                     Game1.staminaRect,

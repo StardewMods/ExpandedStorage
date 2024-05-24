@@ -3,7 +3,7 @@ namespace StardewMods.FauxCore.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewMods.FauxCore.Common.Interfaces;
+using StardewMods.FauxCore.Common.Interfaces.UI;
 using StardewValley.Menus;
 
 #else
@@ -11,7 +11,7 @@ namespace StardewMods.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
-using StardewMods.Common.Interfaces;
+using StardewMods.Common.Interfaces.UI;
 using StardewValley.Menus;
 #endif
 
@@ -30,50 +30,32 @@ internal abstract class BaseComponent : ClickableComponent, ICustomComponent
         this.Input = inputHelper;
 
     /// <inheritdoc />
-    public virtual ClickableComponent Component => this;
-
-    /// <inheritdoc />
     public virtual string? HoverText => null;
 
     /// <inheritdoc />
-    public virtual bool Visible
-    {
-        get => this.Component.visible;
-        set => this.Component.visible = value;
-    }
+    public Point Position => this.bounds.Location;
 
     /// <summary>Gets the input helper.</summary>
     protected IInputHelper Input { get; }
 
     /// <inheritdoc />
-    public virtual bool Contains(Vector2 position) => this.Component.containsPoint((int)position.X, (int)position.Y);
+    public abstract void Draw(SpriteBatch spriteBatch, Point cursor, Point offset);
 
     /// <inheritdoc />
-    public abstract void Draw(SpriteBatch spriteBatch);
+    public virtual void MoveTo(Point cursor) => this.bounds.Location = cursor;
 
     /// <inheritdoc />
-    public virtual void MoveTo(int x, int y)
-    {
-        this.bounds.X = x;
-        this.bounds.Y = y;
-    }
+    public virtual void Resize(Point dimensions) => this.bounds.Size = dimensions;
 
     /// <inheritdoc />
-    public virtual void Resize(int width, int height)
-    {
-        this.bounds.Width = width;
-        this.bounds.Height = height;
-    }
+    public virtual bool TryLeftClick(Point cursor) => false;
 
     /// <inheritdoc />
-    public virtual bool TryLeftClick(int x, int y) => false;
-
-    /// <inheritdoc />
-    public virtual bool TryRightClick(int x, int y) => false;
+    public virtual bool TryRightClick(Point cursor) => false;
 
     /// <inheritdoc />
     public virtual bool TryScroll(int direction) => false;
 
     /// <inheritdoc />
-    public virtual void Update(int x, int y) { }
+    public virtual void Update(Point cursor) { }
 }

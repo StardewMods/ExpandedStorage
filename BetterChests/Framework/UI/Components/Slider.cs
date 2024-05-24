@@ -112,28 +112,26 @@ internal sealed class Slider
     }
 
     /// <summary>Performs a left click at the specified coordinates on the screen.</summary>
-    /// <param name="mouseX">The X-coordinate of the mouse click.</param>
-    /// <param name="mouseY">The Y-coordinate of the mouse click.</param>
+    /// <param name="cursor">The mouse position.</param>
     /// <returns><c>true</c> if the area was clicked; otherwise, <c>false</c>.</returns>
-    public bool LeftClick(int mouseX, int mouseY)
+    public bool LeftClick(Point cursor)
     {
-        this.Holding = this.area.Contains(mouseX, mouseY);
+        this.Holding = this.area.Contains(cursor);
         return this.Holding;
     }
 
     /// <summary>Updates the slider based on the mouse position.</summary>
-    /// <param name="mouseX">The x-coordinate of the mouse position.</param>
-    /// <param name="mouseY">The y-coordinate of the mouse position.</param>
-    public void Update(int mouseX, int mouseY)
+    /// <param name="cursor">The mouse position.</param>
+    public void Update(Point cursor)
     {
-        var newSelection = this.Holding ? this.GetSelected(mouseY) : this.GetSelected();
+        var newSelection = this.Holding ? this.GetSelected(cursor.Y) : this.GetSelected();
         if (this.selected != newSelection)
         {
             this.selected = newSelection;
 
             if (this.Holding)
             {
-                this.setMethod(mouseY.Remap(this.track, Slider.Unit));
+                this.setMethod(cursor.Y.Remap(this.track, Slider.Unit));
             }
         }
 

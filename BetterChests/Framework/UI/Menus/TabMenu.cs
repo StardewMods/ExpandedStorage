@@ -1,5 +1,6 @@
 namespace StardewMods.BetterChests.Framework.UI.Menus;
 
+using Microsoft.Xna.Framework;
 using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models;
@@ -157,9 +158,9 @@ internal sealed class TabMenu : SearchMenu
     protected override bool HighlightMethod(Item item) => true;
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(int x, int y)
+    protected override bool TryLeftClick(Point cursor)
     {
-        if (this.saveButton.containsPoint(x, y) && this.readyToClose())
+        if (this.saveButton.bounds.Contains(cursor) && this.readyToClose())
         {
             Game1.playSound("drumkit6");
             if (this.activeTab is not null)
@@ -170,14 +171,14 @@ internal sealed class TabMenu : SearchMenu
             return true;
         }
 
-        if (this.copyButton.containsPoint(x, y))
+        if (this.copyButton.bounds.Contains(cursor))
         {
             Game1.playSound("drumkit6");
             DesktopClipboard.SetText(this.SearchText);
             return true;
         }
 
-        if (this.pasteButton.containsPoint(x, y))
+        if (this.pasteButton.bounds.Contains(cursor))
         {
             Game1.playSound("drumkit6");
             var searchText = string.Empty;
@@ -186,7 +187,7 @@ internal sealed class TabMenu : SearchMenu
             return true;
         }
 
-        if (this.addButton.containsPoint(x, y))
+        if (this.addButton.bounds.Contains(cursor))
         {
             Game1.playSound("drumkit6");
             var tabData = new TabData
@@ -218,7 +219,7 @@ internal sealed class TabMenu : SearchMenu
             return true;
         }
 
-        if (this.removeButton.containsPoint(x, y))
+        if (this.removeButton.bounds.Contains(cursor))
         {
             Game1.playSound("drumkit6");
             if (this.activeTab is not null)
@@ -235,8 +236,8 @@ internal sealed class TabMenu : SearchMenu
                     var currentY = current.bounds.Y;
                     var nextY = next.bounds.Y;
 
-                    current.MoveTo(current.bounds.X, nextY);
-                    next.MoveTo(next.bounds.X, currentY);
+                    current.MoveTo(new Point(current.bounds.X, nextY));
+                    next.MoveTo(new Point(next.bounds.X, currentY));
 
                     (this.allClickableComponents[index], this.allClickableComponents[index + 1]) = (
                         this.allClickableComponents[index + 1], this.allClickableComponents[index]);
@@ -249,7 +250,7 @@ internal sealed class TabMenu : SearchMenu
             return true;
         }
 
-        if (this.okButton.containsPoint(x, y))
+        if (this.okButton.bounds.Contains(cursor))
         {
             Game1.playSound("bigDeSelect");
             this.exitThisMenuNoSound();
@@ -294,8 +295,8 @@ internal sealed class TabMenu : SearchMenu
         var currentY = current.bounds.Y;
         var nextY = next.bounds.Y;
 
-        current.MoveTo(current.bounds.X, nextY);
-        next.MoveTo(next.bounds.X, currentY);
+        current.MoveTo(new Point(current.bounds.X, nextY));
+        next.MoveTo(new Point(next.bounds.X, currentY));
 
         (this.allClickableComponents[index], this.allClickableComponents[index + 1]) = (
             this.allClickableComponents[index + 1], this.allClickableComponents[index]);
@@ -323,8 +324,8 @@ internal sealed class TabMenu : SearchMenu
         var currentY = current.bounds.Y;
         var previousY = previous.bounds.Y;
 
-        current.MoveTo(current.bounds.X, previousY);
-        previous.MoveTo(previous.bounds.X, currentY);
+        current.MoveTo(new Point(current.bounds.X, previousY));
+        previous.MoveTo(new Point(previous.bounds.X, currentY));
 
         (this.allClickableComponents[index], this.allClickableComponents[index - 1]) = (
             this.allClickableComponents[index - 1], this.allClickableComponents[index]);

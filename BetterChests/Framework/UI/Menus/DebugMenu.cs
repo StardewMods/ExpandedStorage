@@ -53,17 +53,15 @@ internal sealed class DebugMenu : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override void Draw(SpriteBatch spriteBatch)
+    protected override void Draw(SpriteBatch spriteBatch, Point cursor)
     {
         var hoverText = string.Empty;
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-
         for (var i = 0; i < this.items.Count; i++)
         {
             var item = this.items[i];
             var area = this.areas[i];
-            spriteBatch.DrawString(Game1.smallFont, item, new Vector2(area.X, area.Y), Game1.textColor);
-            if (area.Contains(mouseX, mouseY))
+            spriteBatch.DrawString(Game1.smallFont, item, area.Location.ToVector2(), Game1.textColor);
+            if (area.Contains(cursor))
             {
                 hoverText = this.descriptions[i];
             }
@@ -79,13 +77,13 @@ internal sealed class DebugMenu : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(int x, int y)
+    protected override bool TryLeftClick(Point cursor)
     {
         for (var i = 0; i < this.items.Count; i++)
         {
             var item = this.items[i];
             var area = this.areas[i];
-            if (area.Contains(x, y))
+            if (area.Contains(cursor))
             {
                 switch (item)
                 {

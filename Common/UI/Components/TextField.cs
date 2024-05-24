@@ -1,12 +1,17 @@
 #if IS_FAUXCORE
 namespace StardewMods.FauxCore.Common.UI.Components;
-#else
-namespace StardewMods.Common.UI.Components;
-#endif
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
+
+#else
+namespace StardewMods.Common.UI.Components;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using StardewValley.Menus;
+#endif
 
 /// <summary>Represents a search overlay control that allows the user to input text.</summary>
 internal sealed class TextField : BaseComponent
@@ -14,7 +19,6 @@ internal sealed class TextField : BaseComponent
     private const int CountdownTimer = 20;
 
     private readonly Func<string> getMethod;
-    private readonly ClickableTextureComponent icon;
     private readonly Action<string> setMethod;
     private readonly TextBox textBox;
     private string previousText;
@@ -50,12 +54,6 @@ internal sealed class TextField : BaseComponent
             limitWidth = false,
             Text = this.previousText,
         };
-
-        this.icon = new ClickableTextureComponent(
-            new Rectangle(this.bounds.X + this.textBox.Width - 38, this.bounds.Y + 6, 32, 32),
-            Game1.mouseCursors,
-            new Rectangle(80, 0, 13, 13),
-            2.5f);
     }
 
     /// <summary>Gets or sets a value indicating whether the search bar is currently selected.</summary>
@@ -71,24 +69,28 @@ internal sealed class TextField : BaseComponent
         set => this.setMethod(value);
     }
 
-    /// <summary>Draws the search overlay to the screen.</summary>
-    /// <param name="spriteBatch">The SpriteBatch used for drawing.</param>
-    public override void Draw(SpriteBatch spriteBatch) => this.textBox.Draw(spriteBatch, false);
+    /// <inheritdoc />
+    public override void Draw(SpriteBatch spriteBatch, Point cursor, Point offset)
+    {
+        this.textBox.X = this.bounds.X + offset.X;
+        this.textBox.Y = this.bounds.Y + offset.Y;
+        this.textBox.Draw(spriteBatch, false);
+    }
 
     /// <summary>Reset the value of the text box.</summary>
     public void Reset() => this.textBox.Text = this.Text;
 
     /// <inheritdoc />
-    public override bool TryLeftClick(int mouseX, int mouseY)
+    public override bool TryLeftClick(Point cursor)
     {
-        this.Selected = this.bounds.Contains(mouseX, mouseY);
+        this.Selected = this.bounds.Contains(cursor);
         return this.Selected;
     }
 
     /// <inheritdoc />
-    public override bool TryRightClick(int mouseX, int mouseY)
+    public override bool TryRightClick(Point cursor)
     {
-        if (!this.bounds.Contains(mouseX, mouseY))
+        if (!this.bounds.Contains(cursor))
         {
             this.Selected = false;
             return false;
@@ -99,12 +101,10 @@ internal sealed class TextField : BaseComponent
         return this.Selected;
     }
 
-    /// <summary>Updates the search bar based on the mouse position.</summary>
-    /// <param name="mouseX">The x-coordinate of the mouse position.</param>
-    /// <param name="mouseY">The y-coordinate of the mouse position.</param>
-    public override void Update(int mouseX, int mouseY)
+    /// <inheritdoc />
+    public override void Update(Point cursor)
     {
-        this.textBox.Hover(mouseX, mouseY);
+        this.textBox.Hover(cursor.X, cursor.Y);
         if (this.timeout > 0 && --this.timeout == 0 && this.Text != this.textBox.Text)
         {
             this.Text = this.textBox.Text;

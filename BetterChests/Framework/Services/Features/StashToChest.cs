@@ -122,8 +122,8 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (!itemGrabMenu.fillStacksButton.containsPoint(mouseX, mouseY))
+        var cursor = e.Cursor.GetScaledScreenPixels();
+        if (!itemGrabMenu.fillStacksButton.bounds.Contains(cursor))
         {
             return;
         }
@@ -191,9 +191,8 @@ internal sealed class StashToChest : BaseFeature<StashToChest>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (!this.Config.Controls.TransferItems.IsDown()
-            || !itemGrabMenu.fillStacksButton.containsPoint(mouseX, mouseY))
+        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels();
+        if (!this.Config.Controls.TransferItems.IsDown() || !itemGrabMenu.fillStacksButton.bounds.Contains(cursor))
         {
             itemGrabMenu.fillStacksButton.texture = Game1.mouseCursors;
             itemGrabMenu.fillStacksButton.sourceRect = new Rectangle(103, 469, 16, 16);

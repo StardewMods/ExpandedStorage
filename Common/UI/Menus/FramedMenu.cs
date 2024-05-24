@@ -17,9 +17,10 @@ using StardewMods.Common.UI.Components;
 internal abstract class FramedMenu : BaseMenu
 {
     private readonly IReflectionHelper reflectionHelper;
+    private readonly VerticalScrollBar scrollBar;
 
-    private int maxOffset;
-    private int offset;
+    private Point maxOffset;
+    private Point offset;
 
     /// <summary>Initializes a new instance of the <see cref="FramedMenu" /> class.</summary>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
@@ -40,92 +41,92 @@ internal abstract class FramedMenu : BaseMenu
         : base(inputHelper, x, y, width, height, showUpperRightCloseButton)
     {
         this.reflectionHelper = reflectionHelper;
-        this.ScrollBar = new VerticalScrollBar(
+        this.maxOffset = new Point(-1, -1);
+        this.scrollBar = new VerticalScrollBar(
             this.Input,
             this.xPositionOnScreen + this.width + 4,
             this.yPositionOnScreen + 4,
             this.height,
-            () => this.Offset,
+            () => this.offset.Y,
             value =>
             {
-                this.Offset = value;
+                this.offset.Y = value;
             },
             () => 0,
-            () => this.MaxOffset,
+            () => this.MaxOffset.Y,
             () => this.StepSize);
-
-        this.allClickableComponents.Add(this.ScrollBar);
     }
 
     /// <summary>Gets or sets the maximum offset.</summary>
-    public int MaxOffset
+    public Point MaxOffset
     {
         get => this.maxOffset;
         protected set
         {
-            this.maxOffset = value;
-            this.ScrollBar.visible = this.maxOffset > -1;
+            this.maxOffset.X = Math.Max(-1, value.X);
+            this.maxOffset.Y = Math.Max(-1, value.Y);
+            this.scrollBar.visible = this.maxOffset.Y > -1;
         }
     }
 
     /// <summary>Gets or sets the y-offset.</summary>
-    public int Offset
+    public Point Offset
     {
         get => this.offset;
-        set => this.offset = Math.Min(this.MaxOffset, Math.Max(0, value));
+        set
+        {
+            this.offset.X = Math.Min(this.maxOffset.X, Math.Max(0, value.X));
+            this.offset.Y = Math.Min(this.maxOffset.Y, Math.Max(0, value.Y));
+        }
     }
 
     /// <summary>Gets the frame.</summary>
-    protected virtual Rectangle Frame { get; } = Rectangle.Empty;
-
-    /// <summary>Gets the scrollbar.</summary>
-    protected VerticalScrollBar ScrollBar { get; }
+    protected virtual Rectangle Frame => this.Bounds;
 
     /// <summary>Gets the step size for scrolling.</summary>
     protected virtual int StepSize => 1;
 
     /// <inheritdoc />
-    public override void MoveTo(int x, int y)
+    public override void MoveTo(Point position)
     {
-        base.MoveTo(x, y);
-        this.ScrollBar.MoveTo(this.xPositionOnScreen + this.width + 4, this.yPositionOnScreen + 4);
+        base.MoveTo(position);
+        this.scrollBar.MoveTo(new Point(this.xPositionOnScreen + this.width + 4, this.yPositionOnScreen + 4));
     }
 
     /// <inheritdoc />
-    public override void Resize(int newWidth, int newHeight)
+    public override void Resize(Point dimensions)
     {
-        base.Resize(newWidth, newHeight);
-        this.ScrollBar.Resize(0, this.height);
-        this.ScrollBar.MoveTo(this.xPositionOnScreen + this.width + 4, this.yPositionOnScreen + 4);
+        base.Resize(dimensions);
+        this.scrollBar.Resize(new Point(0, dimensions.Y));
+        this.scrollBar.MoveTo(new Point(this.Bounds.Right + 4, this.Bounds.Top + 4));
     }
 
-    /// <summary>Draws the specified render action within a specified area of the screen.</summary>
-    /// <param name="b">The SpriteBatch used for drawing.</param>
-    /// <param name="mode">The SpriteSortMode used for drawing.</param>
-    /// <param name="render">The action containing the rendering code.</param>
-    protected void DrawInFrame(SpriteBatch b, SpriteSortMode mode, Action render)
+    /// <inheritdoc />
+    protected sealed override void Draw(SpriteBatch spriteBatch, Point cursor)
     {
-        var sortModeReflected = this.reflectionHelper.GetField<SpriteSortMode>(b, "_sortMode", false);
-        var sortModeOriginal = sortModeReflected?.GetValue() ?? mode;
+        var sortModeReflected = this.reflectionHelper.GetField<SpriteSortMode>(spriteBatch, "_sortMode", false);
+        var sortModeOriginal = sortModeReflected?.GetValue() ?? SpriteSortMode.Deferred;
 
-        var blendStateReflected = this.reflectionHelper.GetField<BlendState>(b, "_blendState", false);
+        var blendStateReflected = this.reflectionHelper.GetField<BlendState>(spriteBatch, "_blendState", false);
         var blendStateOriginal = blendStateReflected?.GetValue();
 
-        var samplerStateReflected = this.reflectionHelper.GetField<SamplerState>(b, "_samplerState", false);
+        var samplerStateReflected = this.reflectionHelper.GetField<SamplerState>(spriteBatch, "_samplerState", false);
         var samplerStateOriginal = samplerStateReflected?.GetValue();
 
         var depthStencilStateReflected =
-            this.reflectionHelper.GetField<DepthStencilState>(b, "_depthStencilState", false);
+            this.reflectionHelper.GetField<DepthStencilState>(spriteBatch, "_depthStencilState", false);
 
         var depthStencilStateOriginal = depthStencilStateReflected?.GetValue();
 
-        var rasterizerStateReflected = this.reflectionHelper.GetField<RasterizerState>(b, "_rasterizerState", false);
+        var rasterizerStateReflected =
+            this.reflectionHelper.GetField<RasterizerState>(spriteBatch, "_rasterizerState", false);
+
         var rasterizerStateOriginal = rasterizerStateReflected?.GetValue();
 
-        var effectReflected = this.reflectionHelper.GetField<Effect>(b, "_effect", false);
+        var effectReflected = this.reflectionHelper.GetField<Effect>(spriteBatch, "_effect", false);
         var effectOriginal = effectReflected?.GetValue();
 
-        var scissorOriginal = b.GraphicsDevice.ScissorRectangle;
+        var scissorOriginal = spriteBatch.GraphicsDevice.ScissorRectangle;
 
         var rasterizerState = new RasterizerState { ScissorTestEnable = true };
         if (rasterizerStateOriginal is not null)
@@ -138,27 +139,27 @@ internal abstract class FramedMenu : BaseMenu
             rasterizerState.DepthClipEnable = rasterizerStateOriginal.DepthClipEnable;
         }
 
-        b.End();
+        spriteBatch.End();
 
-        b.Begin(
-            mode,
+        spriteBatch.Begin(
+            SpriteSortMode.Deferred,
             blendStateOriginal,
             samplerStateOriginal,
             depthStencilStateOriginal,
             rasterizerState,
             effectOriginal);
 
-        b.GraphicsDevice.ScissorRectangle = Rectangle.Intersect(this.Frame, scissorOriginal);
+        spriteBatch.GraphicsDevice.ScissorRectangle = Rectangle.Intersect(this.Frame, scissorOriginal);
 
         try
         {
-            render.Invoke();
+            this.DrawInFrame(spriteBatch, cursor);
         }
         finally
         {
-            b.End();
+            spriteBatch.End();
 
-            b.Begin(
+            spriteBatch.Begin(
                 sortModeOriginal,
                 blendStateOriginal,
                 samplerStateOriginal,
@@ -166,7 +167,26 @@ internal abstract class FramedMenu : BaseMenu
                 rasterizerStateOriginal,
                 effectOriginal);
 
-            b.GraphicsDevice.ScissorRectangle = scissorOriginal;
+            spriteBatch.GraphicsDevice.ScissorRectangle = scissorOriginal;
+        }
+
+        if (this.scrollBar.visible)
+        {
+            this.scrollBar.Draw(spriteBatch, cursor, Point.Zero);
         }
     }
+
+    /// <summary>Draws the specified render action within a specified area of the screen.</summary>
+    /// <param name="spriteBatch">The SpriteBatch used for drawing.</param>
+    /// <param name="cursor">The mouse position.</param>
+    protected abstract void DrawInFrame(SpriteBatch spriteBatch, Point cursor);
+
+    /// <inheritdoc />
+    protected override bool TryLeftClick(Point cursor) => this.scrollBar.visible && this.scrollBar.TryLeftClick(cursor);
+
+    /// <inheritdoc />
+    protected override bool TryScroll(int direction) => this.scrollBar.visible && this.scrollBar.TryScroll(direction);
+
+    /// <inheritdoc />
+    protected override void Update(Point cursor) => this.scrollBar.Update(cursor);
 }

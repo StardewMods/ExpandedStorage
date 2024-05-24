@@ -1,5 +1,6 @@
 ﻿namespace StardewMods.BetterChests.Framework.UI.Overlays;
 
+using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Input;
 using StardewMods.Common.UI.Components;
 using StardewMods.Common.UI.Menus;
@@ -38,9 +39,9 @@ internal sealed class SearchOverlay : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(int x, int y)
+    protected override bool TryLeftClick(Point cursor)
     {
-        this.textField.TryLeftClick(x, y);
+        this.textField.TryLeftClick(cursor);
         if (this.textField.Selected)
         {
             return false;
@@ -52,9 +53,9 @@ internal sealed class SearchOverlay : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override bool TryRightClick(int x, int y)
+    protected override bool TryRightClick(Point cursor)
     {
-        this.textField.TryRightClick(x, y);
+        this.textField.TryRightClick(cursor);
         if (this.textField.Selected)
         {
             return false;

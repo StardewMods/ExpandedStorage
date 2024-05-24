@@ -14,6 +14,7 @@ internal sealed class TabEditor : BaseComponent
 {
     private readonly TabData data;
     private readonly ClickableTextureComponent downArrow;
+    private readonly ClickableTextureComponent icon;
     private readonly ClickableTextureComponent upArrow;
 
     private EventHandler<TabClickedEventArgs>? clicked;
@@ -40,9 +41,8 @@ internal sealed class TabEditor : BaseComponent
         : base(inputHelper, x, y, width, Game1.tileSize, tabData.Label)
     {
         this.data = tabData;
-        this.Component = icon.GetComponent(IconStyle.Transparent, x, y);
-        this.Component.name = this.name;
-        this.Component.bounds = this.bounds with
+        this.icon = icon.GetComponent(IconStyle.Transparent, x, y);
+        this.icon.bounds = this.bounds with
         {
             X = this.bounds.X + Game1.tileSize,
             Width = this.bounds.Width - (Game1.tileSize * 2),
@@ -80,9 +80,6 @@ internal sealed class TabEditor : BaseComponent
     }
 
     /// <inheritdoc />
-    public override ClickableComponent Component { get; }
-
-    /// <inheritdoc />
     public override string? HoverText => this.hoverText;
 
     /// <summary>Gets or sets a value indicating whether the tab is currently active.</summary>
@@ -92,13 +89,10 @@ internal sealed class TabEditor : BaseComponent
     public int Index { get; set; }
 
     /// <inheritdoc />
-    public override bool Contains(Vector2 position) => this.bounds.Contains((int)position.X, (int)position.Y);
-
-    /// <inheritdoc />
-    public override void Draw(SpriteBatch spriteBatch)
+    public override void Draw(SpriteBatch spriteBatch, Point cursor, Point offset)
     {
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        var hover = this.bounds.Contains(mouseX, mouseY);
+        cursor -= offset;
+        var hover = this.bounds.Contains(cursor);
         var color = this.Active
             ? Color.White
             : hover
@@ -109,10 +103,10 @@ internal sealed class TabEditor : BaseComponent
         spriteBatch.Draw(
             Game1.mouseCursors,
             new Rectangle(
-                this.Component.bounds.X + 20,
-                this.Component.bounds.Y,
-                this.Component.bounds.Width - 40,
-                this.Component.bounds.Height),
+                this.icon.bounds.X + offset.X + 20,
+                this.icon.bounds.Y + offset.Y,
+                this.icon.bounds.Width - 40,
+                this.icon.bounds.Height),
             new Rectangle(21, 368, 6, 16),
             color,
             0,
@@ -124,9 +118,9 @@ internal sealed class TabEditor : BaseComponent
         spriteBatch.Draw(
             Game1.mouseCursors,
             new Rectangle(
-                this.Component.bounds.X + 20,
-                this.Component.bounds.Y + this.Component.bounds.Height - 20,
-                this.Component.bounds.Width - 40,
+                this.icon.bounds.X + offset.X + 20,
+                this.icon.bounds.Y + this.icon.bounds.Height + offset.Y - 20,
+                this.icon.bounds.Width - 40,
                 20),
             new Rectangle(21, 368, 6, 5),
             color,
@@ -138,7 +132,7 @@ internal sealed class TabEditor : BaseComponent
         // Top-Left
         spriteBatch.Draw(
             Game1.mouseCursors,
-            new Vector2(this.Component.bounds.X, this.Component.bounds.Y),
+            new Vector2(this.icon.bounds.X + offset.X, this.icon.bounds.Y + offset.Y),
             new Rectangle(16, 368, 5, 15),
             color,
             0,
@@ -150,7 +144,7 @@ internal sealed class TabEditor : BaseComponent
         // Bottom-Left
         spriteBatch.Draw(
             Game1.mouseCursors,
-            new Vector2(this.Component.bounds.X, this.Component.bounds.Y + this.Component.bounds.Height - 20),
+            new Vector2(this.icon.bounds.X + offset.X, this.icon.bounds.Y + this.icon.bounds.Height + offset.Y - 20),
             new Rectangle(16, 368, 5, 5),
             color,
             0,
@@ -162,7 +156,7 @@ internal sealed class TabEditor : BaseComponent
         // Top-Right
         spriteBatch.Draw(
             Game1.mouseCursors,
-            new Vector2(this.Component.bounds.Right - 20, this.Component.bounds.Y),
+            new Vector2(this.icon.bounds.Right + offset.X - 20, this.icon.bounds.Y + offset.Y),
             new Rectangle(16, 368, 5, 15),
             color,
             0,
@@ -174,7 +168,9 @@ internal sealed class TabEditor : BaseComponent
         // Bottom-Right
         spriteBatch.Draw(
             Game1.mouseCursors,
-            new Vector2(this.Component.bounds.Right - 20, this.Component.bounds.Y + this.Component.bounds.Height - 20),
+            new Vector2(
+                this.icon.bounds.Right + offset.X - 20,
+                this.icon.bounds.Y + this.icon.bounds.Height + offset.Y - 20),
             new Rectangle(16, 368, 5, 5),
             color,
             0,
@@ -183,22 +179,19 @@ internal sealed class TabEditor : BaseComponent
             SpriteEffects.FlipHorizontally | SpriteEffects.FlipVertically,
             0.5f);
 
-        if (this.Component is ClickableTextureComponent clickableTextureComponent)
+        if (this.Active && hover)
         {
-            if (this.Active && hover)
-            {
-                clickableTextureComponent.tryHover(mouseX, mouseY);
-            }
-
-            clickableTextureComponent.draw(spriteBatch, color, 1f);
+            this.icon.tryHover(cursor.X, cursor.Y);
         }
+
+        this.icon.draw(spriteBatch, color, 1f, 0, offset.X, offset.Y);
 
         spriteBatch.DrawString(
             Game1.smallFont,
-            this.Component.name,
+            this.name,
             new Vector2(
-                this.Component.bounds.X + Game1.tileSize,
-                this.Component.bounds.Y + (IClickableMenu.borderWidth / 2f)),
+                this.icon.bounds.X + Game1.tileSize + offset.X,
+                this.icon.bounds.Y + (IClickableMenu.borderWidth / 2f) + offset.Y),
             this.Active ? Game1.textColor : Game1.unselectedOptionColor);
 
         if (!this.Active)
@@ -206,19 +199,19 @@ internal sealed class TabEditor : BaseComponent
             return;
         }
 
-        this.upArrow.tryHover(mouseX, mouseY);
-        this.downArrow.tryHover(mouseX, mouseY);
+        this.upArrow.tryHover(cursor.X, cursor.Y);
+        this.downArrow.tryHover(cursor.X, cursor.Y);
 
         this.upArrow.draw(spriteBatch, color, 1f);
         this.downArrow.draw(spriteBatch, color, 1f);
 
-        if (this.upArrow.containsPoint(mouseX, mouseY))
+        if (this.upArrow.bounds.Contains(cursor))
         {
             this.hoverText = this.upArrow.hoverText;
             return;
         }
 
-        if (this.downArrow.containsPoint(mouseX, mouseY))
+        if (this.downArrow.bounds.Contains(cursor))
         {
             this.hoverText = this.downArrow.hoverText;
             return;
@@ -228,25 +221,24 @@ internal sealed class TabEditor : BaseComponent
     }
 
     /// <inheritdoc />
-    public override void MoveTo(int x, int y)
+    public override void MoveTo(Point cursor)
     {
-        this.bounds.X = x;
-        this.bounds.Y = y;
-        this.Component.bounds.Y = y;
-        this.upArrow.bounds.Y = y + 8;
-        this.downArrow.bounds.Y = y + 8;
+        base.MoveTo(cursor);
+        this.icon.bounds.Y = cursor.Y;
+        this.upArrow.bounds.Y = cursor.Y + 8;
+        this.downArrow.bounds.Y = cursor.Y + 8;
     }
 
     /// <inheritdoc />
-    public override bool TryLeftClick(int x, int y)
+    public override bool TryLeftClick(Point cursor)
     {
-        if (this.Active && this.downArrow.containsPoint(x, y))
+        if (this.Active && this.downArrow.bounds.Contains(cursor))
         {
             this.moveDown.InvokeAll(this, new TabClickedEventArgs(SButton.MouseLeft, this.data));
             return true;
         }
 
-        if (this.Active && this.upArrow.containsPoint(x, y))
+        if (this.Active && this.upArrow.bounds.Contains(cursor))
         {
             this.moveUp.InvokeAll(this, new TabClickedEventArgs(SButton.MouseLeft, this.data));
             return true;
@@ -257,15 +249,15 @@ internal sealed class TabEditor : BaseComponent
     }
 
     /// <inheritdoc />
-    public override bool TryRightClick(int x, int y)
+    public override bool TryRightClick(Point cursor)
     {
-        if (this.Active && this.downArrow.containsPoint(x, y))
+        if (this.Active && this.downArrow.bounds.Contains(cursor))
         {
             this.moveDown.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
             return true;
         }
 
-        if (this.Active && this.upArrow.containsPoint(x, y))
+        if (this.Active && this.upArrow.bounds.Contains(cursor))
         {
             this.moveUp.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
             return true;

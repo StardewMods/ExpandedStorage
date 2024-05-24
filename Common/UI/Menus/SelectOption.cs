@@ -21,14 +21,14 @@ using StardewValley.Menus;
 /// <typeparam name="TItem">The item type.</typeparam>
 internal sealed class SelectOption<TItem> : FramedMenu
 {
+    private readonly List<TItem> allItems;
     private readonly List<ClickableComponent> components;
     private readonly Func<TItem, string> getValue;
     private readonly List<Highlight> highlights = [];
-    private readonly List<TItem> items;
     private readonly List<Operation> operations = [];
 
     private int currentIndex = -1;
-    private List<TItem>? options;
+    private List<TItem>? items;
     private EventHandler<TItem?>? selectionChanged;
 
     /// <summary>Initializes a new instance of the <see cref="SelectOption{TItem}" /> class.</summary>
@@ -54,23 +54,24 @@ internal sealed class SelectOption<TItem> : FramedMenu
         : base(inputHelper, reflectionHelper, x, y)
     {
         this.getValue = getValue ?? SelectOption<TItem>.GetDefaultValue;
-        this.items = items
+        this.allItems = items
             .Where(
                 item => this.GetValue(item).Trim().Length >= 3
                     && !this.GetValue(item).StartsWith("id_", StringComparison.OrdinalIgnoreCase))
             .ToList();
 
         var textBounds =
-            this.items.Select(item => Game1.smallFont.MeasureString(this.GetValue(item)).ToPoint()).ToList();
+            this.allItems.Select(item => Game1.smallFont.MeasureString(this.GetValue(item)).ToPoint()).ToList();
 
         var textHeight = textBounds.Max(textBound => textBound.Y);
 
         this.Resize(
-            Math.Max(minWidth, Math.Min(maxWidth, textBounds.Max(textBound => textBound.X) + 16)),
-            textBounds.Take(maxItems).Sum(textBound => textBound.Y) + 16);
+            new Point(
+                Math.Max(minWidth, Math.Min(maxWidth, textBounds.Max(textBound => textBound.X) + 16)),
+                textBounds.Take(maxItems).Sum(textBound => textBound.Y) + 16));
 
         this.components = this
-            .items.Take(maxItems)
+            .allItems.Take(maxItems)
             .Select(
                 (_, index) => new ClickableComponent(
                     new Rectangle(
@@ -82,12 +83,8 @@ internal sealed class SelectOption<TItem> : FramedMenu
             .ToList();
 
         this.allClickableComponents.AddRange(this.components);
-
-        this.MaxOffset = this.items.Count - this.components.Count;
-        if (this.MaxOffset <= 0)
-        {
-            this.MaxOffset = -1;
-        }
+        var offset = this.allItems.Count - this.components.Count;
+        this.MaxOffset = new Point(-1, offset <= 0 ? -1 : offset);
     }
 
     /// <summary>Highlight an option.</summary>
@@ -107,27 +104,26 @@ internal sealed class SelectOption<TItem> : FramedMenu
         remove => this.selectionChanged -= value;
     }
 
-    /// <summary>Gets the currently selected option.</summary>
-    public TItem? CurrentSelection => this.Options.ElementAtOrDefault(this.CurrentIndex);
-
     /// <summary>Gets the options.</summary>
     public List<TItem> Options =>
-        this.options ??=
-            this.operations.Aggregate(this.items.AsEnumerable(), (current, operation) => operation(current)).ToList();
+        this.items ??= this
+            .operations.Aggregate(this.allItems.AsEnumerable(), (current, operation) => operation(current))
+            .ToList();
 
-    /// <summary>Gets the current index.</summary>
-    public int CurrentIndex
+    /// <summary>Gets the currently selected option.</summary>
+    public TItem? CurrentSelection { get; private set; }
+
+    /// <summary>Gets or sets the current index.</summary>
+    private int CurrentIndex
     {
         get => this.currentIndex;
-        private set
+        set
         {
             this.currentIndex = value;
+            this.CurrentSelection = this.Options.ElementAtOrDefault(value);
             this.selectionChanged?.InvokeAll(this, this.CurrentSelection);
         }
     }
-
-    /// <inheritdoc />
-    protected override Rectangle Frame => new(this.xPositionOnScreen, this.yPositionOnScreen, this.width, this.height);
 
     /// <summary>Add a highlight operation that will be applied to the items.</summary>
     /// <param name="highlight">The highlight operation.</param>
@@ -143,51 +139,43 @@ internal sealed class SelectOption<TItem> : FramedMenu
     public string GetValue(TItem item) => this.getValue(item);
 
     /// <summary>Refreshes the items by applying the operations to them.</summary>
-    public void RefreshOptions() => this.options = null;
+    public void RefreshOptions() => this.items = null;
 
     /// <inheritdoc />
-    protected override void Draw(SpriteBatch spriteBatch)
+    protected override void DrawInFrame(SpriteBatch spriteBatch, Point cursor)
     {
-        // Draw items
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        this.DrawInFrame(
-            spriteBatch,
-            SpriteSortMode.Deferred,
-            () =>
+        foreach (var component in this.components)
+        {
+            var index = this.Offset.Y + int.Parse(component.name, CultureInfo.InvariantCulture);
+            var item = this.Options.ElementAtOrDefault(index);
+            if (item is null)
             {
-                foreach (var component in this.components)
-                {
-                    var index = this.Offset + int.Parse(component.name, CultureInfo.InvariantCulture);
-                    var item = this.Options.ElementAtOrDefault(index);
-                    if (item is null)
-                    {
-                        continue;
-                    }
+                continue;
+            }
 
-                    if (component.bounds.Contains(mouseX, mouseY))
-                    {
-                        spriteBatch.Draw(
-                            Game1.staminaRect,
-                            component.bounds with { Width = component.bounds.Width - 16 },
-                            new Rectangle(0, 0, 1, 1),
-                            Color.Wheat,
-                            0f,
-                            Vector2.Zero,
-                            SpriteEffects.None,
-                            0.975f);
-                    }
+            if (component.bounds.Contains(cursor))
+            {
+                spriteBatch.Draw(
+                    Game1.staminaRect,
+                    component.bounds with { Width = component.bounds.Width - 16 },
+                    new Rectangle(0, 0, 1, 1),
+                    Color.Wheat,
+                    0f,
+                    Vector2.Zero,
+                    SpriteEffects.None,
+                    0.975f);
+            }
 
-                    spriteBatch.DrawString(
-                        Game1.smallFont,
-                        this.getValue(item),
-                        new Vector2(component.bounds.X, component.bounds.Y),
-                        this.HighlightOption(item) ? Game1.textColor : Game1.unselectedOptionColor);
-                }
-            });
+            spriteBatch.DrawString(
+                Game1.smallFont,
+                this.getValue(item),
+                component.bounds.Location.ToVector2(),
+                this.HighlightOption(item) ? Game1.textColor : Game1.unselectedOptionColor);
+        }
     }
 
     /// <inheritdoc />
-    protected override void DrawUnder(SpriteBatch b) =>
+    protected override void DrawUnder(SpriteBatch b, Point cursor) =>
         IClickableMenu.drawTextureBox(
             b,
             Game1.mouseCursors,
@@ -202,15 +190,20 @@ internal sealed class SelectOption<TItem> : FramedMenu
             0.97f);
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(int x, int y)
+    protected override bool TryLeftClick(Point cursor)
     {
-        var component = this.components.FirstOrDefault(i => i.bounds.Contains(x, y));
+        if (base.TryLeftClick(cursor))
+        {
+            return true;
+        }
+
+        var component = this.components.FirstOrDefault(i => i.bounds.Contains(cursor));
         if (component is null)
         {
             return false;
         }
 
-        this.CurrentIndex = this.Offset + int.Parse(component.name, CultureInfo.InvariantCulture);
+        this.CurrentIndex = this.Offset.Y + int.Parse(component.name, CultureInfo.InvariantCulture);
         return true;
     }
 

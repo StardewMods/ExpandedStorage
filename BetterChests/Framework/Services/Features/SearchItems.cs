@@ -1,5 +1,6 @@
 namespace StardewMods.BetterChests.Framework.Services.Features;
 
+using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
@@ -84,11 +85,11 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
         switch (e.Button)
         {
             case SButton.MouseLeft or SButton.ControllerA:
-                if (this.searchBar.Value.TryLeftClick(mouseX, mouseY))
+                if (this.searchBar.Value.TryLeftClick(cursor))
                 {
                     this.inputHelper.Suppress(e.Button);
                 }
@@ -96,7 +97,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
                 break;
 
             case SButton.MouseRight or SButton.ControllerB:
-                if (this.searchBar.Value.TryRightClick(mouseX, mouseY))
+                if (this.searchBar.Value.TryRightClick(cursor))
                 {
                     this.inputHelper.Suppress(e.Button);
                 }
@@ -260,7 +261,8 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             return;
         }
 
-        this.searchBar.Value.Draw(e.SpriteBatch);
+        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        this.searchBar.Value.Draw(e.SpriteBatch, cursor, Point.Zero);
     }
 
     private void OnRenderingActiveMenu(RenderingActiveMenuEventArgs e)
@@ -270,8 +272,8 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        this.searchBar.Value.Update(mouseX, mouseY);
+        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        this.searchBar.Value.Update(cursor);
     }
 
     private void OnSearchChanged(SearchChangedEventArgs e)

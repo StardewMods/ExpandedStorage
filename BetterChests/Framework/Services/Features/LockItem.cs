@@ -96,13 +96,13 @@ internal sealed class LockItem : BaseFeature<LockItem>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (!this.TryGetMenu(mouseX, mouseY, out var inventoryMenu))
+        var cursor = e.Cursor.GetScaledScreenPixels().ToPoint();
+        if (!this.TryGetMenu(cursor, out var inventoryMenu))
         {
             return;
         }
 
-        var slot = inventoryMenu.inventory.FirstOrDefault(slot => slot.containsPoint(mouseX, mouseY));
+        var slot = inventoryMenu.inventory.FirstOrDefault(slot => slot.bounds.Contains(cursor));
         var index = slot?.name.GetInt(-1) ?? -1;
         if (index == -1)
         {
@@ -126,13 +126,13 @@ internal sealed class LockItem : BaseFeature<LockItem>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        if (!this.TryGetMenu(mouseX, mouseY, out var inventoryMenu))
+        var cursor = e.Cursor.GetScaledScreenPixels().ToPoint();
+        if (!this.TryGetMenu(cursor, out var inventoryMenu))
         {
             return;
         }
 
-        var slot = inventoryMenu.inventory.FirstOrDefault(slot => slot.containsPoint(mouseX, mouseY));
+        var slot = inventoryMenu.inventory.FirstOrDefault(slot => slot.bounds.Contains(cursor));
         var index = slot?.name.GetInt(-1) ?? -1;
         if (index == -1)
         {
@@ -193,7 +193,7 @@ internal sealed class LockItem : BaseFeature<LockItem>
         }
     }
 
-    private bool TryGetMenu(int mouseX, int mouseY, [NotNullWhen(true)] out InventoryMenu? inventoryMenu)
+    private bool TryGetMenu(Point cursor, [NotNullWhen(true)] out InventoryMenu? inventoryMenu)
     {
         inventoryMenu = this.menuHandler.CurrentMenu switch
         {
@@ -201,12 +201,12 @@ internal sealed class LockItem : BaseFeature<LockItem>
             {
                 inventory:
                 { } inventory,
-            } when inventory.isWithinBounds(mouseX, mouseY) => inventory,
+            } when inventory.isWithinBounds(cursor.X, cursor.Y) => inventory,
             ItemGrabMenu
             {
                 ItemsToGrabMenu:
                 { } itemsToGrabMenu,
-            } when itemsToGrabMenu.isWithinBounds(mouseX, mouseY) => itemsToGrabMenu,
+            } when itemsToGrabMenu.isWithinBounds(cursor.X, cursor.Y) => itemsToGrabMenu,
             InventoryPage
             {
                 inventory:

@@ -156,12 +156,8 @@ internal class SelectIcon : FramedMenu
                     })
                 .ToList();
 
-            this.MaxOffset = this.components.Last().bounds.Bottom - this.yPositionOnScreen - this.height + this.spacing;
-            if (this.MaxOffset <= 0)
-            {
-                this.MaxOffset = -1;
-            }
-
+            var yOffset = this.components.Last().bounds.Bottom - this.yPositionOnScreen - this.height + this.spacing;
+            this.MaxOffset = new Point(-1, yOffset <= 0 ? -1 : yOffset);
             return this.components;
         }
     }
@@ -175,9 +171,9 @@ internal class SelectIcon : FramedMenu
     public void AddOperation(Operation operation) => this.operations.Add(operation);
 
     /// <inheritdoc />
-    public override void MoveTo(int x, int y)
+    public override void MoveTo(Point dimensions)
     {
-        base.MoveTo(x, y);
+        base.MoveTo(dimensions);
         this.RefreshIcons();
     }
 
@@ -189,61 +185,55 @@ internal class SelectIcon : FramedMenu
     }
 
     /// <inheritdoc />
-    protected override void Draw(SpriteBatch spriteBatch)
+    protected override void DrawInFrame(SpriteBatch spriteBatch, Point cursor)
     {
         // Draw items
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        this.DrawInFrame(
-            spriteBatch,
-            SpriteSortMode.Deferred,
-            () =>
+        foreach (var component in this.Components)
+        {
+            var index = int.Parse(component.name, CultureInfo.InvariantCulture);
+            var icon = this.Icons[index];
+            component.tryHover(cursor.X + this.Offset.X, cursor.Y + this.Offset.Y, 0.2f);
+
+            if (index == this.CurrentIndex)
             {
-                foreach (var component in this.Components)
-                {
-                    var index = int.Parse(component.name, CultureInfo.InvariantCulture);
-                    var icon = this.Icons[index];
-                    component.tryHover(mouseX, mouseY + this.Offset, 0.2f);
+                spriteBatch.Draw(
+                    Game1.mouseCursors,
+                    new Rectangle(
+                        this.xPositionOnScreen
+                        + (index % this.columns * (this.length + this.spacing))
+                        + this.spacing
+                        - this.Offset.X,
+                        this.yPositionOnScreen
+                        + (index / this.columns * (this.length + this.spacing))
+                        + this.spacing
+                        - this.Offset.Y,
+                        this.length,
+                        this.length),
+                    new Rectangle(194, 388, 16, 16),
+                    Color.White,
+                    0f,
+                    Vector2.Zero,
+                    SpriteEffects.None,
+                    0.975f);
+            }
 
-                    if (index == this.CurrentIndex)
-                    {
-                        spriteBatch.Draw(
-                            Game1.mouseCursors,
-                            new Rectangle(
-                                this.xPositionOnScreen
-                                + (index % this.columns * (this.length + this.spacing))
-                                + this.spacing,
-                                this.yPositionOnScreen
-                                + (index / this.columns * (this.length + this.spacing))
-                                - this.Offset
-                                + this.spacing,
-                                this.length,
-                                this.length),
-                            new Rectangle(194, 388, 16, 16),
-                            Color.White,
-                            0f,
-                            Vector2.Zero,
-                            SpriteEffects.None,
-                            0.975f);
-                    }
+            component.draw(
+                spriteBatch,
+                this.HighlightIcon(icon) ? Color.White : Color.White * 0.25f,
+                1f,
+                0,
+                -this.Offset.X,
+                -this.Offset.Y);
 
-                    component.draw(
-                        spriteBatch,
-                        this.HighlightIcon(icon) ? Color.White : Color.White * 0.25f,
-                        1f,
-                        0,
-                        0,
-                        -this.Offset);
-
-                    if (component.containsPoint(mouseX, mouseY + this.Offset))
-                    {
-                        this.HoverText ??= component.hoverText;
-                    }
-                }
-            });
+            if (component.bounds.Contains(cursor + this.Offset))
+            {
+                this.HoverText ??= component.hoverText;
+            }
+        }
     }
 
     /// <inheritdoc />
-    protected override void DrawUnder(SpriteBatch b) =>
+    protected override void DrawUnder(SpriteBatch b, Point cursor) =>
         IClickableMenu.drawTextureBox(
             b,
             Game1.mouseCursors,
@@ -258,9 +248,14 @@ internal class SelectIcon : FramedMenu
             0.97f);
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(int x, int y)
+    protected override bool TryLeftClick(Point cursor)
     {
-        var component = this.Components.FirstOrDefault(i => i.bounds.Contains(x, y + this.Offset));
+        if (base.TryLeftClick(cursor))
+        {
+            return true;
+        }
+
+        var component = this.Components.FirstOrDefault(i => i.bounds.Contains(cursor + this.Offset));
         if (component is null)
         {
             return false;

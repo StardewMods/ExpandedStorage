@@ -16,6 +16,7 @@ using StardewMods.Common.Models;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.Common.UI.Components;
 using StardewMods.Common.UI.Menus;
 using StardewValley.Buildings;
 using StardewValley.Menus;
@@ -28,7 +29,7 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
     private readonly PerScreen<MenuManager> bottomMenu;
 
     private readonly Type? chestsAnywhereType;
-    private readonly PerScreen<List<ICustomComponent>> components = new(() => []);
+    private readonly PerScreen<List<BaseComponent>> components = new(() => []);
     private readonly ContainerFactory containerFactory;
     private readonly PerScreen<IClickableMenu?> currentMenu = new();
     private readonly IEventManager eventManager;
@@ -331,7 +332,7 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
-        var cursorPos = e.Cursor.GetScaledScreenPixels().ToPoint();
+        var cursor = e.Cursor.GetScaledScreenPixels().ToPoint();
         var baseMenu = Game1.activeClickableMenu?.GetChildMenu() as BaseMenu;
         switch (e.Button)
         {
@@ -339,15 +340,15 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
                 // Child menus
                 if (baseMenu is not null)
                 {
-                    baseMenu.receiveLeftClick(cursorPos.X, cursorPos.Y);
+                    baseMenu.receiveLeftClick(cursor.X, cursor.Y);
                     this.inputHelper.Suppress(e.Button);
                     return;
                 }
 
                 // Components
                 if (this
-                    .components.Value.Where(c => c.Contains(e.Cursor.GetScaledScreenPixels()))
-                    .Any(component => component.TryLeftClick(cursorPos.X, cursorPos.Y)))
+                    .components.Value.Where(c => c.bounds.Contains(e.Cursor.GetScaledScreenPixels()))
+                    .Any(component => component.TryLeftClick(cursor)))
                 {
                     this.inputHelper.Suppress(e.Button);
                 }
@@ -358,15 +359,15 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
                 // Child menus
                 if (baseMenu is not null)
                 {
-                    baseMenu.receiveRightClick(cursorPos.X, cursorPos.Y);
+                    baseMenu.receiveRightClick(cursor.X, cursor.Y);
                     this.inputHelper.Suppress(e.Button);
                     return;
                 }
 
                 // Components
                 if (this
-                    .components.Value.Where(c => c.Contains(e.Cursor.GetScaledScreenPixels()))
-                    .Any(component => component.TryRightClick(cursorPos.X, cursorPos.Y)))
+                    .components.Value.Where(c => c.bounds.Contains(e.Cursor.GetScaledScreenPixels()))
+                    .Any(component => component.TryRightClick(cursor)))
                 {
                     this.inputHelper.Suppress(e.Button);
                 }
@@ -385,17 +386,18 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
     [Priority(int.MinValue)]
     private void OnRenderedActiveMenu(RenderedActiveMenuEventArgs e)
     {
+        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
         switch (this.CurrentMenu)
         {
             case ItemGrabMenu itemGrabMenu:
                 // Draw overlay
-                this.Top.Draw(e.SpriteBatch);
-                this.Bottom.Draw(e.SpriteBatch);
+                this.Top.Draw(e.SpriteBatch, cursor);
+                this.Bottom.Draw(e.SpriteBatch, cursor);
 
                 // Draw components
                 foreach (var component in this.components.Value)
                 {
-                    component.Draw(e.SpriteBatch);
+                    component.Draw(e.SpriteBatch, cursor, Point.Zero);
                 }
 
                 // Redraw foreground
@@ -454,8 +456,8 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
 
             case InventoryPage inventoryPage:
                 // Draw overlay
-                this.Top.Draw(e.SpriteBatch);
-                this.Bottom.Draw(e.SpriteBatch);
+                this.Top.Draw(e.SpriteBatch, cursor);
+                this.Bottom.Draw(e.SpriteBatch, cursor);
 
                 // Redraw foreground
                 if (this.focus.Value is null)
@@ -493,8 +495,8 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
 
             case ShopMenu shopMenu:
                 // Draw overlay
-                this.Top.Draw(e.SpriteBatch);
-                this.Bottom.Draw(e.SpriteBatch);
+                this.Top.Draw(e.SpriteBatch, cursor);
+                this.Bottom.Draw(e.SpriteBatch, cursor);
 
                 // Redraw foreground
                 if (this.focus.Value is null)
@@ -563,10 +565,10 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
             default: return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
         foreach (var component in this.components.Value)
         {
-            component.Update(mouseX, mouseY);
+            component.Update(cursor);
         }
 
         Game1.mouseCursorTransparency = 0f;
@@ -724,7 +726,7 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
             this.CurrentMenu.allClickableComponents ??= [];
             foreach (var component in this.components.Value)
             {
-                this.CurrentMenu.allClickableComponents.Add(component.Component);
+                this.CurrentMenu.allClickableComponents.Add(component);
             }
 
             break;

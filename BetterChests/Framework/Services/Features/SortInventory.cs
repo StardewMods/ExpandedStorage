@@ -75,15 +75,15 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
+        var cursor = e.Cursor.GetScaledScreenPixels();
         var container = this.menuHandler.CurrentMenu switch
         {
-            ItemGrabMenu itemGrabMenu when itemGrabMenu.organizeButton?.containsPoint(mouseX, mouseY) == true =>
+            ItemGrabMenu itemGrabMenu when itemGrabMenu.organizeButton?.bounds.Contains(cursor) == true =>
                 this.menuHandler.Top.Container,
-            InventoryPage inventoryPage when inventoryPage.organizeButton?.containsPoint(mouseX, mouseY) == true =>
+            InventoryPage inventoryPage when inventoryPage.organizeButton?.bounds.Contains(cursor) == true =>
                 this.menuHandler.Bottom.Container,
-            not null when this.organizeButton.Value?.containsPoint(mouseX, mouseY) == true => this.menuHandler
-                .Bottom.Container,
+            not null when this.organizeButton.Value?.bounds.Contains(cursor) == true => this.menuHandler.Bottom
+                .Container,
             _ => null,
         };
 
@@ -175,10 +175,10 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
             return;
         }
 
-        var (mouseX, mouseY) = Game1.getMousePosition(true);
-        this.organizeButton.Value.tryHover(mouseX, mouseY);
+        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        this.organizeButton.Value.tryHover(cursor.X, cursor.Y);
         this.organizeButton.Value.draw(e.SpriteBatch);
-        if (!this.organizeButton.Value.containsPoint(mouseX, mouseY))
+        if (!this.organizeButton.Value.bounds.Contains(cursor))
         {
             return;
         }

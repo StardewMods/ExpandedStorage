@@ -60,10 +60,11 @@ internal sealed class IconPicker : BaseMenu
 
         this.selectIcon.AddOperation(this.FilterIcons);
         this.AddSubMenu(this.selectIcon);
-        this.Resize(this.selectIcon.width + 16, this.selectIcon.height + 16);
+        this.Resize(new Point(this.selectIcon.width + 16, this.selectIcon.height + 16));
         this.MoveTo(
-            ((Game1.uiViewport.Width - this.width) / 2) + IClickableMenu.borderWidth,
-            ((Game1.uiViewport.Height - this.height) / 2) + IClickableMenu.borderWidth);
+            new Point(
+                ((Game1.uiViewport.Width - this.width) / 2) + IClickableMenu.borderWidth,
+                ((Game1.uiViewport.Height - this.height) / 2) + IClickableMenu.borderWidth));
 
         this.currentText = string.Empty;
         this.textField = new TextField(
@@ -149,16 +150,16 @@ internal sealed class IconPicker : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override void DrawUnder(SpriteBatch spriteBatch) =>
+    protected override void DrawUnder(SpriteBatch spriteBatch, Point cursor) =>
         spriteBatch.Draw(
             Game1.fadeToBlackRect,
             new Rectangle(0, 0, Game1.uiViewport.Width, Game1.uiViewport.Height),
             Color.Black * 0.5f);
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(int x, int y)
+    protected override bool TryLeftClick(Point cursor)
     {
-        if (this.okButton.containsPoint(x, y) && this.readyToClose())
+        if (this.okButton.bounds.Contains(cursor) && this.readyToClose())
         {
             if (this.selectIcon.CurrentSelection is not null)
             {
@@ -169,13 +170,13 @@ internal sealed class IconPicker : BaseMenu
             return true;
         }
 
-        if (this.cancelButton.containsPoint(x, y) && this.readyToClose())
+        if (this.cancelButton.bounds.Contains(cursor) && this.readyToClose())
         {
             this.exitThisMenuNoSound();
             return true;
         }
 
-        if (this.dropdown.containsPoint(x, y))
+        if (this.dropdown.bounds.Contains(cursor))
         {
             var sourceDropdown = new Dropdown<string>(
                 this.inputHelper,

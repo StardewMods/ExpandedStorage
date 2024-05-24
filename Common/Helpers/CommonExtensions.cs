@@ -154,7 +154,7 @@ internal static class CommonExtensions
     /// <summary>Invokes all event handlers for an event.</summary>
     /// <param name="eventHandler">The event.</param>
     /// <param name="source">The source.</param>
-    public static void InvokeAll(this EventHandler? eventHandler, object source)
+    public static void InvokeAll(this EventHandler? eventHandler, object? source)
     {
         if (eventHandler is null)
         {
@@ -179,7 +179,7 @@ internal static class CommonExtensions
     /// <param name="source">The source.</param>
     /// <param name="param">The event parameters.</param>
     /// <typeparam name="T">The event handler type.</typeparam>
-    public static void InvokeAll<T>(this EventHandler<T>? eventHandler, object source, T param)
+    public static void InvokeAll<T>(this EventHandler<T>? eventHandler, object? source, T param)
     {
         if (eventHandler is null)
         {

@@ -66,10 +66,11 @@ internal sealed class PopupSelect<TItem> : BaseMenu
         this.selectOption.AddHighlight(this.HighlightOption);
         this.selectOption.AddOperation(this.SortOptions);
         this.AddSubMenu(this.selectOption);
-        this.Resize(this.selectOption.width + 16, this.selectOption.height + 16);
+        this.Resize(new Point(this.selectOption.width + 16, this.selectOption.height + 16));
         this.MoveTo(
-            ((Game1.uiViewport.Width - this.width) / 2) + IClickableMenu.borderWidth,
-            ((Game1.uiViewport.Height - this.height) / 2) + IClickableMenu.borderWidth);
+            new Point(
+                ((Game1.uiViewport.Width - this.width) / 2) + IClickableMenu.borderWidth,
+                ((Game1.uiViewport.Height - this.height) / 2) + IClickableMenu.borderWidth));
 
         this.currentText = initialValue ?? string.Empty;
         this.textField = new TextField(
@@ -148,16 +149,16 @@ internal sealed class PopupSelect<TItem> : BaseMenu
     }
 
     /// <inheritdoc />
-    protected override void DrawUnder(SpriteBatch spriteBatch) =>
+    protected override void DrawUnder(SpriteBatch spriteBatch, Point cursor) =>
         spriteBatch.Draw(
             Game1.fadeToBlackRect,
             new Rectangle(0, 0, Game1.uiViewport.Width, Game1.uiViewport.Height),
             Color.Black * 0.5f);
 
     /// <inheritdoc />
-    protected override bool TryLeftClick(int x, int y)
+    protected override bool TryLeftClick(Point cursor)
     {
-        if (this.okButton.containsPoint(x, y) && this.readyToClose())
+        if (this.okButton.bounds.Contains(cursor) && this.readyToClose())
         {
             if (this.selectOption.CurrentSelection is not null)
             {
@@ -168,7 +169,7 @@ internal sealed class PopupSelect<TItem> : BaseMenu
             return true;
         }
 
-        if (this.cancelButton.containsPoint(x, y) && this.readyToClose())
+        if (this.cancelButton.bounds.Contains(cursor) && this.readyToClose())
         {
             this.exitThisMenuNoSound();
             return true;
