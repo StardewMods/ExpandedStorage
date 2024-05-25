@@ -19,7 +19,6 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<bool> isActive = new(() => true);
     private readonly MenuHandler menuHandler;
-    private readonly IReflectionHelper reflectionHelper;
     private readonly PerScreen<TextField?> searchBar = new();
     private readonly PerScreen<IExpression?> searchExpression = new();
     private readonly PerScreen<string> searchText = new(() => string.Empty);
@@ -30,20 +29,17 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public SearchItems(
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
         IInputHelper inputHelper,
         MenuHandler menuHandler,
-        IModConfig modConfig,
-        IReflectionHelper reflectionHelper)
+        IModConfig modConfig)
         : base(eventManager, modConfig)
     {
         this.expressionHandler = expressionHandler;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
-        this.reflectionHelper = reflectionHelper;
     }
 
     /// <inheritdoc />
@@ -203,8 +199,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             - (top.Rows == 3 ? 25 : 4);
 
         this.searchBar.Value = new TextField(
-            this.inputHelper,
-            this.reflectionHelper,
+            null,
             x,
             y,
             width,

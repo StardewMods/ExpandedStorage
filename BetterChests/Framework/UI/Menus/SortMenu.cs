@@ -21,15 +21,8 @@ internal sealed class SortMenu : SearchMenu
     /// <param name="container">The container to categorize.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
-    public SortMenu(
-        IStorageContainer container,
-        IExpressionHandler expressionHandler,
-        IIconRegistry iconRegistry,
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper)
-        : base(expressionHandler, iconRegistry, inputHelper, reflectionHelper, container.SortInventoryBy)
+    public SortMenu(IStorageContainer container, IExpressionHandler expressionHandler, IIconRegistry iconRegistry)
+        : base(expressionHandler, iconRegistry, container.SortInventoryBy)
     {
         this.container = container;
         this.searchExpression =
@@ -44,27 +37,24 @@ internal sealed class SortMenu : SearchMenu
             .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + Game1.tileSize + 16);
-
-        this.saveButton.hoverText = I18n.Ui_Save_Name();
+                this.yPositionOnScreen + Game1.tileSize + 16,
+                hoverText: I18n.Ui_Save_Name());
 
         this.copyButton = iconRegistry
             .Icon(InternalIcon.Copy)
             .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 2));
-
-        this.copyButton.hoverText = I18n.Ui_Copy_Tooltip();
+                this.yPositionOnScreen + ((Game1.tileSize + 16) * 2),
+                hoverText: I18n.Ui_Copy_Tooltip());
 
         this.pasteButton = iconRegistry
             .Icon(InternalIcon.Paste)
             .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 3));
-
-        this.pasteButton.hoverText = I18n.Ui_Paste_Tooltip();
+                this.yPositionOnScreen + ((Game1.tileSize + 16) * 3),
+                hoverText: I18n.Ui_Paste_Tooltip());
 
         this.okButton = iconRegistry
             .Icon(VanillaIcon.Ok)

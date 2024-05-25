@@ -3,6 +3,9 @@ namespace StardewMods.FauxCore.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.FauxCore.Common.Helpers;
+using StardewMods.FauxCore.Common.Models.Events;
+using StardewMods.FauxCore.Common.Services;
 using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
@@ -11,6 +14,9 @@ namespace StardewMods.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.Common.Helpers;
+using StardewMods.Common.Models.Events;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 #endif
@@ -18,112 +24,58 @@ using StardewValley.Menus;
 /// <summary>Base custom component.</summary>
 internal abstract class BaseComponent : ClickableComponent, ICustomComponent
 {
-    private readonly IReflectionHelper reflectionHelper;
+    private EventHandler<IClicked>? clicked;
 
     /// <summary>Initializes a new instance of the <see cref="BaseComponent" /> class.</summary>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
+    /// <param name="parent">The parent menu.</param>
     /// <param name="x">The component x-coordinate.</param>
     /// <param name="y">The component y-coordinate.</param>
     /// <param name="width">The component width.</param>
     /// <param name="height">The component height.</param>
     /// <param name="name">The component name.</param>
-    protected BaseComponent(
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
-        int x,
-        int y,
-        int width,
-        int height,
-        string name)
+    protected BaseComponent(ICustomMenu? parent, int x, int y, int width, int height, string name)
         : base(new Rectangle(x, y, width, height), name)
     {
-        this.Input = inputHelper;
-        this.reflectionHelper = reflectionHelper;
+        this.Parent = parent;
+        this.Color = Color.White;
     }
 
     /// <inheritdoc />
-    public Point Position => this.bounds.Location;
+    public event EventHandler<IClicked>? Clicked
+    {
+        add => this.clicked += value;
+        remove => this.clicked -= value;
+    }
+
+    /// <inheritdoc />
+    public Rectangle Bounds => this.bounds;
+
+    /// <inheritdoc />
+    public Point Location => this.bounds.Location;
+
+    /// <inheritdoc />
+    public ICustomMenu? Parent { get; }
+
+    /// <inheritdoc />
+    public Point Size => this.bounds.Size;
+
+    /// <inheritdoc />
+    public Color Color { get; private set; }
 
     /// <inheritdoc />
     public string? HoverText { get; private set; }
 
-    /// <summary>Gets the input helper.</summary>
-    protected IInputHelper Input { get; }
-
     /// <inheritdoc />
-    public virtual void Draw(SpriteBatch spriteBatch, Point cursor, Point offset)
-    {
-        var sortModeReflected = this.reflectionHelper.GetField<SpriteSortMode>(spriteBatch, "_sortMode", false);
-        var sortModeOriginal = sortModeReflected?.GetValue() ?? SpriteSortMode.Deferred;
-
-        var blendStateReflected = this.reflectionHelper.GetField<BlendState>(spriteBatch, "_blendState", false);
-        var blendStateOriginal = blendStateReflected?.GetValue();
-
-        var samplerStateReflected = this.reflectionHelper.GetField<SamplerState>(spriteBatch, "_samplerState", false);
-        var samplerStateOriginal = samplerStateReflected?.GetValue();
-
-        var depthStencilStateReflected =
-            this.reflectionHelper.GetField<DepthStencilState>(spriteBatch, "_depthStencilState", false);
-
-        var depthStencilStateOriginal = depthStencilStateReflected?.GetValue();
-
-        var rasterizerStateReflected =
-            this.reflectionHelper.GetField<RasterizerState>(spriteBatch, "_rasterizerState", false);
-
-        var rasterizerStateOriginal = rasterizerStateReflected?.GetValue();
-
-        var effectReflected = this.reflectionHelper.GetField<Effect>(spriteBatch, "_effect", false);
-        var effectOriginal = effectReflected?.GetValue();
-
-        var scissorOriginal = spriteBatch.GraphicsDevice.ScissorRectangle;
-
-        var rasterizerState = new RasterizerState { ScissorTestEnable = true };
-        if (rasterizerStateOriginal is not null)
-        {
-            rasterizerState.CullMode = rasterizerStateOriginal.CullMode;
-            rasterizerState.FillMode = rasterizerStateOriginal.FillMode;
-            rasterizerState.DepthBias = rasterizerStateOriginal.DepthBias;
-            rasterizerState.MultiSampleAntiAlias = rasterizerStateOriginal.MultiSampleAntiAlias;
-            rasterizerState.SlopeScaleDepthBias = rasterizerStateOriginal.SlopeScaleDepthBias;
-            rasterizerState.DepthClipEnable = rasterizerStateOriginal.DepthClipEnable;
-        }
-
-        spriteBatch.End();
-
-        spriteBatch.Begin(
-            SpriteSortMode.Deferred,
-            blendStateOriginal,
-            samplerStateOriginal,
-            depthStencilStateOriginal,
-            rasterizerState,
-            effectOriginal);
-
-        spriteBatch.GraphicsDevice.ScissorRectangle = Rectangle.Intersect(
+    public virtual void Draw(SpriteBatch spriteBatch, Point cursor, Point offset) =>
+        UiToolkit.DrawInFrame(
+            spriteBatch,
             new Rectangle(this.bounds.X + offset.X, this.bounds.Y + offset.Y, this.bounds.Width, this.bounds.Height),
-            scissorOriginal);
+            sb => this.DrawInFrame(sb, cursor, offset));
 
-        try
-        {
-            this.DrawInFrame(spriteBatch, cursor, offset);
-        }
-        finally
-        {
-            spriteBatch.End();
-
-            spriteBatch.Begin(
-                sortModeOriginal,
-                blendStateOriginal,
-                samplerStateOriginal,
-                depthStencilStateOriginal,
-                rasterizerStateOriginal,
-                effectOriginal);
-
-            spriteBatch.GraphicsDevice.ScissorRectangle = scissorOriginal;
-        }
-    }
-
-    /// <inheritdoc />
+    /// <summary>Draws the component in a framed area.</summary>
+    /// <param name="spriteBatch">The sprite batch to draw the component to.</param>
+    /// <param name="cursor">The mouse position.</param>
+    /// <param name="offset">The offset.</param>
     public virtual void DrawInFrame(SpriteBatch spriteBatch, Point cursor, Point offset)
     {
         // Do nothing
@@ -144,6 +96,13 @@ internal abstract class BaseComponent : ClickableComponent, ICustomComponent
     }
 
     /// <inheritdoc />
+    public ICustomComponent SetColor(Color value)
+    {
+        this.Color = value;
+        return this;
+    }
+
+    /// <inheritdoc />
     public ICustomComponent SetHoverText(string? value)
     {
         this.HoverText = value;
@@ -151,10 +110,28 @@ internal abstract class BaseComponent : ClickableComponent, ICustomComponent
     }
 
     /// <inheritdoc />
-    public virtual bool TryLeftClick(Point cursor) => this.bounds.Contains(cursor);
+    public virtual bool TryLeftClick(Point cursor)
+    {
+        if (!this.visible || !this.bounds.Contains(cursor))
+        {
+            return false;
+        }
+
+        this.clicked.InvokeAll(this, new ClickedEventArgs(SButton.MouseLeft, cursor));
+        return true;
+    }
 
     /// <inheritdoc />
-    public virtual bool TryRightClick(Point cursor) => this.bounds.Contains(cursor);
+    public virtual bool TryRightClick(Point cursor)
+    {
+        if (!this.visible || !this.bounds.Contains(cursor))
+        {
+            return false;
+        }
+
+        this.clicked.InvokeAll(this, new ClickedEventArgs(SButton.Right, cursor));
+        return true;
+    }
 
     /// <inheritdoc />
     public virtual bool TryScroll(int direction) => false;

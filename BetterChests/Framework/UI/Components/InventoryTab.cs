@@ -3,8 +3,6 @@ namespace StardewMods.BetterChests.Framework.UI.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Models;
-using StardewMods.BetterChests.Framework.Models.Events;
-using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
@@ -12,34 +10,23 @@ using StardewValley.Menus;
 /// <summary>A component with an icon that expands into a label when hovered.</summary>
 internal sealed class InventoryTab : BaseComponent
 {
-    private readonly TabData data;
     private readonly ClickableTextureComponent icon;
     private readonly Vector2 origin;
     private readonly int overrideWidth;
     private readonly int textWidth;
 
-    private EventHandler<TabClickedEventArgs>? clicked;
-
     /// <summary>Initializes a new instance of the <see cref="InventoryTab" /> class.</summary>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
+    /// <param name="parent">The parent menu.</param>
     /// <param name="x">The x-coordinate of the tab component.</param>
     /// <param name="y">The y-coordinate of the tab component.</param>
     /// <param name="icon">The tab icon.</param>
     /// <param name="tabData">The inventory tab data.</param>
     /// <param name="overrideWidth">Indicates if the component should have a default width.</param>
-    public InventoryTab(
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
-        int x,
-        int y,
-        IIcon icon,
-        TabData tabData,
-        int overrideWidth = -1)
-        : base(inputHelper, reflectionHelper, x, y, Game1.tileSize, Game1.tileSize, tabData.Label)
+    public InventoryTab(ICustomMenu? parent, int x, int y, IIcon icon, TabData tabData, int overrideWidth = -1)
+        : base(parent, x, y, Game1.tileSize, Game1.tileSize, tabData.Label)
     {
         var textBounds = Game1.smallFont.MeasureString(tabData.Label).ToPoint();
-        this.data = tabData;
+        this.Data = tabData;
         this.overrideWidth = overrideWidth;
         this.origin = new Vector2(x, y);
         this.icon = icon.Component(IconStyle.Transparent, x - Game1.tileSize, y);
@@ -54,12 +41,8 @@ internal sealed class InventoryTab : BaseComponent
         this.bounds.X = (int)this.origin.X - overrideWidth;
     }
 
-    /// <summary>Event triggered when the tab is clicked.</summary>
-    public event EventHandler<TabClickedEventArgs> Clicked
-    {
-        add => this.clicked += value;
-        remove => this.clicked -= value;
-    }
+    /// <summary>Gets the tab data.</summary>
+    public TabData Data { get; }
 
     /// <summary>Gets or sets a value indicating whether the tab is currently active.</summary>
     public bool Active { get; set; } = true;
@@ -173,20 +156,6 @@ internal sealed class InventoryTab : BaseComponent
                 this.bounds.X + Game1.tileSize + offset.X,
                 this.bounds.Y + (IClickableMenu.borderWidth / 2f) + offset.Y),
             this.Active ? Game1.textColor : Game1.unselectedOptionColor);
-    }
-
-    /// <inheritdoc />
-    public override bool TryLeftClick(Point cursor)
-    {
-        this.clicked?.InvokeAll(this, new TabClickedEventArgs(SButton.MouseLeft, this.data));
-        return true;
-    }
-
-    /// <inheritdoc />
-    public override bool TryRightClick(Point cursor)
-    {
-        this.clicked?.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
-        return true;
     }
 
     /// <inheritdoc />

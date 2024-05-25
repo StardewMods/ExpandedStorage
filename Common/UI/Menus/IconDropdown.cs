@@ -21,8 +21,6 @@ internal sealed class IconDropdown : BaseMenu
     private EventHandler<IIcon?>? iconSelected;
 
     /// <summary>Initializes a new instance of the <see cref="IconDropdown" /> class.</summary>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="anchor">The component to anchor the dropdown to.</param>
     /// <param name="icons">The list of values to select from.</param>
     /// <param name="rows">This rows of icons to display.</param>
@@ -31,8 +29,6 @@ internal sealed class IconDropdown : BaseMenu
     /// <param name="scale">The icon scale.</param>
     /// <param name="spacing">The spacing between icons.</param>
     public IconDropdown(
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
         ClickableComponent anchor,
         IEnumerable<IIcon> icons,
         int rows,
@@ -40,11 +36,8 @@ internal sealed class IconDropdown : BaseMenu
         SelectIcon.GetHoverText? getHoverText = null,
         float scale = 3f,
         int spacing = 8)
-        : base(inputHelper)
     {
         var selectIcon = new SelectIcon(
-            inputHelper,
-            reflectionHelper,
             icons,
             rows,
             columns,
@@ -55,6 +48,14 @@ internal sealed class IconDropdown : BaseMenu
             this.yPositionOnScreen);
 
         selectIcon.SelectionChanged += this.OnSelectionChanged;
+
+        var offset = anchor is ICustomComponent
+        {
+            Parent: IFramedMenu parent,
+        }
+            ? parent.CurrentOffset
+            : Point.Zero;
+
         this
             .AddSubMenu(selectIcon)
             .ResizeTo(new Point(selectIcon.width + 16, selectIcon.height + 16))
@@ -62,12 +63,12 @@ internal sealed class IconDropdown : BaseMenu
 
         if (this.xPositionOnScreen + this.width > Game1.uiViewport.Width)
         {
-            this.MoveTo(new Point(anchor.bounds.Right - this.width, this.yPositionOnScreen));
+            this.MoveTo(new Point(anchor.bounds.Right - this.width - offset.X, this.yPositionOnScreen - offset.Y));
         }
 
         if (this.yPositionOnScreen + this.height > Game1.uiViewport.Height)
         {
-            this.MoveTo(new Point(this.xPositionOnScreen, anchor.bounds.Top - this.height + 16));
+            this.MoveTo(new Point(this.xPositionOnScreen - offset.X, anchor.bounds.Top - this.height + 16 - offset.Y));
         }
     }
 

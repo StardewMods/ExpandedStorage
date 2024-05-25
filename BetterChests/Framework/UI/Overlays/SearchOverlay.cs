@@ -11,31 +11,18 @@ internal sealed class SearchOverlay : BaseMenu
     private readonly TextField textField;
 
     /// <summary>Initializes a new instance of the <see cref="SearchOverlay" /> class.</summary>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="getMethod">The function that gets the current search text.</param>
     /// <param name="setMethod">The action that sets the search text.</param>
-    public SearchOverlay(
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
-        Func<string> getMethod,
-        Action<string> setMethod)
-        : base(inputHelper)
+    public SearchOverlay(Func<string> getMethod, Action<string> setMethod)
     {
         var searchBarWidth = Math.Min(12 * Game1.tileSize, Game1.uiViewport.Width);
         var origin = Utility.getTopLeftPositionForCenteringOnScreen(searchBarWidth, 48);
 
-        this.textField = new TextField(
-            this.Input,
-            reflectionHelper,
-            (int)origin.X,
-            Game1.tileSize,
-            searchBarWidth,
-            getMethod,
-            setMethod)
-        {
-            Selected = true,
-        };
+        this.textField =
+            new TextField(this, (int)origin.X, Game1.tileSize, searchBarWidth, getMethod, setMethod)
+            {
+                Selected = true,
+            };
 
         this.allClickableComponents.Add(this.textField);
     }

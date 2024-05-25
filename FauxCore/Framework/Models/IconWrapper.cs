@@ -30,8 +30,14 @@ internal sealed class IconWrapper : IIcon
     public string UniqueId => this.icon.Value.UniqueId;
 
     /// <inheritdoc />
-    public ClickableTextureComponent Component(IconStyle style, int x = 0, int y = 0, float scale = Game1.pixelZoom) =>
-        this.icon.Value.Component(style, x, y, scale);
+    public ClickableTextureComponent Component(
+        IconStyle style,
+        int x = 0,
+        int y = 0,
+        float scale = Game1.pixelZoom,
+        string? name = null,
+        string? hoverText = null) =>
+        this.icon.Value.Component(style, x, y, scale, name, hoverText);
 
     /// <inheritdoc />
     public Texture2D Texture(IconStyle style) => this.icon.Value.Texture(style);

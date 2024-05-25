@@ -19,8 +19,6 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     private readonly ContainerHandler containerHandler;
     private readonly IExpressionHandler expressionHandler;
     private readonly IIconRegistry iconRegistry;
-    private readonly IInputHelper inputHelper;
-    private readonly IReflectionHelper reflectionHelper;
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
 
     /// <summary>Initializes a new instance of the <see cref="DebugMode" /> class.</summary>
@@ -31,8 +29,6 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public DebugMode(
         ICommandHelper commandHelper,
@@ -42,8 +38,6 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
         IIconRegistry iconRegistry,
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
         ToolbarIconsIntegration toolbarIconsIntegration)
         : base(eventManager, configManager)
     {
@@ -53,8 +47,6 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         this.containerHandler = containerHandler;
         this.expressionHandler = expressionHandler;
         this.iconRegistry = iconRegistry;
-        this.inputHelper = inputHelper;
-        this.reflectionHelper = reflectionHelper;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
 
         // Commands
@@ -92,7 +84,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
     /// <inheritdoc />
     protected override void Activate()
     {
-        if (!this.toolbarIconsIntegration.IsLoaded || !this.iconRegistry.TryGetIcon(InternalIcon.Debug, out var icon))
+        if (!this.toolbarIconsIntegration.IsLoaded)
         {
             return;
         }
@@ -123,7 +115,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         }
 
         Game1.activeClickableMenu?.exitThisMenu();
-        Game1.activeClickableMenu = new DebugMenu(this, this.inputHelper);
+        Game1.activeClickableMenu = new DebugMenu(this);
     }
 
     private void ResetAll()
@@ -168,30 +160,23 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
         switch (args[0].Trim().ToLower(CultureInfo.InvariantCulture))
         {
             case "config":
-                Game1.activeClickableMenu = new ConfigMenu(this.inputHelper);
+                Game1.activeClickableMenu = new ConfigMenu();
                 return;
             case "icons":
-                Game1.activeClickableMenu = new IconPicker(this.iconRegistry, this.inputHelper, this.reflectionHelper);
+                Game1.activeClickableMenu = new IconPicker(this.iconRegistry);
                 return;
             case "layout":
-                Game1.activeClickableMenu = new LayoutMenu(this.inputHelper);
+                Game1.activeClickableMenu = new LayoutMenu();
                 return;
             case "search":
                 Game1.activeClickableMenu = new SearchMenu(
                     this.expressionHandler,
                     this.iconRegistry,
-                    this.inputHelper,
-                    this.reflectionHelper,
                     "({category}~\"fish\" !{tags}~\"ocean\" [{quality}~iridium {quality}~gold])");
 
                 return;
             case "tab":
-                Game1.activeClickableMenu = new TabMenu(
-                    this.configManager,
-                    this.expressionHandler,
-                    this.iconRegistry,
-                    this.inputHelper,
-                    this.reflectionHelper);
+                Game1.activeClickableMenu = new TabMenu(this.configManager, this.expressionHandler, this.iconRegistry);
 
                 return;
         }

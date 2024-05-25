@@ -35,25 +35,19 @@ internal sealed class PopupSelect<TItem> : BaseMenu
 
     /// <summary>Initializes a new instance of the <see cref="PopupSelect{TItem}" /> class.</summary>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="items">The list of values to select from.</param>
     /// <param name="initialValue">The initial value of the text field.</param>
     /// <param name="getValue">A function which returns a string from the item.</param>
     /// <param name="maxItems">The maximum number of items to display.</param>
     public PopupSelect(
         IIconRegistry iconRegistry,
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
         IEnumerable<TItem> items,
         string? initialValue,
         Func<TItem, string>? getValue = null,
         int maxItems = int.MaxValue)
-        : base(inputHelper, width: 400)
+        : base(width: 400)
     {
         this.selectOption = new SelectOption<TItem>(
-            inputHelper,
-            reflectionHelper,
             items,
             this.xPositionOnScreen,
             this.yPositionOnScreen + 48,
@@ -75,8 +69,7 @@ internal sealed class PopupSelect<TItem> : BaseMenu
 
         this.currentText = initialValue ?? string.Empty;
         this.textField = new TextField(
-            this.Input,
-            reflectionHelper,
+            this,
             this.xPositionOnScreen - 12,
             this.yPositionOnScreen,
             this.width,

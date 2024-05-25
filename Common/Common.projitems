@@ -24,6 +24,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IApiFactory.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IEventManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Interfaces\IModIntegration.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Models\Events\ClickedEventArgs.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Events\IClicked.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\FauxCore\Interfaces\ICustomMenu.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Assets\CachedAsset.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Models\Assets\TrackedAsset.cs"/>
@@ -109,7 +111,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)Services\Integrations\ToolbarIcons\ToolbarIconsIntegration.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\EventManager.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)Services\Log.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)Services\UiToolkit.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\BaseComponent.cs"/>
+    <Compile Include="$(MSBuildThisFileDirectory)UI\Components\ButtonComponent.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\TextField.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\TextureComponent.cs"/>
     <Compile Include="$(MSBuildThisFileDirectory)UI\Components\VerticalScrollBar.cs"/>

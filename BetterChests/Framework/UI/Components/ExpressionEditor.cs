@@ -4,10 +4,9 @@ using System.Globalization;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Models.Events;
-using StardewMods.Common.Models;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Components;
-using StardewValley.Menus;
 
 /// <summary>A component which represents an <see cref="IExpression" />.</summary>
 internal abstract class ExpressionEditor : BaseComponent
@@ -17,92 +16,71 @@ internal abstract class ExpressionEditor : BaseComponent
         Color.Red, Color.Yellow, Color.Green, Color.Cyan, Color.Blue, Color.Violet, Color.Pink,
     ];
 
+    private readonly ICustomComponent warningIcon;
+
     /// <summary>Initializes a new instance of the <see cref="ExpressionEditor" /> class.</summary>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
-    /// <param name="x">The x-position of the component.</param>
-    /// <param name="y">The y-position of the component.</param>
-    /// <param name="width">The width of the component.</param>
-    /// <param name="height">The height of the component.</param>
+    /// <param name="parent">The parent menu.</param>
+    /// <param name="x">The component x-coordinate.</param>
+    /// <param name="y">The component y-coordinate.</param>
+    /// <param name="width">The component width.</param>
+    /// <param name="height">The component height.</param>
     /// <param name="expression">The expression.</param>
     /// <param name="level">The level.</param>
-    public ExpressionEditor(
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
+    protected ExpressionEditor(
+        ICustomMenu? parent,
         int x,
         int y,
         int width,
         int height,
         IExpression expression,
         int level)
-        : base(inputHelper, reflectionHelper, x, y, width, height, level.ToString(CultureInfo.InvariantCulture))
+        : base(parent, x, y, width, height, level.ToString(CultureInfo.InvariantCulture))
     {
         this.Expression = expression;
         this.Level = level;
-        this.Color = level >= 0 ? ExpressionEditor.Colors[this.Level % ExpressionEditor.Colors.Length] : Color.Black;
+        this.BaseColor =
+            level >= 0 ? ExpressionEditor.Colors[this.Level % ExpressionEditor.Colors.Length] : Color.Black;
+
+        this.warningIcon = new TextureComponent(
+            this.Parent,
+            "warning",
+            new Rectangle(x - 2, y - 7, 5, 14),
+            Game1.mouseCursors,
+            new Rectangle(403, 496, 5, 14),
+            2f).SetHoverText(I18n.Ui_Invalid_Tooltip());
     }
 
     /// <summary>Event raised when the expression is changed.</summary>
     public abstract event EventHandler<ExpressionChangedEventArgs>? ExpressionChanged;
 
+    /// <summary>Gets the expression.</summary>
     public IExpression Expression { get; }
 
-    public int Level { get; }
+    /// <summary>Gets the base color.</summary>
+    protected Color BaseColor { get; }
 
-    protected Color Color { get; }
+    /// <summary>Gets the level.</summary>
+    protected int Level { get; }
 
-    protected static Color Highlighted(Color color) => Color.Lerp(color, Color.White, 0.5f);
-
-    protected static Color Muted(Color color)
+    /// <inheritdoc />
+    public override void Draw(SpriteBatch spriteBatch, Point cursor, Point offset)
     {
-        color = new Color(
-            (int)Utility.Lerp(color.R, Math.Min(255, color.R + 150), 0.65f),
-            (int)Utility.Lerp(color.G, Math.Min(255, color.G + 150), 0.65f),
-            (int)Utility.Lerp(color.B, Math.Min(255, color.B + 150), 0.65f));
+        UiToolkit.DrawInFrame(
+            spriteBatch,
+            new Rectangle(this.bounds.X + offset.X, this.bounds.Y + offset.Y, this.bounds.Width, this.bounds.Height),
+            sb => this.DrawInFrame(sb, cursor, offset));
 
-        var hsl = HslColor.FromColor(color);
-        hsl.S *= 0.5f;
-        return hsl.ToRgbColor();
-    }
-
-    protected void DrawComponent(
-        SpriteBatch spriteBatch,
-        ClickableComponent? component,
-        Color color,
-        Point cursor,
-        Point offset)
-    {
-        if (component is null)
+        if (this.Expression.IsValid)
         {
             return;
         }
 
-        IClickableMenu.drawTextureBox(
-            spriteBatch,
-            Game1.mouseCursors,
-            new Rectangle(403, 373, 9, 9),
-            component.bounds.X + offset.X,
-            component.bounds.Y + offset.Y,
-            component.bounds.Width,
-            component.bounds.Height,
-            component.bounds.Contains(cursor - offset)
-                ? ExpressionEditor.Highlighted(color)
-                : ExpressionEditor.Muted(color),
-            Game1.pixelZoom,
-            false);
+        this.warningIcon.Update(cursor - offset);
+        this.warningIcon.Draw(spriteBatch, cursor, offset);
 
-        if (!string.IsNullOrWhiteSpace(component.label))
+        if (this.warningIcon.Bounds.Contains(cursor - offset))
         {
-            spriteBatch.DrawString(
-                Game1.smallFont,
-                component.label,
-                new Vector2(component.bounds.X + offset.X + 8, component.bounds.Y + offset.Y + 2),
-                Game1.textColor,
-                0f,
-                Vector2.Zero,
-                1f,
-                SpriteEffects.None,
-                1f);
+            this.SetHoverText(this.warningIcon.HoverText);
         }
     }
 }

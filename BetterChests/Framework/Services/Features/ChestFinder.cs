@@ -24,7 +24,6 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
     private readonly PerScreen<List<Pointer>> pointers = new(() => []);
-    private readonly IReflectionHelper reflectionHelper;
     private readonly PerScreen<IExpression?> searchExpression = new();
     private readonly PerScreen<string> searchText = new(() => string.Empty);
     private readonly ToolbarIconsIntegration toolbarIconsIntegration;
@@ -37,7 +36,6 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="toolbarIconsIntegration">Dependency for Toolbar Icons integration.</param>
     public ChestFinder(
         ContainerFactory containerFactory,
@@ -47,7 +45,6 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         IInputHelper inputHelper,
         MenuHandler menuHandler,
         IModConfig modConfig,
-        IReflectionHelper reflectionHelper,
         ToolbarIconsIntegration toolbarIconsIntegration)
         : base(eventManager, modConfig)
     {
@@ -56,7 +53,6 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
         this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
-        this.reflectionHelper = reflectionHelper;
         this.toolbarIconsIntegration = toolbarIconsIntegration;
     }
 
@@ -175,8 +171,6 @@ internal sealed class ChestFinder : BaseFeature<ChestFinder>
 
     private void OpenSearchBar() =>
         Game1.activeClickableMenu = new SearchOverlay(
-            this.inputHelper,
-            this.reflectionHelper,
             () => this.searchText.Value,
             value =>
             {

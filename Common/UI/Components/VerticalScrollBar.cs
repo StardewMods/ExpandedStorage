@@ -3,6 +3,7 @@ namespace StardewMods.FauxCore.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.FauxCore.Common.Services;
 using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
@@ -11,6 +12,7 @@ namespace StardewMods.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 #endif
@@ -30,8 +32,7 @@ internal sealed class VerticalScrollBar : BaseComponent
     private Rectangle runner;
 
     /// <summary>Initializes a new instance of the <see cref="VerticalScrollBar" /> class.</summary>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
+    /// <param name="parent">The parent menu.</param>
     /// <param name="x">The x-coordinate of the scroll bar.</param>
     /// <param name="y">The y-coordinate of the scroll bar.</param>
     /// <param name="height">The height of the scroll bar.</param>
@@ -42,8 +43,7 @@ internal sealed class VerticalScrollBar : BaseComponent
     /// <param name="getStepSize">The step size for arrows or scroll wheel.</param>
     /// <param name="name">The name of the scroll bar.</param>
     public VerticalScrollBar(
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
+        ICustomMenu parent,
         int x,
         int y,
         int height,
@@ -53,7 +53,7 @@ internal sealed class VerticalScrollBar : BaseComponent
         Func<int> getMax,
         Func<int>? getStepSize = null,
         string name = "ScrollBar")
-        : base(inputHelper, reflectionHelper, x, y, 48, height, name)
+        : base(parent, x, y, 48, height, name)
     {
         this.getMethod = getMethod;
         this.setMethod = setMethod;
@@ -262,7 +262,7 @@ internal sealed class VerticalScrollBar : BaseComponent
             Game1.playSound("shiny4");
         }
 
-        this.IsActive = this.Input.IsDown(SButton.MouseLeft) || this.Input.IsSuppressed(SButton.MouseLeft);
+        this.IsActive = UiToolkit.Input.IsDown(SButton.MouseLeft) || UiToolkit.Input.IsSuppressed(SButton.MouseLeft);
     }
 
     private static int GetDefaultStepSize() => 1;

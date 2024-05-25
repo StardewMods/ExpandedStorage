@@ -26,9 +26,7 @@ internal sealed class IconPicker : BaseMenu
 {
     private readonly ClickableTextureComponent cancelButton;
     private readonly ClickableTextureComponent dropdown;
-    private readonly IInputHelper inputHelper;
     private readonly ClickableTextureComponent okButton;
-    private readonly IReflectionHelper reflectionHelper;
     private readonly SelectIcon selectIcon;
     private readonly List<string> sources;
     private readonly TextField textField;
@@ -38,25 +36,16 @@ internal sealed class IconPicker : BaseMenu
 
     /// <summary>Initializes a new instance of the <see cref="IconPicker" /> class.</summary>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
-    public IconPicker(IIconRegistry iconRegistry, IInputHelper inputHelper, IReflectionHelper reflectionHelper)
-        : base(inputHelper, width: 400)
+    public IconPicker(IIconRegistry iconRegistry)
+        : base(width: 400)
     {
-        this.inputHelper = inputHelper;
-        this.reflectionHelper = reflectionHelper;
         var icons = iconRegistry.GetIcons().ToList();
         this.sources = icons.Select(icon => icon.Source).Distinct().ToList();
         this.sources.Sort();
 
-        this.selectIcon = new SelectIcon(
-            inputHelper,
-            reflectionHelper,
-            icons,
-            5,
-            5,
-            x: this.xPositionOnScreen,
-            y: this.yPositionOnScreen + 48).AddOperation(this.FilterIcons);
+        this.selectIcon =
+            new SelectIcon(icons, 5, 5, x: this.xPositionOnScreen, y: this.yPositionOnScreen + 48).AddOperation(
+                this.FilterIcons);
 
         this
             .AddSubMenu(this.selectIcon)
@@ -68,8 +57,7 @@ internal sealed class IconPicker : BaseMenu
 
         this.currentText = string.Empty;
         this.textField = new TextField(
-            this.Input,
-            reflectionHelper,
+            this,
             this.xPositionOnScreen - 12,
             this.yPositionOnScreen,
             this.width,
@@ -179,13 +167,7 @@ internal sealed class IconPicker : BaseMenu
 
         if (this.dropdown.bounds.Contains(cursor))
         {
-            var sourceDropdown = new Dropdown<string>(
-                this.inputHelper,
-                this.reflectionHelper,
-                this.textField,
-                this.sources,
-                minWidth: this.width,
-                maxItems: 10);
+            var sourceDropdown = new Dropdown<string>(this.textField, this.sources, minWidth: this.width, maxItems: 10);
 
             sourceDropdown.OptionSelected += (_, value) =>
             {

@@ -237,8 +237,8 @@ internal sealed class MenuManager
             return;
         }
 
-        this.Icon = storageIcon.Component(IconStyle.Transparent);
-        this.Icon.bounds = new Rectangle(x, y, Game1.tileSize, Game1.tileSize + 12);
+        this.Icon = storageIcon.Component(IconStyle.Transparent, x, y);
+        this.Icon.bounds.Size = new Point(Game1.tileSize, Game1.tileSize + 12);
         parent.allClickableComponents?.Add(this.Icon);
     }
 

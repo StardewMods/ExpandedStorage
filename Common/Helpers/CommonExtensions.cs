@@ -18,6 +18,9 @@ using StardewValley.Mods;
 /// <summary>Common extension methods.</summary>
 internal static class CommonExtensions
 {
+    private static readonly Dictionary<Color, Color> HighlightedColors = new();
+    private static readonly Dictionary<Color, Color> MutedColors = new();
+
     /// <summary>Generate a box of coordinates centered at a specified point with a given radius.</summary>
     /// <param name="center">The center point of the box.</param>
     /// <param name="radius">The radius of the box.</param>
@@ -151,6 +154,21 @@ internal static class CommonExtensions
     public static int GetInt(this IDictionary<string, string> dictionary, string key, int defaultValue = 0) =>
         dictionary.TryGetValue(key, out var value) ? value.GetInt(defaultValue) : defaultValue;
 
+    /// <summary>Generates a highlighted version of a given color.</summary>
+    /// <param name="color">The color to highlight.</param>
+    /// <returns>The highlighted color.</returns>
+    public static Color Highlight(this Color color)
+    {
+        if (CommonExtensions.HighlightedColors.TryGetValue(color, out var highlightedColor))
+        {
+            return highlightedColor;
+        }
+
+        highlightedColor = Color.Lerp(color, Color.White, 0.5f);
+        CommonExtensions.HighlightedColors[color] = highlightedColor;
+        return highlightedColor;
+    }
+
     /// <summary>Invokes all event handlers for an event.</summary>
     /// <param name="eventHandler">The event.</param>
     /// <param name="source">The source.</param>
@@ -198,6 +216,28 @@ internal static class CommonExtensions
                 // ignored
             }
         }
+    }
+
+    /// <summary>Generates a muted version of a given color.</summary>
+    /// <param name="color">The color to mute.</param>
+    /// <returns>The muted color.</returns>
+    public static Color Muted(this Color color)
+    {
+        if (CommonExtensions.MutedColors.TryGetValue(color, out var mutedColor))
+        {
+            return mutedColor;
+        }
+
+        var hsl = HslColor.FromColor(
+            new Color(
+                (int)Utility.Lerp(color.R, Math.Min(255, color.R + 150), 0.65f),
+                (int)Utility.Lerp(color.G, Math.Min(255, color.G + 150), 0.65f),
+                (int)Utility.Lerp(color.B, Math.Min(255, color.B + 150), 0.65f)));
+
+        hsl.S *= 0.5f;
+        mutedColor = hsl.ToRgbColor();
+        CommonExtensions.MutedColors[color] = mutedColor;
+        return mutedColor;
     }
 
     /// <summary>Maps a float value from one range to the same proportional value in another integer range.</summary>

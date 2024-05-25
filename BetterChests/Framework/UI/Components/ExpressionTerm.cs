@@ -7,72 +7,69 @@ using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
 
 /// <inheritdoc />
 internal sealed class ExpressionTerm : ExpressionEditor
 {
-    private readonly ClickableComponent leftComponent;
-    private readonly IExpression? leftTerm;
+    private readonly List<ButtonComponent> components = [];
+    private readonly ButtonComponent leftComponent;
     private readonly ClickableTextureComponent removeButton;
-    private readonly ClickableComponent rightComponent;
-    private readonly IExpression? rightTerm;
-    private readonly ClickableTextureComponent? warningIcon;
+    private readonly ButtonComponent rightComponent;
 
     private EventHandler<ExpressionChangedEventArgs>? expressionChanged;
 
     /// <summary>Initializes a new instance of the <see cref="ExpressionTerm" /> class.</summary>
-    /// <param name="iconRegistry"></param>
-    /// <param name="inputHelper"></param>
-    /// <param name="reflectionHelper"></param>
-    /// <param name="x"></param>
-    /// <param name="y"></param>
-    /// <param name="width"></param>
-    /// <param name="expression"></param>
-    /// <param name="level"></param>
+    /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
+    /// <param name="parent">The parent menu.</param>
+    /// <param name="x">The component x-coordinate.</param>
+    /// <param name="y">The component y-coordinate.</param>
+    /// <param name="width">The component width.</param>
+    /// <param name="expression">The expression.</param>
+    /// <param name="level">The level.</param>
     public ExpressionTerm(
         IIconRegistry iconRegistry,
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
+        ICustomMenu? parent,
         int x,
         int y,
         int width,
         IExpression expression,
         int level)
-        : base(inputHelper, reflectionHelper, x, y, width, 40, expression, level)
+        : base(parent, x, y, width, 40, expression, level)
     {
         var subWidth = ((width - 12) / 2) - 15;
 
         // Left term
-        this.leftTerm = expression.Expressions.ElementAtOrDefault(0);
-        var text = this.leftTerm is not null ? Localized.Attribute(this.leftTerm.Term) : I18n.Attribute_Any_Name();
-        this.leftComponent = new ClickableComponent(new Rectangle(x, y, subWidth, 40), "left", text);
+        var leftTerm = expression.Expressions.ElementAtOrDefault(0);
+        var text = leftTerm is not null ? Localized.Attribute(leftTerm.Term) : I18n.Attribute_Any_Name();
+        this.leftComponent = new ButtonComponent(this.Parent, x, y, subWidth, 40, "left", text);
+        this.leftComponent.Clicked += (_, _) => this.expressionChanged?.InvokeAll(
+            this.leftComponent,
+            new ExpressionChangedEventArgs(ExpressionChange.ChangeAttribute, this.Expression));
+
+        this.components.Add(this.leftComponent);
 
         // Right term
-        this.rightTerm = expression.Expressions.ElementAtOrDefault(1);
-        this.rightComponent = new ClickableComponent(
-            new Rectangle(x + subWidth + 12, y, subWidth, 40),
+        var rightTerm = expression.Expressions.ElementAtOrDefault(1);
+        this.rightComponent = new ButtonComponent(
+            this.Parent,
+            x + subWidth + 12,
+            y,
+            subWidth,
+            40,
             "right",
-            this.rightTerm?.Term ?? expression.Term);
+            rightTerm?.Term ?? expression.Term);
+
+        this.rightComponent.Clicked += (_, _) => this.expressionChanged?.InvokeAll(
+            this.rightComponent,
+            new ExpressionChangedEventArgs(ExpressionChange.ChangeValue, this.Expression));
+
+        this.components.Add(this.rightComponent);
 
         this.removeButton = iconRegistry
             .Icon(VanillaIcon.DoNot)
-            .Component(IconStyle.Transparent, x + width - 24, y + 8, 2f);
-
-        this.removeButton.name = "remove";
-        this.removeButton.hoverText = I18n.Ui_Remove_Tooltip();
-
-        if (!expression.IsValid)
-        {
-            this.warningIcon = new ClickableTextureComponent(
-                "warning",
-                new Rectangle(x - 2, y - 7, 5, 14),
-                string.Empty,
-                I18n.Ui_Invalid_Tooltip(),
-                Game1.mouseCursors,
-                new Rectangle(403, 496, 5, 14),
-                2f);
-        }
+            .Component(IconStyle.Transparent, x + width - 24, y + 8, 2f, "remove", I18n.Ui_Remove_Tooltip());
     }
 
     /// <inheritdoc />
@@ -85,44 +82,45 @@ internal sealed class ExpressionTerm : ExpressionEditor
     /// <inheritdoc />
     public override void DrawInFrame(SpriteBatch spriteBatch, Point cursor, Point offset)
     {
-        this.DrawComponent(spriteBatch, this.leftComponent, this.Color, cursor, offset);
-        this.DrawComponent(spriteBatch, this.rightComponent, this.Color, cursor, offset);
+        foreach (var component in this.components)
+        {
+            component.SetColor(
+                component.bounds.Contains(cursor - offset) ? this.BaseColor.Highlight() : this.BaseColor.Muted());
+
+            component.Draw(spriteBatch, cursor, offset);
+
+            if (component.Bounds.Contains(cursor - offset))
+            {
+                this.SetHoverText(component.HoverText);
+            }
+        }
+
         this.removeButton.tryHover(cursor.X - offset.X, cursor.Y - offset.Y);
         this.removeButton.draw(spriteBatch, Color.White, 1f, 0, offset.X, offset.Y);
-        this.warningIcon?.tryHover(cursor.X - offset.X, cursor.Y - offset.Y);
-        this.warningIcon?.draw(spriteBatch, Color.White, 1f, 0, offset.X, offset.Y);
+
+        if (this.removeButton.bounds.Contains(cursor - offset))
+        {
+            this.SetHoverText(this.removeButton.hoverText);
+        }
     }
 
     /// <inheritdoc />
     public override bool TryLeftClick(Point cursor)
     {
-        if (this.leftComponent.bounds.Contains(cursor))
+        if (this.components.Any(component => component.TryLeftClick(cursor)))
         {
-            this.expressionChanged?.InvokeAll(
-                this,
-                new ExpressionChangedEventArgs(ExpressionChange.ChangeAttribute, this.Expression));
-
             return true;
         }
 
-        if (this.rightComponent.bounds.Contains(cursor))
+        if (!this.removeButton.bounds.Contains(cursor))
         {
-            this.expressionChanged?.InvokeAll(
-                this,
-                new ExpressionChangedEventArgs(ExpressionChange.ChangeValue, this.Expression));
-
-            return true;
+            return false;
         }
 
-        if (this.removeButton.bounds.Contains(cursor))
-        {
-            this.expressionChanged?.InvokeAll(
-                this,
-                new ExpressionChangedEventArgs(ExpressionChange.Remove, this.Expression));
+        this.expressionChanged?.InvokeAll(
+            this,
+            new ExpressionChangedEventArgs(ExpressionChange.Remove, this.Expression));
 
-            return true;
-        }
-
-        return false;
+        return true;
     }
 }

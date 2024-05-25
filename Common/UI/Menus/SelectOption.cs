@@ -32,8 +32,6 @@ internal sealed class SelectOption<TItem> : FramedMenu
     private EventHandler<TItem?>? selectionChanged;
 
     /// <summary>Initializes a new instance of the <see cref="SelectOption{TItem}" /> class.</summary>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="items">The list of values to select from.</param>
     /// <param name="getValue">A function which returns a string from the item.</param>
     /// <param name="x">The x-position.</param>
@@ -42,8 +40,6 @@ internal sealed class SelectOption<TItem> : FramedMenu
     /// <param name="maxWidth">The maximum width.</param>
     /// <param name="maxItems">The maximum number of items to display.</param>
     public SelectOption(
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
         IEnumerable<TItem> items,
         int x,
         int y,
@@ -51,7 +47,7 @@ internal sealed class SelectOption<TItem> : FramedMenu
         int minWidth = 0,
         int maxWidth = int.MaxValue,
         int maxItems = int.MaxValue)
-        : base(inputHelper, reflectionHelper, x, y)
+        : base(x, y)
     {
         this.getValue = getValue ?? SelectOption<TItem>.GetDefaultValue;
         this.allItems = items
@@ -193,6 +189,24 @@ internal sealed class SelectOption<TItem> : FramedMenu
     public override bool TryLeftClick(Point cursor)
     {
         if (base.TryLeftClick(cursor))
+        {
+            return true;
+        }
+
+        var component = this.components.FirstOrDefault(i => i.bounds.Contains(cursor));
+        if (component is null)
+        {
+            return false;
+        }
+
+        this.CurrentIndex = this.CurrentOffset.Y + int.Parse(component.name, CultureInfo.InvariantCulture);
+        return true;
+    }
+
+    /// <inheritdoc />
+    public override bool TryRightClick(Point cursor)
+    {
+        if (base.TryRightClick(cursor))
         {
             return true;
         }

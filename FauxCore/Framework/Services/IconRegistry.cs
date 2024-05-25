@@ -102,7 +102,13 @@ internal sealed class IconRegistry : IIconRegistry
         var parts = id.Split('/');
         if (parts.Length < 2)
         {
-            return false;
+            if (!IconRegistry.Registries[Mod.Id].icons.TryGetValue(id, out var vanillaIcon))
+            {
+                return false;
+            }
+
+            icon = vanillaIcon;
+            return true;
         }
 
         var modId = parts[0];
@@ -128,7 +134,9 @@ internal sealed class IconRegistry : IIconRegistry
         IconStyle style,
         int x = 0,
         int y = 0,
-        float scale = Game1.pixelZoom)
+        float scale = Game1.pixelZoom,
+        string? name = null,
+        string? hoverText = null)
     {
         var texture = this.GetTexture(icon, style);
         scale = style switch
@@ -140,26 +148,28 @@ internal sealed class IconRegistry : IIconRegistry
             _ => scale,
         };
 
-        return style switch
+        var component = style switch
         {
             IconStyle.Transparent => new ClickableTextureComponent(
-                icon.Id,
+                name ?? icon.Id,
                 new Rectangle(x, y, (int)(icon.Area.Width * scale), (int)(icon.Area.Height * scale)),
                 null,
-                null,
+                hoverText,
                 texture,
                 icon.Area,
                 scale),
             IconStyle.Button => new ClickableTextureComponent(
-                icon.Id,
+                name ?? icon.Id,
                 new Rectangle(x, y, (int)(scale * 16), (int)(scale * 16)),
                 null,
-                null,
+                hoverText,
                 texture,
                 new Rectangle(0, 0, texture.Width, texture.Height),
                 scale),
             _ => throw new ArgumentOutOfRangeException(nameof(style), style, null),
         };
+
+        return component;
     }
 
     private Texture2D GetTexture(IIcon icon, IconStyle style) =>

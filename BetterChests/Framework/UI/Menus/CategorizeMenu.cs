@@ -24,15 +24,8 @@ internal sealed class CategorizeMenu : SearchMenu
     /// <param name="container">The container to categorize.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
-    public CategorizeMenu(
-        IStorageContainer container,
-        IExpressionHandler expressionHandler,
-        IIconRegistry iconRegistry,
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper)
-        : base(expressionHandler, iconRegistry, inputHelper, reflectionHelper, container.CategorizeChestSearchTerm)
+    public CategorizeMenu(IStorageContainer container, IExpressionHandler expressionHandler, IIconRegistry iconRegistry)
+        : base(expressionHandler, iconRegistry, container.CategorizeChestSearchTerm)
     {
         this.container = container;
         this.savedExpression =
@@ -45,17 +38,15 @@ internal sealed class CategorizeMenu : SearchMenu
             .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + Game1.tileSize + 16);
-
-        this.saveButton.hoverText = I18n.Ui_Save_Name();
+                this.yPositionOnScreen + Game1.tileSize + 16,
+                hoverText: I18n.Ui_Save_Name());
 
         this.noStackIcon = iconRegistry.Icon(InternalIcon.NoStack);
         this.stackToggle = this.noStackIcon.Component(
             IconStyle.Button,
             this.xPositionOnScreen + this.width + 4,
-            this.yPositionOnScreen + ((Game1.tileSize + 16) * 2));
-
-        this.stackToggle.hoverText = I18n.Button_IncludeExistingStacks_Name();
+            this.yPositionOnScreen + ((Game1.tileSize + 16) * 2),
+            hoverText: I18n.Button_IncludeExistingStacks_Name());
 
         if (this.container.CategorizeChestIncludeStacks is FeatureOption.Enabled)
         {
@@ -68,18 +59,16 @@ internal sealed class CategorizeMenu : SearchMenu
             .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 3));
-
-        this.copyButton.hoverText = I18n.Ui_Copy_Tooltip();
+                this.yPositionOnScreen + ((Game1.tileSize + 16) * 3),
+                hoverText: I18n.Ui_Copy_Tooltip());
 
         this.pasteButton = iconRegistry
             .Icon(InternalIcon.Paste)
             .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 4));
-
-        this.pasteButton.hoverText = I18n.Ui_Paste_Tooltip();
+                this.yPositionOnScreen + ((Game1.tileSize + 16) * 4),
+                hoverText: I18n.Ui_Paste_Tooltip());
 
         this.okButton = iconRegistry
             .Icon(VanillaIcon.Ok)

@@ -4,7 +4,6 @@ using Microsoft.Xna.Framework;
 using StardewMods.BetterChests.Framework.Enums;
 using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models;
-using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Services.Integrations.FauxCore;
@@ -21,7 +20,6 @@ internal sealed class TabMenu : SearchMenu
     private readonly IIconRegistry iconRegistry;
     private readonly ClickableTextureComponent okButton;
     private readonly ClickableTextureComponent pasteButton;
-    private readonly IReflectionHelper reflectionHelper;
     private readonly ClickableTextureComponent removeButton;
     private readonly ClickableTextureComponent saveButton;
 
@@ -31,19 +29,11 @@ internal sealed class TabMenu : SearchMenu
     /// <param name="configManager">Dependency used for managing config data.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
-    public TabMenu(
-        ConfigManager configManager,
-        IExpressionHandler expressionHandler,
-        IIconRegistry iconRegistry,
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper)
-        : base(expressionHandler, iconRegistry, inputHelper, reflectionHelper, string.Empty)
+    public TabMenu(ConfigManager configManager, IExpressionHandler expressionHandler, IIconRegistry iconRegistry)
+        : base(expressionHandler, iconRegistry, string.Empty)
     {
         this.configManager = configManager;
         this.iconRegistry = iconRegistry;
-        this.reflectionHelper = reflectionHelper;
         this.config = this.configManager.GetNew();
 
         this.saveButton = iconRegistry
@@ -51,54 +41,48 @@ internal sealed class TabMenu : SearchMenu
             .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + Game1.tileSize + 16);
-
-        this.saveButton.hoverText = I18n.Ui_Save_Name();
+                this.yPositionOnScreen + Game1.tileSize + 16,
+                hoverText: I18n.Ui_Save_Name());
 
         this.copyButton = iconRegistry
             .Icon(InternalIcon.Copy)
             .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 2));
-
-        this.copyButton.hoverText = I18n.Ui_Copy_Tooltip();
+                this.yPositionOnScreen + ((Game1.tileSize + 16) * 2),
+                hoverText: I18n.Ui_Copy_Tooltip());
 
         this.pasteButton = iconRegistry
             .Icon(InternalIcon.Paste)
             .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 3));
-
-        this.pasteButton.hoverText = I18n.Ui_Paste_Tooltip();
+                this.yPositionOnScreen + ((Game1.tileSize + 16) * 3),
+                hoverText: I18n.Ui_Paste_Tooltip());
 
         this.editButton = iconRegistry
             .Icon(VanillaIcon.ColorPicker)
             .Component(
                 IconStyle.Transparent,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 4));
-
-        this.editButton.hoverText = I18n.Ui_Edit_Tooltip();
+                this.yPositionOnScreen + ((Game1.tileSize + 16) * 4),
+                hoverText: I18n.Ui_Edit_Tooltip());
 
         this.addButton = iconRegistry
             .Icon(VanillaIcon.Plus)
             .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 5));
-
-        this.addButton.hoverText = I18n.Ui_Add_Tooltip();
+                this.yPositionOnScreen + ((Game1.tileSize + 16) * 5),
+                hoverText: I18n.Ui_Add_Tooltip());
 
         this.removeButton = iconRegistry
             .Icon(VanillaIcon.Trash)
             .Component(
                 IconStyle.Button,
                 this.xPositionOnScreen + this.width + 4,
-                this.yPositionOnScreen + ((Game1.tileSize + 16) * 6));
-
-        this.removeButton.hoverText = I18n.Ui_Remove_Tooltip();
+                this.yPositionOnScreen + ((Game1.tileSize + 16) * 6),
+                hoverText: I18n.Ui_Remove_Tooltip());
 
         this.okButton = iconRegistry
             .Icon(VanillaIcon.Ok)
@@ -129,8 +113,7 @@ internal sealed class TabMenu : SearchMenu
             var icon = this.iconRegistry.Icon(tabData.Icon);
             var tabIcon = new TabEditor(
                 this.iconRegistry,
-                this.Input,
-                reflectionHelper,
+                this,
                 this.xPositionOnScreen - (Game1.tileSize * 2) - 256,
                 this.yPositionOnScreen + (Game1.tileSize * (i + 1)) + 16,
                 (Game1.tileSize * 2) + 256,
@@ -199,8 +182,7 @@ internal sealed class TabMenu : SearchMenu
             var icon = this.iconRegistry.Icon(VanillaIcon.Plus);
             var tabIcon = new TabEditor(
                 this.iconRegistry,
-                this.Input,
-                this.reflectionHelper,
+                this,
                 this.xPositionOnScreen - (Game1.tileSize * 2) - 256,
                 this.yPositionOnScreen + (Game1.tileSize * (this.config.InventoryTabList.Count + 1)) + 16,
                 (Game1.tileSize * 2) + 256,
@@ -264,29 +246,35 @@ internal sealed class TabMenu : SearchMenu
     /// <inheritdoc />
     protected override bool HighlightMethod(Item item) => true;
 
-    private void OnClicked(object? sender, TabClickedEventArgs e)
+    private void OnClicked(object? sender, IClicked e)
     {
+        if (sender is not TabEditor tabEditor)
+        {
+            return;
+        }
+
         Game1.playSound("drumkit6");
-        this.SetSearchText(e.Data.SearchTerm, true);
+        this.SetSearchText(tabEditor.Data.SearchTerm, true);
         if (this.activeTab is not null)
         {
             this.activeTab.Active = false;
         }
 
-        this.activeTab = (TabEditor?)sender;
+        this.activeTab = tabEditor;
         if (this.activeTab is not null)
         {
             this.activeTab.Active = true;
         }
     }
 
-    private void OnMoveDown(object? sender, TabClickedEventArgs e)
+    private void OnMoveDown(object? sender, IClicked e)
     {
-        Game1.playSound("drumkit6");
         if (sender is not TabEditor tabEditor || tabEditor.Index >= this.config.InventoryTabList.Count - 1)
         {
             return;
         }
+
+        Game1.playSound("drumkit6");
 
         (this.config.InventoryTabList[tabEditor.Index], this.config.InventoryTabList[tabEditor.Index + 1]) = (
             this.config.InventoryTabList[tabEditor.Index + 1], this.config.InventoryTabList[tabEditor.Index]);
@@ -306,9 +294,8 @@ internal sealed class TabMenu : SearchMenu
             this.allClickableComponents[index + 1], this.allClickableComponents[index]);
     }
 
-    private void OnMoveUp(object? sender, TabClickedEventArgs e)
+    private void OnMoveUp(object? sender, IClicked e)
     {
-        Game1.playSound("drumkit6");
         if (sender is not TabEditor
             {
                 Index: > 0,
@@ -317,6 +304,7 @@ internal sealed class TabMenu : SearchMenu
             return;
         }
 
+        Game1.playSound("drumkit6");
         (this.config.InventoryTabList[tabEditor.Index], this.config.InventoryTabList[tabEditor.Index - 1]) = (
             this.config.InventoryTabList[tabEditor.Index - 1], this.config.InventoryTabList[tabEditor.Index]);
 

@@ -8,7 +8,7 @@ using StardewMods.Common.Services;
 
 /// <inheritdoc cref="StardewMods.BetterChests.Framework.Interfaces.IFeature" />
 internal abstract class BaseFeature<TFeature> : BaseService<TFeature>, IFeature
-    where TFeature : class, IFeature
+    where TFeature : BaseService<TFeature>, IFeature
 {
     private bool isActivated;
 

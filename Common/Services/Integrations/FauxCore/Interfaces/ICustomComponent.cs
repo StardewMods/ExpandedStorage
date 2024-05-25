@@ -14,23 +14,32 @@ using Microsoft.Xna.Framework.Graphics;
 /// <summary>Represents a custom component.</summary>
 public interface ICustomComponent
 {
+    /// <summary>Event raised when the component is clicked.</summary>
+    event EventHandler<IClicked> Clicked;
+
+    /// <summary>Gets the component bounds.</summary>
+    Rectangle Bounds { get; }
+
+    /// <summary>Gets the color.</summary>
+    Color Color { get; }
+
     /// <summary>Gets the hover text.</summary>
     string? HoverText { get; }
 
+    /// <summary>Gets the parent menu.</summary>
+    ICustomMenu? Parent { get; }
+
     /// <summary>Gets the component position.</summary>
-    Point Position { get; }
+    Point Location { get; }
+
+    /// <summary>Gets the component size.</summary>
+    Point Size { get; }
 
     /// <summary>Draws the component.</summary>
     /// <param name="spriteBatch">The sprite batch to draw the component to.</param>
     /// <param name="cursor">The mouse position.</param>
     /// <param name="offset">The offset.</param>
     void Draw(SpriteBatch spriteBatch, Point cursor, Point offset);
-
-    /// <summary>Draws the component in a framed area.</summary>
-    /// <param name="spriteBatch">The sprite batch to draw the component to.</param>
-    /// <param name="cursor">The mouse position.</param>
-    /// <param name="offset">The offset.</param>
-    void DrawInFrame(SpriteBatch spriteBatch, Point cursor, Point offset);
 
     /// <summary>Moves the component to the specified position.</summary>
     /// <param name="location">The position to move to.</param>
@@ -41,6 +50,11 @@ public interface ICustomComponent
     /// <param name="size">The component dimensions.</param>
     /// <returns>Returns the component.</returns>
     ICustomComponent ResizeTo(Point size);
+
+    /// <summary>Sets the color.</summary>
+    /// <param name="value">The color value.</param>
+    /// <returns>Returns the component.</returns>
+    ICustomComponent SetColor(Color value);
 
     /// <summary>Sets the hover text.</summary>
     /// <param name="value">The hover text value.</param>

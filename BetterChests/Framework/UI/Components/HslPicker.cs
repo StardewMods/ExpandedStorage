@@ -103,10 +103,17 @@ internal sealed class HslPicker
                 + this.xPosition,
         };
 
-        this.copyComponent = iconRegistry.Icon(InternalIcon.Copy).Component(IconStyle.Transparent);
-        this.copyComponent.bounds = new Rectangle(this.xPosition + 30, this.yPosition - 4, 36, 36);
-        this.copyComponent.hoverText = I18n.Ui_Copy_Tooltip();
-        this.copyComponent.scale = 3f;
+        this.copyComponent = iconRegistry
+            .Icon(InternalIcon.Copy)
+            .Component(
+                IconStyle.Transparent,
+                this.xPosition + 30,
+                this.yPosition - 4,
+                3f,
+                "copy",
+                I18n.Ui_Copy_Tooltip());
+
+        this.copyComponent.bounds.Size = new Point(36, 36);
         this.copyComponent.myID = (int)Math.Pow(this.yPosition + 2, 2) + this.xPosition + 34;
 
         this.defaultColorArea = new Rectangle(this.xPosition - 6, this.yPosition - 4, 36, 36);

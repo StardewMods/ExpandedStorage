@@ -12,8 +12,6 @@ internal sealed class ToolbarIconOption : BaseComplexOption
 {
     private static string? hoverText;
 
-    private readonly IIcon checkedIcon;
-    private readonly IIcon downArrowIcon;
     private readonly Func<string> getCurrentId;
     private readonly Func<bool> getEnabled;
     private readonly Func<string> getTooltip;
@@ -22,8 +20,6 @@ internal sealed class ToolbarIconOption : BaseComplexOption
     private readonly Action? moveDown;
     private readonly Action? moveUp;
     private readonly Action<bool> setEnabled;
-    private readonly IIcon uncheckedIcon;
-    private readonly IIcon upArrowIcon;
     private ClickableTextureComponent? checkedComponent;
 
     private string currentId;
@@ -61,10 +57,6 @@ internal sealed class ToolbarIconOption : BaseComplexOption
         this.setEnabled = setEnabled;
         this.moveDown = moveDown;
         this.moveUp = moveUp;
-        this.downArrowIcon = iconRegistry.Icon(VanillaIcon.ArrowDown);
-        this.upArrowIcon = iconRegistry.Icon(VanillaIcon.ArrowUp);
-        this.checkedIcon = iconRegistry.Icon(VanillaIcon.Checked);
-        this.uncheckedIcon = iconRegistry.Icon(VanillaIcon.Unchecked);
         this.UpdateId();
     }
 
@@ -77,65 +69,29 @@ internal sealed class ToolbarIconOption : BaseComplexOption
     /// <inheritdoc />
     public override int Height { get; protected set; }
 
-    private ClickableTextureComponent CheckedIcon
-    {
-        get
-        {
-            if (this.checkedComponent is not null)
-            {
-                return this.checkedComponent;
-            }
+    private ClickableTextureComponent CheckedIcon =>
+        this.checkedComponent ??=
+            this
+                .iconRegistry.Icon(VanillaIcon.Checked)
+                .Component(IconStyle.Transparent, hoverText: I18n.Config_CheckBox_Tooltip());
 
-            this.checkedComponent = this.checkedIcon.Component(IconStyle.Transparent);
-            this.checkedComponent.hoverText = I18n.Config_CheckBox_Tooltip();
-            return this.checkedComponent;
-        }
-    }
+    private ClickableTextureComponent DownArrow =>
+        this.downArrow ??=
+            this
+                .iconRegistry.Icon(VanillaIcon.ArrowDown)
+                .Component(IconStyle.Transparent, hoverText: I18n.Config_MoveDown_Tooltip());
 
-    private ClickableTextureComponent DownArrow
-    {
-        get
-        {
-            if (this.downArrow is not null)
-            {
-                return this.downArrow;
-            }
+    private ClickableTextureComponent UncheckedIcon =>
+        this.uncheckedComponent ??=
+            this
+                .iconRegistry.Icon(VanillaIcon.Unchecked)
+                .Component(IconStyle.Transparent, hoverText: I18n.Config_CheckBox_Tooltip());
 
-            this.downArrow = this.downArrowIcon.Component(IconStyle.Transparent);
-            this.downArrow.hoverText = I18n.Config_MoveDown_Tooltip();
-            return this.downArrow;
-        }
-    }
-
-    private ClickableTextureComponent UncheckedIcon
-    {
-        get
-        {
-            if (this.uncheckedComponent is not null)
-            {
-                return this.uncheckedComponent;
-            }
-
-            this.uncheckedComponent = this.uncheckedIcon.Component(IconStyle.Transparent);
-            this.uncheckedComponent.hoverText = I18n.Config_CheckBox_Tooltip();
-            return this.uncheckedComponent;
-        }
-    }
-
-    private ClickableTextureComponent UpArrow
-    {
-        get
-        {
-            if (this.upArrow is not null)
-            {
-                return this.upArrow;
-            }
-
-            this.upArrow = this.upArrowIcon.Component(IconStyle.Transparent);
-            this.upArrow.hoverText = I18n.Config_MoveUp_Tooltip();
-            return this.upArrow;
-        }
-    }
+    private ClickableTextureComponent UpArrow =>
+        this.upArrow ??=
+            this
+                .iconRegistry.Icon(VanillaIcon.ArrowUp)
+                .Component(IconStyle.Transparent, hoverText: I18n.Config_MoveUp_Tooltip());
 
     private bool Enabled
     {

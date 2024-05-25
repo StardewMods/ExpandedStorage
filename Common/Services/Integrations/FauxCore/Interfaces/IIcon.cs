@@ -1,12 +1,16 @@
 #if IS_FAUXCORE
 namespace StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
-#else
-namespace StardewMods.Common.Services.Integrations.FauxCore;
-#endif
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
+#else
+namespace StardewMods.Common.Services.Integrations.FauxCore;
+
+using Microsoft.Xna.Framework;
+using Microsoft.Xna.Framework.Graphics;
+using StardewValley.Menus;
+#endif
 
 /// <summary>Represents an icon on a sprite sheet.</summary>
 public interface IIcon
@@ -36,6 +40,14 @@ public interface IIcon
     /// <param name="x">The component x-coordinate.</param>
     /// <param name="y">The component y-coordinate.</param>
     /// <param name="scale">The target component scale.</param>
+    /// <param name="name">The name.</param>
+    /// <param name="hoverText">The hover text.</param>
     /// <returns>Returns a new button.</returns>
-    public ClickableTextureComponent Component(IconStyle style, int x = 0, int y = 0, float scale = Game1.pixelZoom);
+    public ClickableTextureComponent Component(
+        IconStyle style,
+        int x = 0,
+        int y = 0,
+        float scale = Game1.pixelZoom,
+        string? name = null,
+        string? hoverText = null);
 }

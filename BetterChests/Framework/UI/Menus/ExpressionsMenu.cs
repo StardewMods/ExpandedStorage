@@ -11,6 +11,7 @@ using StardewMods.BetterChests.Framework.UI.Components;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.Common.UI.Components;
 using StardewMods.Common.UI.Menus;
 using StardewValley.Menus;
 
@@ -20,7 +21,6 @@ internal sealed class ExpressionsMenu : FramedMenu
     private readonly IExpressionHandler expressionHandler;
     private readonly Func<string> getSearchText;
     private readonly IIconRegistry iconRegistry;
-    private readonly IReflectionHelper reflectionHelper;
     private readonly Action<string> setSearchText;
 
     private ExpressionGroup? baseComponent;
@@ -28,8 +28,6 @@ internal sealed class ExpressionsMenu : FramedMenu
     /// <summary>Initializes a new instance of the <see cref="ExpressionsMenu" /> class.</summary>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="getSearchText">A function that gets the current search text.</param>
     /// <param name="setSearchText">An action that sets the current search text.</param>
     /// <param name="xPosition">The x-position of the menu.</param>
@@ -39,26 +37,23 @@ internal sealed class ExpressionsMenu : FramedMenu
     public ExpressionsMenu(
         IExpressionHandler expressionHandler,
         IIconRegistry iconRegistry,
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
         Func<string> getSearchText,
         Action<string> setSearchText,
         int xPosition,
         int yPosition,
         int width,
         int height)
-        : base(inputHelper, reflectionHelper, xPosition, yPosition, width, height)
+        : base(xPosition, yPosition, width, height)
     {
         this.expressionHandler = expressionHandler;
         this.iconRegistry = iconRegistry;
-        this.reflectionHelper = reflectionHelper;
         this.getSearchText = getSearchText;
         this.setSearchText = setSearchText;
     }
 
     /// <inheritdoc />
     public override Rectangle Frame =>
-        new(this.xPositionOnScreen - 4, this.yPositionOnScreen - 8, this.width + 8, this.height + 16);
+        new(this.xPositionOnScreen - 4, this.yPositionOnScreen - 8, this.width + 8, this.height + 20);
 
     /// <inheritdoc />
     public override int StepSize => 40;
@@ -70,16 +65,13 @@ internal sealed class ExpressionsMenu : FramedMenu
     }
 
     /// <inheritdoc />
-    public override void DrawInFrame(SpriteBatch spriteBatch, Point cursor) =>
-        this.baseComponent?.Draw(spriteBatch, cursor, new Point(-this.CurrentOffset.X, -this.CurrentOffset.Y));
-
-    /// <inheritdoc />
     public override void DrawUnder(SpriteBatch b, Point cursor) { }
 
     /// <summary>Re-initializes the components of the object with the given initialization expression.</summary>
     /// <param name="initExpression">The initial expression, or null to clear.</param>
     public void ReInitializeComponents(IExpression? initExpression)
     {
+        this.allClickableComponents.Clear();
         if (initExpression is null)
         {
             return;
@@ -87,18 +79,18 @@ internal sealed class ExpressionsMenu : FramedMenu
 
         this.baseComponent = new ExpressionGroup(
             this.iconRegistry,
-            this.Input,
-            this.reflectionHelper,
-            this.xPositionOnScreen,
-            this.yPositionOnScreen,
-            this.width,
+            this,
+            this.Bounds.X,
+            this.Bounds.Y,
+            this.Bounds.Width,
             initExpression,
             -1);
 
         this.baseComponent.ExpressionChanged += this.OnExpressionChanged;
+        this.allClickableComponents.Add(this.baseComponent);
 
         this.SetMaxOffset(
-            new Point(-1, Math.Max(0, this.baseComponent.bounds.Bottom - this.height - this.yPositionOnScreen)));
+            new Point(-1, Math.Max(0, this.baseComponent.bounds.Bottom - this.Bounds.Height - this.Bounds.Y)));
     }
 
     private void Add(IExpression toAddTo, ExpressionType expressionType)
@@ -170,10 +162,10 @@ internal sealed class ExpressionsMenu : FramedMenu
             case ExpressionChange.AddTerm:
                 this.Add(e.Expression, ExpressionType.Comparable);
                 break;
-            case ExpressionChange.ChangeAttribute when sender is Components.ExpressionEditor component:
+            case ExpressionChange.ChangeAttribute when sender is ButtonComponent component:
                 this.ShowDropdown(e.Expression, component);
                 break;
-            case ExpressionChange.ChangeValue when sender is Components.ExpressionEditor component:
+            case ExpressionChange.ChangeValue when sender is ButtonComponent component:
                 this.ShowPopup(e.Expression, component);
                 break;
             case ExpressionChange.Remove:
@@ -213,8 +205,6 @@ internal sealed class ExpressionsMenu : FramedMenu
     private void ShowDropdown(IExpression expression, ClickableComponent component)
     {
         var dropdown = new Dropdown<ItemAttribute>(
-            this.Input,
-            this.reflectionHelper,
             component,
             ItemAttributeExtensions.GetValues().AsEnumerable(),
             static attribute => Localized.Attribute(attribute.ToStringFast()));
@@ -244,14 +234,7 @@ internal sealed class ExpressionsMenu : FramedMenu
             _ => throw new ArgumentOutOfRangeException(nameof(expression)),
         };
 
-        var popupSelect = new PopupSelect<string>(
-            this.iconRegistry,
-            this.Input,
-            this.reflectionHelper,
-            popupItems,
-            component.label,
-            maxItems: 10);
-
+        var popupSelect = new PopupSelect<string>(this.iconRegistry, popupItems, component.label, maxItems: 10);
         popupSelect.OptionSelected += (_, _) =>
         {
             this.ChangeTerm(expression, popupSelect.CurrentText);

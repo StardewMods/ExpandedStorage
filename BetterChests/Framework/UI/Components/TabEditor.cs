@@ -3,8 +3,8 @@ namespace StardewMods.BetterChests.Framework.UI.Components;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.BetterChests.Framework.Models;
-using StardewMods.BetterChests.Framework.Models.Events;
 using StardewMods.Common.Helpers;
+using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
@@ -12,19 +12,16 @@ using StardewValley.Menus;
 /// <summary>A component for configuring a tab.</summary>
 internal sealed class TabEditor : BaseComponent
 {
-    private readonly TabData data;
     private readonly ClickableTextureComponent downArrow;
     private readonly ClickableTextureComponent icon;
     private readonly ClickableTextureComponent upArrow;
 
-    private EventHandler<TabClickedEventArgs>? clicked;
-    private EventHandler<TabClickedEventArgs>? moveDown;
-    private EventHandler<TabClickedEventArgs>? moveUp;
+    private EventHandler<IClicked>? moveDown;
+    private EventHandler<IClicked>? moveUp;
 
     /// <summary>Initializes a new instance of the <see cref="TabEditor" /> class.</summary>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
+    /// <param name="parent">The parent menu.</param>
     /// <param name="x">The x-coordinate of the tab component.</param>
     /// <param name="y">The y-coordinate of the tab component.</param>
     /// <param name="width">The width of the tab component.</param>
@@ -32,53 +29,47 @@ internal sealed class TabEditor : BaseComponent
     /// <param name="tabData">The inventory tab data.</param>
     public TabEditor(
         IIconRegistry iconRegistry,
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
+        ICustomMenu parent,
         int x,
         int y,
         int width,
         IIcon icon,
         TabData tabData)
-        : base(inputHelper, reflectionHelper, x, y, width, Game1.tileSize, tabData.Label)
+        : base(parent, x, y, width, Game1.tileSize, tabData.Label)
     {
-        this.data = tabData;
-        this.icon = icon.Component(IconStyle.Transparent, x, y);
-        this.icon.bounds = this.bounds with
-        {
-            X = this.bounds.X + Game1.tileSize,
-            Width = this.bounds.Width - (Game1.tileSize * 2),
-        };
+        this.Data = tabData;
+        this.icon = icon.Component(IconStyle.Transparent, this.bounds.X + Game1.tileSize, y);
+        this.icon.bounds.Width = this.bounds.Width - (Game1.tileSize * 2);
 
-        this.upArrow = iconRegistry.Icon(VanillaIcon.ArrowUp).Component(IconStyle.Transparent, x + 8, y + 8);
+        this.upArrow = iconRegistry
+            .Icon(VanillaIcon.ArrowUp)
+            .Component(IconStyle.Transparent, x + 8, y + 8, hoverText: I18n.Ui_MoveUp_Tooltip());
 
         this.downArrow = iconRegistry
             .Icon(VanillaIcon.ArrowDown)
-            .Component(IconStyle.Transparent, x + width - Game1.tileSize + 8, y + 8);
-
-        this.downArrow.hoverText = I18n.Ui_MoveDown_Tooltip();
-        this.upArrow.hoverText = I18n.Ui_MoveUp_Tooltip();
-    }
-
-    /// <summary>Event triggered when the tab is clicked.</summary>
-    public event EventHandler<TabClickedEventArgs> Clicked
-    {
-        add => this.clicked += value;
-        remove => this.clicked -= value;
+            .Component(
+                IconStyle.Transparent,
+                x + width - Game1.tileSize + 8,
+                y + 8,
+                hoverText: I18n.Ui_MoveDown_Tooltip());
     }
 
     /// <summary>Event triggered when the move up button is clicked.</summary>
-    public event EventHandler<TabClickedEventArgs> MoveDown
+    public event EventHandler<IClicked> MoveDown
     {
         add => this.moveDown += value;
         remove => this.moveDown -= value;
     }
 
     /// <summary>Event triggered when the move down button is clicked.</summary>
-    public event EventHandler<TabClickedEventArgs> MoveUp
+    public event EventHandler<IClicked> MoveUp
     {
         add => this.moveUp += value;
         remove => this.moveUp -= value;
     }
+
+    /// <summary>Gets the tab data.</summary>
+    public TabData Data { get; }
 
     /// <summary>Gets or sets a value indicating whether the tab is currently active.</summary>
     public bool Active { get; set; } = true;
@@ -233,18 +224,17 @@ internal sealed class TabEditor : BaseComponent
     {
         if (this.Active && this.downArrow.bounds.Contains(cursor))
         {
-            this.moveDown.InvokeAll(this, new TabClickedEventArgs(SButton.MouseLeft, this.data));
+            this.moveDown.InvokeAll(this, new ClickedEventArgs(SButton.MouseLeft, cursor));
             return true;
         }
 
         if (this.Active && this.upArrow.bounds.Contains(cursor))
         {
-            this.moveUp.InvokeAll(this, new TabClickedEventArgs(SButton.MouseLeft, this.data));
+            this.moveUp.InvokeAll(this, new ClickedEventArgs(SButton.MouseLeft, cursor));
             return true;
         }
 
-        this.clicked.InvokeAll(this, new TabClickedEventArgs(SButton.MouseLeft, this.data));
-        return true;
+        return base.TryLeftClick(cursor);
     }
 
     /// <inheritdoc />
@@ -252,17 +242,16 @@ internal sealed class TabEditor : BaseComponent
     {
         if (this.Active && this.downArrow.bounds.Contains(cursor))
         {
-            this.moveDown.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
+            this.moveDown.InvokeAll(this, new ClickedEventArgs(SButton.MouseRight, cursor));
             return true;
         }
 
         if (this.Active && this.upArrow.bounds.Contains(cursor))
         {
-            this.moveUp.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
+            this.moveUp.InvokeAll(this, new ClickedEventArgs(SButton.MouseRight, cursor));
             return true;
         }
 
-        this.clicked.InvokeAll(this, new TabClickedEventArgs(SButton.MouseRight, this.data));
-        return true;
+        return base.TryLeftClick(cursor);
     }
 }

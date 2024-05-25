@@ -1,6 +1,5 @@
 namespace StardewMods.BetterChests.Framework.Services.Features;
 
-using Microsoft.Xna.Framework;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Interfaces;
@@ -138,27 +137,14 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
         // Add new organize button to the bottom inventory menu
         var x = itemGrabMenu.okButton.bounds.X;
         var y = itemGrabMenu.okButton.bounds.Y - Game1.tileSize - 16;
-        this.organizeButton.Value = this.iconRegistry.Icon(VanillaIcon.Organize).Component(IconStyle.Transparent, x, y);
-        this.organizeButton.Value.bounds = this.organizeButton.Value.bounds with
-        {
-            X = x,
-            Y = y,
-        };
-
-        this.organizeButton.Value = new ClickableTextureComponent(
-            string.Empty,
-            new Rectangle(x, y, Game1.tileSize, Game1.tileSize),
-            string.Empty,
-            Game1.content.LoadString("Strings\\UI:ItemGrab_Organize"),
-            Game1.mouseCursors,
-            new Rectangle(162, 440, 16, 16),
-            4f)
-        {
-            myID = (int)Math.Pow(y, 2) + x,
-            upNeighborID = 5948,
-            downNeighborID = 4857,
-            leftNeighborID = 12,
-        };
+        this.organizeButton.Value =
+            this
+                .iconRegistry.Icon(VanillaIcon.Organize)
+                .Component(
+                    IconStyle.Transparent,
+                    x,
+                    y,
+                    hoverText: Game1.content.LoadString("Strings\\UI:ItemGrab_Organize"));
 
         itemGrabMenu.trashCan.bounds.Y -= Game1.tileSize;
         itemGrabMenu.okButton.upNeighborID = this.organizeButton.Value.myID;

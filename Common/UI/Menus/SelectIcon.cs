@@ -36,8 +36,6 @@ internal class SelectIcon : FramedMenu
     private EventHandler<IIcon?>? selectionChanged;
 
     /// <summary>Initializes a new instance of the <see cref="SelectIcon" /> class.</summary>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="allIcons">The icons to pick from.</param>
     /// <param name="rows">This rows of icons to display.</param>
     /// <param name="columns">The columns of icons to display.</param>
@@ -47,8 +45,6 @@ internal class SelectIcon : FramedMenu
     /// <param name="x">The x-position.</param>
     /// <param name="y">The y-position.</param>
     public SelectIcon(
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
         IEnumerable<IIcon> allIcons,
         int rows,
         int columns,
@@ -58,8 +54,6 @@ internal class SelectIcon : FramedMenu
         int? x = null,
         int? y = null)
         : base(
-            inputHelper,
-            reflectionHelper,
             x,
             y,
             (columns * ((int)(scale * 16) + spacing)) + spacing,

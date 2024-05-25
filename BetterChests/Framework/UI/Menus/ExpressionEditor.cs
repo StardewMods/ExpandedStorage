@@ -27,7 +27,6 @@ internal sealed class ExpressionEditor : FramedMenu
     private readonly List<(Color Color, ClickableComponent Component, IExpression? Expression, string Tooltip, Action?
         Action)> items = [];
 
-    private readonly IReflectionHelper reflectionHelper;
     private readonly Action<string> setSearchText;
 
     private IExpression? baseExpression;
@@ -35,8 +34,6 @@ internal sealed class ExpressionEditor : FramedMenu
     /// <summary>Initializes a new instance of the <see cref="ExpressionEditor" /> class.</summary>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     /// <param name="getSearchText">A function that gets the current search text.</param>
     /// <param name="setSearchText">An action that sets the current search text.</param>
     /// <param name="xPosition">The x-position of the menu.</param>
@@ -46,19 +43,16 @@ internal sealed class ExpressionEditor : FramedMenu
     public ExpressionEditor(
         IExpressionHandler expressionHandler,
         IIconRegistry iconRegistry,
-        IInputHelper inputHelper,
-        IReflectionHelper reflectionHelper,
         Func<string> getSearchText,
         Action<string> setSearchText,
         int xPosition,
         int yPosition,
         int width,
         int height)
-        : base(inputHelper, reflectionHelper, xPosition, yPosition, width, height)
+        : base(xPosition, yPosition, width, height)
     {
         this.expressionHandler = expressionHandler;
         this.iconRegistry = iconRegistry;
-        this.reflectionHelper = reflectionHelper;
         this.getSearchText = getSearchText;
         this.setSearchText = setSearchText;
     }
@@ -583,8 +577,6 @@ internal sealed class ExpressionEditor : FramedMenu
     private void ShowDropdown(IExpression expression, ClickableComponent component)
     {
         var dropdown = new Dropdown<ItemAttribute>(
-            this.Input,
-            this.reflectionHelper,
             component,
             ItemAttributeExtensions.GetValues().AsEnumerable(),
             static attribute => Localized.Attribute(attribute.ToStringFast()));
@@ -614,13 +606,7 @@ internal sealed class ExpressionEditor : FramedMenu
             _ => throw new ArgumentOutOfRangeException(nameof(expression)),
         };
 
-        var popupSelect = new PopupSelect<string>(
-            this.iconRegistry,
-            this.Input,
-            this.reflectionHelper,
-            popupItems,
-            component.label,
-            maxItems: 10);
+        var popupSelect = new PopupSelect<string>(this.iconRegistry, popupItems, component.label, maxItems: 10);
 
         popupSelect.OptionSelected += (_, _) =>
         {

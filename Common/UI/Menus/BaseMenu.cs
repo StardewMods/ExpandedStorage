@@ -3,6 +3,7 @@ namespace StardewMods.FauxCore.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.FauxCore.Common.Services;
 using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
@@ -11,6 +12,7 @@ namespace StardewMods.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 #endif
@@ -24,14 +26,12 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     private string? hoverText;
 
     /// <summary>Initializes a new instance of the <see cref="BaseMenu" /> class.</summary>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="x">The x-position of the menu.</param>
     /// <param name="y">The y-position of the menu.</param>
     /// <param name="width">The width of the menu.</param>
     /// <param name="height">The height of the menu.</param>
     /// <param name="showUpperRightCloseButton">A value indicating whether to show the right close button.</param>
     protected BaseMenu(
-        IInputHelper inputHelper,
         int? x = null,
         int? y = null,
         int? width = null,
@@ -44,7 +44,6 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
             height ?? 600 + (IClickableMenu.borderWidth * 2),
             showUpperRightCloseButton)
     {
-        this.Input = inputHelper;
         this.allClickableComponents ??= [];
         this.bounds = new Rectangle(this.xPositionOnScreen, this.yPositionOnScreen, this.width, this.height);
         if (this.upperRightCloseButton is not null)
@@ -54,7 +53,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public Rectangle Bounds => this.bounds;
+    public virtual Rectangle Bounds => this.bounds;
 
     /// <inheritdoc />
     public Point Dimensions => this.Bounds.Location;
@@ -67,9 +66,6 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
 
     /// <inheritdoc />
     public IClickableMenu? Parent { get; private set; }
-
-    /// <summary>Gets the input helper.</summary>
-    protected IInputHelper Input { get; }
 
     /// <inheritdoc />
     public ICustomMenu AddSubMenu(IClickableMenu subMenu)
@@ -89,7 +85,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     /// <inheritdoc />
     public sealed override void draw(SpriteBatch b, int red = -1, int green = -1, int blue = -1)
     {
-        var cursor = this.Input.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        var cursor = UiToolkit.Cursor;
         this.SetHoverText(null);
 
         // Draw under
@@ -99,34 +95,6 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
         foreach (var subMenu in this.SubMenus)
         {
             subMenu.draw(b, red, green, blue);
-        }
-
-        // Draw components
-        foreach (var component in this.allClickableComponents)
-        {
-            switch (component)
-            {
-                case ClickableTextureComponent
-                {
-                    visible: true,
-                } clickableTextureComponent:
-                    clickableTextureComponent.draw(b);
-                    if (clickableTextureComponent.bounds.Contains(cursor)
-                        && !string.IsNullOrWhiteSpace(clickableTextureComponent.hoverText))
-                    {
-                        this.SetHoverText(clickableTextureComponent.hoverText);
-                    }
-
-                    break;
-                case ICustomComponent customComponent when component.visible:
-                    customComponent.Draw(b, cursor, Point.Zero);
-                    if (component.bounds.Contains(cursor) && !string.IsNullOrWhiteSpace(customComponent.HoverText))
-                    {
-                        this.SetHoverText(customComponent.HoverText);
-                    }
-
-                    break;
-            }
         }
 
         // Draw menu
@@ -142,7 +110,36 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public virtual void Draw(SpriteBatch spriteBatch, Point cursor) { }
+    public virtual void Draw(SpriteBatch spriteBatch, Point cursor)
+    {
+        // Draw components
+        foreach (var component in this.allClickableComponents)
+        {
+            switch (component)
+            {
+                case ICustomComponent customComponent when component.visible:
+                    customComponent.Draw(spriteBatch, cursor, Point.Zero);
+                    if (component.bounds.Contains(cursor) && !string.IsNullOrWhiteSpace(customComponent.HoverText))
+                    {
+                        this.SetHoverText(customComponent.HoverText);
+                    }
+
+                    break;
+                case ClickableTextureComponent
+                {
+                    visible: true,
+                } clickableTextureComponent:
+                    clickableTextureComponent.draw(spriteBatch);
+                    if (clickableTextureComponent.bounds.Contains(cursor)
+                        && !string.IsNullOrWhiteSpace(clickableTextureComponent.hoverText))
+                    {
+                        this.SetHoverText(clickableTextureComponent.hoverText);
+                    }
+
+                    break;
+            }
+        }
+    }
 
     /// <inheritdoc />
     public virtual void DrawOver(SpriteBatch spriteBatch, Point cursor)
@@ -188,30 +185,15 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
         base.leftClickHeld(x, y);
         var cursor = new Point(x, y);
 
+        if (this.bounds.Contains(cursor))
+        {
+            this.Update(cursor);
+        }
+
         // Hold left-click sub-menus
         foreach (var subMenu in this.SubMenus)
         {
-            switch (subMenu)
-            {
-                case BaseMenu baseMenu:
-                    baseMenu.Update(cursor);
-                    baseMenu.leftClickHeld(x, y);
-                    break;
-                default:
-                    subMenu.leftClickHeld(x, y);
-                    break;
-            }
-        }
-
-        // Hold left-click components
-        foreach (var component in this.allClickableComponents)
-        {
-            switch (component)
-            {
-                case ICustomComponent customComponent when component.visible:
-                    customComponent.Update(cursor);
-                    break;
-            }
+            subMenu.leftClickHeld(x, y);
         }
     }
 
@@ -241,7 +223,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
             switch (component)
             {
                 case ICustomComponent customComponent:
-                    customComponent.MoveTo(customComponent.Position + delta);
+                    customComponent.MoveTo(customComponent.Location + delta);
                     break;
                 default:
                     component.bounds.Offset(delta);
@@ -260,7 +242,6 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     {
         base.performHoverAction(x, y);
         var cursor = new Point(x, y);
-
         if (this.TryHover(cursor))
         {
             return;
@@ -271,30 +252,15 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
         {
             switch (subMenu)
             {
-                case BaseMenu baseMenu when baseMenu.TryHover(cursor): return;
                 case BaseMenu baseMenu:
-                    baseMenu.Update(cursor);
-                    baseMenu.performHoverAction(x, y);
+                    if (baseMenu.TryHover(cursor))
+                    {
+                        return;
+                    }
+
                     break;
                 default:
                     subMenu.performHoverAction(x, y);
-                    break;
-            }
-        }
-
-        // Hover components
-        foreach (var component in this.allClickableComponents)
-        {
-            switch (component)
-            {
-                case ClickableTextureComponent
-                {
-                    visible: true,
-                } clickableTextureComponent:
-                    clickableTextureComponent.tryHover(x, y);
-                    break;
-                case ICustomComponent customComponent when component.visible:
-                    customComponent.Update(cursor);
                     break;
             }
         }
@@ -311,21 +277,21 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
             return;
         }
 
-        // Click sub-menus
+        // Left-click sub-menus
         foreach (var subMenu in this.SubMenus)
         {
-            subMenu.receiveLeftClick(x, y, playSound);
-        }
-
-        // Click components
-        foreach (var component in this.allClickableComponents)
-        {
-            switch (component)
+            switch (subMenu)
             {
-                case ICustomComponent customComponent when component.visible
-                    && component.bounds.Contains(cursor)
-                    && customComponent.TryLeftClick(cursor):
-                    return;
+                case BaseMenu baseMenu:
+                    if (baseMenu.TryLeftClick(cursor))
+                    {
+                        return;
+                    }
+
+                    break;
+                default:
+                    subMenu.receiveLeftClick(x, y, playSound);
+                    break;
             }
         }
     }
@@ -341,21 +307,21 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
             return;
         }
 
-        // Click sub-menus
+        // Right-click sub-menus
         foreach (var subMenu in this.SubMenus)
         {
-            subMenu.receiveRightClick(x, y, playSound);
-        }
-
-        // Click components
-        foreach (var component in this.allClickableComponents)
-        {
-            switch (component)
+            switch (subMenu)
             {
-                case ICustomComponent customComponent when component.visible
-                    && component.bounds.Contains(cursor)
-                    && customComponent.TryRightClick(cursor):
-                    return;
+                case BaseMenu baseMenu:
+                    if (baseMenu.TryRightClick(cursor))
+                    {
+                        return;
+                    }
+
+                    break;
+                default:
+                    subMenu.receiveRightClick(x, y, playSound);
+                    break;
             }
         }
     }
@@ -364,7 +330,8 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     public sealed override void receiveScrollWheelAction(int direction)
     {
         base.receiveScrollWheelAction(direction);
-        var cursor = this.Input.GetCursorPosition().GetScaledScreenPixels();
+        var cursor = UiToolkit.Cursor;
+
         if (this.Bounds.Contains(cursor) && this.TryScroll(direction))
         {
             return;
@@ -375,7 +342,13 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
         {
             switch (subMenu)
             {
-                case BaseMenu baseMenu when baseMenu.Bounds.Contains(cursor) && baseMenu.TryScroll(direction): return;
+                case BaseMenu baseMenu:
+                    if (baseMenu.Bounds.Contains(cursor) && baseMenu.TryScroll(direction))
+                    {
+                        return;
+                    }
+
+                    break;
                 default:
                     subMenu.receiveScrollWheelAction(direction);
                     break;
@@ -387,6 +360,9 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     public sealed override void releaseLeftClick(int x, int y)
     {
         base.releaseLeftClick(x, y);
+        var cursor = new Point(x, y);
+
+        this.Update(cursor);
 
         // Un-click sub-menus
         foreach (var subMenu in this.SubMenus)
@@ -399,6 +375,8 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     public virtual ICustomMenu ResizeTo(Point size)
     {
         this.bounds.Size = size;
+        this.width = size.X;
+        this.height = size.Y;
         return this;
     }
 
@@ -416,20 +394,84 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public virtual bool TryHover(Point cursor) => false;
+    public virtual bool TryHover(Point cursor)
+    {
+        // Hover components
+        foreach (var component in this.allClickableComponents.OfType<ClickableTextureComponent>())
+        {
+            component.tryHover(cursor.X, cursor.Y);
+        }
+
+        return false;
+    }
 
     /// <inheritdoc />
-    public virtual bool TryLeftClick(Point cursor) => false;
+    public virtual bool TryLeftClick(Point cursor)
+    {
+        // Left-click components
+        foreach (var component in this.allClickableComponents)
+        {
+            if (component is ICustomComponent customComponent
+                && component.visible
+                && component.bounds.Contains(cursor)
+                && customComponent.TryLeftClick(cursor))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <inheritdoc />
-    public virtual bool TryRightClick(Point cursor) => false;
+    public virtual bool TryRightClick(Point cursor)
+    {
+        // Right-click components
+        foreach (var component in this.allClickableComponents)
+        {
+            if (component is ICustomComponent customComponent
+                && component.visible
+                && component.bounds.Contains(cursor)
+                && customComponent.TryRightClick(cursor))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <inheritdoc />
-    public virtual bool TryScroll(int direction) => false;
+    public virtual bool TryScroll(int direction)
+    {
+        // Scroll components
+        foreach (var component in this.allClickableComponents)
+        {
+            if (component is ICustomComponent customComponent
+                && component.visible
+                && component.bounds.Contains(UiToolkit.Cursor)
+                && customComponent.TryScroll(direction))
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
 
     /// <inheritdoc />
     public virtual void Update(Point cursor)
     {
-        // Do nothing
+        // Update sub-menus
+        foreach (var subMenu in this.SubMenus.OfType<BaseMenu>())
+        {
+            subMenu.Update(cursor);
+        }
+
+        // Update components
+        foreach (var component in this.allClickableComponents.OfType<ICustomComponent>())
+        {
+            component.Update(cursor);
+        }
     }
 }

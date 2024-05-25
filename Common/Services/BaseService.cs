@@ -5,8 +5,9 @@ namespace StardewMods.Common.Services;
 #endif
 
 /// <summary>This abstract class serves as the base for all service classes.</summary>
+/// <typeparam name="TService">The service type.</typeparam>
 internal abstract class BaseService<TService>
-    where TService : class
+    where TService : BaseService<TService>
 {
     /// <summary>Initializes a new instance of the <see cref="BaseService{TService}" /> class.</summary>
     protected BaseService()
@@ -17,11 +18,11 @@ internal abstract class BaseService<TService>
     }
 
     /// <summary>Gets a unique id for this service.</summary>
-    public string Id { get; }
+    protected string Id { get; }
 
     /// <summary>Gets a globally unique prefix for this service.</summary>
-    public string Prefix { get; }
+    protected string Prefix { get; }
 
     /// <summary>Gets a globally unique id for this service.</summary>
-    public string UniqueId { get; }
+    protected string UniqueId { get; }
 }

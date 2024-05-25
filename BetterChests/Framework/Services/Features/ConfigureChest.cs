@@ -25,7 +25,6 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     private readonly IInputHelper inputHelper;
     private readonly PerScreen<IStorageContainer?> lastContainer = new();
     private readonly MenuHandler menuHandler;
-    private readonly IReflectionHelper reflectionHelper;
 
     /// <summary>Initializes a new instance of the <see cref="ConfigureChest" /> class.</summary>
     /// <param name="configManager">Dependency used for managing config data.</param>
@@ -37,7 +36,6 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
     /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public ConfigureChest(
         ConfigManager configManager,
         ContainerFactory containerFactory,
@@ -47,8 +45,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         GenericModConfigMenuIntegration genericModConfigMenuIntegration,
         IIconRegistry iconRegistry,
         IInputHelper inputHelper,
-        MenuHandler menuHandler,
-        IReflectionHelper reflectionHelper)
+        MenuHandler menuHandler)
         : base(eventManager, configManager)
     {
         this.configManager = configManager;
@@ -59,7 +56,6 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         this.iconRegistry = iconRegistry;
         this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
-        this.reflectionHelper = reflectionHelper;
     }
 
     /// <inheritdoc />
@@ -103,17 +99,17 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
     private string GetHoverText(IIcon icon)
     {
-        if (icon == this.ConfigureIcon)
+        if (icon.Id == this.ConfigureIcon.Id)
         {
             return I18n.Configure_Options_Name();
         }
 
-        if (icon == this.CategorizeIcon)
+        if (icon.Id == this.CategorizeIcon.Id)
         {
             return I18n.Configure_Categorize_Name();
         }
 
-        if (icon == this.SortIcon)
+        if (icon.Id == this.SortIcon.Id)
         {
             return I18n.Configure_Sorting_Name();
         }
@@ -163,9 +159,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
         focus.Release();
         this.inputHelper.Suppress(e.Button);
-        var dropdown =
-            new IconDropdown(this.inputHelper, this.reflectionHelper, icon, options, 3, 1, this.GetHoverText);
-
+        var dropdown = new IconDropdown(icon, options, 3, 1, this.GetHoverText);
         dropdown.IconSelected += (_, i) => this.ShowMenu(container, i);
         Game1.activeClickableMenu?.SetChildMenu(dropdown);
     }
@@ -208,32 +202,22 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
     private void ShowMenu(IStorageContainer container, IIcon? icon)
     {
         this.lastContainer.Value = container;
-        if (icon is null || icon == this.ConfigureIcon)
+        if (icon is null || icon.Id == this.ConfigureIcon.Id)
         {
             this.containerHandler.Configure(container);
             return;
         }
 
-        if (icon == this.CategorizeIcon)
+        if (icon.Id == this.CategorizeIcon.Id)
         {
-            Game1.activeClickableMenu = new CategorizeMenu(
-                container,
-                this.expressionHandler,
-                this.iconRegistry,
-                this.inputHelper,
-                this.reflectionHelper);
+            Game1.activeClickableMenu = new CategorizeMenu(container, this.expressionHandler, this.iconRegistry);
 
             return;
         }
 
-        if (icon == this.SortIcon)
+        if (icon.Id == this.SortIcon.Id)
         {
-            Game1.activeClickableMenu = new SortMenu(
-                container,
-                this.expressionHandler,
-                this.iconRegistry,
-                this.inputHelper,
-                this.reflectionHelper);
+            Game1.activeClickableMenu = new SortMenu(container, this.expressionHandler, this.iconRegistry);
         }
     }
 }

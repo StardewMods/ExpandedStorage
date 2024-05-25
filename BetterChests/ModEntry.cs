@@ -44,6 +44,7 @@ internal sealed class ModEntry : Mod
         container.RegisterSingleton<StatusEffectManager>();
         container.RegisterSingleton<IThemeHelper, FauxCoreIntegration>();
         container.RegisterSingleton<ToolbarIconsIntegration>();
+        container.RegisterSingleton<UiToolkit>();
         container.RegisterInstance<Func<IModConfig>>(container.GetInstance<IModConfig>);
         container.Collection.Register<IFeature>(
             new[]

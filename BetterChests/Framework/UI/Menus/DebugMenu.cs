@@ -16,9 +16,7 @@ internal sealed class DebugMenu : BaseMenu
 
     /// <summary>Initializes a new instance of the <see cref="DebugMenu" /> class.</summary>
     /// <param name="debugMode">Dependency used for debugging features.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
-    public DebugMenu(DebugMode debugMode, IInputHelper inputHelper)
-        : base(inputHelper)
+    public DebugMenu(DebugMode debugMode)
     {
         this.debugMode = debugMode;
         var lineHeight = Game1.smallFont.MeasureString("T").ToPoint().Y;

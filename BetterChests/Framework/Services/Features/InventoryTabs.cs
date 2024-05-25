@@ -15,34 +15,26 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
 {
     private readonly IExpressionHandler expressionHandler;
     private readonly IIconRegistry iconRegistry;
-    private readonly IInputHelper inputHelper;
     private readonly MenuHandler menuHandler;
-    private readonly IReflectionHelper reflectionHelper;
     private readonly PerScreen<List<InventoryTab>> tabs = new(() => []);
 
     /// <summary>Initializes a new instance of the <see cref="InventoryTabs" /> class.</summary>
     /// <param name="eventManager">Dependency used for managing events.</param>
     /// <param name="expressionHandler">Dependency used for parsing expressions.</param>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    /// <param name="inputHelper">Dependency used for checking and changing input state.</param>
     /// <param name="menuHandler">Dependency used for managing the current menu.</param>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
-    /// <param name="reflectionHelper">Dependency used for reflecting into non-public code.</param>
     public InventoryTabs(
         IEventManager eventManager,
         IExpressionHandler expressionHandler,
         IIconRegistry iconRegistry,
-        IInputHelper inputHelper,
         MenuHandler menuHandler,
-        IModConfig modConfig,
-        IReflectionHelper reflectionHelper)
+        IModConfig modConfig)
         : base(eventManager, modConfig)
     {
         this.expressionHandler = expressionHandler;
         this.iconRegistry = iconRegistry;
-        this.inputHelper = inputHelper;
         this.menuHandler = menuHandler;
-        this.reflectionHelper = reflectionHelper;
     }
 
     /// <inheritdoc />
@@ -56,12 +48,17 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
     protected override void Deactivate() =>
         this.Events.Unsubscribe<InventoryMenuChangedEventArgs>(this.OnInventoryMenuChanged);
 
-    private void OnClicked(object? sender, TabClickedEventArgs e)
+    private void OnClicked(object? sender, IClicked e)
     {
-        Log.Trace("{0}: Switching tab to {1}.", this.Id, e.Data.Label);
+        if (sender is not InventoryTab tab)
+        {
+            return;
+        }
+
+        Log.Trace("{0}: Switching tab to {1}.", this.Id, tab.Data.Label);
         Game1.playSound("drumkit6");
-        _ = this.expressionHandler.TryParseExpression(e.Data.SearchTerm, out var expression);
-        this.Events.Publish(new SearchChangedEventArgs(e.Data.SearchTerm, expression));
+        _ = this.expressionHandler.TryParseExpression(tab.Data.SearchTerm, out var expression);
+        this.Events.Publish(new SearchChangedEventArgs(tab.Data.SearchTerm, expression));
     }
 
     private void OnInventoryMenuChanged(InventoryMenuChangedEventArgs e)
@@ -96,7 +93,7 @@ internal sealed class InventoryTabs : BaseFeature<InventoryTabs>
                 continue;
             }
 
-            var tabIcon = new InventoryTab(this.inputHelper, this.reflectionHelper, x, y, icon, tabData);
+            var tabIcon = new InventoryTab(null, x, y, icon, tabData);
             tabIcon.Clicked += this.OnClicked;
             e.AddComponent(tabIcon);
 
