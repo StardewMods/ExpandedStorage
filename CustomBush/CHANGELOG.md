@@ -1,11 +1,15 @@
 # Custom Bush Change Log
 
-## 1.2.2 (Unreleased)
+## 1.2.2 (November 5, 2024)
 
 ### Changed
 
 * Updated for FauxCore 1.2.0.
 * Generate a default name/description if one is not provided.
+
+### Fixed
+
+* Updated for SDV 1.6.10 and SMAPI 4.1.3.
 
 ## 1.2.1 (May 1, 2024)
 

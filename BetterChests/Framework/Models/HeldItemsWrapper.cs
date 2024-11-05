@@ -2,6 +2,7 @@ namespace StardewMods.BetterChests.Framework.Models;
 
 using System.Collections;
 using Netcode;
+using StardewMods.Common.Services;
 using StardewValley.Inventories;
 using StardewValley.Objects;
 
@@ -165,6 +166,34 @@ internal sealed class HeldItemsWrapper : IInventory
     }
 
     /// <inheritdoc />
+    public int Reduce(Item item, int count, bool reduceRemainderFromInventory = false)
+    {
+        var index = this.IndexOf(item);
+        var remaining = count;
+        if (index > -1)
+        {
+            remaining -= item.Stack;
+            this.Items[index] = item.ConsumeStack(count);
+        }
+        else
+        {
+            Log.Warn("Can't deduct item with ID {0} from {1} inventory because it's not in that inventory.", item.QualifiedItemId, this.IsLocalPlayerInventory ? "the player's" : "this");
+        }
+
+        if (reduceRemainderFromInventory && remaining > 0)
+        {
+            remaining -= this.ReduceId(item.QualifiedItemId, remaining);
+        }
+
+        if (remaining > 0)
+        {
+            return count - remaining;
+        }
+
+        return count;
+    }
+
+    /// <inheritdoc />
     public IEnumerator<Item> GetEnumerator() => this.Items.GetEnumerator();
 
     /// <inheritdoc />
@@ -275,6 +304,8 @@ internal sealed class HeldItemsWrapper : IInventory
         this.Items[index] = null;
         return true;
     }
+
+    public bool IsLocalPlayerInventory { get; set; }
 
     /// <inheritdoc />
     public void RemoveEmptySlots()

@@ -22,6 +22,12 @@
   into the first chest.
 * Added back the ability to see locked items from the main inventory menu.
 
+## 2.18.4 (November 5, 2024)
+
+### Fixed
+
+* Updated for SDV 1.6.10 and SMAPI 4.1.3.
+
 ## 2.18.3 (May 7, 2024)
 
 ### Added

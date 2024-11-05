@@ -1,6 +1,6 @@
 # Toolbar Icons Change Log
 
-## 2.8.0 (Unreleased)
+## 2.8.0 (November 5, 2024)
 
 ### Added
 
@@ -18,6 +18,7 @@
 
 ### Fixed
 
+* Updated for SDV 1.6.10 and SMAPI 4.1.3.
 * Fixed issue with not being able to configure toolbar icons.
 
 ## 2.7.2 (April 12, 2024)

@@ -1,6 +1,6 @@
 # Easy Access Change Log
 
-## 2.2.0 (Unreleased)
+## 2.2.0 (November 5, 2024)
 
 ### Added
 
@@ -10,6 +10,10 @@
 
 * Updated for FauxCore 1.2.0.
 * If config file is missing, it will attempt to restore from global data.
+
+### Fixed
+
+* Updated for SDV 1.6.10 and SMAPI 4.1.3.
 
 ## 2.1.4 (April 12, 2024)
 
