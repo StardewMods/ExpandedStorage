@@ -18,6 +18,22 @@ internal sealed class GenericModConfigMenuIntegration : ModIntegration<IGenericM
     /// <summary>Gets a value indicating whether the mod is already registered with GMCM.</summary>
     public bool IsRegistered { get; private set; }
 
+    /// <summary>Add an option at the current position in the form using custom rendering logic.</summary>
+    /// <param name="complexOption">The option to add.</param>
+    public void AddComplexOption(IComplexOption complexOption) =>
+        this.Api?.AddComplexOption(
+            Mod.Manifest,
+            () => complexOption.Name,
+            complexOption.Draw,
+            () => complexOption.Tooltip,
+            complexOption.BeforeMenuOpened,
+            complexOption.BeforeSave,
+            complexOption.AfterSave,
+            complexOption.BeforeReset,
+            complexOption.AfterReset,
+            complexOption.BeforeMenuClosed,
+            () => complexOption.Height);
+
     /// <summary>Register a config menu with GMCM.</summary>
     /// <param name="reset">Reset the mod's config to its default values.</param>
     /// <param name="save">Save the mod's current config to the <c>config.json</c> file.</param>
@@ -40,20 +56,4 @@ internal sealed class GenericModConfigMenuIntegration : ModIntegration<IGenericM
         this.Api?.Unregister(Mod.Manifest);
         this.IsRegistered = false;
     }
-
-    /// <summary>Add an option at the current position in the form using custom rendering logic.</summary>
-    /// <param name="complexOption">The option to add.</param>
-    public void AddComplexOption(IComplexOption complexOption) =>
-        this.Api?.AddComplexOption(
-            Mod.Manifest,
-            () => complexOption.Name,
-            complexOption.Draw,
-            () => complexOption.Tooltip,
-            complexOption.BeforeMenuOpened,
-            complexOption.BeforeSave,
-            complexOption.AfterSave,
-            complexOption.BeforeReset,
-            complexOption.AfterReset,
-            complexOption.BeforeMenuClosed,
-            () => complexOption.Height);
 }

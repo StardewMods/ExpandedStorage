@@ -1,6 +1,7 @@
 ﻿# Garbage Day
 
-Stardew Valley mod which turns garbage cans into storages. Trash will build up in them randomly throughout the week.
+Stardew Valley mod which turns garbage cans into storages. Trash will build up
+in them randomly throughout the week.
 Once a week on garbage day, they'll be cleared out.
 
 ## Contents
@@ -79,6 +80,7 @@ See [here](i18n/default.json) for the base translation file.
 
 # Credits
 
-Item Repository code was sourced from [CJB Item Spawner](https://github.com/CJBok/SDV-Mods/tree/master/CJBItemSpawner).
+Item Repository code was sourced
+from [CJB Item Spawner](https://github.com/CJBok/SDV-Mods/tree/master/CJBItemSpawner).
 
 Garbage Can spritesheet was created by 6480.

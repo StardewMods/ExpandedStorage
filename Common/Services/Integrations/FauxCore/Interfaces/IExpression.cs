@@ -13,18 +13,18 @@ public interface IExpression : IComparer<Item>, IEquatable<Item>, IEquatable<IIn
     /// <summary>Gets the type of expression.</summary>
     ExpressionType ExpressionType { get; }
 
-    /// <summary>Gets or sets the sub-expressions.</summary>
-    IImmutableList<IExpression> Expressions { get; set; }
-
     /// <summary>Gets a value indicating whether the expression is valid.</summary>
     bool IsValid { get; }
+
+    /// <summary>Gets the text value.</summary>
+    string Text { get; }
+
+    /// <summary>Gets or sets the sub-expressions.</summary>
+    IImmutableList<IExpression> Expressions { get; set; }
 
     /// <summary>Gets or sets the parent expression.</summary>
     IExpression? Parent { get; set; }
 
     /// <summary>Gets or sets the associated value.</summary>
     string Term { get; set; }
-
-    /// <summary>Gets the text value.</summary>
-    string Text { get; }
 }

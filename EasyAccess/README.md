@@ -15,7 +15,8 @@ Provides easier access to machines and producers in the game.
 
 ### Collect Outputs
 
-Hit a configurable key to instantly collect output items from nearby producers.<sup>1</sup>
+Hit a configurable key to instantly collect output items from nearby
+producers.<sup>1</sup>
 
 | Config Option         | Description                                                                            | Default Value | Other Value(s)                     |
 |:----------------------|:---------------------------------------------------------------------------------------|:--------------|:-----------------------------------|
@@ -26,18 +27,21 @@ Hit a configurable key to instantly collect output items from nearby producers.<
 | DoMachines            | Indicates whether Collect Outputs will collect from machines.                          | `true`        | `true` or `false`                  |
 | DoTerrain             | Indicates whether Collect Outputs will interact with terrain such as Trees and Bushes. | `true`        | `true` or `false`                  |
 
-1. See [Button Codes](https://stardewvalleywiki.com/Modding:Player_Guide/Key_Bindings#Button_codes).
+1.
+See [Button Codes](https://stardewvalleywiki.com/Modding:Player_Guide/Key_Bindings#Button_codes).
 
 ### Dispense Inputs
 
-Hit a configurable key to instantly dispense input items into nearby producers.<sup>1</sup>
+Hit a configurable key to instantly dispense input items into nearby
+producers.<sup>1</sup>
 
 | Config Option         | Description                                                | Default Value | Other Value(s)                     |
 |:----------------------|:-----------------------------------------------------------|:--------------|:-----------------------------------|
 | DispenseItems         | Assigns the keybind for dispensing items.                  | `"Insert"`    | Any valid button code.<sup>1</sup> |
 | DispenseInputDistance | Limits the distance that a producer can be dispensed into. | 15            | Any positive integer.              |
 
-1. See [Button Codes](https://stardewvalleywiki.com/Modding:Player_Guide/Key_Bindings#Button_codes).
+1.
+See [Button Codes](https://stardewvalleywiki.com/Modding:Player_Guide/Key_Bindings#Button_codes).
 
 ## Customization
 
@@ -45,7 +49,8 @@ Hit a configurable key to instantly dispense input items into nearby producers.<
 
 #### Icons
 
-Replace any or all of the icons for the Collect Output or Dispense Input buttons by editing the image<sup>1</sup>:
+Replace any or all of the icons for the Collect Output or Dispense Input buttons
+by editing the image<sup>1</sup>:
 
 `furyx639.EasyAccess/Icons`.
 

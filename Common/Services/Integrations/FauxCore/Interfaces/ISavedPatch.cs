@@ -1,14 +1,14 @@
 #if IS_FAUXCORE
 namespace StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 
+using System.Reflection;
 using StardewMods.FauxCore.Common.Enums;
 #else
 namespace StardewMods.Common.Services.Integrations.FauxCore;
 
+using System.Reflection;
 using StardewMods.Common.Enums;
 #endif
-
-using System.Reflection;
 
 /// <summary>Represents a patch for modifying a method using Harmony.</summary>
 public interface ISavedPatch

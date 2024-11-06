@@ -27,8 +27,8 @@ public interface IContentPatcherApi
      *********/
     /// <summary>Get a set of managed conditions which are matched against Content Patcher's internal context.</summary>
     /// <param name="manifest">
-    /// The manifest of the mod parsing the conditions (see <see cref="ModStuff.ModManifest" /> in your enter
-    /// class).
+    /// The manifest of the mod parsing the conditions (see <see cref="ModStuff.ModManifest" /> in your
+    /// enter class).
     /// </param>
     /// <param name="rawConditions">
     /// The conditions to parse, in the same format as <c>When</c> blocks in Content Patcher
@@ -57,7 +57,10 @@ public interface IContentPatcherApi
         string[]? assumeModIds = null);
 
     /// <summary>Register a simple token.</summary>
-    /// <param name="mod">The manifest of the mod defining the token (see <see cref="ModStuff.ModManifest" /> in your entry class).</param>
+    /// <param name="mod">
+    /// The manifest of the mod defining the token (see <see cref="ModStuff.ModManifest" /> in your entry
+    /// class).
+    /// </param>
     /// <param name="name">
     /// The token name. This only needs to be unique for your mod; Content Patcher will prefix it with your
     /// mod ID automatically, like <c>YourName.ExampleMod/SomeTokenName</c>.
@@ -72,7 +75,10 @@ public interface IContentPatcherApi
     /// Register a complex token. This is an advanced API; only use this method if you've read the documentation and
     /// are aware of the consequences.
     /// </summary>
-    /// <param name="mod">The manifest of the mod defining the token (see <see cref="ModStuff.ModManifest" /> in your entry class).</param>
+    /// <param name="mod">
+    /// The manifest of the mod defining the token (see <see cref="ModStuff.ModManifest" /> in your entry
+    /// class).
+    /// </param>
     /// <param name="name">
     /// The token name. This only needs to be unique for your mod; Content Patcher will prefix it with your
     /// mod ID automatically, like <c>YourName.ExampleMod/SomeTokenName</c>.

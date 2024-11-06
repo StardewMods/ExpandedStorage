@@ -1,7 +1,8 @@
 ﻿# Stardew Mods
 
 A repository for my Stardew Valley mods.  
-All of my mods are available for download on [Nexus Mods](https://www.nexusmods.com/users/1643034?tab=user+files&BH=0).
+All of my mods are available for download
+on [Nexus Mods](https://www.nexusmods.com/users/1643034?tab=user+files&BH=0).
 
 ## [Better Chests](https://www.nexusmods.com/stardewvalley/mods/9791)
 
@@ -12,12 +13,13 @@ All of my mods are available for download on [Nexus Mods](https://www.nexusmods.
 Framework that adds new features to chests.
 
 ## [Crystalline Junimo Chests](http://www.nexusmods.com/stardewvalley/)
-    
+
 ( [source](CrystallineJunimoChests)
 | [docs](CrystallineJunimoChests/README.md)
 | [changelog](CrystallineJunimoChests/CHANGELOG.md) )
 
-Adds enhanced Junimo Chests which can access multiple inventories depending on their color.
+Adds enhanced Junimo Chests which can access multiple inventories depending on
+their color.
 
 ## [Custom Bush](https://www.nexusmods.com/stardewvalley/mods/TBD)
 
@@ -25,7 +27,8 @@ Adds enhanced Junimo Chests which can access multiple inventories depending on t
 | [docs](CustomBush/README.md)
 | [changelog](CustomBush/CHANGELOG.md) )
 
-Custom Bush is a framework which allows custom bushes to be added to the game which work like the tea sapling.
+Custom Bush is a framework which allows custom bushes to be added to the game
+which work like the tea sapling.
 
 ## [Easy Access](https://www.nexusmods.com/stardewvalley/mods/11002)
 
@@ -73,7 +76,8 @@ Turns the town trash cans into chests.
 | [docs](HelpfulSpouses/README.md)
 | [changelog](HelpfulSpouses/CHANGELOG.md) )
 
-Helpful Spouses (and Roommates) will perform one or more customizable chores every morning. By default this all happens
+Helpful Spouses (and Roommates) will perform one or more customizable chores
+every morning. By default this all happens
 in a balanced/lore-friendly way.
 
 ## [Sprite Patcher](https://www.nexusmods.com/stardewvalley/)

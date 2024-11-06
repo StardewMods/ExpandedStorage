@@ -22,8 +22,8 @@
     </IgnoreModFilePatterns>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Remove="assets\PatchTemplate.cs" />
-    <Compile Remove="assets\PatchModel.cs" />
+    <Compile Remove="assets\PatchTemplate.cs"/>
+    <Compile Remove="assets\PatchModel.cs"/>
   </ItemGroup>
   <ItemGroup>
     <None Include="assets\PatchTemplate.cs">
@@ -31,8 +31,8 @@
     </None>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.1.0-1.final" />
-    <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
+    <PackageReference Include="Microsoft.CodeAnalysis.CSharp" Version="4.1.0-1.final"/>
+    <PackageReference Include="System.Runtime.Loader" Version="4.3.0"/>
     <PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.0.1"/>
     <PackageReference Include="SimpleInjector">
       <HintPath>$(GameModsPath)\FauxCore\SimpleInjector.dll</HintPath>
@@ -49,7 +49,7 @@
     <SMAPIDependency Include="spacechase0.SpaceCore" required="true"/>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="docs\screenshots\" />
-    <Folder Include="Framework\Services\Patchers\Monsters\" />
+    <Folder Include="docs\screenshots\"/>
+    <Folder Include="Framework\Services\Patchers\Monsters\"/>
   </ItemGroup>
 </Project>

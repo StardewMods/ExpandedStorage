@@ -8,17 +8,17 @@
     <UpdateKeys>Nexus:20658</UpdateKeys>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.0.1"/>
+    <PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.2.0"/>
     <PackageReference Include="SimpleInjector">
       <HintPath>$(GameModsPath)\FauxCore\SimpleInjector.dll</HintPath>
-      <Version>5.4.5</Version>
+      <Version>5.5.0</Version>
       <Private>false</Private>
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
     <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.0" required="true"/>
     <SMAPIDependency Include="furyx639.ExpandedStorage" Version="3.1.0" required="true"/>
-    <SMAPIDependency Include="furyx639.BetterChests" Version="2.19.0" required="false"/>
+    <SMAPIDependency Include="furyx639.BetterChests" Version="2.18.4" required="false"/>
     <SMAPIDependency Include="spacechase0.GenericModConfigMenu" Version="1.14.0" required="false"/>
   </ItemGroup>
 </Project>

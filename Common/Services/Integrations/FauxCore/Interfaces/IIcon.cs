@@ -4,6 +4,7 @@ namespace StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
+
 #else
 namespace StardewMods.Common.Services.Integrations.FauxCore;
 
@@ -30,11 +31,6 @@ public interface IIcon
     /// <summary>Gets the unique identifier for this icon.</summary>
     public string UniqueId { get; }
 
-    /// <summary>Gets the icon texture.</summary>
-    /// <param name="style">The style of the icon.</param>
-    /// <returns>Returns the texture.</returns>
-    public Texture2D Texture(IconStyle style);
-
     /// <summary>Gets a component with the icon.</summary>
     /// <param name="style">The component style.</param>
     /// <param name="x">The component x-coordinate.</param>
@@ -50,4 +46,9 @@ public interface IIcon
         float scale = Game1.pixelZoom,
         string? name = null,
         string? hoverText = null);
+
+    /// <summary>Gets the icon texture.</summary>
+    /// <param name="style">The style of the icon.</param>
+    /// <returns>Returns the texture.</returns>
+    public Texture2D Texture(IconStyle style);
 }

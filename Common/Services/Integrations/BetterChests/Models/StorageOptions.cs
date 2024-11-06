@@ -3,6 +3,7 @@ namespace StardewMods.FauxCore.Common.Services.Integrations.BetterChests;
 
 using StardewMods.FauxCore.Common.Interfaces.Data;
 using StardewMods.FauxCore.Common.Models.Data;
+
 #else
 namespace StardewMods.Common.Services.Integrations.BetterChests;
 
@@ -70,8 +71,7 @@ internal class StorageOptions : DictionaryDataModel, IStorageOptions
     public FeatureOption CategorizeChestIncludeStacks
     {
         get => this.Get(nameof(this.CategorizeChestIncludeStacks), StorageOptions.StringToFeatureOption);
-        set =>
-            this.Set(nameof(this.CategorizeChestIncludeStacks), value, StorageOptions.FeatureOptionToString);
+        set => this.Set(nameof(this.CategorizeChestIncludeStacks), value, StorageOptions.FeatureOptionToString);
     }
 
     /// <inheritdoc />

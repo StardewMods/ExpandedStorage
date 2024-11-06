@@ -15,6 +15,6 @@ internal sealed class BetterChestsIntegration : ModIntegration<IBetterChestsApi>
     /// <inheritdoc />
     public override string UniqueId => "furyx639.BetterChests";
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override ISemanticVersion Version { get; } = new SemanticVersion(2, 19, 0);
 }

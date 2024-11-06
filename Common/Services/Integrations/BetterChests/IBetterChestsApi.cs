@@ -35,10 +35,7 @@ public interface IBetterChestsApi
     /// <param name="pos">The position of the game location where the container will be retrieved.</param>
     /// <param name="container">When this method returns, contains the container if found; otherwise, null.</param>
     /// <returns><c>true</c> if a container is found; otherwise, <c>false</c>.</returns>
-    public bool TryGetOne(
-        GameLocation location,
-        Vector2 pos,
-        [NotNullWhen(true)] out IStorageContainer? container);
+    public bool TryGetOne(GameLocation location, Vector2 pos, [NotNullWhen(true)] out IStorageContainer? container);
 
     /// <summary>Tries to retrieve a container from the active menu.</summary>
     /// <param name="menu">The menu to retrieve a container from.</param>
@@ -51,10 +48,7 @@ public interface IBetterChestsApi
     /// <param name="index">The index of the player's inventory. Defaults to the active item.</param>
     /// <param name="container">When this method returns, contains the container if found; otherwise, null.</param>
     /// <returns><c>true</c> if a container is found; otherwise, <c>false</c>.</returns>
-    public bool TryGetOne(
-        Farmer farmer,
-        int index,
-        [NotNullWhen(true)] out IStorageContainer? container);
+    public bool TryGetOne(Farmer farmer, int index, [NotNullWhen(true)] out IStorageContainer? container);
 
     /// <summary>Tries to retrieve a container from the specified farmer.</summary>
     /// <param name="farmer">The farmer to get a container from.</param>

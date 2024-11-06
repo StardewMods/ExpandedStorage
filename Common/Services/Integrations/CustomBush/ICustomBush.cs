@@ -24,11 +24,11 @@ public interface ICustomBush
     /// <summary>Gets the default texture used when planted indoors.</summary>
     public string IndoorTexture { get; }
 
-    /// <summary>Gets the season in which this bush will produce its drops.</summary>
-    public List<Season> Seasons { get; }
-
     /// <summary>Gets the rules which override the locations that custom bushes can be planted in.</summary>
     public List<PlantableRule> PlantableLocationRules { get; }
+
+    /// <summary>Gets the season in which this bush will produce its drops.</summary>
+    public List<Season> Seasons { get; }
 
     /// <summary>Gets the texture of the tea bush.</summary>
     public string Texture { get; }

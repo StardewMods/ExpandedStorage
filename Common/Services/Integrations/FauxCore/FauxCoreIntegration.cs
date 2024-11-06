@@ -47,7 +47,7 @@ internal sealed class FauxCoreIntegration
     /// <inheritdoc />
     public override string UniqueId => "furyx639.FauxCore";
 
-    /// <inheritdoc/>
+    /// <inheritdoc />
     public override ISemanticVersion Version { get; } = new SemanticVersion(1, 2, 0);
 
     /// <inheritdoc />
@@ -100,6 +100,15 @@ internal sealed class FauxCoreIntegration
         this.iconRegistry?.Value.GetIcons(modId) ?? Enumerable.Empty<IIcon>();
 
     /// <inheritdoc />
+    public IIcon Icon(string id) =>
+        this.iconRegistry?.Value.Icon(id) ?? throw new InvalidOperationException($"Failed to load icon: {id}.");
+
+    /// <inheritdoc />
+    public IIcon Icon(VanillaIcon icon) =>
+        this.iconRegistry?.Value.Icon(icon)
+        ?? throw new InvalidOperationException($"Failed to load icon: {icon.ToStringFast()}.");
+
+    /// <inheritdoc />
     public void Info(string message, object?[]? args = null) => this.log?.Value.Info(message, args);
 
     /// <inheritdoc />
@@ -113,15 +122,6 @@ internal sealed class FauxCoreIntegration
 
         this.deferred.Enqueue(() => this.patchManager?.Value.Patch(id));
     }
-
-    /// <inheritdoc />
-    public IIcon Icon(string id) =>
-        this.iconRegistry?.Value.Icon(id) ?? throw new InvalidOperationException($"Failed to load icon: {id}.");
-
-    /// <inheritdoc/>
-    public IIcon Icon(VanillaIcon icon) =>
-        this.iconRegistry?.Value.Icon(icon)
-        ?? throw new InvalidOperationException($"Failed to load icon: {icon.ToStringFast()}.");
 
     /// <inheritdoc />
     public void Trace(string message, object?[]? args = null) => this.log?.Value.Trace(message, args);

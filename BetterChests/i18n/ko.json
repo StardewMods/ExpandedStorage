@@ -1,4 +1,4 @@
-{  
+{
   // Alerts
   "alert.carry-chest-limit.hit-limit": "더 이상 상자를 들고 다닐 수 없습니다.",
   "alert.craft-from-chest.no-eligible": "아이템 제작에 적합한 상자를 찾을 수 없습니다.",
@@ -36,7 +36,7 @@
   "config.categorize-chest-automatically.name": "카테고리 분류 자동화",
   "config.categorize-chest-automatically.tooltip": "아이템이 추가될 때 카테고리를 자동으로 설정합니다.",
   "config.chest-color.name": "상자 색깔",
-  "config.chest-color.tooltip":  "이 상자의 색깔",
+  "config.chest-color.tooltip": "이 상자의 색깔",
   "config.chest-finder.name": "상자 찾기",
   "config.chest-finder.tooltip": "찾고 있는 아이템이 들어 있는 상자를 검색합니다.",
   "config.chest-info.name": "상자 정보",

@@ -11,7 +11,7 @@
   <ItemGroup>
     <PackageReference Include="SimpleInjector">
       <HintPath>$(GameModsPath)\FauxCore\SimpleInjector.dll</HintPath>
-      <Version>5.4.2</Version>
+      <Version>5.5.0</Version>
       <Private>false</Private>
     </PackageReference>
     <Reference Include="HarmonyLib">
@@ -23,8 +23,8 @@
     <SMAPIDependency Include="furyx639.FauxCore" Version="1.0.0" required="true"/>
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Framework\Interfaces\" />
-    <Folder Include="Framework\Models\" />
-    <Folder Include="Framework\Services\" />
+    <Folder Include="Framework\Interfaces\"/>
+    <Folder Include="Framework\Models\"/>
+    <Folder Include="Framework\Services\"/>
   </ItemGroup>
 </Project>

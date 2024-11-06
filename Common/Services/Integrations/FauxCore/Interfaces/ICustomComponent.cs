@@ -26,11 +26,11 @@ public interface ICustomComponent
     /// <summary>Gets the hover text.</summary>
     string? HoverText { get; }
 
-    /// <summary>Gets the parent menu.</summary>
-    ICustomMenu? Parent { get; }
-
     /// <summary>Gets the component position.</summary>
     Point Location { get; }
+
+    /// <summary>Gets the parent menu.</summary>
+    ICustomMenu? Parent { get; }
 
     /// <summary>Gets the component size.</summary>
     Point Size { get; }

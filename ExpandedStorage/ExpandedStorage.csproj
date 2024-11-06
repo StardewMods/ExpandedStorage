@@ -12,10 +12,10 @@
     <ProjectReference Include="..\FauxCore\FauxCore.csproj" Private="false"/>
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.0.1"/>
+    <PackageReference Include="Pathoschild.Stardew.ModTranslationClassBuilder" Version="2.2.0"/>
     <PackageReference Include="SimpleInjector">
       <HintPath>$(GameModsPath)\FauxCore\SimpleInjector.dll</HintPath>
-      <Version>5.4.5</Version>
+      <Version>5.5.0</Version>
       <Private>false</Private>
     </PackageReference>
     <Reference Include="HarmonyLib">

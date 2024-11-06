@@ -9,12 +9,14 @@ Framework for adding icons to the toolbar.
 
 ## API
 
-Add toolbar icons using the [Toolbar Icons API](../Common/Integrations/ToolbarIcons/IToolbarIconsApi.cs).
+Add toolbar icons using
+the [Toolbar Icons API](../Common/Integrations/ToolbarIcons/IToolbarIconsApi.cs).
 
 ## Assets
 
 Integration is possible via data paths using
-[SMAPI](https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Content#Edit_a_game_asset) or
+[SMAPI](https://stardewvalleywiki.com/Modding:Modder_Guide/APIs/Content#Edit_a_game_asset)
+or
 [Content Patcher](https://github.com/Pathoschild/StardewMods/blob/develop/ContentPatcher/docs/author-guide.md).
 
 `furyx639.ToolbarIcons/Toolbar`
@@ -94,7 +96,8 @@ The data entry is as follows:
 
 ## Integrations
 
-Some integrations are handled directly by the Toolbar Icons mod which means icons are automatically added for them.
+Some integrations are handled directly by the Toolbar Icons mod which means
+icons are automatically added for them.
 
 ### Supported mods
 

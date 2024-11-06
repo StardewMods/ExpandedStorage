@@ -76,51 +76,51 @@ internal sealed class DefaultConfig : IModConfig
     /// <inheritdoc />
     public List<TabData> InventoryTabList { get; set; } =
     [
-        new TabData
+        new()
         {
             Icon = "furyx639.BetterChests/Clothing",
             Label = I18n.Tabs_Clothing_Name(),
             SearchTerm = "category_clothing category_boots category_hat",
         },
-        new TabData
+        new()
         {
             Icon = "furyx639.BetterChests/Cooking",
             Label = I18n.Tabs_Cooking_Name(),
             SearchTerm =
                 "category_syrup category_artisan_goods category_ingredients category_sell_at_pierres_and_marnies category_sell_at_pierres category_meat category_cooking category_milk category_egg",
         },
-        new TabData
+        new()
         {
             Icon = "furyx639.BetterChests/Crops",
             Label = I18n.Tabs_Crops_Name(),
             SearchTerm = "category_greens category_flowers category_fruits category_vegetable",
         },
-        new TabData
+        new()
         {
             Icon = "furyx639.BetterChests/Equipment",
             Label = I18n.Tabs_Equipment_Name(),
             SearchTerm = "category_equipment category_ring category_tool category_weapon",
         },
-        new TabData
+        new()
         {
             Icon = "furyx639.BetterChests/Fishing",
             Label = I18n.Tabs_Fishing_Name(),
             SearchTerm = "category_bait category_fish category_tackle category_sell_at_fish_shop",
         },
-        new TabData
+        new()
         {
             Icon = "furyx639.BetterChests/Materials",
             Label = I18n.Tabs_Materials_Name(),
             SearchTerm =
                 "category_monster_loot category_metal_resources category_building_resources category_minerals category_crafting category_gem",
         },
-        new TabData
+        new()
         {
             Icon = "furyx639.BetterChests/Miscellaneous",
             Label = I18n.Tabs_Misc_Name(),
             SearchTerm = "category_big_craftable category_furniture category_junk",
         },
-        new TabData
+        new()
         {
             Icon = "furyx639.BetterChests/Seeds",
             Label = I18n.Tabs_Seeds_Name(),

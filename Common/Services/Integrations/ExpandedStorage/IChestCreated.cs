@@ -16,9 +16,9 @@ public interface IChestCreated
     /// <summary>Gets the location of the chest being created.</summary>
     GameLocation Location { get; }
 
-    /// <summary>Gets the tile location of the chest being created.</summary>
-    Vector2 TileLocation { get; }
-
     /// <summary>Gets the expanded storage data for the chest being created.</summary>
     IStorageData StorageData { get; }
+
+    /// <summary>Gets the tile location of the chest being created.</summary>
+    Vector2 TileLocation { get; }
 }
