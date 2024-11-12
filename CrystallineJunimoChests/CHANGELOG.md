@@ -1,5 +1,11 @@
 # Crystalline Junimo Chest Change Log
 
+## 1.1.2 (November 12, 2024)
+
+### Fixed
+
+* Fixed incorrect dependency on unreleased Better Chests.
+
 ## 1.1.1 (November 5, 2024)
 
 ### Fixed

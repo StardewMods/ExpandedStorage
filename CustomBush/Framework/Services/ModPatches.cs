@@ -619,7 +619,11 @@ internal sealed class ModPatches
 
         var item = ItemQueryResolver.TryResolveRandomItem(
             drop,
-            new ItemQueryContext(bush.Location, null, null),
+            new ItemQueryContext(
+                bush.Location,
+                null,
+                null,
+                $"custom bush '{bush.modData[ModPatches.instance.modDataId]}' > fruit '{drop.Id}'"),
             false,
             null,
             null,

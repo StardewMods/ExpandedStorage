@@ -1,5 +1,11 @@
 # Custom Bush Change Log
 
+## 1.2.3 (November 12, 2024)
+
+### Fixed
+
+* Updated for SDV 1.6.14 and SMAPI 4.1.7.
+
 ## 1.2.2 (November 5, 2024)
 
 ### Changed

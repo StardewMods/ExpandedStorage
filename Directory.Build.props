@@ -8,7 +8,7 @@
     <TargetFramework>net6.0</TargetFramework>
     <LangVersion>latest</LangVersion>
     <BaseManifest>new</BaseManifest>
-    <MinimumGameVersion>1.6.10</MinimumGameVersion>
+    <MinimumGameVersion>1.6.14</MinimumGameVersion>
     <MinimumApiVersion_Behavior>Update</MinimumApiVersion_Behavior>
     <AppendTargetFrameworkToOutputPath>false</AppendTargetFrameworkToOutputPath>
     <EnableModZip Condition="'$(Configuration)' == 'Debug'">False</EnableModZip>

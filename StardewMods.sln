@@ -12,6 +12,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 		GlobalSuppressions.cs = GlobalSuppressions.cs
 		LICENSE = LICENSE
 		README.md = README.md
+		StardewMods.sln.DotSettings = StardewMods.sln.DotSettings
 	EndProjectSection
 EndProject
 Project("{D954291E-2A0B-460D-934E-DC6B0785DB48}") = ".Common", "Common\.Common.shproj", "{EECB6271-93FD-4172-BFDD-33E3F169F8E7}"
