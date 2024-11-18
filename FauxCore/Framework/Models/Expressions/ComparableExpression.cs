@@ -27,18 +27,6 @@ internal sealed class ComparableExpression : IExpression
     }
 
     /// <inheritdoc />
-    public ExpressionType ExpressionType => ExpressionType.Comparable;
-
-    /// <inheritdoc />
-    public bool IsValid => this.LeftTerm is not null && !string.IsNullOrWhiteSpace(this.RightTerm?.Term);
-
-    /// <inheritdoc />
-    public string Text =>
-        this.LeftTerm?.Text.Contains(ItemAttribute.Any.ToStringFast(), StringComparison.OrdinalIgnoreCase) == true
-            ? $"{this.RightTerm?.Text}"
-            : $"{this.LeftTerm?.Text}{ComparableExpression.Char}{this.RightTerm?.Text}";
-
-    /// <inheritdoc />
     public IImmutableList<IExpression> Expressions
     {
         get => this.expressions;
@@ -54,6 +42,12 @@ internal sealed class ComparableExpression : IExpression
     }
 
     /// <inheritdoc />
+    public ExpressionType ExpressionType => ExpressionType.Comparable;
+
+    /// <inheritdoc />
+    public bool IsValid => this.LeftTerm is not null && !string.IsNullOrWhiteSpace(this.RightTerm?.Term);
+
+    /// <inheritdoc />
     public IExpression? Parent { get; set; }
 
     /// <inheritdoc />
@@ -62,6 +56,12 @@ internal sealed class ComparableExpression : IExpression
         get => string.Empty;
         set => throw new NotSupportedException();
     }
+
+    /// <inheritdoc />
+    public string Text =>
+        this.LeftTerm?.Text.Contains(ItemAttribute.Any.ToStringFast(), StringComparison.OrdinalIgnoreCase) == true
+            ? $"{this.RightTerm?.Text}"
+            : $"{this.LeftTerm?.Text}{ComparableExpression.Char}{this.RightTerm?.Text}";
 
     private int? ComparableInt =>
         this.LeftTerm?.TryParse(this.RightTerm?.Term, out var parsedInt) == true ? parsedInt : null;

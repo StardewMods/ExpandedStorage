@@ -63,7 +63,7 @@ internal sealed class ChestHandler
             return;
         }
 
-        var (mouseX, mouseY) = e.Cursor.GetScaledScreenPixels().ToPoint();
+        var (mouseX, mouseY) = Utility.ModifyCoordinatesForUIScale(e.Cursor.GetScaledScreenPixels()).ToPoint();
         var currentColor = chest.playerChoiceColor.Value;
         var currentSelection = chestColorPicker.colorSelection;
         chestColorPicker.receiveLeftClick(mouseX, mouseY);

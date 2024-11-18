@@ -68,11 +68,11 @@ internal sealed class TabEditor : BaseComponent
         remove => this.moveUp -= value;
     }
 
-    /// <summary>Gets the tab data.</summary>
-    public TabData Data { get; }
-
     /// <summary>Gets or sets a value indicating whether the tab is currently active.</summary>
     public bool Active { get; set; } = true;
+
+    /// <summary>Gets the tab data.</summary>
+    public TabData Data { get; }
 
     /// <summary>Gets or sets the index.</summary>
     public int Index { get; set; }

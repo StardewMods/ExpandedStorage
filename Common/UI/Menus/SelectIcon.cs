@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.UI.Menus;
 
 using System.Globalization;
@@ -9,6 +10,7 @@ using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 #else
+
 namespace StardewMods.Common.UI.Menus;
 
 using System.Globalization;
@@ -17,6 +19,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
+
 #endif
 
 /// <summary>Menu for selecting an icon.</summary>

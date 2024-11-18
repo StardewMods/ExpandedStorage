@@ -10,7 +10,7 @@ internal sealed class ContainerSortingEventArgs : EventArgs
     public ContainerSortingEventArgs(IStorageContainer container)
     {
         this.Container = container;
-        this.OriginalItems = [..container.Items];
+        this.OriginalItems = [.. container.Items];
     }
 
     /// <summary>Gets the container being sorted.</summary>

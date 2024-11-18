@@ -1,6 +1,8 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Models.Events;
 #else
+
 namespace StardewMods.Common.Models.Events;
 #endif
 

@@ -85,7 +85,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             return;
         }
 
-        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        var cursor = Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels()).ToPoint();
         switch (e.Button)
         {
             case SButton.MouseLeft or SButton.ControllerA:
@@ -110,7 +110,8 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
                 this.menuHandler.CurrentMenu.exitThisMenu();
                 break;
 
-            case SButton.Escape: return;
+            case SButton.Escape:
+                return;
 
             default:
                 if (this.searchBar.Value.Selected
@@ -261,7 +262,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             return;
         }
 
-        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        var cursor = Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels()).ToPoint();
         this.searchBar.Value.Draw(e.SpriteBatch, cursor, Point.Zero);
     }
 
@@ -272,7 +273,7 @@ internal sealed class SearchItems : BaseFeature<SearchItems>
             return;
         }
 
-        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        var cursor = Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels()).ToPoint();
         this.searchBar.Value.Update(cursor);
     }
 

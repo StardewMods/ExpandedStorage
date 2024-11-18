@@ -76,6 +76,7 @@ internal sealed class SimpleLogging : ISimpleLogging
 
                 this.monitor.Log(message, level);
                 break;
+
             default:
                 // Suppress log from console
                 this.monitor.Log(message);

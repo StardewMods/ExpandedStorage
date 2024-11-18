@@ -147,6 +147,6 @@ internal sealed class CategorizeChest : BaseFeature<CategorizeChest>
             return;
         }
 
-        this.cachedItems.Value = [..ItemRepository.GetItems(e.SearchExpression.Equals)];
+        this.cachedItems.Value = [.. ItemRepository.GetItems(e.SearchExpression.Equals)];
     }
 }

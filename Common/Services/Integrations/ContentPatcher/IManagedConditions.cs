@@ -1,6 +1,8 @@
-﻿#if IS_FAUXCORE
+#if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations.ContentPatcher;
 #else
+
 namespace StardewMods.Common.Services.Integrations.ContentPatcher;
 #endif
 
@@ -31,6 +33,7 @@ public interface IManagedConditions
     /*********
      ** Accessors
      *********/
+
     /// <summary>Whether the conditions were parsed successfully (regardless of whether they're in scope currently).</summary>
     [MemberNotNullWhen(false, nameof(IManagedConditions.ValidationError))]
     bool IsValid { get; }
@@ -52,6 +55,7 @@ public interface IManagedConditions
     /*********
      ** Methods
      *********/
+
     /// <summary>
     /// Update the conditions based on Content Patcher's current context for every active screen. It's safe to call
     /// this as often as you want, but it has no effect if the Content Patcher context hasn't changed since you last called it.

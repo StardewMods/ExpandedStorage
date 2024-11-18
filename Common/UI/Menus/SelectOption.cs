@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.UI.Menus;
 
 using System.Globalization;
@@ -8,6 +9,7 @@ using StardewMods.FauxCore.Common.Helpers;
 using StardewValley.Menus;
 
 #else
+
 namespace StardewMods.Common.UI.Menus;
 
 using System.Globalization;
@@ -15,6 +17,7 @@ using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewMods.Common.Helpers;
 using StardewValley.Menus;
+
 #endif
 
 /// <summary>Menu for selecting an item from a list of values.</summary>

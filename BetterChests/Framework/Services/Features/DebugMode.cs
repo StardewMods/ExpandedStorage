@@ -72,9 +72,11 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
             case "bc_config":
                 this.Configure(args);
                 return;
+
             case "bc_reset":
                 this.ResetAll();
                 return;
+
             case "bc_menu":
                 this.ShowMenu(args);
                 return;
@@ -145,7 +147,8 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
                 this.containerHandler.Configure(container);
                 return;
 
-            default: return;
+            default:
+                return;
         }
     }
 
@@ -162,12 +165,15 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
             case "config":
                 Game1.activeClickableMenu = new ConfigMenu();
                 return;
+
             case "icons":
                 Game1.activeClickableMenu = new IconPicker(this.iconRegistry);
                 return;
+
             case "layout":
                 Game1.activeClickableMenu = new LayoutMenu();
                 return;
+
             case "search":
                 Game1.activeClickableMenu = new SearchMenu(
                     this.expressionHandler,
@@ -175,6 +181,7 @@ internal sealed class DebugMode : BaseFeature<DebugMode>
                     "({category}~\"fish\" !{tags}~\"ocean\" [{quality}~iridium {quality}~gold])");
 
                 return;
+
             case "tab":
                 Game1.activeClickableMenu = new TabMenu(this.configManager, this.expressionHandler, this.iconRegistry);
 

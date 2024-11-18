@@ -23,12 +23,6 @@ internal sealed class FoundGarbageCan
     /// <summary>Gets the asset name of the map containing the garbage can.</summary>
     public IAssetName AssetName { get; }
 
-    /// <summary>Gets the tile position of the garbage can.</summary>
-    public Vector2 TilePosition { get; }
-
-    /// <summary>Gets the name of the garbage can.</summary>
-    public string WhichCan { get; }
-
     /// <summary>Gets or sets a value indicating whether the garbage can is valid.</summary>
     public bool IsValid
     {
@@ -43,4 +37,10 @@ internal sealed class FoundGarbageCan
             this.isValid = value;
         }
     }
+
+    /// <summary>Gets the tile position of the garbage can.</summary>
+    public Vector2 TilePosition { get; }
+
+    /// <summary>Gets the name of the garbage can.</summary>
+    public string WhichCan { get; }
 }

@@ -61,13 +61,13 @@ internal sealed class ToolbarIconOption : BaseComplexOption
     }
 
     /// <inheritdoc />
+    public override int Height { get; protected set; }
+
+    /// <inheritdoc />
     public override string Name => string.Empty;
 
     /// <inheritdoc />
     public override string Tooltip => string.Empty;
-
-    /// <inheritdoc />
-    public override int Height { get; protected set; }
 
     private ClickableTextureComponent CheckedIcon =>
         this.checkedComponent ??=
@@ -81,8 +81,14 @@ internal sealed class ToolbarIconOption : BaseComplexOption
                 .iconRegistry.Icon(VanillaIcon.ArrowDown)
                 .Component(IconStyle.Transparent, hoverText: I18n.Config_MoveDown_Tooltip());
 
+    private bool Enabled
+    {
+        get => this.getEnabled();
+        set => this.setEnabled(value);
+    }
+
     private ClickableTextureComponent UncheckedIcon =>
-        this.uncheckedComponent ??=
+            this.uncheckedComponent ??=
             this
                 .iconRegistry.Icon(VanillaIcon.Unchecked)
                 .Component(IconStyle.Transparent, hoverText: I18n.Config_CheckBox_Tooltip());
@@ -93,16 +99,10 @@ internal sealed class ToolbarIconOption : BaseComplexOption
                 .iconRegistry.Icon(VanillaIcon.ArrowUp)
                 .Component(IconStyle.Transparent, hoverText: I18n.Config_MoveUp_Tooltip());
 
-    private bool Enabled
-    {
-        get => this.getEnabled();
-        set => this.setEnabled(value);
-    }
-
     /// <inheritdoc />
     public override void Draw(SpriteBatch spriteBatch, Vector2 pos)
     {
-        var (mouseX, mouseY) = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        var (mouseX, mouseY) = Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels()).ToPoint();
         var mouseLeft = this.inputHelper.GetState(SButton.MouseLeft) == SButtonState.Pressed;
         var mouseRight = this.inputHelper.GetState(SButton.MouseRight) == SButtonState.Pressed;
         var hoverY = mouseY >= pos.Y && mouseY < pos.Y + this.Height;

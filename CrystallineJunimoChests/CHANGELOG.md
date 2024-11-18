@@ -1,5 +1,11 @@
 # Crystalline Junimo Chest Change Log
 
+## 1.1.3 (Unreleased)
+
+### Fixed
+
+* Fixed issues with UI scaling.
+
 ## 1.1.2 (November 12, 2024)
 
 ### Fixed

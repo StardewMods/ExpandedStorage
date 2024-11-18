@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Helpers;
 
 using Microsoft.Xna.Framework;
@@ -7,12 +8,14 @@ using StardewMods.FauxCore.Common.Services.Integrations.BetterChests;
 using StardewValley.Mods;
 
 #else
+
 namespace StardewMods.Common.Helpers;
 
 using Microsoft.Xna.Framework;
 using StardewMods.Common.Models;
 using StardewMods.Common.Services.Integrations.BetterChests;
 using StardewValley.Mods;
+
 #endif
 
 /// <summary>Common extension methods.</summary>
@@ -279,52 +282,69 @@ internal static class CommonExtensions
             case nameof(options.AutoOrganize):
                 options.AutoOrganize = value;
                 return;
+
             case nameof(options.CarryChest):
                 options.CarryChest = value;
                 return;
+
             case nameof(options.CategorizeChest):
                 options.CategorizeChest = value;
                 return;
+
             case nameof(options.CategorizeChestBlockItems):
                 options.CategorizeChestBlockItems = value;
                 return;
+
             case nameof(options.CategorizeChestIncludeStacks):
                 options.CategorizeChestIncludeStacks = value;
                 return;
+
             case nameof(options.ChestFinder):
                 options.ChestFinder = value;
                 return;
+
             case nameof(options.CollectItems):
                 options.CollectItems = value;
                 return;
+
             case nameof(options.ConfigureChest):
                 options.ConfigureChest = value;
                 return;
+
             case nameof(options.HslColorPicker):
                 options.HslColorPicker = value;
                 return;
+
             case nameof(options.InventoryTabs):
                 options.InventoryTabs = value;
                 return;
+
             case nameof(options.OpenHeldChest):
                 options.OpenHeldChest = value;
                 return;
+
             case nameof(options.SearchItems):
                 options.SearchItems = value;
                 return;
+
             case nameof(options.ShopFromChest):
                 options.ShopFromChest = value;
                 return;
+
             case nameof(options.SortInventory):
                 options.SortInventory = value;
                 return;
+
             case nameof(options.StorageInfo):
                 options.StorageInfo = value;
                 return;
+
             case nameof(options.StorageInfoHover):
                 options.StorageInfoHover = value;
                 return;
-            default: throw new ArgumentOutOfRangeException(name);
+
+            default:
+                throw new ArgumentOutOfRangeException(name);
         }
     }
 
@@ -339,16 +359,21 @@ internal static class CommonExtensions
             case nameof(options.AccessChest):
                 options.AccessChest = value;
                 return;
+
             case nameof(options.CookFromChest):
                 options.CookFromChest = value;
                 return;
+
             case nameof(options.CraftFromChest):
                 options.CraftFromChest = value;
                 return;
+
             case nameof(options.StashToChest):
                 options.StashToChest = value;
                 return;
-            default: throw new ArgumentOutOfRangeException(name);
+
+            default:
+                throw new ArgumentOutOfRangeException(name);
         }
     }
 
@@ -363,16 +388,21 @@ internal static class CommonExtensions
             case nameof(options.CategorizeChestSearchTerm):
                 options.CategorizeChestSearchTerm = value;
                 return;
+
             case nameof(options.SortInventoryBy):
                 options.SortInventoryBy = value;
                 return;
+
             case nameof(options.StorageIcon):
                 options.StorageIcon = value;
                 return;
+
             case nameof(options.StorageName):
                 options.StorageName = value;
                 return;
-            default: throw new ArgumentOutOfRangeException(name);
+
+            default:
+                throw new ArgumentOutOfRangeException(name);
         }
     }
 
@@ -387,16 +417,21 @@ internal static class CommonExtensions
             case nameof(options.AccessChestPriority):
                 options.AccessChestPriority = value;
                 return;
+
             case nameof(options.CraftFromChestDistance):
                 options.CraftFromChestDistance = value;
                 return;
+
             case nameof(options.ResizeChestCapacity):
                 options.ResizeChestCapacity = value;
                 return;
+
             case nameof(options.StashToChestDistance):
                 options.StashToChestDistance = value;
                 return;
-            default: throw new ArgumentOutOfRangeException(name);
+
+            default:
+                throw new ArgumentOutOfRangeException(name);
         }
     }
 
@@ -411,7 +446,9 @@ internal static class CommonExtensions
             case nameof(options.ResizeChest):
                 options.ResizeChest = value;
                 return;
-            default: throw new ArgumentOutOfRangeException(name);
+
+            default:
+                throw new ArgumentOutOfRangeException(name);
         }
     }
 
@@ -426,7 +463,9 @@ internal static class CommonExtensions
             case nameof(options.StashToChestPriority):
                 options.StashToChestPriority = value;
                 return;
-            default: throw new ArgumentOutOfRangeException(name);
+
+            default:
+                throw new ArgumentOutOfRangeException(name);
         }
     }
 
@@ -495,7 +534,8 @@ internal static class CommonExtensions
     {
         value = name switch
         {
-            nameof(options.ResizeChest) => options.ResizeChest, _ => throw new ArgumentOutOfRangeException(name),
+            nameof(options.ResizeChest) => options.ResizeChest,
+            _ => throw new ArgumentOutOfRangeException(name),
         };
 
         return value is not default(ChestMenuOption);

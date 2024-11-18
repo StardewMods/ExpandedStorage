@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
@@ -10,6 +11,7 @@ using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 #else
+
 namespace StardewMods.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
@@ -19,6 +21,7 @@ using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
+
 #endif
 
 /// <summary>Base custom component.</summary>
@@ -137,5 +140,6 @@ internal abstract class BaseComponent : ClickableComponent, ICustomComponent
     public virtual bool TryScroll(int direction) => false;
 
     /// <inheritdoc />
-    public virtual void Update(Point cursor) { }
+    public virtual void Update(Point cursor)
+    { }
 }

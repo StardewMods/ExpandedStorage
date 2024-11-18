@@ -628,7 +628,7 @@ internal sealed class ModPatches
             null,
             null,
             null,
-            delegate(string query, string error)
+            delegate (string query, string error)
             {
                 Log.Error(
                     "{0} failed parsing item query {1} for item {2}: {3}",

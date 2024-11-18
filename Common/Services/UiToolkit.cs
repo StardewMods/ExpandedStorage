@@ -1,14 +1,17 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 #else
+
 namespace StardewMods.Common.Services;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
 #endif
 
 /// <summary>User interface helper service.</summary>
@@ -27,7 +30,7 @@ internal sealed class UiToolkit
     }
 
     /// <summary>Gets the cursor position.</summary>
-    public static Point Cursor => UiToolkit.Input.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+    public static Point Cursor => Utility.ModifyCoordinatesForUIScale(UiToolkit.Input.GetCursorPosition().GetScaledScreenPixels()).ToPoint();
 
     /// <summary>Gets the input helper.</summary>
     public static IInputHelper Input { get; private set; } = null!;

@@ -20,16 +20,6 @@ internal class AnyExpression : IExpression
     public AnyExpression(params IExpression[] expressions) => this.Expressions = expressions.ToImmutableList();
 
     /// <inheritdoc />
-    public ExpressionType ExpressionType => ExpressionType.Any;
-
-    /// <inheritdoc />
-    public bool IsValid => this.Expressions.Any();
-
-    /// <inheritdoc />
-    public virtual string Text =>
-        $"{AnyExpression.BeginChar}{string.Join(' ', this.Expressions.Select(expression => expression.Text))}{AnyExpression.EndChar}";
-
-    /// <inheritdoc />
     public IImmutableList<IExpression> Expressions
     {
         get => this.expressions;
@@ -45,6 +35,12 @@ internal class AnyExpression : IExpression
     }
 
     /// <inheritdoc />
+    public ExpressionType ExpressionType => ExpressionType.Any;
+
+    /// <inheritdoc />
+    public bool IsValid => this.Expressions.Any();
+
+    /// <inheritdoc />
     public IExpression? Parent { get; set; }
 
     /// <inheritdoc />
@@ -53,6 +49,10 @@ internal class AnyExpression : IExpression
         get => string.Empty;
         set => throw new NotSupportedException();
     }
+
+    /// <inheritdoc />
+    public virtual string Text =>
+        $"{AnyExpression.BeginChar}{string.Join(' ', this.Expressions.Select(expression => expression.Text))}{AnyExpression.EndChar}";
 
     /// <inheritdoc />
     public int Compare(Item? x, Item? y) =>

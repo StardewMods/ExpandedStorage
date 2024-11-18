@@ -40,9 +40,6 @@ internal sealed class FarmerContainer : BaseContainer<Farmer>
     public override NetMutex? Mutex => (Utility.getHomeOfFarmer(this.Farmer) as Cabin)?.inventoryMutex;
 
     /// <inheritdoc />
-    public override Vector2 TileLocation => this.Farmer.Tile;
-
-    /// <inheritdoc />
     public override int ResizeChestCapacity
     {
         get => this.Farmer.MaxItems;
@@ -63,6 +60,9 @@ internal sealed class FarmerContainer : BaseContainer<Farmer>
         get => this.Farmer.Name;
         set { }
     }
+
+    /// <inheritdoc />
+    public override Vector2 TileLocation => this.Farmer.Tile;
 
     /// <inheritdoc />
     public override void ShowMenu(bool playSound = false) =>

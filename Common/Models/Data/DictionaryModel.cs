@@ -1,12 +1,15 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Models.Data;
 
 using StardewMods.FauxCore.Common.Interfaces.Data;
 
 #else
+
 namespace StardewMods.Common.Models.Data;
 
 using StardewMods.Common.Interfaces.Data;
+
 #endif
 
 internal sealed class DictionaryModel : IDictionaryModel

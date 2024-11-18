@@ -6,5 +6,6 @@ using StardewMods.Common.UI.Menus;
 internal sealed class LayoutMenu : BaseMenu
 {
     /// <summary>Initializes a new instance of the <see cref="LayoutMenu" /> class.</summary>
-    public LayoutMenu() { }
+    public LayoutMenu()
+    { }
 }

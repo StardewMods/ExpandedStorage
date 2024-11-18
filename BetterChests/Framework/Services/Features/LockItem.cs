@@ -96,7 +96,7 @@ internal sealed class LockItem : BaseFeature<LockItem>
             return;
         }
 
-        var cursor = e.Cursor.GetScaledScreenPixels().ToPoint();
+        var cursor = Utility.ModifyCoordinatesForUIScale(e.Cursor.GetScaledScreenPixels()).ToPoint();
         if (!this.TryGetMenu(cursor, out var inventoryMenu))
         {
             return;
@@ -126,7 +126,7 @@ internal sealed class LockItem : BaseFeature<LockItem>
             return;
         }
 
-        var cursor = e.Cursor.GetScaledScreenPixels().ToPoint();
+        var cursor = Utility.ModifyCoordinatesForUIScale(e.Cursor.GetScaledScreenPixels()).ToPoint();
         if (!this.TryGetMenu(cursor, out var inventoryMenu))
         {
             return;

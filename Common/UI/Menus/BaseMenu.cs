@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
@@ -8,6 +9,7 @@ using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 #else
+
 namespace StardewMods.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
@@ -15,6 +17,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
+
 #endif
 
 /// <summary>Base menu.</summary>
@@ -80,10 +83,10 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public sealed override void draw(SpriteBatch b) => this.draw(b, -1);
+    public override sealed void draw(SpriteBatch b) => this.draw(b, -1);
 
     /// <inheritdoc />
-    public sealed override void draw(SpriteBatch b, int red = -1, int green = -1, int blue = -1)
+    public override sealed void draw(SpriteBatch b, int red = -1, int green = -1, int blue = -1)
     {
         var cursor = UiToolkit.Cursor;
         this.SetHoverText(null);
@@ -125,6 +128,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
                     }
 
                     break;
+
                 case ClickableTextureComponent
                 {
                     visible: true,
@@ -180,7 +184,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public sealed override void leftClickHeld(int x, int y)
+    public override sealed void leftClickHeld(int x, int y)
     {
         base.leftClickHeld(x, y);
         var cursor = new Point(x, y);
@@ -210,6 +214,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
                 case BaseMenu baseMenu:
                     baseMenu.MoveTo(baseMenu.Position.ToPoint() + delta);
                     break;
+
                 default:
                     subMenu.xPositionOnScreen += delta.X;
                     subMenu.yPositionOnScreen += delta.Y;
@@ -225,6 +230,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
                 case ICustomComponent customComponent:
                     customComponent.MoveTo(customComponent.Location + delta);
                     break;
+
                 default:
                     component.bounds.Offset(delta);
                     break;
@@ -238,7 +244,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public sealed override void performHoverAction(int x, int y)
+    public override sealed void performHoverAction(int x, int y)
     {
         base.performHoverAction(x, y);
         var cursor = new Point(x, y);
@@ -259,6 +265,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
                     }
 
                     break;
+
                 default:
                     subMenu.performHoverAction(x, y);
                     break;
@@ -267,7 +274,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public sealed override void receiveLeftClick(int x, int y, bool playSound = true)
+    public override sealed void receiveLeftClick(int x, int y, bool playSound = true)
     {
         base.receiveLeftClick(x, y, playSound);
         var cursor = new Point(x, y);
@@ -289,6 +296,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
                     }
 
                     break;
+
                 default:
                     subMenu.receiveLeftClick(x, y, playSound);
                     break;
@@ -297,7 +305,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public sealed override void receiveRightClick(int x, int y, bool playSound = true)
+    public override sealed void receiveRightClick(int x, int y, bool playSound = true)
     {
         base.receiveRightClick(x, y, playSound);
         var cursor = new Point(x, y);
@@ -319,6 +327,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
                     }
 
                     break;
+
                 default:
                     subMenu.receiveRightClick(x, y, playSound);
                     break;
@@ -327,7 +336,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public sealed override void receiveScrollWheelAction(int direction)
+    public override sealed void receiveScrollWheelAction(int direction)
     {
         base.receiveScrollWheelAction(direction);
         var cursor = UiToolkit.Cursor;
@@ -349,6 +358,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
                     }
 
                     break;
+
                 default:
                     subMenu.receiveScrollWheelAction(direction);
                     break;
@@ -357,7 +367,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public sealed override void releaseLeftClick(int x, int y)
+    public override sealed void releaseLeftClick(int x, int y)
     {
         base.releaseLeftClick(x, y);
         var cursor = new Point(x, y);

@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Models;
 
 using System.Globalization;
@@ -7,12 +8,14 @@ using StardewMods.FauxCore.Common.Helpers;
 using StardewMods.FauxCore.Common.Services.Integrations.BetterChests;
 
 #else
+
 namespace StardewMods.Common.Models;
 
 using System.Globalization;
 using System.Text;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.BetterChests;
+
 #endif
 
 /// <inheritdoc />

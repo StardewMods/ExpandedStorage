@@ -126,7 +126,7 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
             return;
         }
 
-        var cursor = e.Cursor.GetScaledScreenPixels();
+        var cursor = Utility.ModifyCoordinatesForUIScale(e.Cursor.GetScaledScreenPixels());
         IStorageContainer? container = null;
         ClickableComponent? icon = null;
         if (this.menuHandler.Top.Container?.ConfigureChest is FeatureOption.Enabled

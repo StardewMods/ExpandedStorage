@@ -17,15 +17,6 @@ internal sealed class NotExpression : IExpression
     public NotExpression(params IExpression[] expressions) => this.Expressions = expressions.ToImmutableList();
 
     /// <inheritdoc />
-    public ExpressionType ExpressionType => ExpressionType.Not;
-
-    /// <inheritdoc />
-    public bool IsValid => this.Expression is not null;
-
-    /// <inheritdoc />
-    public string Text => $"{NotExpression.Char}{this.Expression?.Text}";
-
-    /// <inheritdoc />
     public IImmutableList<IExpression> Expressions
     {
         get => this.expressions;
@@ -41,6 +32,12 @@ internal sealed class NotExpression : IExpression
     }
 
     /// <inheritdoc />
+    public ExpressionType ExpressionType => ExpressionType.Not;
+
+    /// <inheritdoc />
+    public bool IsValid => this.Expression is not null;
+
+    /// <inheritdoc />
     public IExpression? Parent { get; set; }
 
     /// <inheritdoc />
@@ -49,6 +46,9 @@ internal sealed class NotExpression : IExpression
         get => string.Empty;
         set => throw new NotSupportedException();
     }
+
+    /// <inheritdoc />
+    public string Text => $"{NotExpression.Char}{this.Expression?.Text}";
 
     private IExpression? Expression => this.Expressions.ElementAtOrDefault(0);
 

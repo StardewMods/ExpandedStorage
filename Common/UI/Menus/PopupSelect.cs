@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
@@ -10,6 +11,7 @@ using StardewMods.FauxCore.Common.UI.Components;
 using StardewValley.Menus;
 
 #else
+
 namespace StardewMods.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
@@ -19,6 +21,7 @@ using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
+
 #endif
 
 /// <summary>Popup menu for selecting an item from a list of values.</summary>
@@ -137,10 +140,12 @@ internal sealed class PopupSelect<TItem> : BaseMenu
             case Keys.Escape when this.readyToClose():
                 this.exitThisMenuNoSound();
                 return;
+
             case Keys.Enter when this.readyToClose() && this.selectOption.CurrentSelection is not null:
                 this.optionSelected?.InvokeAll(this, this.selectOption.CurrentSelection);
                 this.exitThisMenuNoSound();
                 return;
+
             case Keys.Tab when this.textField.Selected
                 && !string.IsNullOrWhiteSpace(this.CurrentText)
                 && this.selectOption.Options.Any():

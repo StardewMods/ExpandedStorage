@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
@@ -9,6 +10,7 @@ using StardewMods.FauxCore.Common.UI.Components;
 using StardewValley.Menus;
 
 #else
+
 namespace StardewMods.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
@@ -17,6 +19,7 @@ using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.Common.UI.Components;
 using StardewValley.Menus;
+
 #endif
 
 /// <summary>Framed menu with vertical scrolling.</summary>
@@ -75,7 +78,7 @@ internal abstract class FramedMenu : BaseMenu, IFramedMenu
     public virtual int StepSize => 1;
 
     /// <inheritdoc />
-    public sealed override void Draw(SpriteBatch spriteBatch, Point cursor) =>
+    public override sealed void Draw(SpriteBatch spriteBatch, Point cursor) =>
         UiToolkit.DrawInFrame(spriteBatch, this.Frame, sb => this.DrawInFrame(sb, cursor));
 
     /// <inheritdoc />
@@ -96,6 +99,7 @@ internal abstract class FramedMenu : BaseMenu, IFramedMenu
                     }
 
                     break;
+
                 case ClickableTextureComponent
                 {
                     visible: true,

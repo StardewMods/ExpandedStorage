@@ -98,7 +98,8 @@ internal sealed class ExpressionEditor : FramedMenu
                         false);
 
                     continue;
-                case ExpressionType.Comparable: continue;
+                case ExpressionType.Comparable:
+                    continue;
             }
 
             if (component is ClickableTextureComponent clickableTextureComponent)
@@ -160,7 +161,8 @@ internal sealed class ExpressionEditor : FramedMenu
     }
 
     /// <inheritdoc />
-    public override void DrawUnder(SpriteBatch b, Point cursor) { }
+    public override void DrawUnder(SpriteBatch b, Point cursor)
+    { }
 
     /// <summary>Re-initializes the components of the object with the given initialization expression.</summary>
     /// <param name="initExpression">The initial expression, or null to clear.</param>
@@ -216,7 +218,8 @@ internal sealed class ExpressionEditor : FramedMenu
 
             Action? action = expression.ExpressionType switch
             {
-                ExpressionType.All or ExpressionType.Any => () => this.ToggleGroup(expression), _ => null,
+                ExpressionType.All or ExpressionType.Any => () => this.ToggleGroup(expression),
+                _ => null,
             };
 
             var toggleGroup = new ClickableComponent(

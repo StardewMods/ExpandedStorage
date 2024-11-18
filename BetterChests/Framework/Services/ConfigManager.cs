@@ -391,7 +391,13 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
             },
             value => options.ResizeChestCapacity = value switch
             {
-                5 => -1, 0 => 0, _ when size > 1 => value * size, 1 => 9, 2 => 36, 3 => 70, _ => 70 * value,
+                5 => -1,
+                0 => 0,
+                _ when size > 1 => value * size,
+                1 => 9,
+                2 => 36,
+                3 => 70,
+                _ => 70 * value,
             },
             I18n.Config_ResizeChestCapacity_Name,
             I18n.Config_ResizeChestCapacity_Tooltip,
@@ -604,32 +610,40 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
                         name = TokenParser.ParseText(bigCraftableData.DisplayName);
                         description = TokenParser.ParseText(bigCraftableData.Description);
                         break;
+
                     case "Buildings" when storageId == "Stable":
                         name = I18n.Storage_Saddlebag_Name();
                         description = I18n.Storage_Saddlebag_Tooltip();
                         break;
+
                     case "Buildings" when Game1.buildingData.TryGetValue(storageId, out var buildingData):
                         name = TokenParser.ParseText(buildingData.Name);
                         description = TokenParser.ParseText(buildingData.Description);
                         break;
+
                     case "Character" when storageId == "Farmer":
                         name = I18n.Storage_Backpack_Name();
                         description = I18n.Storage_Backpack_Tooltip();
                         break;
+
                     case "Furniture":
                         var data = furnitureData.GetData(storageId);
                         name = TokenParser.ParseText(data.DisplayName);
                         description = TokenParser.ParseText(data.Description);
                         break;
+
                     case "Locations" when storageId == "FarmHouse":
                         name = I18n.Storage_Fridge_Name();
                         description = I18n.Storage_Fridge_Tooltip();
                         break;
+
                     case "Locations" when storageId == "IslandFarmHouse":
                         name = I18n.Storage_IslandFridge_Name();
                         description = I18n.Storage_IslandFridge_Tooltip();
                         break;
-                    default: continue;
+
+                    default:
+                        continue;
                 }
 
                 subPages.Add(($"{dataType}_{storageId}", name, description, storageOptions));
@@ -946,7 +960,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         gmcm.AddTextOption(
             Mod.Manifest,
             () => string.Join(',', config.StorageInfoHoverItems.Select(item => item.ToStringFast())),
-            value => config.StorageInfoHoverItems = [..GetStorageInfoItems(value)],
+            value => config.StorageInfoHoverItems = [.. GetStorageInfoItems(value)],
             I18n.Config_StorageInfoHoverItems_Name,
             I18n.Config_StorageInfoHoverItems_Tooltip);
 
@@ -954,7 +968,7 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         gmcm.AddTextOption(
             Mod.Manifest,
             () => string.Join(',', config.StorageInfoMenuItems.Select(item => item.ToStringFast())),
-            value => config.StorageInfoMenuItems = [..GetStorageInfoItems(value)],
+            value => config.StorageInfoMenuItems = [.. GetStorageInfoItems(value)],
             I18n.Config_StorageInfoMenuItems_Name,
             I18n.Config_StorageInfoMenuItems_Tooltip);
 

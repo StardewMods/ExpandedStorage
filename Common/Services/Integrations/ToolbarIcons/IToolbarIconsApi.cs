@@ -1,15 +1,19 @@
-﻿#if IS_FAUXCORE
+#if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations.ToolbarIcons;
 
 using Microsoft.Xna.Framework;
 using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
+
 #else
+
 namespace StardewMods.Common.Services.Integrations.ToolbarIcons;
 
 using Microsoft.Xna.Framework;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
+
 #endif
 
 /// <summary>Public api to add icons above or below the toolbar.</summary>

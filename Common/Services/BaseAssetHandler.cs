@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services;
 
 using StardewModdingAPI.Events;
@@ -8,6 +9,7 @@ using StardewMods.FauxCore.Common.Models.Assets;
 using StardewMods.FauxCore.Common.Services.Integrations.ContentPatcher;
 
 #else
+
 namespace StardewMods.Common.Services;
 
 using StardewModdingAPI.Events;
@@ -15,6 +17,7 @@ using StardewMods.Common.Interfaces;
 using StardewMods.Common.Interfaces.Assets;
 using StardewMods.Common.Models.Assets;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
+
 #endif
 
 /// <inheritdoc />

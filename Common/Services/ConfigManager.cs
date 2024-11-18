@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services;
 
 using StardewModdingAPI.Events;
@@ -7,12 +8,14 @@ using StardewMods.FauxCore.Common.Models.Events;
 using StardewMods.FauxCore.Common.Services.Integrations.ContentPatcher;
 
 #else
+
 namespace StardewMods.Common.Services;
 
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Events;
 using StardewMods.Common.Services.Integrations.ContentPatcher;
+
 #endif
 
 /// <summary>Service for managing the mod configuration file.</summary>

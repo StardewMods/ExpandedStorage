@@ -1,6 +1,8 @@
-﻿#if IS_FAUXCORE
+#if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations.ProjectFluent;
 #else
+
 namespace StardewMods.Common.Services.Integrations.ProjectFluent;
 #endif
 

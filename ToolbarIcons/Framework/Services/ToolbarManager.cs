@@ -66,7 +66,7 @@ internal sealed class ToolbarManager
         this
             .Toolbar?.allClickableComponents?.OfType<ClickableTextureComponent>()
             .FirstOrDefault(
-                component => component.bounds.Contains(this.inputHelper.GetCursorPosition().GetScaledScreenPixels()));
+                component => component.bounds.Contains(Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels())));
 
     private ClickableComponent? Button
     {
@@ -216,7 +216,7 @@ internal sealed class ToolbarManager
         }
 
         this.RefreshComponents();
-        var cursorPos = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        var cursorPos = Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels()).ToPoint();
         foreach (var component in this.Toolbar.allClickableComponents.OfType<ClickableTextureComponent>())
         {
             component.tryHover(cursorPos.X, cursorPos.Y);

@@ -41,11 +41,11 @@ internal sealed class InventoryTab : BaseComponent
         this.bounds.X = (int)this.origin.X - overrideWidth;
     }
 
-    /// <summary>Gets the tab data.</summary>
-    public TabData Data { get; }
-
     /// <summary>Gets or sets a value indicating whether the tab is currently active.</summary>
     public bool Active { get; set; } = true;
+
+    /// <summary>Gets the tab data.</summary>
+    public TabData Data { get; }
 
     /// <inheritdoc />
     public override void Draw(SpriteBatch spriteBatch, Point cursor, Point offset)

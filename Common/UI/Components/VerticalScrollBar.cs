@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
@@ -8,6 +9,7 @@ using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 #else
+
 namespace StardewMods.Common.UI.Components;
 
 using Microsoft.Xna.Framework;
@@ -15,6 +17,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewMods.Common.Services;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
+
 #endif
 
 /// <summary>Represents a scrollbar with up/down arrows.</summary>

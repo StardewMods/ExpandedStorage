@@ -12,7 +12,7 @@ public class ItemsDisplayingEventArgs : EventArgs
     public ItemsDisplayingEventArgs(IStorageContainer container)
     {
         this.Container = container;
-        this.items = [..container.Items];
+        this.items = [.. container.Items];
     }
 
     /// <summary>Gets the container with the items being displayed.</summary>
@@ -24,5 +24,5 @@ public class ItemsDisplayingEventArgs : EventArgs
     /// <summary>Updates the collection of items using the specified operation.</summary>
     /// <param name="operation">A function that takes a collection of items and returns a modified collection.</param>
     public void Edit(Func<IEnumerable<Item>, IEnumerable<Item>> operation) =>
-        this.items = [..operation.Invoke(this.items)];
+        this.items = [.. operation.Invoke(this.items)];
 }

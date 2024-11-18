@@ -114,7 +114,12 @@ internal sealed class Localized
             var size = getSize();
             var actualCapacity = value switch
             {
-                5 => -1, > 0 when size > 1 => value * size, 1 => 9, 2 => 36, 3 => 70, _ => 70 * value,
+                5 => -1,
+                > 0 when size > 1 => value * size,
+                1 => 9,
+                2 => 36,
+                3 => 70,
+                _ => 70 * value,
             };
 
             var sb = new StringBuilder();
@@ -169,7 +174,7 @@ internal sealed class Localized
                 case >= (int)RangeOption.Location when parentOption == RangeOption.Location
                     && parentValue == Math.Pow(2, 1 + value - (int)RangeOption.Location):
                 case
-                    { } when parentOption == RangeOption.Default:
+                { } when parentOption == RangeOption.Default:
                     sb.Append(I18n.Config_DefaultOption_Indicator());
                     break;
             }

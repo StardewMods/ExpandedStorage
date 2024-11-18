@@ -100,7 +100,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             return;
         }
 
-        var cursor = e.Cursor.GetScaledScreenPixels();
+        var cursor = Utility.ModifyCoordinatesForUIScale(e.Cursor.GetScaledScreenPixels());
         if (this.currentContainer.Value.bounds.Contains(cursor))
         {
             this.inputHelper.Suppress(e.Button);
@@ -277,7 +277,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             return;
         }
 
-        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels();
+        var cursor = Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels());
         if (!this.bounds.Value.Contains(cursor))
         {
             return;
@@ -288,10 +288,13 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             case > 0:
                 this.offset.Value--;
                 break;
+
             case < 0:
                 this.offset.Value++;
                 break;
-            default: return;
+
+            default:
+                return;
         }
 
         this.offset.Value = Math.Min(
@@ -307,7 +310,7 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
             return;
         }
 
-        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels();
+        var cursor = Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels());
 
         // Draw current container index
         if (this.menuHandler.Top.Container is not null && this.Config.AccessChestsShowArrows)

@@ -1,14 +1,17 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Models.Data;
 
 using StardewMods.FauxCore.Common.Interfaces.Data;
 using StardewValley.Mods;
 
 #else
+
 namespace StardewMods.Common.Models.Data;
 
 using StardewMods.Common.Interfaces.Data;
 using StardewValley.Mods;
+
 #endif
 
 /// <inheritdoc />

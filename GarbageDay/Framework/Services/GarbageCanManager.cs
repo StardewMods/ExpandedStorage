@@ -103,11 +103,13 @@ internal sealed class GarbageCanManager : BaseService<GarbageCanManager>
                     npc.setNewDialogue("Data\\ExtraDialogue:Town_DumpsterDiveComment_Child", true, true);
 
                     break;
+
                 case 1:
                     npc.doEmote(8);
                     npc.setNewDialogue("Data\\ExtraDialogue:Town_DumpsterDiveComment_Teen", true, true);
 
                     break;
+
                 default:
                     npc.doEmote(12);
                     npc.setNewDialogue("Data\\ExtraDialogue:Town_DumpsterDiveComment_Adult", true, true);

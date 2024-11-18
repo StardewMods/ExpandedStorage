@@ -1,12 +1,15 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Models.Assets;
 
 using StardewMods.FauxCore.Common.Interfaces.Cache;
 
 #else
+
 namespace StardewMods.Common.Models.Assets;
 
 using StardewMods.Common.Interfaces.Cache;
+
 #endif
 
 /// <inheritdoc />

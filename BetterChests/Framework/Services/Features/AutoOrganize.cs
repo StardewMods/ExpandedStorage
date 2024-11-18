@@ -51,7 +51,7 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
         var containerGroupsFrom = new Dictionary<int, List<IStorageContainer>>();
         foreach (var (priority, containers) in containerGroupsTo)
         {
-            containerGroupsFrom.Add(priority, [..containers]);
+            containerGroupsFrom.Add(priority, [.. containers]);
         }
 
         var topPriority = containerGroupsTo.Keys.Max();

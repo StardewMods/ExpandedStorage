@@ -60,23 +60,23 @@ internal sealed class MenuManager
     /// <summary>Gets the number of columns of the inventory menu.</summary>
     public int Columns => this.Capacity / this.Rows;
 
-    /// <summary>Gets the instance of the inventory menu that is being managed.</summary>
-    public InventoryMenu? InventoryMenu => this.Menu as InventoryMenu;
-
-    /// <summary>Gets the instance of the menu that is being managed.</summary>
-    public IClickableMenu? Menu => this.source.TryGetTarget(out var target) ? target : null;
-
-    /// <summary>Gets the number of rows of the inventory menu.</summary>
-    public int Rows => this.InventoryMenu?.rows ?? 3;
-
     /// <summary>Gets or sets the container associated with the menu.</summary>
     public IStorageContainer? Container { get; set; }
 
     /// <summary>Gets the inventory icon.</summary>
     public ClickableComponent? Icon { get; private set; }
 
+    /// <summary>Gets the instance of the inventory menu that is being managed.</summary>
+    public InventoryMenu? InventoryMenu => this.Menu as InventoryMenu;
+
+    /// <summary>Gets the instance of the menu that is being managed.</summary>
+    public IClickableMenu? Menu => this.source.TryGetTarget(out var target) ? target : null;
+
     /// <summary>Gets or sets the method used to highlight an item in the inventory menu.</summary>
     public InventoryMenu.highlightThisItem? OriginalHighlightMethod { get; set; }
+
+    /// <summary>Gets the number of rows of the inventory menu.</summary>
+    public int Rows => this.InventoryMenu?.rows ?? 3;
 
     private ClickableTextureComponent DownArrow =>
         this.downArrow ??= this.iconRegistry.Icon(VanillaIcon.ArrowDown).Component(IconStyle.Transparent);
@@ -211,23 +211,29 @@ internal sealed class MenuManager
                 x = this.InventoryMenu.xPositionOnScreen - Game1.tileSize - 36;
                 y = itemGrabMenu.yPositionOnScreen + 4;
                 break;
+
             case ItemGrabMenu itemGrabMenu when this == this.menuHandler.Bottom:
                 x = itemGrabMenu.xPositionOnScreen - Game1.tileSize;
                 y = itemGrabMenu.yPositionOnScreen + (int)(itemGrabMenu.height / 2f) + 4;
                 break;
+
             case InventoryPage when this.InventoryMenu is not null:
                 x = this.InventoryMenu.xPositionOnScreen - Game1.tileSize - 36;
                 y = this.InventoryMenu.yPositionOnScreen + 24;
                 break;
+
             case ShopMenu shopMenu when this == this.menuHandler.Top && !shopMenu.tabButtons.Any():
                 x = shopMenu.xPositionOnScreen - Game1.tileSize + 4;
                 y = shopMenu.yPositionOnScreen + Game1.tileSize + 24;
                 break;
+
             case ShopMenu when this == this.menuHandler.Bottom && this.InventoryMenu is not null:
                 x = this.InventoryMenu.xPositionOnScreen - Game1.tileSize - 20;
                 y = this.InventoryMenu.yPositionOnScreen + 24;
                 break;
-            default: return;
+
+            default:
+                return;
         }
 
         if (string.IsNullOrWhiteSpace(this.Container?.StorageIcon)
@@ -249,7 +255,7 @@ internal sealed class MenuManager
             return;
         }
 
-        var cursor = e.Cursor.GetScaledScreenPixels();
+        var cursor = Utility.ModifyCoordinatesForUIScale(e.Cursor.GetScaledScreenPixels());
         if (this.scrolled > 0 && this.UpArrow.bounds.Contains(cursor))
         {
             this.scrolled--;
@@ -265,7 +271,7 @@ internal sealed class MenuManager
 
     private void OnButtonsChanged(ButtonsChangedEventArgs e)
     {
-        var cursor = e.Cursor.GetScaledScreenPixels().ToPoint();
+        var cursor = Utility.ModifyCoordinatesForUIScale(e.Cursor.GetScaledScreenPixels()).ToPoint();
         if (this.InventoryMenu?.isWithinBounds(cursor.X, cursor.Y) != true)
         {
             return;
@@ -306,7 +312,7 @@ internal sealed class MenuManager
 
     private void OnMouseWheelScrolled(MouseWheelScrolledEventArgs e)
     {
-        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        var cursor = Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels()).ToPoint();
         if (this.InventoryMenu?.isWithinBounds(cursor.X, cursor.Y) != true)
         {
             return;

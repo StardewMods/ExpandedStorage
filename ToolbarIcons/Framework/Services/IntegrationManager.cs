@@ -57,16 +57,20 @@ internal sealed class IntegrationManager
             case IntegrationType.Menu when this.TryGetMenuAction(data.ModId, data.ExtraData, out var integrationAction):
                 action = integrationAction;
                 break;
+
             case IntegrationType.Method when this.TryGetMethod(data.ModId, data.ExtraData, out var integrationAction):
                 action = integrationAction;
                 break;
+
             case IntegrationType.Keybind when this.TryGetKeybindAction(
                 data.ModId,
                 data.ExtraData,
                 out var integrationAction):
                 action = integrationAction;
                 break;
-            default: return;
+
+            default:
+                return;
         }
 
         if (!this.actions.TryAdd(id, action))
@@ -104,6 +108,7 @@ internal sealed class IntegrationManager
                         integration.HoverText);
 
                     break;
+
                 case IMethodIntegration integration when this.TryGetMethodWithParams(
                     integration.ModId,
                     integration.MethodName,
@@ -118,6 +123,7 @@ internal sealed class IntegrationManager
                         integration.MethodName);
 
                     break;
+
                 case IVanillaIntegration integration:
                     action = integration.DoAction;
                     Log.Trace(
@@ -126,7 +132,9 @@ internal sealed class IntegrationManager
                         integration.HoverText);
 
                     break;
-                default: continue;
+
+                default:
+                    continue;
             }
 
             if (!this.actions.TryAdd(customIntegration.Icon, action))

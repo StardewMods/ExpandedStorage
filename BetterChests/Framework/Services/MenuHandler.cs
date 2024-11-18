@@ -132,15 +132,15 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
     /// <summary>Gets the inventory menu manager for the bottom inventory menu.</summary>
     public MenuManager Bottom => this.bottomMenu.Value;
 
-    /// <summary>Gets the inventory menu manager for the top inventory menu.</summary>
-    public MenuManager Top => this.topMenu.Value;
-
     /// <summary>Gets the current menu.</summary>
     public IClickableMenu? CurrentMenu
     {
         get => this.currentMenu.Value;
         private set => this.currentMenu.Value = value;
     }
+
+    /// <summary>Gets the inventory menu manager for the top inventory menu.</summary>
+    public MenuManager Top => this.topMenu.Value;
 
     /// <summary>Determines if the specified source object can receive focus.</summary>
     /// <param name="source">The object to check if it can receive focus.</param>
@@ -194,9 +194,9 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
                 heldObject.Value: Chest heldChest,
             } => heldChest,
             Building building when building.GetBuildingChest("Output") is
-                { } outputChest => outputChest,
+            { } outputChest => outputChest,
             GameLocation location when location.GetFridge() is
-                { } fridge => fridge,
+            { } fridge => fridge,
             _ => sourceItem,
         };
 
@@ -215,7 +215,8 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
                     _ => capacity,
                 };
 
-            default: return capacity > 70 ? 70 : capacity;
+            default:
+                return capacity > 70 ? 70 : capacity;
         }
     }
 
@@ -228,11 +229,18 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static void InventoryMenu_draw_postfix(InventoryMenu __instance, ref MenuManager? __state)
     {
-        __state = __instance.Equals(MenuHandler.instance.Top.InventoryMenu)
-            ? MenuHandler.instance.Top
-            : __instance.Equals(MenuHandler.instance.Bottom.InventoryMenu)
-                ? MenuHandler.instance.Bottom
-                : null;
+        if (__instance.Equals(MenuHandler.instance.Top.InventoryMenu))
+        {
+            __state = MenuHandler.instance.Top;
+        }
+        else if (__instance.Equals(MenuHandler.instance.Bottom.InventoryMenu))
+        {
+            __state = MenuHandler.instance.Bottom;
+        }
+        else
+        {
+            __state = null;
+        }
 
         if (__state?.Container is null)
         {
@@ -248,11 +256,18 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static void InventoryMenu_draw_prefix(InventoryMenu __instance, ref MenuManager? __state)
     {
-        __state = __instance.Equals(MenuHandler.instance.Top.InventoryMenu)
-            ? MenuHandler.instance.Top
-            : __instance.Equals(MenuHandler.instance.Bottom.InventoryMenu)
-                ? MenuHandler.instance.Bottom
-                : null;
+        if (__instance.Equals(MenuHandler.instance.Top.InventoryMenu))
+        {
+            __state = MenuHandler.instance.Top;
+        }
+        else if (__instance.Equals(MenuHandler.instance.Bottom.InventoryMenu))
+        {
+            __state = MenuHandler.instance.Bottom;
+        }
+        else
+        {
+            __state = null;
+        }
 
         if (__state?.Container is null)
         {
@@ -332,7 +347,7 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
 
     private void OnButtonPressed(ButtonPressedEventArgs e)
     {
-        var cursor = e.Cursor.GetScaledScreenPixels().ToPoint();
+        var cursor = Utility.ModifyCoordinatesForUIScale(e.Cursor.GetScaledScreenPixels()).ToPoint();
         var baseMenu = Game1.activeClickableMenu?.GetChildMenu() as BaseMenu;
         switch (e.Button)
         {
@@ -347,7 +362,7 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
 
                 // Components
                 if (this
-                    .components.Value.Where(c => c.bounds.Contains(e.Cursor.GetScaledScreenPixels()))
+                    .components.Value.Where(c => c.bounds.Contains(Utility.ModifyCoordinatesForUIScale(e.Cursor.GetScaledScreenPixels())))
                     .Any(component => component.TryLeftClick(cursor)))
                 {
                     this.inputHelper.Suppress(e.Button);
@@ -366,7 +381,7 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
 
                 // Components
                 if (this
-                    .components.Value.Where(c => c.bounds.Contains(e.Cursor.GetScaledScreenPixels()))
+                    .components.Value.Where(c => c.bounds.Contains(Utility.ModifyCoordinatesForUIScale(e.Cursor.GetScaledScreenPixels())))
                     .Any(component => component.TryRightClick(cursor)))
                 {
                     this.inputHelper.Suppress(e.Button);
@@ -386,7 +401,7 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
     [Priority(int.MinValue)]
     private void OnRenderedActiveMenu(RenderedActiveMenuEventArgs e)
     {
-        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        var cursor = Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels()).ToPoint();
         switch (this.CurrentMenu)
         {
             case ItemGrabMenu itemGrabMenu:
@@ -460,34 +475,31 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
                 this.Bottom.Draw(e.SpriteBatch, cursor);
 
                 // Redraw foreground
-                if (this.focus.Value is null)
+                if (this.focus.Value is null && !string.IsNullOrEmpty(inventoryPage.hoverText))
                 {
-                    if (!string.IsNullOrEmpty(inventoryPage.hoverText))
+                    if (inventoryPage.hoverAmount > 0)
                     {
-                        if (inventoryPage.hoverAmount > 0)
-                        {
-                            IClickableMenu.drawToolTip(
-                                e.SpriteBatch,
-                                inventoryPage.hoverText,
-                                inventoryPage.hoverTitle,
-                                null,
-                                true,
-                                -1,
-                                0,
-                                null,
-                                -1,
-                                null,
-                                inventoryPage.hoverAmount);
-                        }
-                        else
-                        {
-                            IClickableMenu.drawToolTip(
-                                e.SpriteBatch,
-                                inventoryPage.hoverText,
-                                inventoryPage.hoverTitle,
-                                inventoryPage.hoveredItem,
-                                Game1.player.CursorSlotItem is not null);
-                        }
+                        IClickableMenu.drawToolTip(
+                            e.SpriteBatch,
+                            inventoryPage.hoverText,
+                            inventoryPage.hoverTitle,
+                            null,
+                            true,
+                            -1,
+                            0,
+                            null,
+                            -1,
+                            null,
+                            inventoryPage.hoverAmount);
+                    }
+                    else
+                    {
+                        IClickableMenu.drawToolTip(
+                            e.SpriteBatch,
+                            inventoryPage.hoverText,
+                            inventoryPage.hoverTitle,
+                            inventoryPage.hoveredItem,
+                            Game1.player.CursorSlotItem is not null);
                     }
                 }
 
@@ -532,7 +544,8 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
 
                 break;
 
-            default: return;
+            default:
+                return;
         }
 
         Game1.mouseCursorTransparency = 1f;
@@ -561,11 +574,14 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
 
                 break;
 
-            case InventoryPage or ShopMenu: break;
-            default: return;
+            case InventoryPage or ShopMenu:
+                break;
+
+            default:
+                return;
         }
 
-        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels().ToPoint();
+        var cursor = Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels()).ToPoint();
         foreach (var component in this.components.Value)
         {
             component.Update(cursor);
@@ -651,6 +667,7 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
                         top = menu.showReceivingMenu ? menu.ItemsToGrabMenu : null;
                         bottom = menu.inventory;
                         break;
+
                     case GameMenu menu:
                         newMenu = menu.GetCurrentPage();
                         continue;
@@ -659,11 +676,13 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
                         top = null;
                         bottom = menu.inventory;
                         break;
+
                     case ShopMenu menu:
                         parent = menu;
                         top = menu;
                         bottom = menu.inventory;
                         break;
+
                     case BaseMenu
                     {
                         Parent:
@@ -672,7 +691,7 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
                         newMenu = baseMenuParent;
                         continue;
                     case not null when newMenu.GetParentMenu() is
-                        { } parentMenu:
+                    { } parentMenu:
                         newMenu = parentMenu;
                         continue;
                 }
@@ -738,7 +757,7 @@ internal sealed class MenuHandler : BaseService<MenuHandler>
         var menu = Game1.activeClickableMenu switch
         {
             { } menuWithChild when menuWithChild.GetChildMenu() is
-                { } childMenu => childMenu,
+            { } childMenu => childMenu,
             GameMenu gameMenu => gameMenu.GetCurrentPage(),
             _ => Game1.activeClickableMenu,
         };

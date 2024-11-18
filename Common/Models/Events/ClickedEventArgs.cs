@@ -1,14 +1,17 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Models.Events;
 
 using Microsoft.Xna.Framework;
 using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 
 #else
+
 namespace StardewMods.Common.Models.Events;
 
 using Microsoft.Xna.Framework;
 using StardewMods.Common.Services.Integrations.FauxCore;
+
 #endif
 
 /// <inheritdoc />

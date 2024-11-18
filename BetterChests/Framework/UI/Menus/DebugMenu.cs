@@ -88,9 +88,11 @@ internal sealed class DebugMenu : BaseMenu
                     case "backpack":
                         this.debugMode.Command("bc_config", [item]);
                         return true;
+
                     case "reset":
                         this.debugMode.Command("bc_reset", [item]);
                         return true;
+
                     default:
                         this.debugMode.Command("bc_menu", [item]);
                         return true;

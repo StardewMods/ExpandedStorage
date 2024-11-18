@@ -1,6 +1,8 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations.BetterChests;
 #else
+
 namespace StardewMods.Common.Services.Integrations.BetterChests;
 #endif
 

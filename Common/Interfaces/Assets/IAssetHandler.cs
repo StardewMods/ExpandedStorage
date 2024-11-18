@@ -1,12 +1,15 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Interfaces.Assets;
 
 using StardewModdingAPI.Events;
 
 #else
+
 namespace StardewMods.Common.Interfaces.Assets;
 
 using StardewModdingAPI.Events;
+
 #endif
 
 /// <summary>Handles modification and manipulation of assets in the game.</summary>

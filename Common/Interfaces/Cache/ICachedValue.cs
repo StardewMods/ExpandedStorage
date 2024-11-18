@@ -1,6 +1,8 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Interfaces.Cache;
 #else
+
 namespace StardewMods.Common.Interfaces.Cache;
 #endif
 

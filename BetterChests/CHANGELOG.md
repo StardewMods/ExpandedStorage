@@ -1,4 +1,4 @@
-﻿# Better Chests Change Log
+# Better Chests Change Log
 
 ## 2.19.0 (Planned)
 
@@ -22,6 +22,12 @@
 * Fixed AutoOrganize not grabbing items from chests after they fail too insert
   into the first chest.
 * Added back the ability to see locked items from the main inventory menu.
+
+## 2.18.5 (Unreleased)
+
+### Fixed
+
+* Fixed issues with UI scaling.
 
 ## 2.18.4 (November 5, 2024)
 

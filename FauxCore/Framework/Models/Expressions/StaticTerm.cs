@@ -12,16 +12,6 @@ internal class StaticTerm : IExpression
     public StaticTerm(string term) => this.Term = term;
 
     /// <inheritdoc />
-    public virtual ExpressionType ExpressionType => ExpressionType.Static;
-
-    /// <inheritdoc />
-    public bool IsValid => !string.IsNullOrWhiteSpace(this.Term);
-
-    /// <inheritdoc />
-    public virtual string Text =>
-        this.Term.Contains(' ') || string.IsNullOrWhiteSpace(this.Term) ? $"\"{this.Term}\"" : this.Term;
-
-    /// <inheritdoc />
     public IImmutableList<IExpression> Expressions
     {
         get => ImmutableList<IExpression>.Empty;
@@ -29,10 +19,20 @@ internal class StaticTerm : IExpression
     }
 
     /// <inheritdoc />
+    public virtual ExpressionType ExpressionType => ExpressionType.Static;
+
+    /// <inheritdoc />
+    public bool IsValid => !string.IsNullOrWhiteSpace(this.Term);
+
+    /// <inheritdoc />
     public IExpression? Parent { get; set; }
 
     /// <inheritdoc />
     public string Term { get; set; }
+
+    /// <inheritdoc />
+    public virtual string Text =>
+        this.Term.Contains(' ') || string.IsNullOrWhiteSpace(this.Term) ? $"\"{this.Term}\"" : this.Term;
 
     /// <inheritdoc />
     public int Compare(Item? x, Item? y) => (this.Equals(x) ? -1 : 1).CompareTo(this.Equals(y) ? -1 : 1);

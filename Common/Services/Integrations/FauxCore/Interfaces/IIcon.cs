@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 
 using Microsoft.Xna.Framework;
@@ -6,11 +7,13 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
 
 #else
+
 namespace StardewMods.Common.Services.Integrations.FauxCore;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using StardewValley.Menus;
+
 #endif
 
 /// <summary>Represents an icon on a sprite sheet.</summary>

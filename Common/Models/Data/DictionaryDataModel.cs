@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Models.Data;
 
 using System.Globalization;
@@ -8,6 +9,7 @@ using StardewMods.FauxCore.Common.Interfaces.Data;
 using StardewMods.FauxCore.Common.Models.Cache;
 
 #else
+
 namespace StardewMods.Common.Models.Data;
 
 using System.Globalization;
@@ -15,6 +17,7 @@ using Microsoft.Xna.Framework;
 using StardewMods.Common.Interfaces.Cache;
 using StardewMods.Common.Interfaces.Data;
 using StardewMods.Common.Models.Cache;
+
 #endif
 
 internal abstract class DictionaryDataModel

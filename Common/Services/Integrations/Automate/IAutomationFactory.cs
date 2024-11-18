@@ -1,6 +1,8 @@
-﻿#if IS_FAUXCORE
+#if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations.Automate;
 #else
+
 namespace StardewMods.Common.Services.Integrations.Automate;
 #endif
 
@@ -17,6 +19,7 @@ public interface IAutomationFactory
     /*********
      ** Accessors
      *********/
+
     /// <summary>Get a machine, container, or connector instance for a given object.</summary>
     /// <param name="obj">The in-game object.</param>
     /// <param name="location">The location to check.</param>

@@ -1,5 +1,11 @@
 # Toolbar Icons Change Log
 
+## 2.8.1 (Unreleased)
+
+### Fixed
+
+* Fixed issues with UI scaling.
+
 ## 2.8.0 (November 5, 2024)
 
 ### Added

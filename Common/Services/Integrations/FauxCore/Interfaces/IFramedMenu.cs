@@ -1,14 +1,17 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 
 #else
+
 namespace StardewMods.Common.Services.Integrations.FauxCore;
 
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+
 #endif
 
 /// <summary>Represents a framed custom menu.</summary>

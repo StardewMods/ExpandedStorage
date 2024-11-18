@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Models;
 
 using System.Reflection;
@@ -6,11 +7,13 @@ using StardewMods.FauxCore.Common.Enums;
 using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 
 #else
+
 namespace StardewMods.Common.Models;
 
 using System.Reflection;
 using StardewMods.Common.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
+
 #endif
 
 /// <inheritdoc />

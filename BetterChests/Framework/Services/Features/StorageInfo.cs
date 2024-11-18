@@ -212,7 +212,7 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
         var yOffset = 0;
         Info? infoIcon = null;
         var iconPos = Vector2.Zero;
-        var cursor = this.inputHelper.GetCursorPosition().GetScaledScreenPixels();
+        var cursor = Utility.ModifyCoordinatesForUIScale(this.inputHelper.GetCursorPosition().GetScaledScreenPixels());
 
         foreach (var infoItem in this.Config.StorageInfoHoverItems)
         {
@@ -344,12 +344,9 @@ internal sealed class StorageInfo : BaseFeature<StorageInfo>
     {
         public string Name { get; } = name;
 
-        public string Value { get; } = value;
-
         public Point NameBounds { get; } = Game1.smallFont.MeasureString($"{name} ").ToPoint();
-
-        public Point ValueBounds { get; } = Game1.smallFont.MeasureString($"{value} ").ToPoint();
-
         public Point TotalBounds { get; } = Game1.smallFont.MeasureString($"{name} {value}").ToPoint();
+        public string Value { get; } = value;
+        public Point ValueBounds { get; } = Game1.smallFont.MeasureString($"{value} ").ToPoint();
     }
 }

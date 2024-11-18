@@ -1,5 +1,5 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
-  <Import Project="$(SolutionDir)\Common\Common.projitems" Label="Shared"/>
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(SolutionDir)\Common\Common.projitems" Label="Shared" />
   <PropertyGroup>
     <Authors>LeFauxMatt</Authors>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
@@ -19,10 +19,10 @@
     <Version_AppendConfiguration>false</Version_AppendConfiguration>
   </PropertyGroup>
   <ItemGroup>
-    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.3.1"/>
-    <PackageReference Include="Leclair.Stardew.ModManifestBuilder" Version="2.3.1"/>
-    <PackageReference Include="JetBrains.Annotations" Version="2024.3.0"/>
-    <PackageReference Include="NetEscapades.EnumGenerators" Version="1.0.0-beta09"/>
+    <PackageReference Include="Pathoschild.Stardew.ModBuildConfig" Version="4.3.2" />
+    <PackageReference Include="Leclair.Stardew.ModManifestBuilder" Version="2.4.0" />
+    <PackageReference Include="JetBrains.Annotations" Version="2024.3.0" />
+    <PackageReference Include="NetEscapades.EnumGenerators" Version="1.0.0-beta11" />
     <PackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -33,13 +33,13 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="$(SolutionDir)\GlobalSuppressions.cs" Link="GlobalSuppressions.cs"/>
-    <Using Include="JetBrains.Annotations"/>
-    <Using Include="StardewValley"/>
-    <Using Include="StardewModdingAPI"/>
-    <Using Include="System.Diagnostics.CodeAnalysis"/>
-    <Using Alias="Container" Include="SimpleInjector.Container"/>
-    <Using Alias="Object" Include="System.Object"/>
-    <Using Alias="SObject" Include="StardewValley.Object"/>
+    <Compile Include="$(SolutionDir)\GlobalSuppressions.cs" Link="GlobalSuppressions.cs" />
+    <Using Include="JetBrains.Annotations" />
+    <Using Include="StardewValley" />
+    <Using Include="StardewModdingAPI" />
+    <Using Include="System.Diagnostics.CodeAnalysis" />
+    <Using Alias="Container" Include="SimpleInjector.Container" />
+    <Using Alias="Object" Include="System.Object" />
+    <Using Alias="SObject" Include="StardewValley.Object" />
   </ItemGroup>
 </Project>

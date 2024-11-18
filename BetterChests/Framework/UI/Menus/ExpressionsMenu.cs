@@ -65,7 +65,8 @@ internal sealed class ExpressionsMenu : FramedMenu
     }
 
     /// <inheritdoc />
-    public override void DrawUnder(SpriteBatch b, Point cursor) { }
+    public override void DrawUnder(SpriteBatch b, Point cursor)
+    { }
 
     /// <summary>Re-initializes the components of the object with the given initialization expression.</summary>
     /// <param name="initExpression">The initial expression, or null to clear.</param>
@@ -156,21 +157,27 @@ internal sealed class ExpressionsMenu : FramedMenu
             case ExpressionChange.AddGroup:
                 this.Add(e.Expression, ExpressionType.All);
                 break;
+
             case ExpressionChange.AddNot:
                 this.Add(e.Expression, ExpressionType.Not);
                 break;
+
             case ExpressionChange.AddTerm:
                 this.Add(e.Expression, ExpressionType.Comparable);
                 break;
+
             case ExpressionChange.ChangeAttribute when sender is ButtonComponent component:
                 this.ShowDropdown(e.Expression, component);
                 break;
+
             case ExpressionChange.ChangeValue when sender is ButtonComponent component:
                 this.ShowPopup(e.Expression, component);
                 break;
+
             case ExpressionChange.Remove:
                 this.Remove(e.Expression);
                 break;
+
             case ExpressionChange.ToggleGroup:
                 this.ToggleGroup(e.Expression);
                 break;

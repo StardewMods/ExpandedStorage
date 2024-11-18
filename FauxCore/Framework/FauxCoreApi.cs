@@ -43,6 +43,9 @@ public sealed class FauxCoreApi : IFauxCoreApi
         this.iconRegistry ??= new IconRegistry(this.assetHandler, this.modInfo.Manifest);
 
     /// <inheritdoc />
+    public IMonitor? Monitor { get; set; }
+
+    /// <inheritdoc />
     public IPatchManager PatchManager => this.patchManager ??= new PatchManager(this.modInfo);
 
     /// <inheritdoc />
@@ -53,7 +56,4 @@ public sealed class FauxCoreApi : IFauxCoreApi
 
     /// <inheritdoc />
     public IThemeHelper ThemeHelper { get; }
-
-    /// <inheritdoc />
-    public IMonitor? Monitor { get; set; }
 }

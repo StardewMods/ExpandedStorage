@@ -1,6 +1,8 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Helpers;
 #else
+
 namespace StardewMods.Common.Helpers;
 #endif
 

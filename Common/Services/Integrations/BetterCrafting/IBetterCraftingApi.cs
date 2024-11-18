@@ -1,12 +1,15 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations.BetterCrafting;
 #else
+
 namespace StardewMods.Common.Services.Integrations.BetterCrafting;
 #endif
 #nullable enable
 
 // ReSharper disable All
 #pragma warning disable
+
 using System;
 using System.Collections.Generic;
 using Microsoft.Xna.Framework;
@@ -26,6 +29,7 @@ using Leclair.Stardew.BetterCrafting.Models;
 namespace Leclair.Stardew.BetterCrafting;
 #else
 using StardewValley.Network;
+
 using Newtonsoft.Json.Linq;
 
 /// <summary>The various currency types supported by <see cref="IBetterCrafting.CreateCurrencyIngredient(string, int)" /></summary>
@@ -246,7 +250,7 @@ public interface IIngredient
     /// <summary>The texture to use when drawing this ingredient in the menu.</summary>
     Texture2D Texture { get; }
 
-#region Consumption
+    #region Consumption
 
     /// <summary>Consume this ingredient out of the player's inventory and the other available inventories.</summary>
     /// <param name="who">The farmer performing the craft</param>
@@ -261,9 +265,9 @@ public interface IIngredient
     /// </param>
     void Consume(Farmer who, IList<IBCInventory>? inventories, int maxQuality, bool lowQualityFirst);
 
-#endregion
+    #endregion Consumption
 
-#region Quantity
+    #region Quantity
 
     /// <summary>The amount of this ingredient required to perform a craft.</summary>
     int Quantity { get; }
@@ -285,7 +289,7 @@ public interface IIngredient
     /// </param>
     int GetAvailableQuantity(Farmer who, IList<Item?>? items, IList<IBCInventory>? inventories, int maxQuality);
 
-#endregion
+    #endregion Quantity
 }
 
 /// <summary>
@@ -323,7 +327,7 @@ public interface IPerformCraftEvent
 /// </summary>
 public interface IRecipe
 {
-#region Identity
+    #region Identity
 
     /// <summary>
     /// An additional sorting value to apply to recipes in the Better Crafting menu. Applied before other forms of
@@ -364,9 +368,9 @@ public interface IRecipe
     /// </summary>
     CraftingRecipe? CraftingRecipe { get; }
 
-#endregion
+    #endregion Identity
 
-#region Display
+    #region Display
 
     /// <summary>The texture to use when drawing this recipe in the menu.</summary>
     Texture2D Texture { get; }
@@ -380,9 +384,9 @@ public interface IRecipe
     /// <summary>How wide this recipe should appear in the menu, in grid squares.</summary>
     int GridWidth { get; }
 
-#endregion
+    #endregion Display
 
-#region Cost and Quantity
+    #region Cost and Quantity
 
     /// <summary>The quantity of item produced every time this recipe is crafted.</summary>
     int QuantityPerCraft { get; }
@@ -390,9 +394,9 @@ public interface IRecipe
     /// <summary>The ingredients used by this recipe.</summary>
     IIngredient[]? Ingredients { get; }
 
-#endregion
+    #endregion Cost and Quantity
 
-#region Creation
+    #region Creation
 
     /// <summary>Whether or not the item created by this recipe is stackable, and thus eligible for bulk crafting.</summary>
     bool Stackable { get; }
@@ -433,7 +437,7 @@ public interface IRecipe
         evt.Complete();
     }
 
-#endregion
+    #endregion Creation
 }
 
 /// <summary>Better Crafting uses <c>IRecipeProvider</c> to discover crafting recipes for display in the menu.</summary>
@@ -490,7 +494,7 @@ public interface IDynamicRuleData
 /// </summary>
 public interface IDynamicRuleHandler
 {
-#region Display
+    #region Display
 
     /// <summary>The name of the dynamic rule, to be displayed to the user when editing a category.</summary>
     string DisplayName { get; }
@@ -510,9 +514,9 @@ public interface IDynamicRuleHandler
     /// <summary>Whether or not this dynamic rule should be allowed to be added to a category multiple times.</summary>
     bool AllowMultiple { get; }
 
-#endregion
+    #endregion Display
 
-#region Editing
+    #region Editing
 
     /// <summary>Whether or not this dynamic rule has a custom editor.</summary>
     bool HasEditor { get; }
@@ -525,9 +529,9 @@ public interface IDynamicRuleHandler
     /// <param name="data">The data of the rule being edited</param>
     IClickableMenu? GetEditor(IClickableMenu parent, IDynamicRuleData data);
 
-#endregion
+    #endregion Editing
 
-#region Processing
+    #region Processing
 
     /// <summary>
     /// This method is called before a dynamic rule is executed, allowing the rule to parse its configuration into a
@@ -543,7 +547,7 @@ public interface IDynamicRuleHandler
     /// <param name="state">The state object returned from <see cref="ParseState(IDynamicRuleData)" /></param>
     bool DoesRecipeMatch(IRecipe recipe, Lazy<Item?> item, object? state);
 
-#endregion
+    #endregion Processing
 }
 
 /// <summary>
@@ -568,15 +572,15 @@ public interface ISimpleInputRuleHandler : IDynamicRuleHandler
 /// </summary>
 public interface IRecipeBuilder
 {
-#region Output
+    #region Output
 
     /// <summary>Build this recipe and return it.</summary>
     /// <returns>The built <see cref="IRecipe" /></returns>
     IRecipe Build();
 
-#endregion
+    #endregion Output
 
-#region Identity
+    #region Identity
 
     /// <summary>
     /// An additional sorting value to apply to the recipe in the Better Crafting menu. This is applied before other
@@ -619,9 +623,9 @@ public interface IRecipeBuilder
     /// <returns>The same <see cref="IRecipeBuilder" /> instance</returns>
     IRecipeBuilder GetTimesCrafted(Func<Farmer, int>? timesCrafted);
 
-#endregion
+    #endregion Identity
 
-#region Display
+    #region Display
 
     /// <summary>
     /// The texture to use when drawing this recipe in UI. Setting this to <c>null</c> will restore the default
@@ -654,9 +658,9 @@ public interface IRecipeBuilder
     /// <returns>The same <see cref="IRecipeBuilder" /> instance</returns>
     IRecipeBuilder ClearGridSize();
 
-#endregion
+    #endregion Display
 
-#region Ingredients
+    #region Ingredients
 
     /// <summary>
     /// Clear the recipe's ingredients list. Optionally, a predicate can be provided to only clear ingredients from
@@ -676,9 +680,9 @@ public interface IRecipeBuilder
     /// <returns>The same <see cref="IRecipeBuilder" /> instance</returns>
     IRecipeBuilder AddIngredients(IEnumerable<IIngredient> ingredients);
 
-#endregion
+    #endregion Ingredients
 
-#region Can Craft
+    #region Can Craft
 
     /// <summary>
     /// Check to see if the given player can currently craft this recipe. See <see cref="IRecipe.CanCraft(Farmer)" />
@@ -696,9 +700,9 @@ public interface IRecipeBuilder
     /// <returns>The same <see cref="IRecipeBuilder" /> instance</returns>
     IRecipeBuilder GetTooltipExtra(Func<Farmer, string?>? tooltipExtra);
 
-#endregion
+    #endregion Can Craft
 
-#region Crafting and Output
+    #region Crafting and Output
 
     /// <summary>
     /// A method called when performing a craft, which can be used to perform asynchronous actions or other additional
@@ -738,7 +742,7 @@ public interface IRecipeBuilder
     /// <returns>The same <see cref="IRecipeBuilder" /> instance</returns>
     IRecipeBuilder Stackable(bool? stackable);
 
-#endregion
+    #endregion Crafting and Output
 }
 
 public interface ICraftingStation
@@ -867,7 +871,7 @@ public interface IPopulateContainersEvent
 
 public interface IBetterCrafting
 {
-#region GUI
+    #region GUI
 
     /// <summary>
     /// Try to open the Better Crafting menu. This may fail if there is another menu open that cannot be replaced. If
@@ -918,9 +922,9 @@ public interface IBetterCrafting
     /// </summary>
     event Action<IPopulateContainersEvent>? MenuPopulateContainers;
 
-#endregion
+    #endregion GUI
 
-#region Recipes
+    #region Recipes
 
     /// <summary>
     /// Return a list of all recipes that are exclusive to a specific crafting station. These recipes should not be
@@ -967,9 +971,9 @@ public interface IBetterCrafting
     /// <param name="name">The recipe's name.</param>
     IRecipeBuilder RecipeBuilder(string name);
 
-#endregion
+    #endregion Recipes
 
-#region Ingredients
+    #region Ingredients
 
     /// <summary>Create a simple <see cref="IIngredient" /> that matches an item by ID and that consumes an exact quantity.</summary>
     /// <param name="item">The item ID to match.</param>
@@ -1009,9 +1013,9 @@ public interface IBetterCrafting
     /// </summary>
     IIngredient CreateErrorIngredient();
 
-#endregion
+    #endregion Ingredients
 
-#region Item Manipulation
+    #region Item Manipulation
 
     /// <summary>
     /// Lock the provided inventories and call a delegate with the locked <see cref="IBCInventory" /> instances, ready
@@ -1065,9 +1069,9 @@ public interface IBetterCrafting
     /// <returns>The number of matching items.</returns>
     int CountItem(Func<Item, bool> predicate, Farmer? who, IEnumerable<Item?>? items, int maxQuality = int.MaxValue);
 
-#endregion
+    #endregion Item Manipulation
 
-#region Categories
+    #region Categories
 
     /// <summary>
     /// Create a new default category for recipes. Every player will receive this category, but they may delete it or
@@ -1099,9 +1103,9 @@ public interface IBetterCrafting
     /// <param name="recipeNames">An enumeration of recipe names for recipes to remove from the category.</param>
     void RemoveRecipesFromDefaultCategory(bool cooking, string categoryId, IEnumerable<string> recipeNames);
 
-#endregion
+    #endregion Categories
 
-#region Dynamic Rules
+    #region Dynamic Rules
 
     /// <summary>
     /// Get the absolute rule ID of a rule added via <see cref="RegisterRuleHandler(string, IDynamicRuleHandler)" />
@@ -1135,9 +1139,9 @@ public interface IBetterCrafting
     /// <returns>Whether or not the handler was successfully unregistered.</returns>
     bool UnregisterRuleHandler(string id);
 
-#endregion
+    #endregion Dynamic Rules
 
-#region Inventories
+    #region Inventories
 
     /// <summary>
     /// Register an inventory provider with Better Crafting. Inventory providers are used for interfacing with chests
@@ -1151,5 +1155,5 @@ public interface IBetterCrafting
     /// <param name="type"></param>
     void UnregisterInventoryProvider(Type type);
 
-#endregion
+    #endregion Inventories
 }

@@ -168,18 +168,23 @@ internal sealed class ExpressionHandler : BaseService<ExpressionHandler>, IExpre
                 case '(':
                     closeChars.Push(')');
                     break;
+
                 case ')' when closeChars.Peek() == ')':
                     closeChars.Pop();
                     break;
+
                 case '[':
                     closeChars.Push(']');
                     break;
+
                 case ']' when closeChars.Peek() == ']':
                     closeChars.Pop();
                     break;
+
                 case '{':
                     closeChars.Push('}');
                     break;
+
                 case '}' when closeChars.Peek() == '}':
                     closeChars.Pop();
                     break;

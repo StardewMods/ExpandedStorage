@@ -1,12 +1,15 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services;
 
 using StardewMods.FauxCore.Common.Interfaces;
 
 #else
+
 namespace StardewMods.Common.Services;
 
 using StardewMods.Common.Interfaces;
+
 #endif
 
 /// <inheritdoc />
@@ -28,7 +31,7 @@ internal abstract class Mod : StardewModdingAPI.Mod
     public static string Prefix => Mod.Id + "/";
 
     /// <inheritdoc />
-    public sealed override void Entry(IModHelper helper)
+    public override sealed void Entry(IModHelper helper)
     {
         // Init
         Mod.instance = this;

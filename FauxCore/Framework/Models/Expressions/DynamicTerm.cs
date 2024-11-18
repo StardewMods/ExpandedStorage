@@ -31,20 +31,17 @@ internal sealed class DynamicTerm : IExpression
     public DynamicTerm(string attribute) => this.Term = attribute;
 
     /// <inheritdoc />
-    public ExpressionType ExpressionType => ExpressionType.Dynamic;
-
-    /// <inheritdoc />
-    public bool IsValid => true;
-
-    /// <inheritdoc />
-    public string Text => $"{DynamicTerm.BeginChar}{this.attribute.ToStringFast()}{DynamicTerm.EndChar}";
-
-    /// <inheritdoc />
     public IImmutableList<IExpression> Expressions
     {
         get => ImmutableList<IExpression>.Empty;
         set => throw new NotSupportedException();
     }
+
+    /// <inheritdoc />
+    public ExpressionType ExpressionType => ExpressionType.Dynamic;
+
+    /// <inheritdoc />
+    public bool IsValid => true;
 
     /// <inheritdoc />
     public IExpression? Parent { get; set; }
@@ -61,6 +58,9 @@ internal sealed class DynamicTerm : IExpression
                     ? itemAttribute
                     : ItemAttribute.Any;
     }
+
+    /// <inheritdoc />
+    public string Text => $"{DynamicTerm.BeginChar}{this.attribute.ToStringFast()}{DynamicTerm.EndChar}";
 
     /// <inheritdoc />
     public int Compare(Item? x, Item? y)
@@ -127,15 +127,18 @@ internal sealed class DynamicTerm : IExpression
         switch (this.attribute)
         {
             case
-                { } when string.IsNullOrWhiteSpace(value):
+            { } when string.IsNullOrWhiteSpace(value):
                 result = null;
                 return false;
+
             case ItemAttribute.Quantity when int.TryParse(value, out var intValue):
                 result = intValue;
                 return true;
+
             case ItemAttribute.Quality when ItemQualityExtensions.TryParse(value, out var itemQuality, true):
                 result = (int)itemQuality;
                 return true;
+
             case ItemAttribute.Quality:
                 result = (int)ItemQualityExtensions
                     .GetValues()
@@ -143,6 +146,7 @@ internal sealed class DynamicTerm : IExpression
                         itemQuality => itemQuality.ToStringFast().Contains(value, StringComparison.OrdinalIgnoreCase));
 
                 return true;
+
             default:
                 result = null;
                 return false;

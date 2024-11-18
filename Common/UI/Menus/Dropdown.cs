@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
@@ -8,6 +9,7 @@ using StardewMods.FauxCore.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
 
 #else
+
 namespace StardewMods.Common.UI.Menus;
 
 using Microsoft.Xna.Framework;
@@ -15,6 +17,7 @@ using Microsoft.Xna.Framework.Graphics;
 using StardewMods.Common.Helpers;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewValley.Menus;
+
 #endif
 
 /// <summary>Dropdown menu for selecting an item from a list of values.</summary>
@@ -80,7 +83,8 @@ internal sealed class Dropdown<TItem> : BaseMenu
     }
 
     /// <inheritdoc />
-    public override void DrawUnder(SpriteBatch spriteBatch, Point cursor) { }
+    public override void DrawUnder(SpriteBatch spriteBatch, Point cursor)
+    { }
 
     /// <inheritdoc />
     public override bool TryLeftClick(Point cursor)

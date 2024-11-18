@@ -1,15 +1,19 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations.ExpandedStorage;
 
 using Microsoft.Xna.Framework;
 using StardewMods.FauxCore.Common.Interfaces.Data;
 using StardewMods.FauxCore.Common.Models.Data;
+
 #else
+
 namespace StardewMods.Common.Services.Integrations.ExpandedStorage;
 
 using Microsoft.Xna.Framework;
 using StardewMods.Common.Interfaces.Data;
 using StardewMods.Common.Models.Data;
+
 #endif
 
 /// <inheritdoc cref="StardewMods.Common.Services.Integrations.ExpandedStorage.IStorageData" />

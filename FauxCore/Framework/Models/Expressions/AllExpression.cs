@@ -20,16 +20,6 @@ internal sealed class AllExpression : IExpression
     public AllExpression(params IExpression[] expressions) => this.Expressions = expressions.ToImmutableList();
 
     /// <inheritdoc />
-    public ExpressionType ExpressionType => ExpressionType.All;
-
-    /// <inheritdoc />
-    public bool IsValid => this.Expressions.Any();
-
-    /// <inheritdoc />
-    public string Text =>
-        $"{AllExpression.BeginChar}{string.Join(' ', this.Expressions.Select(expression => expression.Text))}{AllExpression.EndChar}";
-
-    /// <inheritdoc />
     public IImmutableList<IExpression> Expressions
     {
         get => this.expressions;
@@ -53,6 +43,12 @@ internal sealed class AllExpression : IExpression
     }
 
     /// <inheritdoc />
+    public ExpressionType ExpressionType => ExpressionType.All;
+
+    /// <inheritdoc />
+    public bool IsValid => this.Expressions.Any();
+
+    /// <inheritdoc />
     public IExpression? Parent { get; set; }
 
     /// <inheritdoc />
@@ -61,6 +57,10 @@ internal sealed class AllExpression : IExpression
         get => string.Empty;
         set => throw new NotSupportedException();
     }
+
+    /// <inheritdoc />
+    public string Text =>
+        $"{AllExpression.BeginChar}{string.Join(' ', this.Expressions.Select(expression => expression.Text))}{AllExpression.EndChar}";
 
     /// <inheritdoc />
     public int Compare(Item? x, Item? y) => (this.Equals(x) ? 1 : -1).CompareTo(this.Equals(y) ? 1 : -1);

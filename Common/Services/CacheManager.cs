@@ -1,4 +1,5 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services;
 
 using StardewModdingAPI.Events;
@@ -6,11 +7,13 @@ using StardewMods.FauxCore.Common.Interfaces;
 using StardewMods.FauxCore.Common.Models.Cache;
 
 #else
+
 namespace StardewMods.Common.Services;
 
 using StardewModdingAPI.Events;
 using StardewMods.Common.Interfaces;
 using StardewMods.Common.Models.Cache;
+
 #endif
 
 /// <summary>Service for managing cache tables.</summary>

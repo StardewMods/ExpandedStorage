@@ -194,7 +194,7 @@ internal sealed class ContainerFactory
         var actualMenu = menu switch
         {
             { } menuWithChild when menuWithChild.GetChildMenu() is
-                { } childMenu => childMenu,
+            { } childMenu => childMenu,
             GameMenu gameMenu => gameMenu.GetCurrentPage(),
             not null => menu,
             _ => Game1.activeClickableMenu,
@@ -262,9 +262,9 @@ internal sealed class ContainerFactory
 
             // Placed object container
             SObject
-                {
-                    heldObject.Value: Chest heldChest,
-                } @object when actualInventory is not null
+            {
+                heldObject.Value: Chest heldChest,
+            } @object when actualInventory is not null
                 && actualInventory.Equals(heldChest.GetItemsForPlayer())
                 && @object.Location is not null
                 && this.TryGetOne(@object.Location, @object.TileLocation, out var objectContainer) => objectContainer,
@@ -389,7 +389,7 @@ internal sealed class ContainerFactory
                 break;
 
             case not null when building.GetBuildingChest("Output") is
-                { } chest:
+            { } chest:
                 // Check if output chest has already been cached
                 if (this.cachedContainers.TryGetValue(chest, out buildingContainer))
                 {
@@ -403,7 +403,8 @@ internal sealed class ContainerFactory
                 this.cachedContainers.AddOrUpdate(chest, buildingContainer);
                 break;
 
-            default: return false;
+            default:
+                return false;
         }
 
         // Add global options to the building container
@@ -512,7 +513,8 @@ internal sealed class ContainerFactory
                         ? buildingData.CustomFields
                         : null;
 
-            default: return false;
+            default:
+                return false;
         }
     }
 
@@ -658,11 +660,12 @@ internal sealed class ContainerFactory
 
             // Do an exhaustive search for the container
             case not null when this.GetAll(Predicate).FirstOrDefault() is
-                { } foundContainer:
+            { } foundContainer:
                 itemContainer = foundContainer;
                 return true;
 
-            default: return false;
+            default:
+                return false;
         }
 
         bool Predicate(IStorageContainer container) =>
@@ -840,7 +843,8 @@ internal sealed class ContainerFactory
                 this.cachedContainers.AddOrUpdate(@object, container);
                 return true;
 
-            default: return false;
+            default:
+                return false;
         }
 
         // Add global options to the object container

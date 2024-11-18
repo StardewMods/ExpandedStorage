@@ -1,6 +1,8 @@
-﻿#if IS_FAUXCORE
+#if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations.ContentPatcher;
 #else
+
 namespace StardewMods.Common.Services.Integrations.ContentPatcher;
 #endif
 
@@ -15,6 +17,7 @@ public interface IContentPatcherApi
     /*********
      ** Accessors
      *********/
+
     /// <summary>Whether the conditions API is initialized and ready for use.</summary>
     /// <remarks>
     /// Due to the Content Patcher lifecycle, the conditions API becomes available roughly two ticks after the
@@ -25,6 +28,7 @@ public interface IContentPatcherApi
     /*********
      ** Methods
      *********/
+
     /// <summary>Get a set of managed conditions which are matched against Content Patcher's internal context.</summary>
     /// <param name="manifest">
     /// The manifest of the mod parsing the conditions (see <see cref="ModStuff.ModManifest" /> in your

@@ -187,6 +187,7 @@ internal sealed class ExpressionGroup : ExpressionEditor
                     }
 
                     break;
+
                 case ButtonComponent buttonComponent:
                     component.SetColor(
                         buttonComponent.bounds.Contains(cursor - offset) ? Color.Gray.Highlight() : Color.Gray.Muted());
@@ -259,6 +260,7 @@ internal sealed class ExpressionGroup : ExpressionEditor
 
                 editor = expressionGroup;
                 break;
+
             default:
                 var expressionTerm = new ExpressionTerm(
                     this.iconRegistry,

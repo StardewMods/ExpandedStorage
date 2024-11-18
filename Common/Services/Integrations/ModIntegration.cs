@@ -1,12 +1,15 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations;
 
 using StardewMods.FauxCore.Common.Interfaces;
 
 #else
+
 namespace StardewMods.Common.Services.Integrations;
 
 using StardewMods.Common.Interfaces;
+
 #endif
 
 /// <summary>Provides an integration point for using external mods' APIs.</summary>

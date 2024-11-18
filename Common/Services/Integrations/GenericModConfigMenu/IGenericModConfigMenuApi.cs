@@ -1,6 +1,8 @@
 #if IS_FAUXCORE
+
 namespace StardewMods.FauxCore.Common.Services.Integrations.GenericModConfigMenu;
 #else
+
 namespace StardewMods.Common.Services.Integrations.GenericModConfigMenu;
 #endif
 
@@ -208,6 +210,7 @@ public interface IGenericModConfigMenuApi
     /****
      ** Multi-page management
      ****/
+
     /// <summary>
     /// Start a new page in the mod's config UI, or switch to that page if it already exists. All options registered
     /// after this will be part of that page.

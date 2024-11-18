@@ -24,12 +24,6 @@ public class ConfigStorageOptions : IStorageOptions
     }
 
     /// <inheritdoc />
-    public string Description => this.getDescription();
-
-    /// <inheritdoc />
-    public string DisplayName => this.getDisplayName();
-
-    /// <inheritdoc />
     public RangeOption AccessChest
     {
         get => this.Options.AccessChest;
@@ -126,6 +120,12 @@ public class ConfigStorageOptions : IStorageOptions
         get => this.Options.CraftFromChestDistance;
         set => this.Options.CraftFromChestDistance = value;
     }
+
+    /// <inheritdoc />
+    public string Description => this.getDescription();
+
+    /// <inheritdoc />
+    public string DisplayName => this.getDisplayName();
 
     /// <inheritdoc />
     public FeatureOption HslColorPicker

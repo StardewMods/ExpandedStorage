@@ -25,66 +25,6 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     protected BaseContainer(TSource source) => this.Source = new WeakReference<TSource>(source);
 
     /// <inheritdoc />
-    public IStorageOptions ActualOptions =>
-        this.storageOptions.TryGetValue(StorageOption.Individual, out var options) ? options : this;
-
-    /// <inheritdoc />
-    public abstract int Capacity { get; }
-
-    /// <inheritdoc />
-    public virtual string Description
-    {
-        get
-        {
-            if (this.storageOptions.TryGetValue(StorageOption.Type, out var storageOption)
-                || this.storageOptions.TryGetValue(StorageOption.Individual, out storageOption)
-                || this.storageOptions.TryGetValue(StorageOption.Global, out storageOption))
-            {
-                return storageOption.Description;
-            }
-
-            return string.Empty;
-        }
-    }
-
-    /// <inheritdoc />
-    public virtual string DisplayName
-    {
-        get
-        {
-            if (this.storageOptions.TryGetValue(StorageOption.Type, out var storageOption)
-                || this.storageOptions.TryGetValue(StorageOption.Individual, out storageOption)
-                || this.storageOptions.TryGetValue(StorageOption.Global, out storageOption))
-            {
-                return storageOption.DisplayName;
-            }
-
-            return string.Empty;
-        }
-    }
-
-    /// <inheritdoc />
-    public abstract bool IsAlive { get; }
-
-    /// <inheritdoc />
-    public abstract IInventory Items { get; }
-
-    /// <inheritdoc />
-    public abstract GameLocation Location { get; }
-
-    /// <inheritdoc />
-    public abstract ModDataDictionary ModData { get; }
-
-    /// <inheritdoc />
-    public abstract NetMutex? Mutex { get; }
-
-    /// <inheritdoc />
-    public WeakReference<TSource> Source { get; }
-
-    /// <inheritdoc />
-    public abstract Vector2 TileLocation { get; }
-
-    /// <inheritdoc />
     public RangeOption AccessChest
     {
         get => this.Get(options => options.AccessChest);
@@ -103,11 +43,18 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     }
 
     /// <inheritdoc />
+    public IStorageOptions ActualOptions =>
+        this.storageOptions.TryGetValue(StorageOption.Individual, out var options) ? options : this;
+
+    /// <inheritdoc />
     public FeatureOption AutoOrganize
     {
         get => this.Get(options => options.AutoOrganize);
         set => this.Set(options => options.AutoOrganize, (options, newValue) => options.AutoOrganize = newValue, value);
     }
+
+    /// <inheritdoc />
+    public abstract int Capacity { get; }
 
     /// <inheritdoc />
     public FeatureOption CarryChest
@@ -216,6 +163,38 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     }
 
     /// <inheritdoc />
+    public virtual string Description
+    {
+        get
+        {
+            if (this.storageOptions.TryGetValue(StorageOption.Type, out var storageOption)
+                || this.storageOptions.TryGetValue(StorageOption.Individual, out storageOption)
+                || this.storageOptions.TryGetValue(StorageOption.Global, out storageOption))
+            {
+                return storageOption.Description;
+            }
+
+            return string.Empty;
+        }
+    }
+
+    /// <inheritdoc />
+    public virtual string DisplayName
+    {
+        get
+        {
+            if (this.storageOptions.TryGetValue(StorageOption.Type, out var storageOption)
+                || this.storageOptions.TryGetValue(StorageOption.Individual, out storageOption)
+                || this.storageOptions.TryGetValue(StorageOption.Global, out storageOption))
+            {
+                return storageOption.DisplayName;
+            }
+
+            return string.Empty;
+        }
+    }
+
+    /// <inheritdoc />
     public FeatureOption HslColorPicker
     {
         get => this.Get(options => options.HslColorPicker);
@@ -233,6 +212,21 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
         set =>
             this.Set(options => options.InventoryTabs, (options, newValue) => options.InventoryTabs = newValue, value);
     }
+
+    /// <inheritdoc />
+    public abstract bool IsAlive { get; }
+
+    /// <inheritdoc />
+    public abstract IInventory Items { get; }
+
+    /// <inheritdoc />
+    public abstract GameLocation Location { get; }
+
+    /// <inheritdoc />
+    public abstract ModDataDictionary ModData { get; }
+
+    /// <inheritdoc />
+    public abstract NetMutex? Mutex { get; }
 
     /// <inheritdoc />
     public FeatureOption OpenHeldChest
@@ -302,6 +296,9 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
     }
 
     /// <inheritdoc />
+    public WeakReference<TSource> Source { get; }
+
+    /// <inheritdoc />
     public RangeOption StashToChest
     {
         get => this.Get(options => options.StashToChest);
@@ -361,6 +358,9 @@ internal abstract class BaseContainer<TSource> : IStorageContainer<TSource>
         get => this.Get(storage => storage.StorageName);
         set => this.Set(options => options.StorageName, (options, newValue) => options.StorageName = newValue, value);
     }
+
+    /// <inheritdoc />
+    public abstract Vector2 TileLocation { get; }
 
     /// <inheritdoc />
     public void AddOptions(StorageOption storageOption, IStorageOptions options) =>

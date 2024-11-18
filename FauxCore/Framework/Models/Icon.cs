@@ -23,9 +23,6 @@ internal sealed class Icon : IIcon
     }
 
     /// <inheritdoc />
-    public string UniqueId => $"{this.Source}/{this.Id}";
-
-    /// <inheritdoc />
     public Rectangle Area { get; set; } = Rectangle.Empty;
 
     /// <inheritdoc />
@@ -36,6 +33,9 @@ internal sealed class Icon : IIcon
 
     /// <inheritdoc />
     public string Source { get; set; } = string.Empty;
+
+    /// <inheritdoc />
+    public string UniqueId => $"{this.Source}/{this.Id}";
 
     /// <inheritdoc />
     public ClickableTextureComponent Component(
