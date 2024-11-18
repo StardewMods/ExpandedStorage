@@ -25,6 +25,12 @@
 
 ## 2.18.5 (Unreleased)
 
+### Changed
+
+* Updated Chinese translation.
+* Updated German translation.
+* Updated French translation.
+
 ### Fixed
 
 * Fixed issues with UI scaling.

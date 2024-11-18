@@ -2,6 +2,10 @@
 
 ## 2.8.1 (Unreleased)
 
+### Changed
+
+* Added French translation.
+
 ### Fixed
 
 * Fixed issues with UI scaling.

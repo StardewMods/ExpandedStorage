@@ -1,5 +1,11 @@
 # FauxCore Change Log
 
+## 1.2.1 (Unreleased)
+
+### Changed
+
+* Added French translation.
+
 ## 1.2.0 (November 5, 2024)
 
 ### Added

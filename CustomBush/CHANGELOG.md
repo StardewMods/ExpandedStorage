@@ -1,5 +1,12 @@
 # Custom Bush Change Log
 
+## 1.2.4 (Unreleased)
+
+### Fixed
+
+* Fixed custom bushes not being marked as in pot thanks to voltaek!
+* Fixed custom bushes producing crops out of season thanks to voltaek!
+
 ## 1.2.3 (November 12, 2024)
 
 ### Fixed

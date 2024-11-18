@@ -5,6 +5,7 @@ Framework for adding icons to the toolbar.
 * [API](#api)
 * [Assets](#assets)
 * [Integrations](#integrations)
+* [Translations](#translations)
 * [Credits](#credits)
 
 ## API
@@ -114,7 +115,7 @@ icons are automatically added for them.
 | Language               | Status            | Credits  |
 |:-----------------------|:------------------|:---------|
 | Chinese                | ❌️ Not Translated |          |
-| French                 | ❌️ Not Translated |          |
+| [French](i18n/fr.json) | ✔️ Complete        | CaranudLapin |
 | German                 | ❌️ Not Translated |          |
 | Hungarian              | ❌️ Not Translated |          |
 | Italian                | ❌️ Not Translated |          |
