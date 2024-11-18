@@ -31,6 +31,7 @@ internal sealed class ModPatches
     private readonly IGameContentHelper gameContentHelper;
     private readonly string modDataId;
     private readonly string modDataItem;
+    private readonly string modDataItemSeason;
     private readonly string modDataQuality;
     private readonly string modDataStack;
     private readonly string modDataTexture;
@@ -54,6 +55,7 @@ internal sealed class ModPatches
         ModPatches.instance = this;
         this.modDataId = Mod.Id + "/Id";
         this.modDataItem = Mod.Id + "/ShakeOff";
+        this.modDataItemSeason = Mod.Id + "/Season";
         this.modDataQuality = Mod.Id + "/Quality";
         this.modDataStack = Mod.Id + "/Stack";
         this.modDataTexture = Mod.Id + "/Texture";
@@ -192,11 +194,29 @@ internal sealed class ModPatches
     [SuppressMessage("StyleCop", "SA1313", Justification = "Harmony")]
     private static void Bush_inBloom_postfix(Bush __instance, ref bool __result)
     {
+        var season = __instance.Location.GetSeason();
+
         if (__instance.modData.TryGetValue(ModPatches.instance.modDataItem, out var itemId)
             && !string.IsNullOrWhiteSpace(itemId))
         {
-            __result = true;
-            return;
+            // Verify the cached item is for the current season
+            if (__instance.modData.TryGetValue(ModPatches.instance.modDataItemSeason, out var itemSeason)
+                && !string.IsNullOrWhiteSpace(itemSeason)
+                && itemSeason == nameof(season))
+            {
+                __result = true;
+                return;
+            }
+
+            Log.Trace(
+                "Cached item's {0} season does not match current {1} season. Clearing cache and recalculating item.",
+                itemSeason,
+                nameof(season));
+
+            // If the cached item is not for the current season, remove its cached info and we'll recalculate it below.
+            // This saves us having to patch `seasonUpdate()` or `dayUpdate()`.
+            // In `dayUpdate()`, the correct `tileSheetOffset` will now be set since `inBloom()` will be accurate.
+            ModPatches.ClearCachedItem(__instance);
         }
 
         if (!__instance.modData.TryGetValue(ModPatches.instance.modDataId, out var id)
@@ -205,7 +225,6 @@ internal sealed class ModPatches
             return;
         }
 
-        var season = __instance.Location.GetSeason();
         var dayOfMonth = Game1.dayOfMonth;
         var age = __instance.getAge();
 
@@ -286,6 +305,7 @@ internal sealed class ModPatches
 
         __result = true;
         __instance.modData[ModPatches.instance.modDataItem] = item.QualifiedItemId;
+        __instance.modData[ModPatches.instance.modDataItemSeason] = nameof(season);
         __instance.modData[ModPatches.instance.modDataQuality] = item.Quality.ToString(CultureInfo.InvariantCulture);
         __instance.modData[ModPatches.instance.modDataStack] = item.Stack.ToString(CultureInfo.InvariantCulture);
     }
@@ -397,6 +417,14 @@ internal sealed class ModPatches
         return i;
     }
 
+    private static void ClearCachedItem(Bush bush)
+    {
+        bush.modData.Remove(ModPatches.instance.modDataItem);
+        bush.modData.Remove(ModPatches.instance.modDataItemSeason);
+        bush.modData.Remove(ModPatches.instance.modDataQuality);
+        bush.modData.Remove(ModPatches.instance.modDataStack);
+    }
+
     [SuppressMessage("ReSharper", "SuggestBaseTypeForParameter", Justification = "Harmony")]
     private static void CreateObjectDebris(
         string id,
@@ -429,15 +457,11 @@ internal sealed class ModPatches
                 Game1.createObjectDebris(itemId, xTile, yTile, groundLevel, itemQuality, velocityMultiplier, location);
             }
 
-            bush.modData.Remove(ModPatches.instance.modDataItem);
-            bush.modData.Remove(ModPatches.instance.modDataQuality);
-            bush.modData.Remove(ModPatches.instance.modDataStack);
+            ModPatches.ClearCachedItem(bush);
             return;
         }
 
-        bush.modData.Remove(ModPatches.instance.modDataItem);
-        bush.modData.Remove(ModPatches.instance.modDataQuality);
-        bush.modData.Remove(ModPatches.instance.modDataStack);
+        ModPatches.ClearCachedItem(bush);
 
         // Try to create random item
         if (bush.modData.TryGetValue(ModPatches.instance.modDataId, out var bushId)
