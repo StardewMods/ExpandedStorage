@@ -187,10 +187,6 @@
   "option.inventory.name": "Inventaire",
   "option.location.name": "Zone",
   "option.world.name": "Monde",
-  // Console Commands
-  "command.player-config": "Configurer le sac à dos du joueur.",
-  "command.reset-all": "Réinitialiser toutes les options de stockage par défaut.",
-  "command.menu": "Ouvrir le menu de Better Chest.",
   // Capacity Options
   "capacity.other.name": "{{slots}} emplacements",
   "capacity.unlimited.name": "Illimité",
@@ -218,18 +214,20 @@
   "priority.high.name": "Haute",
   "priority.higher.name": "Supérieure",
   "priority.highest.name": "La plus haute",
-  // UI - Button
-  "button.configure.name": "Configurer le stockage",
+  // Buttons
   "button.find-chest.name": "Rechercher un coffre",
   "button.stash-to-chest.name": "Ranger dans un coffre",
   "button.craft-from-chest.name": "Fabriquer à partir d'un coffre",
   "button.transfer-up.name": "Transférer des objets dans le coffre",
   "button.transfer-down.name": "Transférer des Objets dans l'inventaire",
-  "button.save-as-categorization.name": "Enregistrer en tant que Catégorisation",
   "button.include-existing-stacks.name": "Inclure les piles existantes",
   "button.reject-uncategorized.name": "Rejeter les objets non catégorisés",
   "button.debug.name": "Déboguer",
-  // UI - Tabs
+  // Configure
+  "configure.options.name": "Configurer",
+  "configure.categorize.name": "Catégoriser",
+  "configure.sorting.name": "Tri",
+  // Tabs
   "tabs.Clothing.name": "Vêtements",
   "tabs.Cooking.name": "Cuisine",
   "tabs.Crops.name": "Récoltes",
@@ -238,6 +236,44 @@
   "tabs.Materials.name": "Matériaux",
   "tabs.Misc.name": "Divers",
   "tabs.Seeds.name": "Graines",
+  // UI"
+  "ui.add-term.name": "+trm",
+  "ui.add-term.tooltip": "Ajouter le terme",
+  "ui.add-group.name": "+grp",
+  "ui.add-group.tooltip": "Ajouter le groupe",
+  "ui.add-not.name": "+not",
+  "ui.add-not.tooltip": "Ne pas ajouter",
+  "ui.all.name": "all",
+  "ui.all.tooltip": "Tout doit correspondre",
+  "ui.any.name": "any",
+  "ui.any.tooltip": "N’importe lequel peut correspondre",
+  "ui.comparable.name": "comparable",
+  "ui.comparable.tooltip": "Les termes gauches et droites doivent correspondre",
+  "ui.dynamic.name": "dynamic",
+  "ui.dynamic.tooltip": "Obtient la valeur d’un attribut",
+  "ui.quoted.name": "quoted",
+  "ui.quoted.tooltip": "Une valeur citée.",
+  "ui.static.name": "static",
+  "ui.static.tooltip": "Une valeur statique",
+  "ui.not.name": "not",
+  "ui.not.tooltip": "Ne doit pas correspondre",
+  "ui.add.tooltip": "Ajouter",
+  "ui.edit.tooltip": "Éditer",
+  "ui.remove.tooltip": "Retirer",
+  "ui.invalid.tooltip": "Manquant ou invalide",
+  "ui.copy.tooltip": "Copier dans le presse-papier",
+  "ui.paste.tooltip": "Coller dans le presse-papier",
+  "ui.save.name": "Sauvegarder",
+  "ui.move-up.tooltip": "Bouger en haut",
+  "ui.move-down.tooltip": "Bouger en bas",
+  "ui.new-tab.name": "Nouvel onglet",
+  // Attributes
+  "attribute.category.name": "Catégorie",
+  "attribute.name.name": "Nom",
+  "attribute.quantity.name": "Quantité",
+  "attribute.quality.name": "Qualité",
+  "attribute.tags.name": "Étiquettes",
+  "attribute.any.name": "N’importe quel",
   // Storage Info
   "storage-info.name": "Nom",
   "storage-info.icon": "Icône",
@@ -253,5 +289,9 @@
   "border.left": "Gauche",
   "border.right": "Droite",
   "border.top": "Haut",
-  "border.bottom": "Bas"
+  "border.bottom": "Bas",
+  // Console Commands
+  "command.player-config": "Configurer le sac à dos du joueur.",
+  "command.reset-all": "Réinitialiser toutes les options de stockage par défaut.",
+  "command.menu": "Ouvrir le menu de Better Chest."
 }
