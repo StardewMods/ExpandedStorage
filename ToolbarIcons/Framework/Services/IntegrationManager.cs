@@ -221,7 +221,7 @@ internal sealed class IntegrationManager
             return false;
         }
 
-        var type = Type.GetType(fullName);
+        var type = mod.GetType().Assembly.GetType(fullName);
         var constructor = type?.GetConstructor(Array.Empty<Type>());
         if (constructor is null)
         {
