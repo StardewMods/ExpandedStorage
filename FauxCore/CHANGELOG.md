@@ -1,6 +1,6 @@
 # FauxCore Change Log
 
-## 1.2.1 (Unreleased)
+## 1.2.1 (December 3, 2024)
 
 ### Changed
 

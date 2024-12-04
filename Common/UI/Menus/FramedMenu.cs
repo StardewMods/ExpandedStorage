@@ -170,7 +170,7 @@ internal abstract class FramedMenu : BaseMenu, IFramedMenu
             component.tryHover(cursor.X - this.CurrentOffset.X, cursor.Y - this.CurrentOffset.Y);
         }
 
-        return false;
+        return base.TryHover(cursor);
     }
 
     /// <inheritdoc />
@@ -215,7 +215,7 @@ internal abstract class FramedMenu : BaseMenu, IFramedMenu
             }
         }
 
-        return false;
+        return base.TryScroll(direction);
     }
 
     /// <inheritdoc />

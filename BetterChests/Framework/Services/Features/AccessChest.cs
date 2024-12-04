@@ -187,7 +187,14 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
         {
             // Access First Chest
             this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.AccessChests);
-            this.containerFactory.GetAll(this.Predicate).MinBy(c => c.ToString())?.ShowMenu();
+            this.containerFactory
+                .GetAll(this.Predicate)
+                .GroupBy(container => container.AccessChestPriority)
+                .OrderByDescending(kvp => kvp.Key)
+                .FirstOrDefault()?
+                .MinBy(c => c.ToString())?
+                .ShowMenu();
+
             return;
         }
 
@@ -490,9 +497,8 @@ internal sealed class AccessChest : BaseFeature<AccessChest>
 
         this.currentContainers.Value.Clear();
         this.currentContainers.Value.AddRange(
-            this
-                .containerFactory.GetAll(this.Predicate)
-                .OrderBy(container => container.AccessChestPriority)
+            this.containerFactory.GetAll(this.Predicate)
+                .OrderByDescending(container => container.AccessChestPriority)
                 .ThenBy(container => container.ToString()!));
 
         if (this.currentContainers.Value.Count == 0)

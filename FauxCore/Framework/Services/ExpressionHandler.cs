@@ -33,21 +33,23 @@ internal sealed class ExpressionHandler : BaseService<ExpressionHandler>, IExpre
                 ComparableExpression.Char,
                 ' ')
             .ManyString()
-            .Between(Parser.SkipWhitespaces)
             .Where(term => !string.IsNullOrWhiteSpace(term));
 
-        var staticTerm = stringParser.Select(term => new StaticTerm(term)).OfType<IExpression>();
+        var staticTerm = stringParser
+            .Between(Parser.SkipWhitespaces)
+            .Select(expression => new StaticTerm(expression))
+            .OfType<IExpression>();
 
         var quotedTerm = stringParser
+            .Separated(Parser.Whitespaces)
             .Between(Parser.Char(QuotedTerm.BeginChar), Parser.Char(QuotedTerm.EndChar))
-            .Between(Parser.SkipWhitespaces)
-            .Select(expressions => new QuotedTerm(expressions))
+            .Select(expressions => new QuotedTerm(string.Join(' ', expressions)))
             .OfType<IExpression>();
 
         var dynamicParser = stringParser
+            .Separated(Parser.Whitespaces)
             .Between(Parser.Char(DynamicTerm.BeginChar), Parser.Char(DynamicTerm.EndChar))
-            .Between(Parser.SkipWhitespaces)
-            .Select(term => new DynamicTerm(term))
+            .Select(expressions => new DynamicTerm(string.Join(' ', expressions)))
             .OfType<IExpression>();
 
         var comparableParser = Parser.Try(
@@ -56,61 +58,50 @@ internal sealed class ExpressionHandler : BaseService<ExpressionHandler>, IExpre
                     (left, _, right) => new ComparableExpression(left, right),
                     dynamicParser,
                     Parser.Char(ComparableExpression.Char),
-                    quotedTerm.Or(staticTerm))
+                    Parser.OneOf(quotedTerm, staticTerm))
                 .OfType<IExpression>());
 
-        var staticParser = stringParser
-            .Select(
-                term => new ComparableExpression(
-                    new DynamicTerm(ItemAttribute.Any.ToStringFast()),
-                    new StaticTerm(term)))
+        var quotedParser = quotedTerm
+            .Select(expression => new ComparableExpression(new DynamicTerm(ItemAttribute.Any.ToStringFast()), expression))
             .OfType<IExpression>();
 
-        var quotedParser = stringParser
-            .Between(Parser.Char(QuotedTerm.BeginChar), Parser.Char(QuotedTerm.EndChar))
-            .Between(Parser.SkipWhitespaces)
-            .Select(
-                term => new ComparableExpression(
-                    new DynamicTerm(ItemAttribute.Any.ToStringFast()),
-                    new QuotedTerm(term)))
+        var staticParser = staticTerm
+            .Select(expression => new ComparableExpression(new DynamicTerm(ItemAttribute.Any.ToStringFast()), expression))
             .OfType<IExpression>();
 
         Parser<char, IExpression> allParser = null!;
         Parser<char, IExpression> anyParser = null!;
         Parser<char, IExpression> notParser = null!;
-        var parsers = Parser.Rec(
-            () => Parser.OneOf(
-                anyParser,
-                allParser,
-                notParser,
+
+        var parsers = Parser.OneOf(
+                Parser.Rec(() => anyParser),
+                Parser.Rec(() => allParser),
+                Parser.Rec(() => notParser),
                 comparableParser,
                 dynamicParser,
                 quotedParser,
-                staticParser));
+                staticParser);
 
         allParser = parsers
             .Many()
             .Between(Parser.Char(AllExpression.BeginChar), Parser.Char(AllExpression.EndChar))
-            .Between(Parser.SkipWhitespaces)
             .Select(expressions => new AllExpression(expressions.ToArray()))
             .OfType<IExpression>();
 
         anyParser = parsers
             .Many()
             .Between(Parser.Char(AnyExpression.BeginChar), Parser.Char(AnyExpression.EndChar))
-            .Between(Parser.SkipWhitespaces)
             .Select(expressions => new AnyExpression(expressions.ToArray()))
             .OfType<IExpression>();
 
         notParser = Parser
             .Char(NotExpression.Char)
-            .Then(Parser.OneOf(anyParser, allParser, comparableParser, dynamicParser, quotedParser, staticParser))
+            .Then(parsers)
             .Select(term => new NotExpression(term))
             .OfType<IExpression>();
 
         ExpressionHandler.RootParser = parsers
             .Many()
-            .Between(Parser.SkipWhitespaces)
             .Select(expressions => new RootExpression(expressions.ToArray()))
             .OfType<IExpression>();
     }
@@ -213,7 +204,7 @@ internal sealed class ExpressionHandler : BaseService<ExpressionHandler>, IExpre
             parsedExpression = ExpressionHandler.DefaultExpression;
         }
 
-        this.cachedSearches.AddOrUpdate(expression, parsedExpression.DeepClone());
+        //this.cachedSearches.AddOrUpdate(expression, parsedExpression.DeepClone());
         return true;
     }
 }

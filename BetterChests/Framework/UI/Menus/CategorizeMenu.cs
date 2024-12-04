@@ -138,7 +138,7 @@ internal sealed class CategorizeMenu : SearchMenu
             return true;
         }
 
-        return false;
+        return base.TryLeftClick(cursor);
     }
 
     /// <inheritdoc />

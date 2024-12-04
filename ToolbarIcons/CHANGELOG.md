@@ -1,14 +1,16 @@
 # Toolbar Icons Change Log
 
-## 2.8.1 (Unreleased)
+## 2.8.1 (December 3, 2024)
 
 ### Changed
 
+* Updated for FauxCore 1.2.1.
 * Added French translation.
 
 ### Fixed
 
 * Fixed issues with UI scaling.
+* Fixed integration broken for some mods such as Fashion Sense.
 
 ## 2.8.0 (November 5, 2024)
 

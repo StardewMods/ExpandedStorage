@@ -1,12 +1,28 @@
 # Better Chests Change Log
 
-## 2.19.0 (Planned)
+## 2.18.5 (December 3, 2024)
+
+### Changed
+
+* Updated for FauxCore 1.2.1.
+* Updated Chinese translation.
+* Updated German translation.
+* Updated French translation.
+* Higher Access Chest Priority are now sorted before lower priority chests.
+
+
+### Fixed
+
+* Fixed issues with UI scaling.
+* Fixed scroll wheel not working for items in the categorize/sort menu.
+* Fixed Access Chests hotkey not selecting the highest priority chest first.
+* Fixed quoted strings not being handled correctly for categorization menu.
+
+## 2.18.4 (November 5, 2024)
 
 ### Added
 
 * Updated for FauxCore 1.2.0.
-* Added visual editors for configuring storage options.
-* Added support for searching by item attributes.
 
 ### Changed
 
@@ -19,27 +35,10 @@
 
 ### Fixed
 
-* Fixed AutoOrganize not grabbing items from chests after they fail too insert
+* Updated for SDV 1.6.10 and SMAPI 4.1.3.
+* Fixed AutoOrganize not grabbing items from chests after they fail to insert
   into the first chest.
 * Added back the ability to see locked items from the main inventory menu.
-
-## 2.18.5 (Unreleased)
-
-### Changed
-
-* Updated Chinese translation.
-* Updated German translation.
-* Updated French translation.
-
-### Fixed
-
-* Fixed issues with UI scaling.
-
-## 2.18.4 (November 5, 2024)
-
-### Fixed
-
-* Updated for SDV 1.6.10 and SMAPI 4.1.3.
 
 ## 2.18.3 (May 7, 2024)
 

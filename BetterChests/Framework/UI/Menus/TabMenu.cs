@@ -240,7 +240,7 @@ internal sealed class TabMenu : SearchMenu
             return true;
         }
 
-        return false;
+        return base.TryLeftClick(cursor);
     }
 
     /// <inheritdoc />

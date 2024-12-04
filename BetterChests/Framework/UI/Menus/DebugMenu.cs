@@ -100,6 +100,6 @@ internal sealed class DebugMenu : BaseMenu
             }
         }
 
-        return false;
+        return base.TryLeftClick(cursor);
     }
 }

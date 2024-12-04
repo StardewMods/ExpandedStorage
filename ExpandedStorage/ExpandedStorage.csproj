@@ -25,6 +25,6 @@
   </ItemGroup>
   <ItemGroup>
     <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.1" required="true"/>
-    <SMAPIDependency Include="spacechase0.GenericModConfigMenu" Version="1.14.0" required="false"/>
+    <SMAPIDependency Include="spacechase0.GenericModConfigMenu" Version="1.14.1" required="false"/>
   </ItemGroup>
 </Project>

@@ -90,6 +90,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     {
         var cursor = UiToolkit.Cursor;
         this.SetHoverText(null);
+        this.Update(cursor);
 
         // Draw under
         this.DrawUnder(b, cursor);
@@ -184,7 +185,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     }
 
     /// <inheritdoc />
-    public override sealed void leftClickHeld(int x, int y)
+    public sealed override void leftClickHeld(int x, int y)
     {
         base.leftClickHeld(x, y);
         var cursor = new Point(x, y);
@@ -308,7 +309,7 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     public override sealed void receiveRightClick(int x, int y, bool playSound = true)
     {
         base.receiveRightClick(x, y, playSound);
-        var cursor = new Point(x, y);
+        var cursor = Utility.ModifyCoordinatesForUIScale(new Vector2(x, y)).ToPoint();
 
         if (this.TryRightClick(cursor))
         {

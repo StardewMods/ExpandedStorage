@@ -21,6 +21,6 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.0" required="true"/>
+    <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.1" required="true"/>
   </ItemGroup>
 </Project>

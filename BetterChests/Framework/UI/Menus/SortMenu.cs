@@ -103,7 +103,7 @@ internal sealed class SortMenu : SearchMenu
             return true;
         }
 
-        return false;
+        return base.TryLeftClick(cursor);
     }
 
     /// <inheritdoc />

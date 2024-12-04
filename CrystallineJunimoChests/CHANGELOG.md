@@ -1,6 +1,10 @@
 # Crystalline Junimo Chest Change Log
 
-## 1.1.3 (Unreleased)
+## 1.1.3 (December 3, 2024)
+
+### Changed
+
+* Updated for FauxCore 1.2.1.
 
 ### Fixed
 

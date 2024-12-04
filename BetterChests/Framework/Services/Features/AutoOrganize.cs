@@ -64,19 +64,17 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
                 continue;
             }
 
-            for (var priorityFrom = priorityTo - 1; priorityFrom >= bottomPriority; --priorityFrom)
+            foreach (var containerTo in containersTo)
             {
-                if (!containerGroupsFrom.TryGetValue(priorityFrom, out var containersFrom))
+                for (var priorityFrom = priorityTo - 1; priorityFrom >= bottomPriority; --priorityFrom)
                 {
-                    continue;
-                }
-
-                for (var indexTo = containersTo.Count - 1; indexTo >= 0; --indexTo)
-                {
-                    var containerTo = containersTo[indexTo];
-                    for (var indexFrom = containersFrom.Count - 1; indexFrom >= 0; --indexFrom)
+                    if (!containerGroupsFrom.TryGetValue(priorityFrom, out var containersFrom))
                     {
-                        var containerFrom = containersFrom[indexFrom];
+                        continue;
+                    }
+
+                    foreach (var containerFrom in containersFrom)
+                    {
                         if (!this.containerHandler.Transfer(containerFrom, containerTo, out var amounts))
                         {
                             continue;
@@ -96,9 +94,9 @@ internal sealed class AutoOrganize : BaseFeature<AutoOrganize>
                             }
                         }
                     }
-
-                    ItemGrabMenu.organizeItemsInList(containerTo.Items);
                 }
+
+                ItemGrabMenu.organizeItemsInList(containerTo.Items);
             }
         }
     }
