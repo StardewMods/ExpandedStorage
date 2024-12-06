@@ -16,9 +16,9 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.1" required="true"/>
+    <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.2" required="true"/>
     <SMAPIDependency Include="furyx639.ExpandedStorage" Version="3.1.0" required="true"/>
-    <SMAPIDependency Include="furyx639.BetterChests" Version="2.18.5" required="false"/>
+    <SMAPIDependency Include="furyx639.BetterChests" Version="2.18.6" required="false"/>
     <SMAPIDependency Include="spacechase0.GenericModConfigMenu" Version="1.14.1" required="false"/>
   </ItemGroup>
 </Project>

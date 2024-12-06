@@ -1,0 +1,28 @@
+{
+  "Changes": [
+    {
+      "LogName": "FauxCore Icon for ChestsAnywhere.OpenMenu",
+      "Action": "EditData",
+      "Target": "furyx639.FauxCore/Icons",
+      "Entries": {
+        "{{ModId}}/ChestsAnywhere.OpenMenu": {
+          "Area": { "X": 0, "Y": 0, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        }
+      }
+    },
+    {
+      "LogName": "Toolbar Icon for ChestsAnywhere.OpenMenu",
+      "Action": "EditData",
+      "Target": "furyx639.ToolbarIcons/Data",
+      "Entries": {
+        "{{ModId}}/ChestsAnywhere.OpenMenu": {
+          "ModId": "Pathoschild.ChestsAnywhere",
+          "Type": "Method",
+          "ExtraData": "OpenMenu",
+          "HoverText": "{{i18n: button.ChestsAnywhere}}"
+        }
+      }
+    }
+  ]
+}

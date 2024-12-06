@@ -1,0 +1,14 @@
+{
+  "storage.Default.name": "Default Storage",
+  "storage.Default.tooltip": "Config options that apply to every storage.",
+  "storage.Fridge.name": "Fridge",
+  "storage.Fridge.tooltip": "Storage in the farmhouse for cooking ingredients.",
+  "storage.Island-Fridge.name": "Island Fridge",
+  "storage.Island-Fridge.tooltip": "Storage in the island farmhouse for cooking ingredients.",
+  "storage.Backpack.name": "Backpack",
+  "storage.Backpack.tooltip": "Storage in the farmer's backpack.",
+  "storage.Saddlebag.name": "Saddle Bag",
+  "storage.Saddlebag.tooltip": "Storage on the horse.",
+  "storage.Other.name": "Other",
+  "storage.Other.tooltip": "An unknown storage type.",
+}

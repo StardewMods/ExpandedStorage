@@ -143,11 +143,11 @@ internal sealed class ConfigManager : ConfigManager<DefaultConfig>, IModConfig
         }
 
         var featureOptions = (isDefault && parentOptions is null
-            ? FeatureOptionExtensions.GetNames().Except(new[] { FeatureOption.Default.ToStringFast() })
+            ? FeatureOptionExtensions.GetNames().Except([FeatureOption.Default.ToStringFast()])
             : FeatureOptionExtensions.GetNames()).ToArray();
 
         var rangeOptions = (isDefault && parentOptions is null
-            ? RangeOptionExtensions.GetNames().Except(new[] { RangeOption.Default.ToStringFast() })
+            ? RangeOptionExtensions.GetNames().Except([RangeOption.Default.ToStringFast()])
             : RangeOptionExtensions.GetNames()).ToArray();
 
         // Access Chest

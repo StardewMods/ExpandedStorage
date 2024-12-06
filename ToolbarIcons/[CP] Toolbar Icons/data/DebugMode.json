@@ -1,0 +1,28 @@
+{
+  "Changes": [
+    {
+      "LogName": "FauxCore Icon for DebugMode.Toggle",
+      "Action": "EditData",
+      "Target": "furyx639.FauxCore/Icons",
+      "Entries": {
+        "{{ModId}}/DebugMode.Toggle": {
+          "Area": { "X": 32, "Y": 0, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        }
+      }
+    },
+    {
+      "LogName": "Toolbar Icon for DebugMode.Toggle",
+      "Action": "EditData",
+      "Target": "furyx639.ToolbarIcons/Data",
+      "Entries": {
+        "{{ModId}}/DebugMode.Toggle": {
+          "ModId": "Pathoschild.DebugMode",
+          "Type": "Method",
+          "ExtraData": "ToggleDebugMenu",
+          "HoverText": "{{i18n: button.DebugMode}}"
+        }
+      }
+    }
+  ]
+}

@@ -43,6 +43,8 @@ internal sealed class AssetHandler : BaseAssetHandler
         InternalIcon.Hsl,
         InternalIcon.Debug,
         InternalIcon.NoStack,
+        InternalIcon.Categorize,
+        InternalIcon.Sort,
     ];
 
     private readonly IModConfig modConfig;

@@ -1,0 +1,28 @@
+{
+  "Changes": [
+    {
+      "LogName": "FauxCore Icon for ResetTerrainFeatures.Reset",
+      "Action": "EditData",
+      "Target": "furyx639.FauxCore/Icons",
+      "Entries": {
+        "{{ModId}}/ResetTerrainFeatures.Reset": {
+          "Area": { "X": 64, "Y": 16, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        }
+      }
+    },
+    {
+      "LogName": "Toolbar Icon for ResetTerrainFeatures.Reset",
+      "Action": "EditData",
+      "Target": "furyx639.ToolbarIcons/Data",
+      "Entries": {
+        "{{ModId}}/ResetTerrainFeatures.Reset": {
+          "ModId": "MabelSyrup.ResetTerrainFeatures",
+          "Type": "Keybind",
+          "ExtraData": "{{ResetTerrainFeaturesHotkey}}",
+          "HoverText": "{{i18n: button.ResetTerrainFeatures}}"
+        }
+      }
+    }
+  ]
+}

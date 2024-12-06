@@ -6,6 +6,9 @@ using NetEscapades.EnumGenerators;
 [EnumExtensions]
 internal enum InternalIcon
 {
+    /// <summary>A categorize icon.</summary>
+    Categorize,
+
     /// <summary>A shirt.</summary>
     Clothing,
 
@@ -56,6 +59,9 @@ internal enum InternalIcon
 
     /// <summary>A seed.</summary>
     Seeds,
+
+    /// <summary>A sort icon.</summary>
+    Sort,
 
     /// <summary>Up arrow into a grid.</summary>
     Stash,

@@ -34,7 +34,7 @@ internal sealed class PopupSelect<TItem> : BaseMenu
     private readonly TextField textField;
 
     private string currentText;
-    private EventHandler<TItem>? optionSelected;
+    private EventHandler<TItem?>? optionSelected;
 
     /// <summary>Initializes a new instance of the <see cref="PopupSelect{TItem}" /> class.</summary>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
@@ -102,7 +102,7 @@ internal sealed class PopupSelect<TItem> : BaseMenu
     }
 
     /// <summary>Event raised when the selection changes.</summary>
-    public event EventHandler<TItem> OptionSelected
+    public event EventHandler<TItem?> OptionSelected
     {
         add => this.optionSelected += value;
         remove => this.optionSelected -= value;
@@ -141,7 +141,7 @@ internal sealed class PopupSelect<TItem> : BaseMenu
                 this.exitThisMenuNoSound();
                 return;
 
-            case Keys.Enter when this.readyToClose() && this.selectOption.CurrentSelection is not null:
+            case Keys.Enter when this.readyToClose():
                 this.optionSelected?.InvokeAll(this, this.selectOption.CurrentSelection);
                 this.exitThisMenuNoSound();
                 return;
@@ -149,7 +149,7 @@ internal sealed class PopupSelect<TItem> : BaseMenu
             case Keys.Tab when this.textField.Selected
                 && !string.IsNullOrWhiteSpace(this.CurrentText)
                 && this.selectOption.Options.Any():
-                this.CurrentText = this.selectOption.GetValue(this.selectOption.Options.First());
+                this.CurrentText = this.selectOption.GetValue(this.selectOption.Options[0]);
                 this.textField.Reset();
                 break;
         }
@@ -160,11 +160,7 @@ internal sealed class PopupSelect<TItem> : BaseMenu
     {
         if (this.okButton.bounds.Contains(cursor) && this.readyToClose())
         {
-            if (this.selectOption.CurrentSelection is not null)
-            {
-                this.optionSelected?.InvokeAll(this, this.selectOption.CurrentSelection);
-            }
-
+            this.optionSelected?.InvokeAll(this, this.selectOption.CurrentSelection);
             this.exitThisMenuNoSound();
             return true;
         }

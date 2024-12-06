@@ -36,7 +36,6 @@ internal sealed class ExpressionHandler : BaseService<ExpressionHandler>, IExpre
             .Where(term => !string.IsNullOrWhiteSpace(term));
 
         var staticTerm = stringParser
-            .Between(Parser.SkipWhitespaces)
             .Select(expression => new StaticTerm(expression))
             .OfType<IExpression>();
 
@@ -80,16 +79,16 @@ internal sealed class ExpressionHandler : BaseService<ExpressionHandler>, IExpre
                 comparableParser,
                 dynamicParser,
                 quotedParser,
-                staticParser);
+                staticParser)
+            .Between(Parser.SkipWhitespaces)
+            .Many();
 
         allParser = parsers
-            .Many()
             .Between(Parser.Char(AllExpression.BeginChar), Parser.Char(AllExpression.EndChar))
             .Select(expressions => new AllExpression(expressions.ToArray()))
             .OfType<IExpression>();
 
         anyParser = parsers
-            .Many()
             .Between(Parser.Char(AnyExpression.BeginChar), Parser.Char(AnyExpression.EndChar))
             .Select(expressions => new AnyExpression(expressions.ToArray()))
             .OfType<IExpression>();
@@ -97,11 +96,10 @@ internal sealed class ExpressionHandler : BaseService<ExpressionHandler>, IExpre
         notParser = Parser
             .Char(NotExpression.Char)
             .Then(parsers)
-            .Select(term => new NotExpression(term))
+            .Select(expressions => new NotExpression(expressions.ToArray()))
             .OfType<IExpression>();
 
         ExpressionHandler.RootParser = parsers
-            .Many()
             .Select(expressions => new RootExpression(expressions.ToArray()))
             .OfType<IExpression>();
     }

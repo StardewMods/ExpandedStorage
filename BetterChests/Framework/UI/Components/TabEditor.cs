@@ -13,9 +13,9 @@ using StardewValley.Menus;
 internal sealed class TabEditor : BaseComponent
 {
     private readonly ClickableTextureComponent downArrow;
-    private readonly ClickableTextureComponent icon;
     private readonly ClickableTextureComponent upArrow;
 
+    private ClickableTextureComponent icon;
     private EventHandler<IClicked>? moveDown;
     private EventHandler<IClicked>? moveUp;
 
@@ -253,5 +253,13 @@ internal sealed class TabEditor : BaseComponent
         }
 
         return base.TryLeftClick(cursor);
+    }
+
+    /// <summary>Updates the tab icon.</summary>
+    /// <param name="icon">The icon to update to.</param>
+    public void UpdateIcon(IIcon icon)
+    {
+        this.icon = icon.Component(IconStyle.Transparent, this.icon.bounds.X, this.icon.bounds.Y);
+        this.icon.bounds.Width = this.bounds.Width - (Game1.tileSize * 2);
     }
 }

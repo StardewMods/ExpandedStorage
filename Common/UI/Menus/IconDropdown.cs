@@ -42,6 +42,7 @@ internal sealed class IconDropdown : BaseMenu
     {
         var selectIcon = new SelectIcon(
             icons,
+            null,
             rows,
             columns,
             getHoverText,

@@ -16,10 +16,11 @@ using StardewValley.TokenizableStrings;
 /// <summary>Provides access to all known storages for other services.</summary>
 internal sealed class ContainerFactory
 {
-    private readonly ConditionalWeakTable<object, IStorageContainer> cachedContainers = new();
+    private readonly ConditionalWeakTable<object, IStorageContainer> cachedContainers = [];
+    private readonly IStorageOptions globalOptions;
     private readonly IModConfig modConfig;
     private readonly ProxyChestFactory proxyChestFactory;
-    private readonly Dictionary<string, IStorageOptions> storageOptions = new();
+    private readonly Dictionary<string, IStorageOptions> storageOptions = [];
 
     /// <summary>Initializes a new instance of the <see cref="ContainerFactory" /> class.</summary>
     /// <param name="modConfig">Dependency used for accessing config data.</param>
@@ -28,6 +29,7 @@ internal sealed class ContainerFactory
     {
         this.modConfig = modConfig;
         this.proxyChestFactory = proxyChestFactory;
+        this.globalOptions = new ConfigStorageOptions(() => modConfig.DefaultOptions, static () => string.Empty, static () => string.Empty);
     }
 
     /// <summary>Retrieves all containers that match the optional predicate.</summary>
@@ -408,7 +410,7 @@ internal sealed class ContainerFactory
         }
 
         // Add global options to the building container
-        buildingContainer.AddOptions(StorageOption.Global, this.modConfig.DefaultOptions);
+        buildingContainer.AddOptions(StorageOption.Global, this.globalOptions);
 
         // Add mod options to the building container
         var buildingModel = new ModDataModel(building.modData);
@@ -482,7 +484,7 @@ internal sealed class ContainerFactory
                 npcContainer = new NpcContainer(horse, saddleBagChest);
 
                 // Add global options to the horse container
-                npcContainer.AddOptions(StorageOption.Global, this.modConfig.DefaultOptions);
+                npcContainer.AddOptions(StorageOption.Global, this.globalOptions);
 
                 // Add mod options to the horse container
                 var npcModel = new ModDataModel(horse.modData);
@@ -607,7 +609,7 @@ internal sealed class ContainerFactory
         locationContainer = new FridgeContainer(location, fridge);
 
         // Add global options to the fridge container
-        locationContainer.AddOptions(StorageOption.Global, this.modConfig.DefaultOptions);
+        locationContainer.AddOptions(StorageOption.Global, this.globalOptions);
 
         // Add mod options to the fridge container
         var buildingModel = new ModDataModel(location.modData);
@@ -818,7 +820,7 @@ internal sealed class ContainerFactory
                 container = new FurnitureContainer(furniture);
 
                 // Add global options to the furniture container
-                container.AddOptions(StorageOption.Global, this.modConfig.DefaultOptions);
+                container.AddOptions(StorageOption.Global, this.globalOptions);
 
                 // Add mod options to the furniture container
                 var furnitureModel = new ModDataModel(furniture.modData);
@@ -848,7 +850,7 @@ internal sealed class ContainerFactory
         }
 
         // Add global options to the object container
-        container.AddOptions(StorageOption.Global, this.modConfig.DefaultOptions);
+        container.AddOptions(StorageOption.Global, this.globalOptions);
 
         // Add mod options to the object container
         var objectModel = new ModDataModel(@object.modData);

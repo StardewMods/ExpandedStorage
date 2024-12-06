@@ -112,6 +112,7 @@ internal sealed class SortInventory : BaseFeature<SortInventory>
     private void OnContainerSorting(ContainerSortingEventArgs e)
     {
         if (e.Container.SortInventory is not FeatureOption.Enabled
+            || string.IsNullOrWhiteSpace(e.Container.SortInventoryBy)
             || !this.expressionHandler.TryParseExpression(e.Container.SortInventoryBy, out var expression))
         {
             return;

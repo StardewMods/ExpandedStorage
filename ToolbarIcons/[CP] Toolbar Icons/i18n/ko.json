@@ -1,0 +1,9 @@
+{
+  // Icons
+  "button.DataLayers": "데이터 레이어 활성화",
+  "button.DebugMode": "디버그 모드 활성화",
+  "button.HorseFluteAnywhere": "말 소환 버튼",
+  "button.InstantBuildings.Build": "즉시 농장 건물 건설 오픈",
+  "button.InstantBuildings.Upgrade": "즉시 집 업그레이드 메뉴 오픈",
+  "button.LookupAnything": "무엇이든 조회 버튼"
+}

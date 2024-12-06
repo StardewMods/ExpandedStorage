@@ -242,10 +242,7 @@ internal sealed class ExpressionsMenu : FramedMenu
         };
 
         var popupSelect = new PopupSelect<string>(this.iconRegistry, popupItems, component.label, maxItems: 10);
-        popupSelect.OptionSelected += (_, _) =>
-        {
-            this.ChangeTerm(expression, popupSelect.CurrentText);
-        };
+        popupSelect.OptionSelected += (_, _) => this.ChangeTerm(expression, popupSelect.CurrentText);
 
         this.Parent?.SetChildMenu(popupSelect);
     }

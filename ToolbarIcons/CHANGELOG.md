@@ -1,5 +1,16 @@
 # Toolbar Icons Change Log
 
+## 2.8.2 (December 5, 2024)
+
+### Changed
+
+* Updated to new icons by Taiyō.
+* Bundling the content pack by default.
+
+### Fixed
+
+* Fixed content pack icons not loading.
+
 ## 2.8.1 (December 3, 2024)
 
 ### Changed

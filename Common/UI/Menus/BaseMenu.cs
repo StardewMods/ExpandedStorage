@@ -190,6 +190,13 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
         base.leftClickHeld(x, y);
         var cursor = new Point(x, y);
 
+        // Hold left-click child menu
+        if (this.GetChildMenu() is { } childMenu)
+        {
+            childMenu.leftClickHeld(x, y);
+            return;
+        }
+
         if (this.bounds.Contains(cursor))
         {
             this.Update(cursor);
@@ -249,6 +256,14 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     {
         base.performHoverAction(x, y);
         var cursor = new Point(x, y);
+
+        // Hover child menu
+        if (this.GetChildMenu() is { } childMenu)
+        {
+            childMenu.performHoverAction(x, y);
+            return;
+        }
+
         if (this.TryHover(cursor))
         {
             return;
@@ -279,6 +294,13 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     {
         base.receiveLeftClick(x, y, playSound);
         var cursor = new Point(x, y);
+
+        // Left-click child menu
+        if (this.GetChildMenu() is { } childMenu)
+        {
+            childMenu.receiveLeftClick(x, y, playSound);
+            return;
+        }
 
         if (this.TryLeftClick(cursor))
         {
@@ -311,6 +333,13 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
         base.receiveRightClick(x, y, playSound);
         var cursor = Utility.ModifyCoordinatesForUIScale(new Vector2(x, y)).ToPoint();
 
+        // Right-click child menu
+        if (this.GetChildMenu() is { } childMenu)
+        {
+            childMenu.receiveRightClick(x, y, playSound);
+            return;
+        }
+
         if (this.TryRightClick(cursor))
         {
             return;
@@ -342,6 +371,13 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
         base.receiveScrollWheelAction(direction);
         var cursor = UiToolkit.Cursor;
 
+        // Scroll child menu
+        if (this.GetChildMenu() is { } childMenu)
+        {
+            childMenu.receiveScrollWheelAction(direction);
+            return;
+        }
+
         if (this.Bounds.Contains(cursor) && this.TryScroll(direction))
         {
             return;
@@ -372,6 +408,13 @@ internal abstract class BaseMenu : IClickableMenu, ICustomMenu
     {
         base.releaseLeftClick(x, y);
         var cursor = new Point(x, y);
+
+        // Scroll child menu
+        if (this.GetChildMenu() is { } childMenu)
+        {
+            childMenu.releaseLeftClick(x, y);
+            return;
+        }
 
         this.Update(cursor);
 

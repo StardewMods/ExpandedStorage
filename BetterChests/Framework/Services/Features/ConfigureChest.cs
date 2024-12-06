@@ -1,5 +1,6 @@
 namespace StardewMods.BetterChests.Framework.Services.Features;
 
+using System;
 using StardewModdingAPI.Events;
 using StardewModdingAPI.Utilities;
 using StardewMods.BetterChests.Framework.Enums;
@@ -63,11 +64,13 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         this.Config.DefaultOptions.ConfigureChest != FeatureOption.Disabled
         && this.genericModConfigMenuIntegration.IsLoaded;
 
-    private IIcon CategorizeIcon => this.iconRegistry.Icon(InternalIcon.Miscellaneous);
+    private IIcon CategorizeIcon => this.iconRegistry.Icon(InternalIcon.Categorize);
 
     private IIcon ConfigureIcon => this.iconRegistry.Icon(InternalIcon.Config);
 
-    private IIcon SortIcon => this.iconRegistry.Icon(InternalIcon.Debug);
+    private IIcon PickIcon => this.iconRegistry.Icon(VanillaIcon.ColorPicker);
+
+    private IIcon SortIcon => this.iconRegistry.Icon(InternalIcon.Sort);
 
     /// <inheritdoc />
     protected override void Activate()
@@ -114,6 +117,11 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
             return I18n.Configure_Sorting_Name();
         }
 
+        if (icon.Id == this.PickIcon.Id)
+        {
+            return I18n.Configure_Icon_Name();
+        }
+
         return string.Empty;
     }
 
@@ -155,11 +163,12 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
             this.ConfigureIcon,
             this.CategorizeIcon,
             this.SortIcon,
+            this.PickIcon,
         };
 
         focus.Release();
         this.inputHelper.Suppress(e.Button);
-        var dropdown = new IconDropdown(icon, options, 3, 1, this.GetHoverText);
+        var dropdown = new IconDropdown(icon, options, 4, 1, this.GetHoverText);
         dropdown.IconSelected += (_, i) => this.ShowMenu(container, i);
         Game1.activeClickableMenu?.SetChildMenu(dropdown);
     }
@@ -176,6 +185,17 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
 
         this.inputHelper.SuppressActiveKeybinds(this.Config.Controls.ConfigureChest);
         this.ShowMenu(container, this.ConfigureIcon);
+    }
+
+    private void OnIconSelected(object? sender, IIcon? icon)
+    {
+        if (this.lastContainer.Value is null)
+        {
+            return;
+        }
+
+        this.lastContainer.Value.StorageIcon = icon?.UniqueId ?? string.Empty;
+        this.lastContainer.Value.ShowMenu();
     }
 
     private void OnMenuChanged(MenuChangedEventArgs e)
@@ -218,6 +238,15 @@ internal sealed class ConfigureChest : BaseFeature<ConfigureChest>
         if (icon.Id == this.SortIcon.Id)
         {
             Game1.activeClickableMenu = new SortMenu(container, this.expressionHandler, this.iconRegistry);
+            return;
+        }
+
+        if (icon.Id == this.PickIcon.Id)
+        {
+            Game1.playSound("drumkit6");
+            var iconPicker = new IconPicker(this.iconRegistry);
+            iconPicker.IconSelected += this.OnIconSelected;
+            Game1.activeClickableMenu.SetChildMenu(iconPicker);
         }
     }
 }

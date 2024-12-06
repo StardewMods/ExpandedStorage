@@ -6,7 +6,9 @@ using StardewMods.BetterChests.Framework.Interfaces;
 using StardewMods.BetterChests.Framework.Models;
 using StardewMods.BetterChests.Framework.Services;
 using StardewMods.BetterChests.Framework.UI.Components;
+using StardewMods.Common.Enums;
 using StardewMods.Common.Services.Integrations.FauxCore;
+using StardewMods.Common.UI.Menus;
 using StardewValley.Menus;
 
 /// <summary>Menu for customizing tabs.</summary>
@@ -170,6 +172,19 @@ internal sealed class TabMenu : SearchMenu
             return true;
         }
 
+        if (this.editButton.bounds.Contains(cursor))
+        {
+            Game1.playSound("drumkit6");
+            if (this.activeTab is not null)
+            {
+                var iconPicker = new IconPicker(this.iconRegistry);
+                iconPicker.IconSelected += this.OnIconSelected;
+                this.SetChildMenu(iconPicker);
+            }
+
+            return true;
+        }
+
         if (this.addButton.bounds.Contains(cursor))
         {
             Game1.playSound("drumkit6");
@@ -265,6 +280,17 @@ internal sealed class TabMenu : SearchMenu
         {
             this.activeTab.Active = true;
         }
+    }
+
+    private void OnIconSelected(object? sender, IIcon? icon)
+    {
+        if (this.activeTab is null || string.IsNullOrWhiteSpace(icon?.UniqueId))
+        {
+            return;
+        }
+
+        this.config.InventoryTabList[this.activeTab.Index].Icon = icon.UniqueId;
+        this.activeTab.UpdateIcon(icon);
     }
 
     private void OnMoveDown(object? sender, IClicked e)

@@ -1,0 +1,28 @@
+{
+  "Changes": [
+    {
+      "LogName": "FauxCore Icon for Screenshot.Take",
+      "Action": "EditData",
+      "Target": "furyx639.FauxCore/Icons",
+      "Entries": {
+        "{{ModId}}/Screenshot.Take": {
+          "Area": { "X": 0, "Y": 32, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        }
+      }
+    },
+    {
+      "LogName": "Toolbar Icon for Screenshot.Take",
+      "Action": "EditData",
+      "Target": "furyx639.ToolbarIcons/Data",
+      "Entries": {
+        "{{ModId}}/Screenshot.Take": {
+          "ModId": "aedenthorn.Screenshot",
+          "Type": "Keybind",
+          "ExtraData": "{{ScreenshotHotkey}}",
+          "HoverText": "{{i18n: button.Screenshot}}"
+        }
+      }
+    }
+  ]
+}

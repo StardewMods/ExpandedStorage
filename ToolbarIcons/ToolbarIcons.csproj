@@ -2,7 +2,7 @@
   <PropertyGroup>
     <Name>Toolbar Icons</Name>
     <Description>Adds icons above or below the toolbar.</Description>
-    <Version>2.8.1</Version>
+    <Version>2.8.2</Version>
     <RootNamespace>StardewMods.ToolbarIcons</RootNamespace>
     <UniqueId>furyx639.ToolbarIcons</UniqueId>
     <UpdateKeys>Nexus:11026@SMAPI</UpdateKeys>
@@ -16,7 +16,10 @@
     </PackageReference>
   </ItemGroup>
   <ItemGroup>
-    <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.1" required="true"/>
+    <ContentPacks Include="[CP] Toolbar Icons" />
+  </ItemGroup>
+  <ItemGroup>
+    <SMAPIDependency Include="furyx639.FauxCore" Version="1.2.2" required="true"/>
     <SMAPIDependency Include="spacechase0.GenericModConfigMenu" Version="1.14.1" required="false"/>
   </ItemGroup>
 </Project>

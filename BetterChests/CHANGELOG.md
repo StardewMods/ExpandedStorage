@@ -1,5 +1,20 @@
 # Better Chests Change Log
 
+## 2.18.6 (December 5, 2024)
+
+### Added
+
+* Added an icon picker to configure chest.
+
+### Changed
+
+* Updated to new icons by Taiyō.
+
+### Fixed
+
+* Fixed Sort Inventory taking effect even when no sort method is saved.
+* Fixed config options not taking effect for existing chests until restart.
+
 ## 2.18.5 (December 3, 2024)
 
 ### Changed

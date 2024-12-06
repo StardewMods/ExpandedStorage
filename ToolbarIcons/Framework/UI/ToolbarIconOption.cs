@@ -22,7 +22,7 @@ internal sealed class ToolbarIconOption : BaseComplexOption
     private readonly Action<bool> setEnabled;
     private ClickableTextureComponent? checkedComponent;
 
-    private string currentId;
+    private string currentId = null!;
     private ClickableTextureComponent? downArrow;
     private ClickableTextureComponent icon;
     private string name;

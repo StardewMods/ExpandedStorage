@@ -34,12 +34,13 @@ internal class SelectIcon : FramedMenu
     private readonly int spacing;
 
     private List<ClickableTextureComponent>? components;
-    private int currentIndex = -1;
+    private string currentIcon;
     private List<IIcon>? icons;
     private EventHandler<IIcon?>? selectionChanged;
 
     /// <summary>Initializes a new instance of the <see cref="SelectIcon" /> class.</summary>
     /// <param name="allIcons">The icons to pick from.</param>
+    /// <param name="initialValue">The initial value of the icon.</param>
     /// <param name="rows">This rows of icons to display.</param>
     /// <param name="columns">The columns of icons to display.</param>
     /// <param name="getHoverText">A function which returns the hover text for an icon.</param>
@@ -49,6 +50,7 @@ internal class SelectIcon : FramedMenu
     /// <param name="y">The y-position.</param>
     public SelectIcon(
         IEnumerable<IIcon> allIcons,
+        string? initialValue,
         int rows,
         int columns,
         GetHoverText? getHoverText = null,
@@ -60,13 +62,15 @@ internal class SelectIcon : FramedMenu
             x,
             y,
             (columns * ((int)(scale * 16) + spacing)) + spacing,
-            (rows * ((int)(scale * 16) + spacing)) + spacing)
+            (rows * ((int)(scale * 16) + spacing)) + spacing,
+            scrollBarOffset: new Point(0, 4))
     {
         this.allIcons = allIcons;
         this.columns = columns;
         this.getHoverText = getHoverText ?? SelectIcon.GetUniqueId;
         this.spacing = spacing;
         this.length = (int)Math.Floor(scale * 16);
+        this.currentIcon = initialValue ?? string.Empty;
     }
 
     /// <summary>Get the hover text for an icon.</summary>
@@ -91,8 +95,19 @@ internal class SelectIcon : FramedMenu
         remove => this.selectionChanged -= value;
     }
 
+    /// <summary>Gets or sets the current source.</summary>
+    public string CurrentIcon
+    {
+        get => this.currentIcon;
+        protected set
+        {
+            this.currentIcon = value;
+            this.selectionChanged?.InvokeAll(this, this.CurrentSelection);
+        }
+    }
+
     /// <summary>Gets the currently selected icon.</summary>
-    public IIcon? CurrentSelection => this.Icons.ElementAtOrDefault(this.CurrentIndex);
+    public IIcon? CurrentSelection => this.Icons.FirstOrDefault(icon => icon.UniqueId.Equals(this.CurrentIcon, StringComparison.OrdinalIgnoreCase));
 
     /// <inheritdoc />
     public override Rectangle Frame =>
@@ -104,17 +119,6 @@ internal class SelectIcon : FramedMenu
 
     /// <inheritdoc />
     public override int StepSize => 32;
-
-    /// <summary>Gets or sets the current index.</summary>
-    public int CurrentIndex
-    {
-        get => this.currentIndex;
-        protected set
-        {
-            this.currentIndex = value;
-            this.selectionChanged?.InvokeAll(this, this.CurrentSelection);
-        }
-    }
 
     private IEnumerable<ClickableTextureComponent> Components
     {
@@ -187,7 +191,7 @@ internal class SelectIcon : FramedMenu
             var icon = this.Icons[index];
             component.tryHover(cursor.X + this.CurrentOffset.X, cursor.Y + this.CurrentOffset.Y, 0.2f);
 
-            if (index == this.CurrentIndex)
+            if (icon.UniqueId.Equals(this.CurrentIcon, StringComparison.OrdinalIgnoreCase))
             {
                 spriteBatch.Draw(
                     Game1.mouseCursors,
@@ -271,7 +275,8 @@ internal class SelectIcon : FramedMenu
             return false;
         }
 
-        this.CurrentIndex = int.Parse(component.name, CultureInfo.InvariantCulture);
+        var index = int.Parse(component.name, CultureInfo.InvariantCulture);
+        this.CurrentIcon = this.Icons[index].UniqueId;
         return true;
     }
 

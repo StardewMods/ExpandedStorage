@@ -1,4 +1,4 @@
-﻿namespace StardewMods.ToolbarIcons.Framework.Services;
+namespace StardewMods.ToolbarIcons.Framework.Services;
 
 using StardewModdingAPI.Utilities;
 using StardewMods.Common.Interfaces;

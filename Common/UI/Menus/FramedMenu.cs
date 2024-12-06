@@ -26,6 +26,7 @@ using StardewValley.Menus;
 internal abstract class FramedMenu : BaseMenu, IFramedMenu
 {
     private readonly VerticalScrollBar scrollBar;
+    private readonly Point scrollBarOffset;
 
     private Point maxOffset;
     private Point offset;
@@ -36,25 +37,25 @@ internal abstract class FramedMenu : BaseMenu, IFramedMenu
     /// <param name="width">The width of the menu.</param>
     /// <param name="height">The height of the menu.</param>
     /// <param name="showUpperRightCloseButton">A value indicating whether to show the right close button.</param>
+    /// <param name="scrollBarOffset">An offset to the scrollbar position relative to the frame.</param>
     protected FramedMenu(
         int? x = null,
         int? y = null,
         int? width = null,
         int? height = null,
-        bool showUpperRightCloseButton = false)
+        bool showUpperRightCloseButton = false,
+        Point? scrollBarOffset = null)
         : base(x, y, width, height, showUpperRightCloseButton)
     {
         this.maxOffset = new Point(-1, -1);
+        this.scrollBarOffset = scrollBarOffset ?? new Point(-48, 4);
         this.scrollBar = new VerticalScrollBar(
             this,
-            this.xPositionOnScreen + this.width - 48,
-            this.yPositionOnScreen + 4,
+            this.xPositionOnScreen + this.width + this.scrollBarOffset.X,
+            this.yPositionOnScreen + this.scrollBarOffset.Y,
             this.height,
             () => this.offset.Y,
-            value =>
-            {
-                this.offset.Y = value;
-            },
+            value => this.offset.Y = value,
             () => 0,
             () => this.MaxOffset.Y,
             () => this.StepSize);
@@ -132,7 +133,8 @@ internal abstract class FramedMenu : BaseMenu, IFramedMenu
     public override ICustomMenu MoveTo(Point position)
     {
         base.MoveTo(position);
-        this.scrollBar.MoveTo(new Point(this.xPositionOnScreen + this.width - 48, this.yPositionOnScreen + 4));
+        this.scrollBar
+            .MoveTo(new Point(this.xPositionOnScreen + this.width + this.scrollBarOffset.X, this.yPositionOnScreen + this.scrollBarOffset.Y));
         return this;
     }
 
@@ -140,7 +142,9 @@ internal abstract class FramedMenu : BaseMenu, IFramedMenu
     public override ICustomMenu ResizeTo(Point size)
     {
         base.ResizeTo(size);
-        this.scrollBar.ResizeTo(new Point(0, size.Y)).MoveTo(new Point(this.Bounds.Right - 48, this.Bounds.Top + 4));
+        this.scrollBar
+            .ResizeTo(new Point(0, size.Y))
+            .MoveTo(new Point(this.Bounds.Right + this.scrollBarOffset.X, this.Bounds.Top + this.scrollBarOffset.Y));
         return this;
     }
 

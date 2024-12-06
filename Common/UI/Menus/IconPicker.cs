@@ -39,7 +39,8 @@ internal sealed class IconPicker : BaseMenu
 
     /// <summary>Initializes a new instance of the <see cref="IconPicker" /> class.</summary>
     /// <param name="iconRegistry">Dependency used for registering and retrieving icons.</param>
-    public IconPicker(IIconRegistry iconRegistry)
+    /// <param name="initialValue">The initial value of the icon.</param>
+    public IconPicker(IIconRegistry iconRegistry, string? initialValue = null)
         : base(width: 400)
     {
         var icons = iconRegistry.GetIcons().ToList();
@@ -47,8 +48,8 @@ internal sealed class IconPicker : BaseMenu
         this.sources.Sort();
 
         this.selectIcon =
-            new SelectIcon(icons, 5, 5, x: this.xPositionOnScreen, y: this.yPositionOnScreen + 48).AddOperation(
-                this.FilterIcons);
+            new SelectIcon(icons, initialValue, 5, 5, x: this.xPositionOnScreen, y: this.yPositionOnScreen + 48)
+                .AddOperation(this.FilterIcons);
 
         this
             .AddSubMenu(this.selectIcon)
@@ -134,7 +135,7 @@ internal sealed class IconPicker : BaseMenu
                 this.exitThisMenuNoSound();
                 return;
 
-            case Keys.Enter when this.readyToClose() && this.selectIcon.CurrentSelection is not null:
+            case Keys.Enter when this.readyToClose():
                 this.iconSelected?.InvokeAll(this, this.selectIcon.CurrentSelection);
                 this.exitThisMenuNoSound();
                 return;
@@ -155,11 +156,7 @@ internal sealed class IconPicker : BaseMenu
     {
         if (this.okButton.bounds.Contains(cursor) && this.readyToClose())
         {
-            if (this.selectIcon.CurrentSelection is not null)
-            {
-                this.iconSelected?.InvokeAll(this, this.selectIcon.CurrentSelection);
-            }
-
+            this.iconSelected?.InvokeAll(this, this.selectIcon.CurrentSelection);
             this.exitThisMenuNoSound();
             return true;
         }

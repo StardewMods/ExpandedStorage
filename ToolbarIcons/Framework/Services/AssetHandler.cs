@@ -7,6 +7,7 @@ using StardewMods.Common.Services.Integrations.ContentPatcher;
 using StardewMods.Common.Services.Integrations.FauxCore;
 using StardewMods.ToolbarIcons.Framework.Enums;
 using StardewMods.ToolbarIcons.Framework.Models;
+using StardewMods.ToolbarIcons.Framework.Models.Events;
 
 /// <inheritdoc />
 internal sealed class AssetHandler : BaseAssetHandler
@@ -23,6 +24,7 @@ internal sealed class AssetHandler : BaseAssetHandler
         InternalIcon.Calendar,
     ];
 
+    private readonly IEventManager eventManager;
     private readonly IIconRegistry iconRegistry;
     private readonly IntegrationManager integrationManager;
 
@@ -45,6 +47,7 @@ internal sealed class AssetHandler : BaseAssetHandler
         : base(contentPatcherIntegration, eventManager, gameContentHelper, modContentHelper)
     {
         // Init
+        this.eventManager = eventManager;
         this.iconRegistry = iconRegistry;
         this.integrationManager = integrationManager;
         this
@@ -71,5 +74,7 @@ internal sealed class AssetHandler : BaseAssetHandler
         {
             this.integrationManager.AddIcon(id, integrationData);
         }
+
+        this.eventManager.Publish(new ToolbarIconsLoadedEventArgs());
     }
 }

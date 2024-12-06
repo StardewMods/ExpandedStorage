@@ -220,7 +220,7 @@ internal sealed class AssetHandler : BaseAssetHandler, IAssetHandlerExtension, I
                 continue;
             }
 
-            this.iconRegistry.Add(string.Join(string.Empty, parts[1..]), icon.Path, icon.Area, parts[0]);
+            this.iconRegistry.Add(id, icon.Path, icon.Area, parts[0]);
         }
     }
 

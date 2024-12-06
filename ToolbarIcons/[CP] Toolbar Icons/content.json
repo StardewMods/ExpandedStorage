@@ -1,0 +1,97 @@
+{
+  "Format": "2.4.0",
+  "ConfigSchema": {
+    "EventLookupHotkey": {
+      "AllowBlank": true,
+      "Default": "N"
+    },
+    "ResetTerrainFeaturesHotkey": {
+      "AllowBlank": true,
+      "Default": "L"
+    },
+    "ScreenshotHotkey": {
+      "AllowBlank": true,
+      "Default": "F9"
+    }
+  },
+  "Changes": [
+    {
+      "Action": "Include",
+      "FromFile": "data/ChestsAnywhere.json",
+      "When": {
+        "HasMod": "Pathoschild.ChestsAnywhere"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/DataLayers.json",
+      "When": {
+        "HasMod": "Pathoschild.DataLayers"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/DebugMode.json",
+      "When": {
+        "HasMod": "Pathoschild.DebugMode"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/EventLookup.json",
+      "When": {
+        "HasMod": "shekurika.EventLookup"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/FashionSense.json",
+      "When": {
+        "HasMod": "PeacefulEnd.FashionSense"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/HorseFluteAnywhere.json",
+      "When": {
+        "HasMod": "Pathoschild.HorseFluteAnywhere"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/InstantBuildings.json",
+      "When": {
+        "HasMod": "BitwiseJonMods.InstantBuildings"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/LookupAnything.json",
+      "When": {
+        "HasMod": "Pathoschild.LookupAnything"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/ResetTerrainFeatures.json",
+      "When": {
+        "HasMod": "MabelSyrup.ResetTerrainFeatures"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/Screenshot.json",
+      "When": {
+        "HasMod": "aedenthorn.Screenshot"
+      }
+    },
+    {
+      "Action": "Include",
+      "FromFile": "data/TractorMod.json",
+      "When": {
+        "HasMod": "Pathoschild.TractorMod"
+      }
+    }
+  ],
+  "$schema": "https://smapi.io/schemas/content-patcher.json"
+}

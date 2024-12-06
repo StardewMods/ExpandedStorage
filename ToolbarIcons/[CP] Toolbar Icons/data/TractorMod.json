@@ -1,0 +1,28 @@
+{
+  "Changes": [
+    {
+      "LogName": "FauxCore Icon for TractorMod.SummonTractor",
+      "Action": "EditData",
+      "Target": "furyx639.FauxCore/Icons",
+      "Entries": {
+        "{{ModId}}/TractorMod.SummonTractor": {
+          "Area": { "X": 16, "Y": 32, "Width": 16, "Height": 16 },
+          "Path": "{{InternalAssetKey: assets/icons.png}}"
+        }
+      }
+    },
+    {
+      "LogName": "Toolbar Icon for TractorMod.SummonTractor",
+      "Action": "EditData",
+      "Target": "furyx639.ToolbarIcons/Data",
+      "Entries": {
+        "{{ModId}}/TractorMod.SummonTractor": {
+          "ModId": "Pathoschild.TractorMod",
+          "Type": "Method",
+          "ExtraData": "SummonTractor",
+          "HoverText": "{{i18n: button.TractorMod}}"
+        }
+      }
+    }
+  ]
+}

@@ -1,5 +1,11 @@
 # FauxCore Change Log
 
+## 1.2.2 (December 5, 2024)
+
+### Fixed
+
+* Fixed miscellaneous issues parsing search expressions.
+
 ## 1.2.1 (December 3, 2024)
 
 ### Changed
