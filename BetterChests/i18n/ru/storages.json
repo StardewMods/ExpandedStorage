@@ -1,0 +1,14 @@
+{
+  "storage.Default.name": "Хранилище по умолчанию",
+  "storage.Default.tooltip": "Настройки, которые применяются ко всем хранилищам.",
+  "storage.Fridge.name": "Холодильник",
+  "storage.Fridge.tooltip": "Хранилище на ферме для ингредиентов для готовки.",
+  "storage.Island-Fridge.name": "Холодильник на острове",
+  "storage.Island-Fridge.tooltip": "Хранилище в домике на острове для ингредиентов для готовки.",
+  "storage.Backpack.name": "Рюкзак",
+  "storage.Backpack.tooltip": "Хранилище в рюкзаке фермера.",
+  "storage.Saddlebag.name": "Сумка на седле",
+  "storage.Saddlebag.tooltip": "Хранилище на лошади.",
+  "storage.Other.name": "Другое",
+  "storage.Other.tooltip": "Неизвестный тип хранилища."
+}
